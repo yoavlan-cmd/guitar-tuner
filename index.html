@@ -237,6 +237,11 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .blk.cur i{color:inherit}
 .blk.pin b::after{content:" •";color:var(--flat)}
 .paper .sec{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-mute);margin:10px 0 2px}
+.screen{position:relative}
+.live{position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:6px;font:600 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--sharp)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--sharp);animation:pulse 1.2s infinite}
+.screen.hold .needle,.screen.hold .note{opacity:.55}
+.screen.hold .status{opacity:.6}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -285,6 +290,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="note" id="note">E<sub>2</sub></div>
     <div class="readout"><span>Hz <b id="hz">—</b></span><span>Target <b id="tgt">82.41</b></span><span>Cents <b id="cents">—</b></span></div>
     <div class="status" id="status">Tap Listen or a string</div>
+    <span class="live" id="live" hidden><i></i>Live</span>
     <div class="meter" aria-hidden="true"><i id="lvl"></i><s id="gate"></s></div>
   </section>
 
@@ -544,7 +550,7 @@ function stopRepeat(){clearInterval(repTimer);repTimer=null}
 $('repeat').onclick=()=>{repeatOn=!repeatOn;$('repeat').setAttribute('aria-pressed',repeatOn);if(repeatOn){pluck(fq(tuning.n[target]));startRepeat()}else stopRepeat()};
 
 /* pitch detection — band-pass filter, adaptive noise gate, McLeod (NSDF) pitch with clarity check, multi-frame agreement */
-const NF={normal:{clar:.80,gate:2.5,need:3},strong:{clar:.88,gate:3.5,need:4},max:{clar:.93,gate:5,need:5}};
+const NF={normal:{clar:.78,gate:2,need:2},strong:{clar:.85,gate:3,need:2},max:{clar:.9,gate:4.5,need:3}};
 let nfMode=store.get('nf','strong');if(!NF[nfMode])nfMode='strong';
 function setNF(m){nfMode=m;store.set('nf',m);[...$('nf').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.nf===m))}
 $('nf').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setNF(b.dataset.nf)});setNF(nfMode);
@@ -579,33 +585,46 @@ function meter(rms,gate){
 function idle(now){
  if(now-lastHeard<700)return;
  hist=[];needleGoal=0;$('screen').classList.remove('ok');$('hz').textContent='—';$('cents').textContent='—';okSince=0;
- const st=$('status');st.className='status';st.textContent=`Play string ${6-target}`;showTarget();
+ const st=$('status');st.className='status';st.textContent=`Listening… play string ${6-target} (${nm(tuning.n[target])})`;showTarget();
 }
+let holdUntil=0,lastCents=null;
 function loop(){
  raf=requestAnimationFrame(loop);analyser.getFloatTimeDomainData(data);
  const now=performance.now(),cfg=NF[nfMode];
  let rms=0;for(let i=0;i<data.length;i++)rms+=data[i]*data[i];rms=Math.sqrt(rms/data.length);
- floor=floor==null?rms:Math.min(floor*1.003,rms);
- const gate=Math.max(0.004,floor*cfg.gate);meter(rms,gate);
- let r=null;
- if(rms>=gate){const [lo,hi]=searchRange();r=detect(data,ctx.sampleRate,lo,hi)}
- if(r&&r.clarity>=cfg.clar){hist.push({f:r.f,t:now})}
- hist=hist.filter(h=>now-h.t<450).slice(-8);
+ // look for a pitch whenever there is any sound at all
+ let r=null;if(rms>=.0015){const [lo,hi]=searchRange();r=detect(data,ctx.sampleRate,lo,hi)}
+ // learn the room's background level only from moments with no clear note, so a ringing string never raises it
+ if(!r||r.clarity<.6){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+rms*.015)}
+ const gate=Math.max(.002,(floor??0)*cfg.gate);meter(rms,gate);
+ const clear=r&&r.clarity>=cfg.clar&&rms>=gate;
+ if(clear)hist.push({f:r.f,t:now});
+ hist=hist.filter(h=>now-h.t<300).slice(-6);
  let med=0,agree=0;
- if(hist.length){const s=hist.map(h=>h.f).sort((a,b)=>a-b);med=s[s.length>>1];agree=s.filter(f=>Math.abs(1200*Math.log2(f/med))<25).length}
+ if(hist.length){const s2=hist.map(h=>h.f).sort((a,b)=>a-b);med=s2[s2.length>>1];agree=s2.filter(f=>Math.abs(1200*Math.log2(f/med))<30).length}
+ const st=$('status');
  if(agree>=cfg.need){
-  const close=hist.filter(h=>Math.abs(1200*Math.log2(h.f/med))<25).map(h=>h.f);
-  med=close.reduce((a,b)=>a+b,0)/close.length;lastHeard=now;
+  const close=hist.filter(h=>Math.abs(1200*Math.log2(h.f/med))<30).map(h=>h.f);
+  med=close.reduce((a,b)=>a+b,0)/close.length;lastHeard=now;holdUntil=now+1200;
   let i=locked;if(i==null){let best=1e9;tuning.n.forEach((m,k)=>{const cc=Math.abs(1200*Math.log2(med/fq(m)));if(cc<best){best=cc;i=k}})}
   if(i!==target){target=i;renderStrings()}
-  const m=tuning.n[i],cents=1200*Math.log2(med/fq(m));
+  const m=tuning.n[i];let cents=1200*Math.log2(med/fq(m));
+  lastCents=lastCents==null||Math.abs(lastCents-cents)>15?cents:lastCents*.6+cents*.4;cents=lastCents;
   const heard=Math.round(69+12*Math.log2(med/a4));
   $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
   $('cents').textContent=(cents>0?'+':'')+cents.toFixed(0);needleGoal=Math.max(-50,Math.min(50,cents));
-  const ok=Math.abs(cents)<=4,st=$('status');$('screen').classList.toggle('ok',ok);
-  if(ok){st.className='status ok';st.textContent=`In tune · string ${6-i}`;if(!okSince)okSince=now;if(now-okSince>600&&!done.has(i)){done.add(i);renderStrings()}}
-  else{okSince=0;const far=Math.abs(cents)>50;st.className='status '+(cents<0?'flat':'sharp');st.textContent=cents<0?(far?'Way low · tune up':'Tune up'):(far?'Way high · tune down':'Tune down')}
- }else idle(now);
+  const ok=Math.abs(cents)<=4;$('screen').classList.toggle('ok',ok);$('screen').classList.remove('hold');
+  if(ok){st.className='status ok';st.textContent=`In tune ✓ · string ${6-i} (${nm(m)})`;if(!okSince)okSince=now;if(now-okSince>600&&!done.has(i)){done.add(i);renderStrings()}}
+  else{okSince=0;const c=Math.abs(Math.round(cents)),far=Math.abs(cents)>50;st.className='status '+(cents<0?'flat':'sharp');
+   st.textContent=cents<0?`${far?'Way too low':c+' cents low'} · tighten ↑ string ${6-i}`:`${far?'Way too high':c+' cents high'} · loosen ↓ string ${6-i}`}
+ }else if(now<holdUntil){
+  // keep the last reading on screen briefly after the note fades, like a clip-on tuner
+  $('screen').classList.add('hold');
+ }else{
+  lastCents=null;$('screen').classList.remove('hold');
+  if(rms>=gate&&r){st.className='status';st.textContent='Hearing sound… pluck one string and let it ring'}
+  else idle(now);
+ }
  drawNeedle();
 }
 async function startListening(){
@@ -617,14 +636,14 @@ async function startListening(){
   [['highpass',55],['highpass',55],['lowpass',1100],['lowpass',1100]].forEach(([type,f])=>{const bq=ctx.createBiquadFilter();bq.type=type;bq.frequency.value=f;bq.Q.value=0.707;node.connect(bq);node=bq});
   analyser=ctx.createAnalyser();analyser.fftSize=4096;data=new Float32Array(analyser.fftSize);node.connect(analyser);
   floor=null;hist=[];
-  listening=true;$('listen').classList.add('on');$('listenTxt').textContent='Stop';$('status').textContent=`Play string ${6-target}`;
+  listening=true;$('live').hidden=false;$('listen').classList.add('on');$('listenTxt').textContent='Stop';$('status').textContent=`Play string ${6-target}`;
   try{wake=await navigator.wakeLock.request('screen')}catch(e){}
   loop();
  }catch(e){
   msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open the tuner link in Chrome to tune with the mic.';
  }
 }
-function stopListening(){listening=false;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
+function stopListening(){listening=false;$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
  $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent='Tap Listen or a string';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
 $('listen').onclick=()=>listening?stopListening():startListening();
 
