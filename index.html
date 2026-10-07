@@ -19,6 +19,7 @@
 :root{
   --bg:#E8ECEA; --surface:#F7F9F8; --ink:#18201E; --muted:#5A6762; --line:#C8D1CD; --accent:#2B6A58;
   --screen:#111716; --screen-ink:#E6EFEB; --screen-dim:#56665F; --screen-line:#26302D;
+  --paper:#FFFFFF; --paper-ink:#151A19; --paper-mute:#5D6964; --paper-line:#D5DCD9; --paper-note:#FFF3DC;
   --ok:#35D592; --flat:#FFB547; --sharp:#FF7A59;
   --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -161,6 +162,43 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .ai h3{margin:0;font:600 13px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .ai .ver{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:3px}
 .ai .ver a{color:var(--accent);font-weight:600}
+.nownote{margin:4px 0 0;font-size:13px;line-height:1.35;background:var(--bg);border-left:3px solid var(--flat);border-radius:4px;padding:5px 7px}
+.blk.has-note{position:relative}
+.blk.has-note::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--flat)}
+.editbox textarea,.notes{font:400 14px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical;width:100%}
+.liblist{display:flex;flex-direction:column;gap:6px}
+.libitem{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
+.libitem b{font:600 15px var(--body)}
+.libitem span{font-size:12px;color:var(--muted)}
+.badge{display:inline-block;font:600 10px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:1px 6px;margin-left:6px}
+.badge.old{color:var(--flat)}
+.sheetview{display:flex;flex-direction:column;gap:12px}
+.namefield{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.namefield input{font:500 16px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 11px;text-transform:none;letter-spacing:0}
+.sheetactions{display:flex;flex-wrap:wrap;gap:6px}
+.btn.danger{color:var(--sharp);border-color:var(--sharp)}
+.btn.danger:not(.ghost){background:var(--sharp);color:#fff}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;background:var(--surface);border:1px solid var(--sharp);border-radius:10px;padding:10px}
+.tip a{color:var(--accent);font-weight:600}
+.paperwrap{overflow-x:auto;border-radius:6px;box-shadow:0 1px 0 var(--line),0 6px 24px rgba(0,0,0,.12)}
+.paper{background:var(--paper);color:var(--paper-ink);padding:22px 20px 26px;font-family:var(--body);font-size:13.5px;line-height:1.45;min-width:0}
+.paper.print{width:760px;padding:34px 36px 40px}
+.paper h1{font:800 34px/1 var(--display);text-transform:uppercase;letter-spacing:.01em;margin:0 0 6px;text-wrap:balance}
+.paper .meta{display:flex;flex-wrap:wrap;gap:4px 16px;font:500 12.5px var(--mono);color:var(--paper-mute)}
+.paper .meta b{color:var(--paper-ink);font-weight:600}
+.paper h3{font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-mute);margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--paper-line)}
+.paper .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px 10px}
+.paper.print .pgrid{grid-template-columns:repeat(6,1fr)}
+.paper .pgrid svg{width:100%;height:auto;display:block}
+.paper .prog{display:flex;flex-direction:column;gap:3px}
+.paper .pl{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:baseline;padding:3px 0;border-bottom:1px dotted var(--paper-line)}
+.paper .pl time{font:400 11.5px var(--mono);color:var(--paper-mute);font-variant-numeric:tabular-nums}
+.paper .pl .ch{font:800 19px var(--display);letter-spacing:.02em;word-spacing:.5em}
+.paper .pl .x{font:600 12px var(--mono);color:var(--paper-mute)}
+.paper .pn{grid-column:2/4;font-size:12.5px;color:var(--paper-ink);background:var(--paper-note);border-radius:4px;padding:3px 7px}
+.paper ul,.paper ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.paper .notes-out{white-space:pre-wrap}
+.paper .foot{margin-top:22px;font-size:11px;color:var(--paper-mute)}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -239,6 +277,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <span>MP4 works best. The sound is analysed on this device and nothing is uploaded.</span>
     </label>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
+    <section class="card" id="libCard">
+      <h2>My songs</h2>
+      <div class="liblist" id="libList"></div>
+    </section>
     <div class="prog" id="prog" hidden><div class="pbar"><i id="progBar"></i></div><span id="progTxt">Reading the sound…</span></div>
     <p class="msg" id="songMsg" hidden></p>
 
@@ -250,7 +292,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       </div>
 
       <div class="nowrow">
-        <div class="nowcard"><span class="label">Now</span><div id="dNow" class="dgBig"></div><span class="sounds" id="nowSounds"></span></div>
+        <div class="nowcard"><span class="label">Now</span><div id="dNow" class="dgBig"></div><span class="sounds" id="nowSounds"></span><p class="nownote" id="nowNote" dir="auto" hidden></p></div>
         <div class="nowcard next"><span class="label">Next <b id="nextIn"></b></span><div id="dNext"></div><div class="nbar"><i id="nextBar"></i></div></div>
       </div>
 
@@ -267,8 +309,13 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <div class="editrow">
           <select id="edRoot" aria-label="Root"></select>
           <select id="edType" aria-label="Chord type"></select>
-          <button class="btn" id="edApply">Apply</button>
+        </div>
+        <textarea id="edNote" rows="2" dir="auto" placeholder="Comment for this spot, e.g. “palm mute” or “strum down only”" aria-label="Comment"></textarea>
+        <div class="editrow">
+          <button class="btn" id="edApply">Save</button>
+          <button class="btn ghost" id="edSplit">Split at playhead</button>
           <button class="btn ghost" id="edMerge">Merge with previous</button>
+          <button class="btn ghost" id="edClose">Done</button>
         </div>
       </div>
 
@@ -289,6 +336,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <p class="legend">— don’t play this string · ● play it open · numbers are fingers (1 index … 4 pinky)</p>
       </section>
 
+      <section class="card">
+        <h2>Song notes</h2>
+        <textarea id="songNotes" class="notes" rows="3" dir="auto" placeholder="Strumming pattern, intro riff, anything to remember" aria-label="Song notes"></textarea>
+      </section>
+
       <section class="card" id="aiCard">
         <h2>Better versions &amp; Claude’s check</h2>
         <label class="taste">Your taste <textarea id="taste" rows="2"></textarea></label>
@@ -298,7 +350,27 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <div id="aiOut"></div>
       </section>
 
+      <button class="btn wide" id="finish">Finish &amp; make chord sheet</button>
       <button class="btn ghost wide" id="newSong">Analyse another video</button>
+    </div>
+
+    <div id="sheetView" class="sheetview" hidden>
+      <div class="editrow"><button class="btn ghost" id="shBack">← Back</button></div>
+      <label class="namefield">Sheet name <input id="shName" type="text" dir="auto"></label>
+      <div class="sheetactions">
+        <button class="btn" id="shSave">Save to My songs</button>
+        <button class="btn ghost" id="shPdf">Save PDF</button>
+        <button class="btn ghost" id="shShare" hidden>Share / save to Drive…</button>
+        <button class="btn ghost" id="shDrive" hidden>Save to Google Drive</button>
+      </div>
+      <p class="tip" id="shStatus" role="status"></p>
+      <div class="paperwrap"><div class="paper" id="paper"></div></div>
+      <div class="editrow">
+        <button class="btn ghost" id="shEdit">Edit with the video</button>
+        <button class="btn ghost danger" id="shDel" hidden>Delete from My songs</button>
+      </div>
+      <div class="confirm" id="delConfirm" hidden><span>Delete this sheet from My songs? Your Drive copy stays.</span><button class="btn danger" id="delYes">Delete</button><button class="btn ghost" id="delNo">Keep</button></div>
+      <label class="namefield" id="driveCfg" hidden>Google Drive folder <input id="driveFolder" type="text"></label>
     </div>
   </div>
 </div>
@@ -624,7 +696,7 @@ function bestPlay(segs,rec){
 }
 
 /* ---- song UI ---- */
-let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null;
+let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=null;
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
@@ -633,16 +705,19 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)s
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
-function saveSong(){try{const k='tuner.song.'+fileKey;localStorage.setItem(k,JSON.stringify({...A,segs:A.segs.map(g=>[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])}));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem('tuner.song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
-function loadSong(k){try{const v=JSON.parse(localStorage.getItem('tuner.song.'+k));if(v&&v.segs){v.segs=v.segs.map(([t0,t1,c])=>({t0,t1,c}));return v}}catch(e){}return null}
+const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
+const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
+function saveSong(){libSync();if(!fileKey)return;try{const k='tuner.song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem('tuner.song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function loadSong(k){try{const v=JSON.parse(localStorage.getItem('tuner.song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
  songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(file);
  fileKey=(file.name+'|'+file.size).replace(/[^\w|.-]/g,'_');
+ if(pendingLib){const ent=libGet(pendingLib);pendingLib=null;if(ent){A=expand(ent.data);A.libId=ent.id;saveSong();showSong(false);songMsg('Editing “'+ent.name+'”. Changes save to My songs automatically.');return}}
  const saved=loadSong(fileKey);
  if(saved){A=saved;showSong(true);return}
- $('drop').hidden=true;$('songView').hidden=true;prog(.03,'Reading the sound…');
+ $('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;prog(.03,'Reading the sound…');
  try{
   const x=await decodeFile(file);prog(.1);
   const r=await analyse(x,prog);
@@ -651,12 +726,12 @@ $('vidIn').addEventListener('change',async e=>{
   let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c;
   prog(1,'Done');saveSong();showSong(false);
  }catch(err){
-  $('prog').hidden=true;$('drop').hidden=false;
+  $('prog').hidden=true;showLanding();
   songMsg(err&&err.name==='EncodingError'||err&&/decode/i.test(err.message||'')?'This file’s sound couldn’t be read. Try an MP4 or M4A file.':'Something went wrong while analysing. The file may be too long or too large for this phone; try a shorter clip.');
  }
 });
 function showSong(fromSave){
- $('prog').hidden=true;$('drop').hidden=true;$('songView').hidden=false;
+ $('prog').hidden=true;$('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave)songMsg('Loaded your saved analysis for this video.');
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
@@ -687,7 +762,7 @@ function renderPlay(){
 $('plTun').onchange=e=>{A.play.tun=e.target.value;saveSong();renderPlay();renderTimeline();renderChords();curIdx=-1;syncSong(true)};
 $('plCapo').onchange=e=>{A.play.capo=+e.target.value;saveSong();renderPlay();renderTimeline();renderChords();curIdx=-1;syncSong(true)};
 function renderTimeline(){
- $('timeline').innerHTML=A.segs.map((g,i)=>{const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));const sc=shapeIdx(g.c);return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}" data-i="${i}" style="width:${w.toFixed(0)}px"><b>${esc(chordName(sc))}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
+ $('timeline').innerHTML=A.segs.map((g,i)=>{const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));const sc=shapeIdx(g.c);return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}${g.note?' has-note':''}" data-i="${i}" style="width:${w.toFixed(0)}px"><b>${esc(chordName(sc))}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
 }
 function renderChords(){
  const tot={},order=[];for(const g of A.segs){if(g.c>=NS)continue;const k=shapeIdx(g.c);if(!(k in tot)){tot[k]=0;order.push(k)}tot[k]+=g.t1-g.t0}
@@ -699,6 +774,7 @@ function syncSong(force){
  if(!A||!A.segs.length)return;const t=vid.currentTime||0,i=segAt(t),g=A.segs[i],nx=A.segs[i+1];
  if(i!==curIdx||force){curIdx=i;const sc=shapeIdx(g.c);$('dNow').innerHTML=diagram(shapeFor(sc),chordName(sc));
   const snd=g.c;$('nowSounds').textContent=g.c<NS&&chordName(snd)!==chordName(sc)?'sounds as '+chordName(snd):'';
+  const nn=$('nowNote');nn.hidden=!g.note;nn.textContent=g.note||'';
   if(nx){const n2=shapeIdx(nx.c);$('dNext').innerHTML=diagram(shapeFor(n2),chordName(n2))}else $('dNext').innerHTML=diagram(null,'');
   const tl=$('timeline');[...tl.children].forEach((b,k)=>b.classList.toggle('cur',k===i));const el=tl.children[i];if(el)tl.scrollTo({left:el.offsetLeft-tl.clientWidth/2+el.clientWidth/2,behavior:force?'auto':'smooth'})}
  const left=g.t1-t;$('nextIn').textContent=nx?(A.bpm?`in ${Math.max(0,Math.ceil(left*A.bpm/60))} beat${Math.ceil(left*A.bpm/60)===1?'':'s'}`:`in ${left.toFixed(1)}s`):'end';
@@ -713,13 +789,17 @@ $('edRoot').innerHTML=CH.map((n,i)=>`<option value="${i}">${n}</option>`).join('
 $('edType').innerHTML=TYPES.map((t,i)=>`<option value="${i}">${t.label}</option>`).join('')+`<option value="nc">no chord</option>`;
 $('timeline').addEventListener('click',e=>{const b=e.target.closest('.blk');if(!b)return;const i=+b.dataset.i;vid.currentTime=A.segs[i].t0+.01;selIdx=i;
  const sc=shapeIdx(A.segs[i].c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc';
- $('editLabel').textContent=`Fix the chord at ${mmss(A.segs[i].t0)}`;$('edMerge').disabled=i===0;$('editBox').hidden=false;
+ $('edNote').value=A.segs[i].note||'';$('editLabel').textContent=`Edit the chord at ${mmss(A.segs[i].t0)}`;$('edMerge').disabled=i===0;$('editBox').hidden=false;
  [...$('timeline').children].forEach((x,k)=>x.classList.toggle('sel',k===i));syncSong(true)});
-$('edApply').onclick=()=>{if(selIdx<0)return;const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);A.segs[selIdx].c=tv==='nc'?NS:soundIdx(shape);afterEdit()};
-$('edMerge').onclick=()=>{if(selIdx<1)return;A.segs[selIdx-1].t1=A.segs[selIdx].t1;A.segs.splice(selIdx,1);selIdx--;afterEdit()};
-function afterEdit(){const keep=selIdx;A.segs=A.segs.reduce((o,g)=>{if(o.length&&o[o.length-1].c===g.c)o[o.length-1].t1=g.t1;else o.push(g);return o},[]);selIdx=Math.min(keep,A.segs.length-1);saveSong();renderTimeline();renderChords();renderPlay();curIdx=-1;syncSong(true);$('editLabel').textContent='Saved. Tap another block to fix more.'}
+$('edApply').onclick=()=>{if(selIdx<0)return;const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);const g=A.segs[selIdx];g.c=tv==='nc'?NS:soundIdx(shape);const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;afterEdit('Saved.')};
+$('edSplit').onclick=()=>{const t=vid.currentTime||0,i=segAt(t),g=A.segs[i];if(!g||t-g.t0<.3||g.t1-t<.3){$('editLabel').textContent='Move the video to the spot where the new chord starts, then tap Split.';return}A.segs.splice(i+1,0,{t0:t,t1:g.t1,c:g.c});g.t1=t;selIdx=i+1;$('edNote').value='';afterEdit('Split. Now pick the chord for the new part.')};
+$('edClose').onclick=()=>{selIdx=-1;$('editBox').hidden=true;renderTimeline();curIdx=-1;syncSong(true)};
+$('edMerge').onclick=()=>{if(selIdx<1)return;const g=A.segs[selIdx],p=A.segs[selIdx-1];p.t1=g.t1;if(g.note)p.note=p.note?p.note+' / '+g.note:g.note;A.segs.splice(selIdx,1);selIdx--;$('edNote').value=A.segs[selIdx].note||'';afterEdit('Merged.')};
+function afterEdit(msg){selIdx=Math.min(selIdx,A.segs.length-1);saveSong();renderTimeline();renderChords();renderPlay();curIdx=-1;syncSong(true);const g=A.segs[selIdx];if(g){const sc=shapeIdx(g.c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc'}$('editLabel').textContent=(msg||'Saved.')+' Tap another block to edit more.';$('edMerge').disabled=selIdx<1}
 $('songTitle').addEventListener('change',e=>{A.title=e.target.value.trim();saveSong();renderLinks()});
-$('newSong').onclick=()=>{vid.pause();$('songView').hidden=true;$('drop').hidden=false;songMsg('');A=null;$('vidIn').click()};
+$('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg('');$('vidIn').click()};
+$('songNotes').addEventListener('change',e=>{A.notes=e.target.value.trim();saveSong()});
+$('finish').onclick=()=>{vid.pause();A.notes=$('songNotes').value.trim();saveSong();showSheet()};
 /* better versions */
 const DEFAULT_TASTE='Acoustic versions. Israeli rock and 1990s–2000s alternative rock (e.g. Mashina, Aviv Gefen, Radiohead, Pearl Jam, Oasis).';
 $('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('change',e=>store.set('taste',e.target.value));
@@ -771,6 +851,159 @@ Reply with only JSON in this shape:
   else out.innerHTML='<p class="tip">Claude couldn’t answer this time. Tap the button to try again.</p>';
  }finally{btn.disabled=false}
 };
+/* ================= Chord sheet, My songs, Google Drive ================= */
+const LIBK='lib';
+const libAll=()=>store.get(LIBK,[]);
+const libGet=id=>libAll().find(e=>e.id===id);
+function libWrite(list){try{localStorage.setItem('tuner.'+LIBK,JSON.stringify(list));return true}catch(e){return false}}
+function libSync(){if(!A||!A.libId)return;const l=libAll(),e=l.find(x=>x.id===A.libId);if(!e)return;e.data=compact({...A,libId:undefined});e.saved=Date.now();libWrite(l)}
+const fmtDate=t=>new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+function renderLib(){
+ const l=libAll();
+ $('libList').innerHTML=l.length?l.map(e=>{const d=e.data||{},t=d.play?tName(d.play.tun)+(d.play.capo?' · capo '+d.play.capo:''):'';
+  const dr=e.drive?(e.drive.at>=e.saved?'<span class="badge">In Drive</span>':'<span class="badge old">Drive copy older</span>'):'';
+  return `<button class="libitem" data-id="${esc(e.id)}"><b dir="auto">${esc(e.name)}${dr}</b><span>${esc(t)} · saved ${fmtDate(e.saved)}</span></button>`}).join('')
+  :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
+}
+$('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
+function showLanding(){$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib()}
+
+/* ---- sheet content ---- */
+function printify(svg){
+ const F="font-family=\"Arial Narrow, Arial, sans-serif\"";
+ return svg.replace(/class="dgLine"/g,'class="dgLine" stroke="#151A19" stroke-width="1.6"').replace(/class="dgNut"/g,'class="dgNut" fill="#151A19"')
+  .replace(/class="dgMute"/g,'class="dgMute" stroke="#151A19" stroke-width="2.6" stroke-linecap="round"').replace(/class="dgOpen"/g,'class="dgOpen" fill="#151A19"').replace(/class="dgDot"/g,'class="dgDot" fill="#151A19"')
+  .replace(/class="dgNum"/g,'class="dgNum" fill="#FFFFFF" font-size="10" font-weight="700" '+F).replace(/class="dgFret"/g,'class="dgFret" fill="#5D6964" font-size="10" font-weight="600" '+F)
+  .replace(/class="dgName"/g,'class="dgName" fill="#151A19" font-size="24" font-weight="800" '+F).replace(/class="dgNone"/g,'class="dgNone" fill="#5D6964" font-size="12" '+F);
+}
+function progression(){
+ const it=A.segs.map((g,i)=>({n:chordName(shapeIdx(g.c)),t:g.t0,i}));const same=(a,b,L)=>{for(let k=0;k<L;k++)if(it[a+k].n!==it[b+k].n)return false;return true};
+ const lines=[];let i=0;
+ while(i<it.length){let best=null;
+  for(let L=2;L<=8;L++){if(i+2*L>it.length)break;let k=1;while(i+(k+1)*L<=it.length&&same(i,i+k*L,L))k++;if(k>=2&&(!best||L*k>best.L*best.k||(L*k===best.L*best.k&&L<best.L)))best={L,k}}
+  if(best){lines.push({t:it[i].t,ch:it.slice(i,i+best.L).map(x=>x.n),x:best.k,from:i,to:i+best.L*best.k-1});i+=best.L*best.k}
+  else{const L=Math.min(4,it.length-i);lines.push({t:it[i].t,ch:it.slice(i,i+L).map(x=>x.n),x:1,from:i,to:i+L-1});i+=L}}
+ return lines;
+}
+function keyPoints(){
+ const pts=[],used=[...new Set(A.segs.filter(g=>g.c<NS).map(g=>shapeIdx(g.c)))];
+ const barre=used.filter(c=>shapeFor(c).cost>=2).map(chordName);
+ if(barre.length)pts.push(`Barre chords: <b>${barre.map(esc).join(', ')}</b>. Practise these shapes on their own first.`);
+ const pairs={};for(let i=1;i<A.segs.length;i++){const a=A.segs[i-1],b=A.segs[i];if(a.c>=NS||b.c>=NS)continue;const k=chordName(shapeIdx(a.c))+' → '+chordName(shapeIdx(b.c));const d=a.t1-a.t0;(pairs[k]=pairs[k]||{n:0,min:1e9}).n++;pairs[k].min=Math.min(pairs[k].min,d)}
+ const top=Object.entries(pairs).filter(([k,v])=>v.n>=2).sort((a,b)=>b[1].n-a[1].n).slice(0,3);
+ if(top.length)pts.push('Most common changes: '+top.map(([k,v])=>`<b>${esc(k)}</b> (${v.n}×)`).join(', ')+'.');
+ const quick=Object.entries(pairs).filter(([k,v])=>A.bpm?v.min*A.bpm/60<=2.2:v.min<1.3).map(([k])=>k);
+ if(quick.length)pts.push(`Quick changes, about two beats or less: <b>${quick.slice(0,4).map(esc).join(', ')}</b>.`);
+ if(Math.abs(A.offset)>=10)pts.push(`The recording is ${Math.abs(Math.round(A.offset))} cents ${A.offset>0?'sharp':'flat'}. Set the tuner to A4 = ${Math.round(440*Math.pow(2,A.offset/1200))} Hz to play along.`);
+ return {pts,top:top.map(([k])=>k),used:used.map(chordName),barre};
+}
+function sheetHTML(print){
+ const t=TUNINGS.find(x=>x.id===A.play.tun)||TUNINGS[0],name=(A.libId&&libGet(A.libId)?.name)||A.title||'Untitled song';
+ const meta=[`Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})`,`Capo <b>${A.play.capo?'fret '+A.play.capo:'none'}</b>`];
+ if(A.bpm)meta.push(`Tempo <b>≈${A.bpm} BPM</b>`);meta.push(`Length <b>${mmss(A.dur)}</b>`);
+ if(A.play.tun!==A.tuning.id)meta.push(`Recorded in <b>${esc(tName(A.tuning.id))}</b>`);
+ const dg=c=>{let svg=diagram(shapeFor(c),chordName(c));return print?printify(svg):svg};
+ const kp=keyPoints(),lines=progression();
+ const notes=A.segs.map((g,i)=>({g,i})).filter(o=>o.g.note);
+ let h=`<h1 dir="auto">${esc(name)}</h1><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
+ h+=`<h3>Chords</h3><div class="pgrid">${[...new Set(A.segs.filter(g=>g.c<NS).map(g=>shapeIdx(g.c)))].map(dg).join('')}</div>`;
+ h+=`<h3>Progression</h3><div class="prog">${lines.map(L=>{const ns=notes.filter(o=>o.i>=L.from&&o.i<=L.to);return `<div class="pl"><time>${mmss(L.t)}</time><span class="ch">${L.ch.map(esc).join(' ')}</span><span class="x">${L.x>1?'×'+L.x:''}</span>${ns.map(o=>`<span class="pn" dir="auto">${mmss(o.g.t0)} · ${esc(chordName(shapeIdx(o.g.c)))}: ${esc(o.g.note)}</span>`).join('')}</div>`}).join('')}</div>`;
+ if(kp.pts.length)h+=`<h3>Key points</h3><ul>${kp.pts.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+ if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
+ const plan=[`Tune to <b>${esc(t.name)}</b>${A.play.capo?` and put the capo on fret ${A.play.capo}`:''}.`,`Learn the shapes: <b>${kp.used.map(esc).join(', ')}</b>.`];
+ if(kp.top.length)plan.push(`Drill the changes for a minute each: <b>${kp.top.map(esc).join(', ')}</b>.`);
+ plan.push('Play along with the video at 0.75× speed, then at full speed.');
+ h+=`<h3>Practice plan</h3><ol>${plan.map(p=>`<li>${p}</li>`).join('')}</ol>`;
+ h+=`<div class="foot">Six-String Tuner · ${fmtDate(Date.now())}</div>`;
+ return h;
+}
+function showSheet(){
+ $('songView').hidden=true;$('drop').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
+ const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');
+ $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');window.scrollTo({top:0});
+}
+function updateSheetButtons(){const ent=A.libId&&libGet(A.libId);$('shSave').textContent=ent?'Update in My songs':'Save to My songs';$('shDel').hidden=!ent;$('delConfirm').hidden=true;
+ $('shStatus').innerHTML=ent&&ent.drive?`Drive copy: <a href="${esc(ent.drive.url)}" target="_blank" rel="noopener">open in Google Drive ↗</a>${ent.drive.at<ent.saved?' (older than your latest changes)':''}`:''}
+function shStatus(h){$('shStatus').innerHTML=h}
+$('shName').addEventListener('input',()=>{const h=$('paper').querySelector('h1');if(h)h.textContent=$('shName').value.trim()||A.title||'Untitled song'});
+$('shBack').onclick=()=>{if(fileKey&&vid.src){$('sheetView').hidden=true;$('songView').hidden=false;curIdx=-1;syncSong(true)}else{A=null;showLanding()}};
+$('shEdit').onclick=()=>{if(fileKey&&vid.src){$('shBack').click();return}if(A.libId){pendingLib=A.libId;$('vidIn').click()}};
+function saveToLib(){
+ const name=$('shName').value.trim()||A.title||'Untitled song';let l=libAll();let ent=A.libId&&l.find(e=>e.id===A.libId);
+ if(!ent){ent={id:'s'+Date.now().toString(36),name,saved:Date.now()};l.unshift(ent);A.libId=ent.id}
+ ent.name=name;ent.saved=Date.now();ent.data=compact({...A,libId:undefined});
+ if(!libWrite(l)){shStatus('Couldn’t save on this phone; storage is full or blocked. Save the PDF instead.');return null}
+ if(fileKey)try{localStorage.setItem('tuner.song.'+fileKey,JSON.stringify(compact(A)))}catch(e){}
+ $('paper').innerHTML=sheetHTML(false);updateSheetButtons();return ent;
+}
+$('shSave').onclick=()=>{const e=saveToLib();if(e)shStatus(`Saved “${esc(e.name)}” to My songs.`)};
+$('shDel').onclick=()=>{$('delConfirm').hidden=false};
+$('delNo').onclick=()=>{$('delConfirm').hidden=true};
+$('delYes').onclick=()=>{const id=A.libId;libWrite(libAll().filter(e=>e.id!==id));delete A.libId;if(fileKey)saveSong();updateSheetButtons();shStatus('Deleted from My songs.')};
+
+/* ---- PDF ---- */
+function loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(x=>x.src===src&&x.dataset.ok))return res();const el=document.createElement('script');el.src=src;el.onload=()=>{el.dataset.ok=1;res()};el.onerror=()=>rej(new Error('script'));document.head.appendChild(el)})}
+async function makePdf(){
+ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+ const host=document.createElement('div');host.className='paper print';host.style.cssText='position:absolute;left:-12000px;top:0';host.innerHTML=sheetHTML(true);document.body.appendChild(host);
+ try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+ const blocks=[...host.querySelectorAll('h1,.meta,h3,.pgrid svg,.pl,li,.notes-out,.foot')].map(el=>{const r=el.getBoundingClientRect(),o=host.getBoundingClientRect();return [r.top-o.top,r.bottom-o.top]});
+ const S=2,canvas=await window.html2canvas(host,{scale:S,backgroundColor:'#ffffff',logging:false});host.remove();
+ const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'pt',format:'a4'}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=24;
+ const k=(pw-2*m)/(canvas.width/S),pageCss=(ph-2*m)/k,total=canvas.height/S;let y=0,first=true;
+ while(y<total-1){let end=Math.min(total,y+pageCss);if(end<total){const fits=blocks.filter(([a,b])=>b<=end&&b>y).map(([a,b])=>b),cut=blocks.filter(([a,b])=>a<end&&b>end).map(([a])=>a);let brk=cut.length?Math.min(...cut):end;if(brk<=y+40)brk=end;end=brk}
+  const hpx=Math.ceil((end-y)*S),c=document.createElement('canvas');c.width=canvas.width;c.height=hpx;const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.drawImage(canvas,0,Math.floor(y*S),canvas.width,hpx,0,0,canvas.width,hpx);
+  if(!first)pdf.addPage();first=false;pdf.addImage(c.toDataURL('image/jpeg',.86),'JPEG',m,m,pw-2*m,(end-y)*k);y=end}
+ return pdf.output('blob');
+}
+const fileName=()=>(($('shName').value.trim()||A.title||'Chord sheet').replace(/[\\/:*?"<>|]+/g,' ').trim()||'Chord sheet')+'.pdf';
+let dlCap=null,mcpCap=null;
+(async()=>{try{if(window.claude&&window.claude.use){[dlCap,mcpCap]=await Promise.all([window.claude.use('downloads'),window.claude.use('mcp')])}}catch(e){}
+ if(mcpCap){$('shDrive').hidden=false;$('driveCfg').hidden=false}
+ if(!window.claude&&navigator.canShare){try{$('shShare').hidden=!navigator.canShare({files:[new File(['x'],'t.pdf',{type:'application/pdf'})]})}catch(e){}}})();
+$('driveFolder').value=store.get('driveFolder','Guitar Songs');$('driveFolder').addEventListener('change',e=>store.set('driveFolder',e.target.value.trim()||'Guitar Songs'));
+async function withBusy(btn,fn){const all=[...document.querySelectorAll('.sheetactions .btn')];all.forEach(b=>b.disabled=true);try{await fn()}finally{all.forEach(b=>b.disabled=false)}}
+$('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
+ shStatus('Making the PDF…');let blob;try{blob=await makePdf()}catch(e){shStatus('Couldn’t make the PDF. Check your internet connection (the PDF maker loads once) and try again.');return}
+ if(dlCap){try{await dlCap.save({filename:fileName(),data:blob});shStatus('PDF saved.')}catch(e){shStatus(e&&e.code==='declined'?'Download cancelled.':'Couldn’t save the PDF here.')}}
+ else{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);shStatus('PDF saved to your downloads.')}
+});
+$('shShare').onclick=()=>withBusy($('shShare'),async()=>{
+ shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});shStatus('Shared. To keep it in Drive, pick Drive and your Guitar Songs folder.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
+});
+const blobToB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+const pickId=p=>p&&(p.id||(p.file&&p.file.id)||(p.files&&p.files[0]&&p.files[0].id))||'';
+const DRIVE='Google Drive';
+function driveErr(e){const c=e&&e.code;
+ if(c==='server_not_connected'||c==='server_not_found')return 'Google Drive isn’t connected to your Claude account. Connect it in Claude’s settings under Connectors, then try again.';
+ if(c==='needs_reauth')return 'Google Drive needs you to sign in again. Reconnect it in Claude’s settings under Connectors.';
+ if(c==='not_granted'||c==='consent_required')return 'Drive access wasn’t allowed for this page. Tap Save to Google Drive again and choose Allow.';
+ if(c==='rate_limited')return 'Google Drive is busy. Try again in a minute.';
+ return 'Couldn’t save to Google Drive'+(e&&e.message?': '+esc(e.message):'.')}
+$('shDrive').onclick=()=>withBusy($('shDrive'),async()=>{
+ if(!mcpCap)return;const ent=saveToLib();if(!ent)return;
+ const folder=($('driveFolder').value||'Guitar Songs').trim();store.set('driveFolder',folder);const fk='driveFolderId:'+folder;
+ try{
+  shStatus('Making the PDF…');const blob=await makePdf();const b64=await blobToB64(blob);
+  shStatus(`Finding your “${esc(folder)}” folder in Drive…`);
+  const ensureFolder=async()=>{let fid=store.get(fk,'');if(fid)return fid;
+   const r=await mcpCap.callTool(DRIVE,'search_files',{query:`title = '${folder.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}' and mimeType = 'application/vnd.google-apps.folder' and owner = 'me'`,excludeContentSnippets:true,pageSize:5});
+   fid=pickId(r&&r.payload);
+   if(!fid){const c=await mcpCap.callTool(DRIVE,'create_file',{title:folder,mimeType:'application/vnd.google-apps.folder'});fid=pickId(c&&c.payload)}
+   if(!fid)throw {message:'the folder could not be created'};store.set(fk,fid);return fid};
+  const upload=async fid=>mcpCap.callTool(DRIVE,'create_file',{title:fileName(),parentId:fid,base64Content:b64,contentMimeType:'application/pdf',disableConversionToGoogleType:true});
+  shStatus('Uploading the chord sheet…');let fid=await ensureFolder(),up;
+  try{up=await upload(fid)}catch(e){if(e&&e.code==='tool_error'){store.set(fk,'');fid=await ensureFolder();up=await upload(fid)}else throw e}
+  const info=(up&&up.payload)||{},id=pickId(info),url=info.viewUrl||(info.file&&info.file.viewUrl)||(id?`https://drive.google.com/file/d/${id}/view`:'');
+  const l=libAll(),e2=l.find(x=>x.id===ent.id);const old=e2&&e2.drive&&e2.drive.id;
+  if(e2){e2.drive={id,url,at:Date.now()};libWrite(l)}
+  if(old&&old!==id){try{await mcpCap.callTool(DRIVE,'trash_file',{fileId:old})}catch(e){}}
+  updateSheetButtons();shStatus(`Saved to Drive in “${esc(folder)}”${old&&old!==id?' (the older copy went to Drive’s trash)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`);
+ }catch(e){shStatus(driveErr(e))}
+});
+renderLib();
+
 setTab(store.get('tab','tune'));
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
