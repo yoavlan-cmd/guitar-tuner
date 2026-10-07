@@ -87,7 +87,7 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02e
 .meter i{position:absolute;inset:0 auto 0 0;width:0;background:var(--screen-dim);transition:width .08s linear}
 .meter i.hot{background:var(--ok)}
 .meter s{position:absolute;top:0;bottom:0;width:2px;background:var(--flat);left:0}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tabs{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px}
 .tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 14px var(--body);padding:10px;border-radius:10px;cursor:pointer}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .pane{display:flex;flex-direction:column;gap:14px}
@@ -199,6 +199,22 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .paper ul,.paper ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .paper .notes-out{white-space:pre-wrap}
 .paper .foot{margin-top:22px;font-size:11px;color:var(--paper-mute)}
+.textin{font:500 15px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.conf.yours{color:var(--accent)}
+.tunepick{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.searchrow{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding-block:4px}
+.searchrow .textin{font:500 16px var(--body);padding:11px 12px;border-radius:10px;background:var(--surface)}
+.chordbook{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.bookcard{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:6px 6px 8px;cursor:pointer;min-width:0}
+.bookcard svg{width:100%;height:auto}
+.bookcard small{font-size:11px;color:var(--muted);text-align:center}
+.bookcard.extra{border-style:dashed;border-color:var(--accent)}
+.chdetail{display:flex;flex-direction:column;gap:10px}
+.chname{margin:0;font:800 40px/1 var(--display)}
+.voices{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.voice{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px}
+.voice svg{width:100%;height:auto}
+.voice small{font-size:11.5px;color:var(--muted);font-weight:600}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -218,6 +234,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <nav class="tabs" id="tabs">
     <button data-tab="tune" aria-pressed="true">Tuner</button>
     <button data-tab="song" aria-pressed="false">Learn a song</button>
+    <button data-tab="chords" aria-pressed="false">Chords</button>
   </nav>
 
   <div class="pane" id="paneTune">
@@ -271,6 +288,19 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <p class="hint">Listening picks the closest string automatically. Lock a string to tune that one only. If noise moves the needle, switch the filter to Noisy room.</p>
   </div>
 
+  <div class="pane" id="paneChords" hidden>
+    <div class="searchrow" id="chSearchRow">
+      <input id="chSearch" class="textin" type="search" placeholder="Search chords, e.g. Am7, G/B, sus2" aria-label="Search chords" autocapitalize="off" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="seg" id="chTun">
+      <button data-t="std" aria-pressed="true">Standard</button>
+      <button data-t="dropd" aria-pressed="false">Drop D</button>
+    </div>
+    <p class="tip" id="chCount"></p>
+    <div class="chordbook" id="chGrid"></div>
+    <div id="chDetail" class="chdetail" hidden></div>
+  </div>
+
   <div class="pane" id="paneSong" hidden>
     <label class="drop" for="vidIn" id="drop">
       <b>Choose a song video</b>
@@ -310,6 +340,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
           <select id="edRoot" aria-label="Root"></select>
           <select id="edType" aria-label="Chord type"></select>
         </div>
+        <input id="edName" class="textin" type="text" placeholder="…or type any chord, e.g. G/B or Dsus2/F" aria-label="Chord name" autocapitalize="off" autocomplete="off" spellcheck="false">
         <textarea id="edNote" rows="2" dir="auto" placeholder="Comment for this spot, e.g. “palm mute” or “strum down only”" aria-label="Comment"></textarea>
         <div class="editrow">
           <button class="btn" id="edApply">Save</button>
@@ -320,6 +351,18 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       </div>
 
       <section class="card" id="tuneCard"></section>
+
+      <section class="card" id="knownCard">
+        <h2>Use the real chords</h2>
+        <p class="tip">If the video or a chord site shows the chords, enter them as written for the tuning and capo below. The timeline is then redone using only those chords.</p>
+        <input id="knownIn" class="textin" type="text" placeholder="e.g. Dsus2 Dsus2/F G/B Cadd9 C Asus2" aria-label="Chords in this song" autocapitalize="off" autocomplete="off" spellcheck="false">
+        <div class="editrow">
+          <button class="btn" id="knownGo">Redo the timeline</button>
+          <button class="btn ghost" id="readVid" hidden>Read chords from the video</button>
+          <button class="btn ghost" id="undoFit" hidden>Undo</button>
+        </div>
+        <p class="tip" id="knownMsg" role="status"></p>
+      </section>
 
       <section class="card">
         <h2>How to play it</h2>
@@ -584,6 +627,47 @@ function shapeFor(c){
  }
  shapeCache.set(c,out);return out;
 }
+/* chords as written on charts: extended qualities, slash basses, tuning-aware shapes */
+const QUAL={'':[0,4,7],maj:[0,4,7],M:[0,4,7],m:[0,3,7],min:[0,3,7],'-':[0,3,7],'5':[0,7],'6':[0,4,7,9],m6:[0,3,7,9],'7':[0,4,7,10],m7:[0,3,7,10],min7:[0,3,7,10],maj7:[0,4,7,11],M7:[0,4,7,11],'9':[0,4,7,10,2],m9:[0,3,7,10,2],maj9:[0,4,7,11,2],add9:[0,4,7,2],add2:[0,2,4,7],madd9:[0,3,7,2],sus2:[0,2,7],sus4:[0,5,7],sus:[0,5,7],'7sus4':[0,5,7,10],'11':[0,4,7,10,5],add11:[0,4,7,5],'13':[0,4,7,10,9],dim:[0,3,6],'°':[0,3,6],dim7:[0,3,6,9],aug:[0,4,8],'+':[0,4,8],m7b5:[0,3,6,10]};
+const QTYPE={'':'',maj:'',M:'','5':'','6':'',aug:'','+':'',add11:'','13':'7',m:'m',min:'m','-':'m',m6:'m',madd9:'m',dim:'m','°':'m',dim7:'m','7':'7','9':'7','11':'7',m7:'m7',min7:'m7',m9:'m7',m7b5:'m7',maj7:'maj7',M7:'maj7',maj9:'maj7',add9:'add9',add2:'add9',sus2:'sus2',sus4:'sus4',sus:'sus4','7sus4':'sus4'};
+const PCN={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function parseChord(str){
+ const m=String(str).trim().replace(/♯/g,'#').replace(/♭/g,'b').match(/^([A-G])([#b]?)([^/\s]*)(?:\/([A-G])([#b]?))?$/);if(!m)return null;
+ const acc=a=>a==='#'?1:a==='b'?-1:0,q=m[3];if(!(q in QUAL))return null;
+ return {root:(PCN[m[1]]+acc(m[2])+12)%12,q,bass:m[4]?(PCN[m[4]]+acc(m[5])+12)%12:null,iv:QUAL[q]};
+}
+const tshift=(tun,capo)=>(TSHIFT[tun]??0)+(capo||0);
+const curTun=()=>A&&A.play?A.play.tun:'std',curCapo=()=>A&&A.play?A.play.capo:0;
+function nameOf(g,tun=curTun(),capo=curCapo()){
+ if(g.c>=NS)return 'N.C.';const d=tshift(tun,capo),r=(Math.floor(g.c/NT)-d+24)%12;
+ const q=g.q!=null?g.q:TYPES[g.c%NT].id;return CH[r]+q+(g.b!=null?'/'+CH[(g.b-d+24)%12]:'');
+}
+/* hand-made shapes for Drop D (low → high: D A D G B E) */
+const LIBT={dropd:{Dsus2:['000230','---12-'],D:['000232','---132'],Dsus4:['000233','---134'],Dm:['000231','---231'],D5:['0002xx','---1--'],
+ 'Dsus2/F':['300230','2--13-'],'Dsus4/F':['300233','2--134'],'D/F#':['400232','3--142'],'G/B':['x20003','-1---3'],Cadd9:['x32033','-21-34'],
+ 'Asus2/C#':['x42200','-312--'],G:['x2000 3'.replace(' ',''),'-1---3']},
+ std:{'G/B':['x20003','-1---3'],'D/F#':['200232','1--243'],'C/G':['332010','342-1-'],'Am/G':['302210','3-231-'],'C/B':['x22010','-23-1-']}};
+const segShapeCache=new Map();
+function shapeForSeg(g,tun=curTun(),capo=curCapo()){
+ if(!g||g.c>=NS)return null;const name=nameOf(g,tun,capo),key=name+'|'+tun;if(segShapeCache.has(key))return segShapeCache.get(key);
+ const lt=LIBT[tun]&&LIBT[tun][name];let out;
+ if(lt)out={...parseLib(lt),name};
+ else{
+  const d=tshift(tun,capo),base=shapeFor(transpose(g.c,-d));
+  out={...base,f:[...base.f],fi:[...base.fi],name};
+  const basic=chordName(transpose(g.c,-d));
+  if(g.q!=null&&CH[(Math.floor(g.c/NT)-d+24)%12]+g.q!==basic)out.note='Diagram shows '+basic+'; the chart says '+name+'.';
+  const rootPc=(Math.floor(g.c/NT)-d+24)%12;
+  if(tun==='dropd'){
+   if(out.f[0]>=0){if(out.barre&&out.bFrom===0){out.f[0]=-1;out.fi[0]=0;out.bFrom=1}else{const nf=out.f[0]+2;if(nf>4){out.f[0]=-1;out.fi[0]=0}else out.f[0]=nf}}
+   if(rootPc===2&&g.b==null){out.f[0]=0;out.fi[0]=0}
+  }
+  if(g.b!=null){const bp=(g.b-d+24)%12,low=tun==='dropd'?2:4;let fr=(bp-low+12)%12;
+   if(fr<=4){out.f[0]=fr;out.fi[0]=fr?(out.fi.includes(2)?(out.fi.includes(3)?4:3):2):0}
+   else{fr=(bp-9+12)%12;if(fr<=4){out.f[0]=-1;out.fi[0]=0;out.f[1]=fr;out.fi[1]=fr?(out.fi.includes(2)?3:2):0}}}
+ }
+ segShapeCache.set(key,out);return out;
+}
 function diagram(sh,label){
  if(!sh)return `<svg viewBox="0 0 120 156" role="img" aria-label="No chord"><text class="dgName" x="60" y="24" text-anchor="middle">N.C.</text><text class="dgNone" x="60" y="94" text-anchor="middle">no chord</text></svg>`;
  const fr=sh.f.filter(x=>x>0),mx=Math.max(0,...fr);const base=mx>4?(sh.barre||Math.min(...fr)):1;
@@ -654,10 +738,16 @@ async function analyse(x,prog){
  if(segs.length)segs[0].t0=0;segs=cleanSegs(segs);
  prog(.93,'Counting the beat…');await tick();
  const bpm=tempo(x);
- return {dur,offset,hist:[...hist],segs,bpm};
+ return {dur,offset,hist:[...hist],segs,bpm,feat:packFeat(chroma,bass,rms,thr)};
 }
+const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+const b64u8=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+function packFeat(chroma,bass,rms,thr){const n=chroma.length,c=new Uint8Array(n*12),b=new Uint8Array(n*12),sl=new Uint8Array(n);
+ for(let f=0;f<n;f++){const cm=Math.max(...chroma[f])||1,bm=Math.max(...bass[f])||1;for(let i=0;i<12;i++){c[f*12+i]=Math.round(chroma[f][i]/cm*255);b[f*12+i]=Math.round(bass[f][i]/bm*255)}sl[f]=rms[f]<thr?1:0}
+ return {n,c:u8b64(c),b:u8b64(b),s:u8b64(sl)}}
+const sameChord=(a,b)=>a.c===b.c&&(a.q??null)===(b.q??null)&&(a.b??null)===(b.b??null);
 function cleanSegs(segs){
- let out=[];for(const g of segs){const d=g.t1-g.t0;if(out.length&&d<.5){out[out.length-1].t1=g.t1;continue}if(out.length&&out[out.length-1].c===g.c){out[out.length-1].t1=g.t1;continue}out.push({...g})}
+ let out=[];for(const g of segs){const d=g.t1-g.t0;if(out.length&&d<.5){out[out.length-1].t1=g.t1;continue}if(out.length&&sameChord(out[out.length-1],g)){out[out.length-1].t1=g.t1;continue}out.push({...g})}
  if(out.length>1&&out[0].t1-out[0].t0<.5){out[1].t0=0;out.shift()}
  return out;
 }
@@ -696,23 +786,23 @@ function bestPlay(segs,rec){
 }
 
 /* ---- song UI ---- */
-let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=null;
+let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=null,curFile=null,undoSegs=null;
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
+function setTab(t){if(!['tune','song','chords'].includes(t))t='tune';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
 const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
 const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
-function saveSong(){libSync();if(!fileKey)return;try{const k='tuner.song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem('tuner.song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k='tuner.song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem('tuner.song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
 function loadSong(k){try{const v=JSON.parse(localStorage.getItem('tuner.song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
- songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(file);
+ songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(file);curFile=file;
  fileKey=(file.name+'|'+file.size).replace(/[^\w|.-]/g,'_');
  if(pendingLib){const ent=libGet(pendingLib);pendingLib=null;if(ent){A=expand(ent.data);A.libId=ent.id;saveSong();showSong(false);songMsg('Editing “'+ent.name+'”. Changes save to My songs automatically.');return}}
  const saved=loadSong(fileKey);
@@ -722,7 +812,7 @@ $('vidIn').addEventListener('change',async e=>{
   const x=await decodeFile(file);prog(.1);
   const r=await analyse(x,prog);
   const tuning=guessTuning(r.hist,r.segs);
-  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0}};
+  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat};
   let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c;
   prog(1,'Done');saveSong();showSong(false);
  }catch(err){
@@ -736,23 +826,28 @@ function showSong(fromSave){
  if(fromSave)songMsg('Loaded your saved analysis for this video.');
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
  renderTuneCard();renderPlay();renderTimeline();renderChords();renderLinks();$('aiOut').innerHTML='';syncSong(true);
+ $('knownIn').value=A.known||'';$('knownMsg').textContent='';$('undoFit').hidden=true;undoSegs=null;$('readVid').hidden=!(sampleFn&&imgLimit>0);
 }
 function renderTuneCard(){
  const t=TUNINGS.find(x=>x.id===A.tuning.id)||TUNINGS[0];
  const notes=t.n.map(m=>nm(m)).join(' ');
- let h=`<h2>Tuning</h2><div><span class="tunename">${esc(t.name)}</span><span class="conf ${A.tuning.conf}">${A.tuning.conf} confidence</span></div><div class="tunenotes">${notes} · low to high</div><p class="tip">${esc(A.tuning.why)}</p>`;
+ let h=`<h2>Tuning</h2><div><span class="tunename">${esc(t.name)}</span><span class="conf ${A.tuning.conf}">${A.tuning.conf==='yours'?'set by you':A.tuning.conf+' confidence'}</span></div><div class="tunenotes">${notes} · low to high</div><p class="tip">${esc(A.tuning.why)}</p>`;
+ h+=`<label class="tunepick">Wrong? Change it: <select id="tuneFix">${TUNINGS.map(x=>`<option value="${x.id}"${x.id===A.tuning.id?' selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`;
  h+=`<div class="editrow"><button class="btn" id="tuneTo">Tune my guitar to this</button></div>`;
  const off=A.offset;if(Math.abs(off)>=10){const hz=Math.round(440*Math.pow(2,off/1200));h+=`<p class="tip">The recording is <b>${Math.abs(Math.round(off))} cents ${off>0?'sharp':'flat'}</b> of standard pitch. To play along, set the tuner’s reference to A4 = ${hz} Hz.</p><div class="editrow"><button class="btn ghost" id="setRef">Set A4 = ${hz} Hz</button></div>`}
  $('tuneCard').innerHTML=h;
  $('tuneTo').onclick=()=>{setTuning(t);setTab('tune');window.scrollTo({top:0})};
+ $('tuneFix').onchange=e=>setSongTuning(e.target.value,'yours','You set this tuning.');
  const sr=$('setRef');if(sr)sr.onclick=()=>{setA4(Math.round(440*Math.pow(2,off/1200)));sr.textContent='Reference set'};
 }
+function setSongTuning(id,conf,why){const d0=tshift(A.play.tun,A.play.capo);A.tuning={id,conf,why};A.play={tun:id,capo:Math.max(0,d0-(TSHIFT[id]??0))};if(A.play.capo>7)A.play.capo=0;saveSong();renderAll()}
+function renderAll(){renderTuneCard();renderPlay();renderTimeline();renderChords();curIdx=-1;syncSong(true)}
 function renderPlay(){
  const tunSel=$('plTun'),capSel=$('plCapo');const ids=[...new Set([A.tuning.id,'std'])];
  tunSel.innerHTML=ids.map(id=>`<option value="${id}">${esc(tName(id))}${id===A.tuning.id&&id!=='std'?' (as recorded)':''}</option>`).join('');tunSel.value=A.play.tun;
  capSel.innerHTML=[0,1,2,3,4,5,6,7].map(c=>`<option value="${c}">${c?'Fret '+c:'No capo'}</option>`).join('');capSel.value=A.play.capo;
- const best=bestPlay(A.segs,A.tuning.id),shapesOf=(tun,capo)=>[...new Set(A.segs.filter(g=>g.c<NS).map(g=>chordName(transpose(g.c,-(TSHIFT[tun]??0)-capo))))];
- const now=shapesOf(A.play.tun,A.play.capo),barres=now.filter(n=>shapeFor(CH.indexOf(n.match(/^[A-G][b#]?/)[0])*NT+TYPES.findIndex(t=>t.id===n.replace(/^[A-G][b#]?/,''))).cost>=2);
+ const best=bestPlay(A.segs,A.tuning.id),shapesOf=(tun,capo)=>[...new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g,tun,capo)))];
+ const now=shapesOf(A.play.tun,A.play.capo),barres=[...new Set(A.segs.filter(g=>g.c<NS&&(shapeForSeg(g)||{}).cost>=2).map(g=>nameOf(g)))];
  let tip=`You’ll play <b>${now.join(' · ')||'—'}</b>.`;if(barres.length)tip+=` Barre chords: ${barres.join(', ')}.`;
  if(best.tun!==A.play.tun||best.capo!==A.play.capo)tip+=` <br>Easiest overall: <b>${esc(tName(best.tun))}${best.capo?', capo '+best.capo:''}</b> → ${shapesOf(best.tun,best.capo).join(' · ')}. <button class="btn ghost" id="useBest" style="margin-top:6px">Use this</button>`;
  else tip+=' This is already the easiest way found.';
@@ -762,20 +857,20 @@ function renderPlay(){
 $('plTun').onchange=e=>{A.play.tun=e.target.value;saveSong();renderPlay();renderTimeline();renderChords();curIdx=-1;syncSong(true)};
 $('plCapo').onchange=e=>{A.play.capo=+e.target.value;saveSong();renderPlay();renderTimeline();renderChords();curIdx=-1;syncSong(true)};
 function renderTimeline(){
- $('timeline').innerHTML=A.segs.map((g,i)=>{const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));const sc=shapeIdx(g.c);return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}${g.note?' has-note':''}" data-i="${i}" style="width:${w.toFixed(0)}px"><b>${esc(chordName(sc))}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
+ $('timeline').innerHTML=A.segs.map((g,i)=>{const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}${g.note?' has-note':''}" data-i="${i}" style="width:${w.toFixed(0)}px"><b>${esc(nameOf(g))}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
 }
 function renderChords(){
- const tot={},order=[];for(const g of A.segs){if(g.c>=NS)continue;const k=shapeIdx(g.c);if(!(k in tot)){tot[k]=0;order.push(k)}tot[k]+=g.t1-g.t0}
+ const tot={},order=[],rep={};for(const g of A.segs){if(g.c>=NS)continue;const k=nameOf(g);if(!(k in tot)){tot[k]=0;order.push(k);rep[k]=g}tot[k]+=g.t1-g.t0}
  const sum=Object.values(tot).reduce((a,b)=>a+b,0)||1;
- $('chordGrid').innerHTML=order.map(k=>{const sh=shapeFor(k),snd=soundIdx(k);const diff=chordName(snd)!==chordName(k);return `<div class="cg dg">${diagram(sh,chordName(k))}<small>${Math.round(tot[k]/sum*100)}% of the song${diff?' · sounds as '+esc(chordName(snd)):''}${sh&&sh.note?'<br>'+esc(sh.note):''}</small></div>`}).join('')||'<p class="tip">No chords were detected.</p>';
+ $('chordGrid').innerHTML=order.map(k=>{const g=rep[k],sh=shapeForSeg(g),snd=nameOf(g,'std',0);const diff=snd!==k&&tshift(A.play.tun,A.play.capo)!==0;return `<div class="cg dg">${diagram(sh,k)}<small>${Math.round(tot[k]/sum*100)}% of the song${diff?' · sounds as '+esc(snd):''}${sh&&sh.note?'<br>'+esc(sh.note):''}</small></div>`}).join('')||'<p class="tip">No chords were detected.</p>';
 }
 function segAt(t){const s=A.segs;let lo=0,hi=s.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(s[m].t0<=t)lo=m;else hi=m-1}return lo}
 function syncSong(force){
  if(!A||!A.segs.length)return;const t=vid.currentTime||0,i=segAt(t),g=A.segs[i],nx=A.segs[i+1];
- if(i!==curIdx||force){curIdx=i;const sc=shapeIdx(g.c);$('dNow').innerHTML=diagram(shapeFor(sc),chordName(sc));
-  const snd=g.c;$('nowSounds').textContent=g.c<NS&&chordName(snd)!==chordName(sc)?'sounds as '+chordName(snd):'';
+ if(i!==curIdx||force){curIdx=i;$('dNow').innerHTML=diagram(shapeForSeg(g),nameOf(g));
+  const snd=nameOf(g,'std',0);$('nowSounds').textContent=g.c<NS&&tshift(A.play.tun,A.play.capo)!==0&&snd!==nameOf(g)?'sounds as '+snd:'';
   const nn=$('nowNote');nn.hidden=!g.note;nn.textContent=g.note||'';
-  if(nx){const n2=shapeIdx(nx.c);$('dNext').innerHTML=diagram(shapeFor(n2),chordName(n2))}else $('dNext').innerHTML=diagram(null,'');
+  if(nx){$('dNext').innerHTML=diagram(shapeForSeg(nx),nameOf(nx))}else $('dNext').innerHTML=diagram(null,'');
   const tl=$('timeline');[...tl.children].forEach((b,k)=>b.classList.toggle('cur',k===i));const el=tl.children[i];if(el)tl.scrollTo({left:el.offsetLeft-tl.clientWidth/2+el.clientWidth/2,behavior:force?'auto':'smooth'})}
  const left=g.t1-t;$('nextIn').textContent=nx?(A.bpm?`in ${Math.max(0,Math.ceil(left*A.bpm/60))} beat${Math.ceil(left*A.bpm/60)===1?'':'s'}`:`in ${left.toFixed(1)}s`):'end';
  $('nextBar').style.width=Math.min(100,Math.max(0,(t-g.t0)/(g.t1-g.t0)*100))+'%';
@@ -791,12 +886,85 @@ $('timeline').addEventListener('click',e=>{const b=e.target.closest('.blk');if(!
  const sc=shapeIdx(A.segs[i].c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc';
  $('edNote').value=A.segs[i].note||'';$('editLabel').textContent=`Edit the chord at ${mmss(A.segs[i].t0)}`;$('edMerge').disabled=i===0;$('editBox').hidden=false;
  [...$('timeline').children].forEach((x,k)=>x.classList.toggle('sel',k===i));syncSong(true)});
-$('edApply').onclick=()=>{if(selIdx<0)return;const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);const g=A.segs[selIdx];g.c=tv==='nc'?NS:soundIdx(shape);const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;afterEdit('Saved.')};
+$('edApply').onclick=()=>{if(selIdx<0)return;const g=A.segs[selIdx],typed=$('edName').value.trim();
+ if(typed){const p=parseChord(typed);if(!p){$('edName').style.borderColor='var(--sharp)';$('editLabel').textContent='Couldn’t read that chord. Try a name like G/B or Cadd9.';return}const d=tshift(A.play.tun,A.play.capo),ti=TYPES.findIndex(t=>t.id===QTYPE[p.q]);g.c=((p.root+d)%12)*NT+(ti<0?0:ti);g.q=p.q;if(p.bass!=null)g.b=(p.bass+d)%12;else delete g.b;$('edName').value=''}
+ else{const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);g.c=tv==='nc'?NS:soundIdx(shape);delete g.q;delete g.b}const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;afterEdit('Saved.')};
 $('edSplit').onclick=()=>{const t=vid.currentTime||0,i=segAt(t),g=A.segs[i];if(!g||t-g.t0<.3||g.t1-t<.3){$('editLabel').textContent='Move the video to the spot where the new chord starts, then tap Split.';return}A.segs.splice(i+1,0,{t0:t,t1:g.t1,c:g.c});g.t1=t;selIdx=i+1;$('edNote').value='';afterEdit('Split. Now pick the chord for the new part.')};
 $('edClose').onclick=()=>{selIdx=-1;$('editBox').hidden=true;renderTimeline();curIdx=-1;syncSong(true)};
 $('edMerge').onclick=()=>{if(selIdx<1)return;const g=A.segs[selIdx],p=A.segs[selIdx-1];p.t1=g.t1;if(g.note)p.note=p.note?p.note+' / '+g.note:g.note;A.segs.splice(selIdx,1);selIdx--;$('edNote').value=A.segs[selIdx].note||'';afterEdit('Merged.')};
 function afterEdit(msg){selIdx=Math.min(selIdx,A.segs.length-1);saveSong();renderTimeline();renderChords();renderPlay();curIdx=-1;syncSong(true);const g=A.segs[selIdx];if(g){const sc=shapeIdx(g.c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc'}$('editLabel').textContent=(msg||'Saved.')+' Tap another block to edit more.';$('edMerge').disabled=selIdx<1}
 $('songTitle').addEventListener('change',e=>{A.title=e.target.value.trim();saveSong();renderLinks()});
+/* typed chord in the edit box */
+$('edName').addEventListener('input',()=>{$('edName').style.borderColor=''});
+/* ---- re-fit the timeline to known chords ---- */
+async function ensureFeat(){
+ if(A.feat)return true;if(!curFile)return false;
+ $('knownMsg').textContent='Re-reading the sound…';const x=await decodeFile(curFile);const r=await analyse(x,(p)=>{$('knownMsg').textContent='Re-reading the sound… '+Math.round(p*100)+'%'});A.feat=r.feat;return true;
+}
+function refit(list){
+ const F=A.feat,n=F.n,C=b64u8(F.c),B=b64u8(F.b),SL=b64u8(F.s),d=tshift(A.play.tun,A.play.capo);
+ const st=list.map(p=>{const v=new Float32Array(12);p.iv.forEach((iv,j)=>v[(p.root+iv)%12]+=j===0?1.1:1);const nn=Math.hypot(...v);
+  const root=(p.root+d)%12,bass=p.bass!=null?(p.bass+d)%12:null,ti=TYPES.findIndex(t=>t.id===QTYPE[p.q]);
+  return {tpl:v.map(x=>x/nn),root,bass,bp:bass??root,c:root*NT+(ti<0?0:ti),q:p.q,b:bass}});
+ // templates are in shape pitch; rotate to sounding pitch
+ st.forEach(o=>{const r=new Float32Array(12);for(let i=0;i<12;i++)r[(i+d)%12]=o.tpl[i];o.tpl=r});
+ const S=st.length+1,P=.7;let score=new Float64Array(S);const back=new Array(n),em=new Float64Array(S);
+ for(let f=0;f<n;f++){const sil=SL[f]===1;let cn=0;for(let i=0;i<12;i++)cn+=C[f*12+i]**2;cn=Math.sqrt(cn)||1;
+  for(let s=0;s<st.length;s++){if(sil){em[s]=0;continue}const T=st[s].tpl;let dd=0;for(let i=0;i<12;i++)dd+=T[i]*C[f*12+i];em[s]=dd/cn+.3*B[f*12+st[s].bp]/255}
+  em[S-1]=sil?1:.25;let best=-Infinity,bi=0;for(let s=0;s<S;s++)if(score[s]>best){best=score[s];bi=s}
+  const bp=new Uint8Array(S),ns=new Float64Array(S);for(let s=0;s<S;s++){const stay=score[s],sw=best-P;if(f===0||stay>=sw){ns[s]=stay+em[s];bp[s]=s}else{ns[s]=sw+em[s];bp[s]=bi}}
+  score=ns;back[f]=bp}
+ let cur=0;for(let s=1;s<S;s++)if(score[s]>score[cur])cur=s;const path=new Uint8Array(n);for(let f=n-1;f>=0;f--){path[f]=cur;cur=back[f][cur]}
+ const ft=f=>Math.max(0,(f*HOP+(FN-HOP)/2)/SR);let segs=[];
+ for(let f=0;f<n;f++){const k=path[f],g=k===S-1?{c:NS}:{c:st[k].c,q:st[k].q,b:st[k].b};if(g.b==null)delete g.b;if(segs.length&&segs[segs.length-1].k===k)continue;if(segs.length)segs[segs.length-1].t1=ft(f);segs.push({...g,k,t0:ft(f),t1:A.dur})}
+ if(segs.length)segs[0].t0=0;segs=cleanSegs(segs).map(({k,...g})=>g);
+ const notes=A.segs.filter(g=>g.note);notes.forEach(o=>{const t=segs.find(g=>o.t0>=g.t0&&o.t0<g.t1)||segs[segs.length-1];t.note=t.note?t.note+' / '+o.note:o.note});
+ return segs;
+}
+async function applyKnown(text,source){
+ const names=text.split(/[\s,|;]+/).map(x=>x.trim()).filter(Boolean),parsed=[],bad=[];
+ for(const nmx of [...new Set(names)]){const p=parseChord(nmx);if(p)parsed.push(p);else bad.push(nmx)}
+ if(bad.length){$('knownMsg').textContent=`Couldn’t read: ${bad.join(', ')}. Write chords like Am, G/B, Cadd9, Dsus2, F#m7.`;return false}
+ if(parsed.length<2){$('knownMsg').textContent='Enter at least two different chords.';return false}
+ if(parsed.length>40){$('knownMsg').textContent='That’s too many chords; enter the distinct chords only.';return false}
+ try{if(!await ensureFeat()){$('knownMsg').textContent='Open this song’s video again to redo the timeline.';return false}}catch(e){$('knownMsg').textContent='Couldn’t re-read the sound of this video.';return false}
+ undoSegs=JSON.parse(JSON.stringify(A.segs));A.segs=refit(parsed);A.known=names.join(' ');saveSong();renderAll();
+ $('undoFit').hidden=false;$('knownMsg').textContent=`Timeline redone with ${parsed.length} chords${source?' '+source:''}. Check it by playing along, and fix any block by tapping it.`;return true;
+}
+$('knownGo').onclick=async()=>{const b=$('knownGo');b.disabled=true;try{await applyKnown($('knownIn').value,'')}finally{b.disabled=false}};
+$('undoFit').onclick=()=>{if(!undoSegs)return;A.segs=undoSegs;undoSegs=null;saveSong();renderAll();$('undoFit').hidden=true;$('knownMsg').textContent='Back to the previous timeline.'};
+/* ---- Claude reads chord names and tuning off the video ---- */
+let imgLimit=0;
+async function grabFrames(n){
+ const v=vid,dur=v.duration||A.dur,was=v.currentTime,out=[],cv=document.createElement('canvas');v.pause();
+ for(let i=0;i<n;i++){const t=Math.min(dur-.2,dur*(i+.5)/n);
+  await new Promise(r=>{let done=false;const h=()=>{if(done)return;done=true;v.removeEventListener('seeked',h);r()};v.addEventListener('seeked',h);setTimeout(h,4000);v.currentTime=t});
+  const w=Math.min(1280,v.videoWidth||1280),h=Math.round((v.videoHeight||720)*w/(v.videoWidth||1280));cv.width=w;cv.height=h;cv.getContext('2d').drawImage(v,0,0,w,h);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.82));if(blob)out.push({t,blob})}
+ v.currentTime=was;return out;
+}
+$('readVid').onclick=async()=>{
+ if(!sampleFn||!vid.videoWidth)return;const btn=$('readVid'),msg=$('knownMsg');btn.disabled=true;
+ try{
+  msg.textContent='Taking pictures of the video…';const frames=await grabFrames(Math.max(2,Math.min(imgLimit,8)));
+  msg.textContent='Claude is reading the chords on screen… this can take a minute.';
+  const ids=TUNINGS.map(t=>`${t.id} = ${t.name}`).join('; ');
+  const prompt=`These ${frames.length} images are frames from a guitar video, taken at ${frames.map(f=>f.t.toFixed(0)+'s').join(', ')}.
+Read only guitar information shown on screen: chord names written above tab or notation, chord diagrams, tuning labels (for example string names at the start of a tab such as D A D G B E, or text like "Drop D"), and capo markings. Do not transcribe lyrics or any other text.
+Tuning ids: ${ids}.
+Reply with only JSON: {"tuning": one tuning id or null, "tuning_evidence": short string, "capo": number or null, "chords": [every distinct chord name exactly as written, in order of first appearance]}`;
+  const r=await sampleFn.json(prompt,{images:frames.map(f=>f.blob)});
+  const chords=Array.isArray(r&&r.chords)?r.chords.map(String).filter(x=>parseChord(x)):[];
+  let note=[];
+  if(r&&r.tuning&&TUNINGS.some(t=>t.id===r.tuning)&&r.tuning!==A.tuning.id){A.tuning={id:r.tuning,conf:'high',why:'Read from the video: '+String(r.tuning_evidence||'shown on screen')+'.'};A.play.tun=r.tuning;note.push('tuning set to '+tName(r.tuning))}
+  else if(r&&r.tuning===A.tuning.id)note.push('tuning confirmed as '+tName(r.tuning));
+  if(r&&Number.isInteger(r.capo)&&r.capo>=0&&r.capo<=7){A.play.capo=r.capo;if(r.capo)note.push('capo on fret '+r.capo)}
+  if(chords.length<2){saveSong();renderAll();msg.textContent='Claude couldn’t find chord names on screen'+(note.length?' ('+note.join(', ')+')':'')+'. Type them in instead.';return}
+  $('knownIn').value=chords.join(' ');
+  await applyKnown(chords.join(' '),'read from the video'+(note.length?' ('+note.join(', ')+')':''));
+ }catch(e){msg.textContent=e&&e.code==='not_granted'?'Claude’s help isn’t allowed on this page.':e&&e.code==='rate_limited'?'Too many requests right now. Try again in a little while.':'Couldn’t read the video this time. Try again, or type the chords in.'}
+ finally{btn.disabled=false}
+};
 $('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg('');$('vidIn').click()};
 $('songNotes').addEventListener('change',e=>{A.notes=e.target.value.trim();saveSong()});
 $('finish').onclick=()=>{vid.pause();A.notes=$('songNotes').value.trim();saveSong();showSheet()};
@@ -806,19 +974,19 @@ $('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('c
 function renderLinks(){const t=(A&&A.title)||'';if(!t){$('links').innerHTML='<p class="tip">Type the song name above to get search links.</p>';return}
  const q=[['Acoustic',t+' acoustic'],['Unplugged / live',t+' unplugged live'],['Guitar lesson',t+' guitar lesson'],['Acoustic cover',t+' acoustic cover']];
  $('links').innerHTML=q.map(([l,s])=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(s)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}
-(async()=>{try{if(window.claude&&window.claude.use)sampleFn=await window.claude.use('sample')}catch(e){sampleFn=null}if(sampleFn){$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.'}})();
+(async()=>{try{if(window.claude&&window.claude.use)sampleFn=await window.claude.use('sample')}catch(e){sampleFn=null}if(sampleFn){try{const lim=await sampleFn.limits();imgLimit=lim&&lim.images?lim.images.maxCount:0}catch(e){imgLimit=0}$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.'}})();
 let aiCtl=null;
 $('aiAsk').onclick=async()=>{
  if(!sampleFn||!A)return;const out=$('aiOut'),btn=$('aiAsk');
- const tot={};A.segs.forEach(g=>{if(g.c<NS){const n=chordName(g.c);tot[n]=(tot[n]||0)+g.t1-g.t0}});const sum=Object.values(tot).reduce((a,b)=>a+b,0)||1;
- const line=A.segs.slice(0,180).map(g=>`${g.t0.toFixed(1)} ${chordName(g.c)}`).join(', ');
+ const tot={};A.segs.forEach(g=>{if(g.c<NS){const n=nameOf(g);tot[n]=(tot[n]||0)+g.t1-g.t0}});const sum=Object.values(tot).reduce((a,b)=>a+b,0)||1;
+ const line=A.segs.slice(0,180).map(g=>`${g.t0.toFixed(1)} ${nameOf(g)}`).join(', ');
  const prompt=`You are helping a guitarist learn a song from a video. A page analysed the audio and detected the following. These are estimates and may contain errors.
 
 Video title or file name: ${A.title||'(unknown)'}
 Length: ${mmss(A.dur)}. Tempo: ${A.bpm?'about '+A.bpm+' BPM':'unknown'}.
 Detected tuning: ${tName(A.tuning.id)} (${A.tuning.conf} confidence). Reason: ${A.tuning.why}
 Recording pitch offset from A440: ${A.offset} cents.
-Chord timeline (sounding chords, start time in seconds): ${line}
+Chord timeline (chord shapes as played in the tuning and capo above, start time in seconds): ${line}
 Share of time per chord: ${Object.entries(tot).sort((a,b)=>b[1]-a[1]).map(([n,d])=>n+' '+Math.round(d/sum*100)+'%').join(', ')}
 Player's taste: ${$('taste').value||DEFAULT_TASTE}
 
@@ -856,7 +1024,7 @@ const LIBK='lib';
 const libAll=()=>store.get(LIBK,[]);
 const libGet=id=>libAll().find(e=>e.id===id);
 function libWrite(list){try{localStorage.setItem('tuner.'+LIBK,JSON.stringify(list));return true}catch(e){return false}}
-function libSync(){if(!A||!A.libId)return;const l=libAll(),e=l.find(x=>x.id===A.libId);if(!e)return;e.data=compact({...A,libId:undefined});e.saved=Date.now();libWrite(l)}
+function libSync(){if(!A||!A.libId)return;const l=libAll(),e=l.find(x=>x.id===A.libId);if(!e)return;e.data=compact({...A,libId:undefined,feat:undefined});e.saved=Date.now();libWrite(l)}
 const fmtDate=t=>new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
 function renderLib(){
  const l=libAll();
@@ -877,7 +1045,7 @@ function printify(svg){
   .replace(/class="dgName"/g,'class="dgName" fill="#151A19" font-size="24" font-weight="800" '+F).replace(/class="dgNone"/g,'class="dgNone" fill="#5D6964" font-size="12" '+F);
 }
 function progression(){
- const it=A.segs.map((g,i)=>({n:chordName(shapeIdx(g.c)),t:g.t0,i}));const same=(a,b,L)=>{for(let k=0;k<L;k++)if(it[a+k].n!==it[b+k].n)return false;return true};
+ const it=A.segs.map((g,i)=>({n:nameOf(g),t:g.t0,i}));const same=(a,b,L)=>{for(let k=0;k<L;k++)if(it[a+k].n!==it[b+k].n)return false;return true};
  const lines=[];let i=0;
  while(i<it.length){let best=null;
   for(let L=2;L<=8;L++){if(i+2*L>it.length)break;let k=1;while(i+(k+1)*L<=it.length&&same(i,i+k*L,L))k++;if(k>=2&&(!best||L*k>best.L*best.k||(L*k===best.L*best.k&&L<best.L)))best={L,k}}
@@ -886,28 +1054,28 @@ function progression(){
  return lines;
 }
 function keyPoints(){
- const pts=[],used=[...new Set(A.segs.filter(g=>g.c<NS).map(g=>shapeIdx(g.c)))];
- const barre=used.filter(c=>shapeFor(c).cost>=2).map(chordName);
+ const pts=[],rep={};A.segs.forEach(g=>{if(g.c<NS){const k=nameOf(g);if(!rep[k])rep[k]=g}});const used=Object.keys(rep);
+ const barre=used.filter(k=>(shapeForSeg(rep[k])||{}).cost>=2);
  if(barre.length)pts.push(`Barre chords: <b>${barre.map(esc).join(', ')}</b>. Practise these shapes on their own first.`);
- const pairs={};for(let i=1;i<A.segs.length;i++){const a=A.segs[i-1],b=A.segs[i];if(a.c>=NS||b.c>=NS)continue;const k=chordName(shapeIdx(a.c))+' → '+chordName(shapeIdx(b.c));const d=a.t1-a.t0;(pairs[k]=pairs[k]||{n:0,min:1e9}).n++;pairs[k].min=Math.min(pairs[k].min,d)}
+ const pairs={};for(let i=1;i<A.segs.length;i++){const a=A.segs[i-1],b=A.segs[i];if(a.c>=NS||b.c>=NS)continue;const k=nameOf(a)+' → '+nameOf(b);const d=a.t1-a.t0;(pairs[k]=pairs[k]||{n:0,min:1e9}).n++;pairs[k].min=Math.min(pairs[k].min,d)}
  const top=Object.entries(pairs).filter(([k,v])=>v.n>=2).sort((a,b)=>b[1].n-a[1].n).slice(0,3);
  if(top.length)pts.push('Most common changes: '+top.map(([k,v])=>`<b>${esc(k)}</b> (${v.n}×)`).join(', ')+'.');
  const quick=Object.entries(pairs).filter(([k,v])=>A.bpm?v.min*A.bpm/60<=2.2:v.min<1.3).map(([k])=>k);
  if(quick.length)pts.push(`Quick changes, about two beats or less: <b>${quick.slice(0,4).map(esc).join(', ')}</b>.`);
  if(Math.abs(A.offset)>=10)pts.push(`The recording is ${Math.abs(Math.round(A.offset))} cents ${A.offset>0?'sharp':'flat'}. Set the tuner to A4 = ${Math.round(440*Math.pow(2,A.offset/1200))} Hz to play along.`);
- return {pts,top:top.map(([k])=>k),used:used.map(chordName),barre};
+ return {pts,top:top.map(([k])=>k),used,barre,rep};
 }
 function sheetHTML(print){
  const t=TUNINGS.find(x=>x.id===A.play.tun)||TUNINGS[0],name=(A.libId&&libGet(A.libId)?.name)||A.title||'Untitled song';
  const meta=[`Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})`,`Capo <b>${A.play.capo?'fret '+A.play.capo:'none'}</b>`];
  if(A.bpm)meta.push(`Tempo <b>≈${A.bpm} BPM</b>`);meta.push(`Length <b>${mmss(A.dur)}</b>`);
  if(A.play.tun!==A.tuning.id)meta.push(`Recorded in <b>${esc(tName(A.tuning.id))}</b>`);
- const dg=c=>{let svg=diagram(shapeFor(c),chordName(c));return print?printify(svg):svg};
+ const dg=g=>{let svg=diagram(shapeForSeg(g),nameOf(g));return print?printify(svg):svg};
  const kp=keyPoints(),lines=progression();
  const notes=A.segs.map((g,i)=>({g,i})).filter(o=>o.g.note);
  let h=`<h1 dir="auto">${esc(name)}</h1><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
- h+=`<h3>Chords</h3><div class="pgrid">${[...new Set(A.segs.filter(g=>g.c<NS).map(g=>shapeIdx(g.c)))].map(dg).join('')}</div>`;
- h+=`<h3>Progression</h3><div class="prog">${lines.map(L=>{const ns=notes.filter(o=>o.i>=L.from&&o.i<=L.to);return `<div class="pl"><time>${mmss(L.t)}</time><span class="ch">${L.ch.map(esc).join(' ')}</span><span class="x">${L.x>1?'×'+L.x:''}</span>${ns.map(o=>`<span class="pn" dir="auto">${mmss(o.g.t0)} · ${esc(chordName(shapeIdx(o.g.c)))}: ${esc(o.g.note)}</span>`).join('')}</div>`}).join('')}</div>`;
+ h+=`<h3>Chords</h3><div class="pgrid">${kp.used.map(k=>dg(kp.rep[k])).join('')}</div>`;
+ h+=`<h3>Progression</h3><div class="prog">${lines.map(L=>{const ns=notes.filter(o=>o.i>=L.from&&o.i<=L.to);return `<div class="pl"><time>${mmss(L.t)}</time><span class="ch">${L.ch.map(esc).join(' ')}</span><span class="x">${L.x>1?'×'+L.x:''}</span>${ns.map(o=>`<span class="pn" dir="auto">${mmss(o.g.t0)} · ${esc(nameOf(o.g))}: ${esc(o.g.note)}</span>`).join('')}</div>`}).join('')}</div>`;
  if(kp.pts.length)h+=`<h3>Key points</h3><ul>${kp.pts.map(p=>`<li>${p}</li>`).join('')}</ul>`;
  if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
  const plan=[`Tune to <b>${esc(t.name)}</b>${A.play.capo?` and put the capo on fret ${A.play.capo}`:''}.`,`Learn the shapes: <b>${kp.used.map(esc).join(', ')}</b>.`];
@@ -931,7 +1099,7 @@ $('shEdit').onclick=()=>{if(fileKey&&vid.src){$('shBack').click();return}if(A.li
 function saveToLib(){
  const name=$('shName').value.trim()||A.title||'Untitled song';let l=libAll();let ent=A.libId&&l.find(e=>e.id===A.libId);
  if(!ent){ent={id:'s'+Date.now().toString(36),name,saved:Date.now()};l.unshift(ent);A.libId=ent.id}
- ent.name=name;ent.saved=Date.now();ent.data=compact({...A,libId:undefined});
+ ent.name=name;ent.saved=Date.now();ent.data=compact({...A,libId:undefined,feat:undefined});
  if(!libWrite(l)){shStatus('Couldn’t save on this phone; storage is full or blocked. Save the PDF instead.');return null}
  if(fileKey)try{localStorage.setItem('tuner.song.'+fileKey,JSON.stringify(compact(A)))}catch(e){}
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();return ent;
@@ -1004,6 +1172,112 @@ $('shDrive').onclick=()=>withBusy($('shDrive'),async()=>{
 });
 renderLib();
 
+/* ================= Chord book ================= */
+const OPEN={std:[40,45,50,55,59,64],dropd:[38,45,50,55,59,64]};
+const QALIAS={maj:'',M:'',min:'m','-':'m',sus:'sus4',M7:'maj7',min7:'m7','°':'dim','+':'aug'};
+function canon(name){const p=parseChord(name);if(!p)return null;const q=QALIAS[p.q]??p.q;return CH[p.root]+q+(p.bass!=null&&p.bass!==p.root?'/'+CH[p.bass]:'')}
+const BOOKK='chordbook';
+const bookGet=()=>store.get(BOOKK,{});
+function bookAdd(names,song){
+ const b=bookGet();let changed=false,added=0;
+ for(const n of names){const k=canon(n);if(!k)continue;let e=b[k];if(!e){e=b[k]={added:Date.now(),songs:[]};added++;changed=true}
+  if(song&&!e.songs.includes(song)){e.songs.push(song);if(e.songs.length>20)e.songs.shift();changed=true}}
+ if(changed)store.set(BOOKK,b);return added;
+}
+function rememberChords(a){if(!a||!a.segs)return;const names=[...new Set(a.segs.filter(g=>g.c<NS).map(g=>nameOf(g,a.play?a.play.tun:'std',a.play?a.play.capo:0)))];bookAdd(names,a.title||'')}
+function seedBook(){if(store.get('bookSeeded',false))return;try{
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('tuner.song.'))continue;const d=loadSong(k.slice(11));if(d)rememberChords(d)}
+ libAll().forEach(e=>{try{rememberChords(expand(e.data))}catch(err){}})}catch(e){}store.set('bookSeeded',true)}
+
+/* fingering: barre on the lowest fret when it can lie flat, then one finger per remaining note */
+function fingerize(f){
+ const fr=f.map((x,i)=>({x,i})).filter(o=>o.x>0);const fi=f.map(()=>0);if(!fr.length)return {fi,barre:0,bFrom:0,n:0};
+ const min=Math.min(...fr.map(o=>o.x)),atMin=fr.filter(o=>o.x===min);let barre=0,bFrom=0,next=1,used=0;
+ if(atMin.length>=2){const a=atMin[0].i;let ok=true;for(let i=a;i<6;i++)if(f[i]<min)ok=false;
+  if(ok){barre=min;bFrom=a;for(let i=a;i<6;i++)if(f[i]===min)fi[i]=1;next=2;used=1}}
+ const rest=fr.filter(o=>!fi[o.i]).sort((p,q)=>p.x-q.x||p.i-q.i);
+ const groups=[];for(const o of rest){const g=groups[groups.length-1];if(g&&g[0].x===o.x)g.push(o);else groups.push([o])}
+ for(let gi=0;gi<groups.length;gi++){const g=groups[gi],left=groups.slice(gi+1).reduce((a,x)=>a+x.length,0);let fg=Math.max(next,g[0].x-min+1);
+  if(fg+g.length-1+left<=4||g.length===1){for(const o of g){if(fg>4)return null;fi[o.i]=fg++;used++}next=fg}
+  else{const span=g[g.length-1].i-g[0].i+1;if(span!==g.length||fg>4)return null;g.forEach(o=>fi[o.i]=fg);used++;next=fg+1}}
+ return {fi,barre,bFrom,n:used};
+}
+const voiceCache=new Map();
+function voicings(name,tun){
+ const key=name+'|'+tun;if(voiceCache.has(key))return voiceCache.get(key);
+ const p=parseChord(name);if(!p){voiceCache.set(key,[]);return []}
+ const pcs=new Set(p.iv.map(i=>(p.root+i)%12));const bass=p.bass??p.root;pcs.add(bass);
+ const fifth=(p.root+7)%12,req=[...pcs].filter(x=>!(x===fifth&&p.iv.length>=4&&p.bass!==fifth));
+ const open=OPEN[tun]||OPEN.std,seen=new Map();
+ for(let pos=0;pos<=12;pos++){
+  const lo=pos===0?1:pos,hi=pos===0?4:pos+3;
+  const opts=open.map(o=>{const a=[-1];if(pcs.has(o%12))a.push(0);for(let fr=lo;fr<=hi;fr++)if(pcs.has((o+fr)%12))a.push(fr);return a});
+  const cur=[];
+  const rec=(s,started,ended)=>{
+   if(s===6){evalV(cur.slice(),pos);return}
+   for(const fr of opts[s]){
+    if(fr<0){if(started&&s<5)continue;if(started&&s===5){cur[s]=-1;rec(s+1,started,true);continue}cur[s]=-1;rec(s+1,false,false);continue}
+    if(!started&&(open[s]+fr)%12!==bass)continue;
+    cur[s]=fr;rec(s+1,true,ended)}
+  };
+  rec(0,false,false);
+ }
+ function evalV(f,pos){
+  const snd=f.map((x,i)=>x>=0?(open[i]+x)%12:null).filter(x=>x!=null);if(snd.length<(pcs.size<=2?3:4))return;
+  if(!req.every(r=>snd.includes(r)))return;
+  const frets=f.filter(x=>x>0);if(pos>0&&!frets.includes(pos))return;
+  if(frets.length&&Math.max(...frets)-Math.min(...frets)>3)return;
+  const fg=fingerize(f);if(!fg)return;
+  const opens=f.filter(x=>x===0).length,minF=frets.length?Math.min(...frets):0;if(minF>=5&&opens>1)return;
+  const score=fg.n*1+(fg.barre?1.2:0)+minF*.12+opens*(minF>=5?.6:-.35)-snd.length*.6+(snd.includes(fifth)?0:.4);
+  const k=f.join(',');if(!seen.has(k)||seen.get(k).score>score)seen.set(k,{f,...fg,score,minF,opens});
+ }
+ const all=[...seen.values()].sort((a,b)=>a.score-b.score);
+ // best shape per neck position, max 8, ordered up the neck
+ const byPos=new Map();for(const v of all){const b=v.minF<=3&&v.opens?0:v.minF;if(!byPos.has(b))byPos.set(b,v)}
+ let out=[...byPos.values()].sort((a,b)=>a.score-b.score).slice(0,8).sort((a,b)=>a.minF-b.minF||a.score-b.score);
+ const lib=(LIBT[tun]&&LIBT[tun][name])||((tun==='std'||!LIBT[tun])&&LIB[name]);
+ if(lib){const l=parseLib(lib),k=l.f.join(',');out=out.filter(v=>v.f.join(',')!==k);out.unshift({...l,common:true,minF:Math.min(...l.f.filter(x=>x>0),99)})}
+ out=out.map(v=>({f:v.f,fi:v.fi,barre:v.barre,bFrom:v.bFrom,common:!!v.common,label:v.common?'Common':((v.f.includes(0)&&Math.max(...v.f)<=4)?'Open position':(v.barre?'Barre · fret ':'Fret ')+Math.min(...v.f.filter(x=>x>0)))}));
+ voiceCache.set(key,out);return out;
+}
+const chordNotes=name=>{const p=parseChord(name);if(!p)return '';const ns=p.iv.map(i=>CH[(p.root+i)%12]);if(p.bass!=null&&!ns.includes(CH[p.bass]))ns.unshift(CH[p.bass]);return ns.join(' ')};
+const ROOTORD=n=>{const p=parseChord(n);return p?p.root*100+(Object.keys(QUAL).indexOf(p.q))+(p.bass!=null?50:0):9999};
+
+/* ---- Chords tab UI ---- */
+let bookTun=store.get('bookTun','std'),bookOpen=null;
+function setBookTun(t){bookTun=t;store.set('bookTun',t);[...$('chTun').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));renderBook()}
+$('chTun').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setBookTun(b.dataset.t)});
+function normQ(q){return q.trim().toLowerCase().replace(/\s+/g,'').replace(/sharp/g,'#').replace(/♯/g,'#').replace(/♭/g,'b').replace(/flat/g,'b').replace(/minor/g,'m').replace(/major/g,'maj')}
+function renderBook(){
+ if(bookOpen){renderChordDetail(bookOpen);return}
+ const b=bookGet(),q=normQ($('chSearch').value);let names=Object.keys(b).sort((x,y)=>ROOTORD(x)-ROOTORD(y));
+ const total=names.length;
+ if(q)names=names.filter(n=>n.toLowerCase().includes(q)||(q.length>=2&&canon(q.charAt(0).toUpperCase()+q.slice(1))===n));
+ const typed=q&&canon(q.charAt(0).toUpperCase()+q.slice(1));
+ let h='';
+ if(typed&&!b[typed])h+=`<button class="bookcard extra" data-n="${esc(typed)}">${diagram(voicings(typed,bookTun)[0]||null,typed)}<small>Not in your book yet · tap to see shapes</small></button>`;
+ h+=names.map(n=>{const v=voicings(n,bookTun)[0];return `<button class="bookcard" data-n="${esc(n)}">${v?diagram(v,n):diagram(null,n)}<small>${b[n].songs.length?b[n].songs.length+' song'+(b[n].songs.length>1?'s':''):'added by you'}</small></button>`}).join('');
+ $('chGrid').innerHTML=h||(total?'<p class="tip">No chords match. Try a root like “A” or a type like “sus2”.</p>':'<p class="tip">Chords from every song you analyse land here automatically. You can also search for any chord, like Am7 or G/B.</p>');
+ $('chCount').textContent=total?`${total} chord${total>1?'s':''} in your book${q?` · ${names.length} shown`:''}`:'';
+ $('chGrid').hidden=false;$('chDetail').hidden=true;$('chSearchRow').hidden=false;
+}
+function renderChordDetail(n){
+ const b=bookGet(),e=b[n],vs=voicings(n,bookTun);
+ let h=`<div class="editrow"><button class="btn ghost" id="chBack">← All chords</button></div><h2 class="chname">${esc(n)}</h2><p class="tunenotes">Notes: ${esc(chordNotes(n))} · ${esc(tName(bookTun))}</p>`;
+ if(e&&e.songs.length)h+=`<p class="tip">In: ${e.songs.map(s=>`<b dir="auto">${esc(s)}</b>`).join(', ')}</p>`;
+ h+=vs.length?`<div class="voices">${vs.map(v=>`<div class="voice">${diagram(v,n)}<small>${esc(v.label)}</small></div>`).join('')}</div>`:'<p class="tip">No comfortable shape found in this tuning.</p>';
+ h+=`<div class="editrow">${e?'<button class="btn ghost danger" id="chDel">Remove from my book</button>':'<button class="btn" id="chAdd">Add to my book</button>'}</div><div class="confirm" id="chDelOk" hidden><span>Remove ${esc(n)} from your chord book?</span><button class="btn danger" id="chDelYes">Remove</button><button class="btn ghost" id="chDelNo">Keep</button></div>`;
+ $('chDetail').innerHTML=h;$('chDetail').hidden=false;$('chGrid').hidden=true;$('chSearchRow').hidden=true;$('chCount').textContent='';
+ $('chBack').onclick=()=>{bookOpen=null;renderBook()};
+ const add=$('chAdd');if(add)add.onclick=()=>{bookAdd([n],'');renderChordDetail(n)};
+ const del=$('chDel');if(del){del.onclick=()=>{$('chDelOk').hidden=false};$('chDelNo').onclick=()=>{$('chDelOk').hidden=true};$('chDelYes').onclick=()=>{const bb=bookGet();delete bb[n];store.set(BOOKK,bb);bookOpen=null;renderBook()}}
+}
+$('chGrid').addEventListener('click',e=>{const c=e.target.closest('.bookcard');if(!c)return;bookOpen=c.dataset.n;renderBook();window.scrollTo({top:0})});
+$('chSearch').addEventListener('input',()=>renderBook());
+seedBook();
+
+setBookTun(bookTun);
 setTab(store.get('tab','tune'));
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
