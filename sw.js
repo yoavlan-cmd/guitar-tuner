@@ -1,5 +1,5 @@
 // Offline support for the tuner. Bump VERSION whenever index.html changes.
-const VERSION = 'tuner-v3';
+const VERSION = 'tuner-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
