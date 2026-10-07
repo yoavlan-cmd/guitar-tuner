@@ -215,6 +215,17 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .voice{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px}
 .voice svg{width:100%;height:auto}
 .voice small{font-size:11.5px;color:var(--muted);font-weight:600}
+.btn.cta{padding:15px;font-size:16px;background:var(--accent);color:var(--bg)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--ink)}
+.check input{margin-top:3px;accent-color:var(--accent)}
+.steps{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+.steps li.ok{color:var(--ink)} .steps li.ok::marker{color:var(--accent)}
+.steps li.now{color:var(--ink);font-weight:600}
+.done{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:10px 12px}
+.done>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.done b{color:var(--accent);font:600 15px var(--body)}
+.done b::before{content:"✓ "}
+.done span{font-size:13px;color:var(--ink)}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -311,10 +322,21 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <h2>My songs</h2>
       <div class="liblist" id="libList"></div>
     </section>
-    <div class="prog" id="prog" hidden><div class="pbar"><i id="progBar"></i></div><span id="progTxt">Reading the sound…</span></div>
+    <section class="card" id="readyCard" hidden>
+      <h2>Ready to analyse</h2>
+      <p class="tip" id="readyFile" dir="auto"></p>
+      <label class="tunepick">Tuning <select id="preTun"><option value="auto">Detect from the sound</option></select></label>
+      <label class="check" id="preReadWrap" hidden><input type="checkbox" id="preRead" checked> Also read the chords and tuning shown in the video (Claude)</label>
+      <p class="tip" id="readySaved" hidden></p>
+      <button class="btn wide cta" id="analyseBtn">Analyse chords</button>
+      <button class="btn ghost wide" id="openSaved" hidden>Open my saved analysis</button>
+      <button class="btn ghost wide" id="readyCancel">Choose a different video</button>
+    </section>
+    <div class="prog" id="prog" hidden><div class="pbar"><i id="progBar"></i></div><span id="progTxt">Reading the sound…</span><ol class="steps" id="steps"></ol></div>
     <p class="msg" id="songMsg" hidden></p>
 
     <div id="songView" class="songview" hidden>
+      <div class="done" id="doneBanner" role="status" hidden><div><b id="doneTitle">Analysis finished</b><span id="doneText"></span></div><button class="btn ghost" id="doneClose" aria-label="Dismiss">OK</button></div>
       <video id="vid" playsinline controls preload="metadata"></video>
       <div class="titlerow">
         <input id="songTitle" type="text" placeholder="Song – artist" aria-label="Song title">
@@ -805,25 +827,57 @@ $('vidIn').addEventListener('change',async e=>{
  songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(file);curFile=file;
  fileKey=(file.name+'|'+file.size).replace(/[^\w|.-]/g,'_');
  if(pendingLib){const ent=libGet(pendingLib);pendingLib=null;if(ent){A=expand(ent.data);A.libId=ent.id;saveSong();showSong(false);songMsg('Editing “'+ent.name+'”. Changes save to My songs automatically.');return}}
- const saved=loadSong(fileKey);
- if(saved){A=saved;showSong(true);return}
- $('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;prog(.03,'Reading the sound…');
+ showReady(file);
+});
+$('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+function showReady(file){
+ $('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
+ $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
+ const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
+ $('preReadWrap').hidden=!(sampleFn&&imgLimit>0&&/^video\//.test(file.type||'video/'));
+ if(saved){$('readySaved').hidden=false;$('openSaved').hidden=false;$('analyseBtn').textContent='Analyse again';
+  $('readySaved').innerHTML=`You analysed this video before${saved.at?' on '+fmtDate(saved.at):''} (${esc(tName(saved.tuning.id))}).`+(saved.v>=2?'':' <b>That was made with an older version of the app</b>, so analysing again should give better results.')}
+ else{$('readySaved').hidden=true;$('openSaved').hidden=true;$('analyseBtn').textContent='Analyse chords'}
+ window.scrollTo({top:0});
+}
+$('readyCancel').onclick=()=>{$('readyCard').hidden=true;showLanding()};
+$('openSaved').onclick=()=>{const saved=loadSong(fileKey);if(!saved)return;A=saved;$('readyCard').hidden=true;showSong(true)};
+$('doneClose').onclick=()=>{$('doneBanner').hidden=true};
+function setSteps(list,active){$('steps').innerHTML=list.map((t,i)=>`<li class="${i<active?'ok':i===active?'now':''}">${esc(t)}${i<active?' ✓':''}</li>`).join('')}
+$('analyseBtn').onclick=()=>runAnalysis(curFile);
+async function runAnalysis(file){
+ if(!file)return;const pre=$('preTun').value,wantRead=!$('preReadWrap').hidden&&$('preRead').checked;
+ const steps=['Read the sound','Find chords and tuning'].concat(wantRead?['Read chords shown in the video','Match the timeline to those chords']:[]);
+ $('readyCard').hidden=true;songMsg('');prog(.03,'Reading the sound…');setSteps(steps,0);
+ const t0=Date.now();
  try{
-  const x=await decodeFile(file);prog(.1);
+  const x=await decodeFile(file);prog(.1);setSteps(steps,1);
   const r=await analyse(x,prog);
-  const tuning=guessTuning(r.hist,r.segs);
-  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat};
-  let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c;
-  prog(1,'Done');saveSong();showSong(false);
+  let tuning=guessTuning(r.hist,r.segs),src='detected from the sound';
+  if(pre!=='auto'){tuning={id:pre,conf:'yours',why:'You chose this tuning before analysing.'};src='your choice'}
+  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,v:2,at:Date.now()};
+  if(pre==='auto'){let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c}
+  saveSong();showSong(false);$('doneBanner').hidden=true;
+  let chordSrc='detected from the sound',readNote='';
+  if(wantRead){$('songView').hidden=true;$('prog').hidden=false;setSteps(steps,2);prog(.95,'Claude is reading the chords on screen…');
+   const res=await readFromVideo({keepTuning:pre!=='auto'});
+   if(res.tuningSet)src='read from the video';
+   if(res.ok){setSteps(steps,4);chordSrc=`matched to the ${res.count} chords shown in the video`}else readNote=res.msg||'';
+   showSong(false);}
+  prog(1,'Done');$('prog').hidden=true;
+  const uniq=new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g)));
+  $('doneTitle').textContent='Chord analysis finished';
+  $('doneText').innerHTML=`${esc(tName(A.tuning.id))} (${esc(src)}) · ${uniq.size} chords, ${A.segs.length} changes, ${esc(chordSrc)} · took ${Math.round((Date.now()-t0)/1000)} s`+(readNote?`<br>${esc(readNote)}`:'')+(wantRead?'':'<br>Tip: if the video shows the chords, enter them under “Use the real chords” for a better timeline.');
+  $('doneBanner').hidden=false;window.scrollTo({top:0});
  }catch(err){
-  $('prog').hidden=true;showLanding();
+  $('prog').hidden=true;showReady(file);
   songMsg(err&&err.name==='EncodingError'||err&&/decode/i.test(err.message||'')?'This file’s sound couldn’t be read. Try an MP4 or M4A file.':'Something went wrong while analysing. The file may be too long or too large for this phone; try a shorter clip.');
  }
-});
+}
 function showSong(fromSave){
- $('prog').hidden=true;$('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
+ $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
- if(fromSave)songMsg('Loaded your saved analysis for this video.');
+ if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
  renderTuneCard();renderPlay();renderTimeline();renderChords();renderLinks();$('aiOut').innerHTML='';syncSong(true);
  $('knownIn').value=A.known||'';$('knownMsg').textContent='';$('undoFit').hidden=true;undoSegs=null;$('readVid').hidden=!(sampleFn&&imgLimit>0);
@@ -943,8 +997,9 @@ async function grabFrames(n){
   const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.82));if(blob)out.push({t,blob})}
  v.currentTime=was;return out;
 }
-$('readVid').onclick=async()=>{
- if(!sampleFn||!vid.videoWidth)return;const btn=$('readVid'),msg=$('knownMsg');btn.disabled=true;
+async function readFromVideo(opts={}){
+ if(!sampleFn||!vid.videoWidth)return {ok:false,msg:'Reading the video needs Claude and a video file.'};
+ const msg=$('knownMsg');
  try{
   msg.textContent='Taking pictures of the video…';const frames=await grabFrames(Math.max(2,Math.min(imgLimit,8)));
   msg.textContent='Claude is reading the chords on screen… this can take a minute.';
@@ -955,16 +1010,16 @@ Tuning ids: ${ids}.
 Reply with only JSON: {"tuning": one tuning id or null, "tuning_evidence": short string, "capo": number or null, "chords": [every distinct chord name exactly as written, in order of first appearance]}`;
   const r=await sampleFn.json(prompt,{images:frames.map(f=>f.blob)});
   const chords=Array.isArray(r&&r.chords)?r.chords.map(String).filter(x=>parseChord(x)):[];
-  let note=[];
-  if(r&&r.tuning&&TUNINGS.some(t=>t.id===r.tuning)&&r.tuning!==A.tuning.id){A.tuning={id:r.tuning,conf:'high',why:'Read from the video: '+String(r.tuning_evidence||'shown on screen')+'.'};A.play.tun=r.tuning;note.push('tuning set to '+tName(r.tuning))}
-  else if(r&&r.tuning===A.tuning.id)note.push('tuning confirmed as '+tName(r.tuning));
+  const note=[];let tuningSet=false;
+  if(!opts.keepTuning&&r&&r.tuning&&TUNINGS.some(t=>t.id===r.tuning)){if(r.tuning!==A.tuning.id||A.tuning.conf!=='high'){A.tuning={id:r.tuning,conf:'high',why:'Read from the video: '+String(r.tuning_evidence||'shown on screen')+'.'};A.play.tun=r.tuning;A.play.capo=0;tuningSet=true}note.push('tuning '+tName(r.tuning))}
   if(r&&Number.isInteger(r.capo)&&r.capo>=0&&r.capo<=7){A.play.capo=r.capo;if(r.capo)note.push('capo on fret '+r.capo)}
-  if(chords.length<2){saveSong();renderAll();msg.textContent='Claude couldn’t find chord names on screen'+(note.length?' ('+note.join(', ')+')':'')+'. Type them in instead.';return}
+  if(chords.length<2){saveSong();renderAll();const m='No chord names were found on screen'+(note.length?' ('+note.join(', ')+')':'')+'. Type them under “Use the real chords” if you know them.';msg.textContent=m;return {ok:false,tuningSet,msg:m}}
   $('knownIn').value=chords.join(' ');
-  await applyKnown(chords.join(' '),'read from the video'+(note.length?' ('+note.join(', ')+')':''));
- }catch(e){msg.textContent=e&&e.code==='not_granted'?'Claude’s help isn’t allowed on this page.':e&&e.code==='rate_limited'?'Too many requests right now. Try again in a little while.':'Couldn’t read the video this time. Try again, or type the chords in.'}
- finally{btn.disabled=false}
-};
+  const ok=await applyKnown(chords.join(' '),'read from the video'+(note.length?' ('+note.join(', ')+')':''));
+  return {ok,tuningSet,count:new Set(chords.map(canon)).size};
+ }catch(e){const m=e&&e.code==='not_granted'?'Claude’s help isn’t allowed on this page.':e&&e.code==='rate_limited'?'Too many requests right now; try “Read chords from the video” again later.':'Couldn’t read the video this time. Try “Read chords from the video” again, or type the chords in.';msg.textContent=m;return {ok:false,msg:m}}
+}
+$('readVid').onclick=async()=>{const btn=$('readVid');btn.disabled=true;try{const r=await readFromVideo({});if(r.ok){$('doneTitle').textContent='Chords read from the video';$('doneText').textContent=`${tName(A.tuning.id)} · ${r.count} chords · timeline redone`;$('doneBanner').hidden=false}}finally{btn.disabled=false}};
 $('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg('');$('vidIn').click()};
 $('songNotes').addEventListener('change',e=>{A.notes=e.target.value.trim();saveSong()});
 $('finish').onclick=()=>{vid.pause();A.notes=$('songNotes').value.trim();saveSong();showSheet()};
@@ -974,7 +1029,7 @@ $('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('c
 function renderLinks(){const t=(A&&A.title)||'';if(!t){$('links').innerHTML='<p class="tip">Type the song name above to get search links.</p>';return}
  const q=[['Acoustic',t+' acoustic'],['Unplugged / live',t+' unplugged live'],['Guitar lesson',t+' guitar lesson'],['Acoustic cover',t+' acoustic cover']];
  $('links').innerHTML=q.map(([l,s])=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(s)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}
-(async()=>{try{if(window.claude&&window.claude.use)sampleFn=await window.claude.use('sample')}catch(e){sampleFn=null}if(sampleFn){try{const lim=await sampleFn.limits();imgLimit=lim&&lim.images?lim.images.maxCount:0}catch(e){imgLimit=0}$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.'}})();
+(async()=>{try{if(window.claude&&window.claude.use)sampleFn=await window.claude.use('sample')}catch(e){sampleFn=null}if(sampleFn){try{const lim=await sampleFn.limits();imgLimit=lim&&lim.images?lim.images.maxCount:0}catch(e){imgLimit=0}if(!$('readyCard').hidden&&curFile)$('preReadWrap').hidden=!(imgLimit>0);$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.'}})();
 let aiCtl=null;
 $('aiAsk').onclick=async()=>{
  if(!sampleFn||!A)return;const out=$('aiOut'),btn=$('aiAsk');
@@ -1034,7 +1089,7 @@ function renderLib(){
   :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
 }
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
-function showLanding(){$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib()}
+function showLanding(){$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib()}
 
 /* ---- sheet content ---- */
 function printify(svg){
