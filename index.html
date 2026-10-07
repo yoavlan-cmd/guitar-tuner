@@ -19,6 +19,7 @@
 :root{
   --bg:#E8ECEA; --surface:#F7F9F8; --ink:#18201E; --muted:#5A6762; --line:#C8D1CD; --accent:#2B6A58;
   --screen:#111716; --screen-ink:#E6EFEB; --screen-dim:#56665F; --screen-line:#26302D;
+  --wood:#8A5328; --fretboard:#2B1D14; --fretwire:#C2AB82; --nut:#EFE8D8; --stringc:#D2CBBE;
   --paper:#FFFFFF; --paper-ink:#151A19; --paper-mute:#5D6964; --paper-line:#D5DCD9; --paper-note:#FFF3DC;
   --ok:#35D592; --flat:#FFB547; --sharp:#FF7A59;
   --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
@@ -53,7 +54,7 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02e
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .chip[aria-pressed="true"] small{color:inherit;opacity:.8}
 .screen{background:var(--screen);color:var(--screen-ink);border-radius:18px;padding:14px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--screen-line)}
-.screen svg{width:100%;max-width:340px;height:auto;display:block}
+.screen svg{width:100%;max-width:250px;height:auto;display:block}
 .tick{stroke:var(--screen-dim);stroke-width:2;stroke-linecap:round}
 .tick.major{stroke:var(--screen-ink);stroke-width:2.5}
 .zone{fill:none;stroke:var(--ok);stroke-width:8;opacity:.25}
@@ -62,14 +63,14 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02e
 .glyph{fill:var(--screen-dim);font:600 18px var(--body)}
 .screen.ok .needle,.screen.ok .hub{stroke:var(--ok);fill:var(--ok)}
 .screen.ok .zone{opacity:.7}
-.note{font-family:var(--display);font-weight:800;font-size:84px;line-height:.9;margin-top:-34px;display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
+.note{font-family:var(--display);font-weight:800;font-size:58px;line-height:.9;margin-top:4px;display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
 .note sub{font-size:26px;font-weight:600;color:var(--screen-dim);margin:44px 0 0 3px;vertical-align:baseline}
 .screen.ok .note{color:var(--ok)}
 .readout{display:flex;gap:18px;font-family:var(--mono);font-size:13px;color:var(--screen-dim);font-variant-numeric:tabular-nums}
 .readout b{color:var(--screen-ink);font-weight:500}
 .status{font:600 13px var(--body);letter-spacing:.14em;text-transform:uppercase;min-height:20px;margin-top:6px;color:var(--screen-dim)}
 .status.ok{color:var(--ok)} .status.flat{color:var(--flat)} .status.sharp{color:var(--sharp)}
-.strings{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.strings{display:block}
 .str{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:0}
 .str b{font-family:var(--display);font-weight:800;font-size:24px;line-height:1}
 .str span{font-family:var(--mono);font-size:10px;color:var(--muted)}
@@ -242,6 +243,60 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .live i{width:7px;height:7px;border-radius:50%;background:var(--sharp);animation:pulse 1.2s infinite}
 .screen.hold .needle,.screen.hold .note{opacity:.55}
 .screen.hold .status{opacity:.6}
+.headstock{width:100%;height:auto;display:block;overflow:visible}
+.hsbody{fill:var(--wood,#7A4A26)}
+.board{fill:var(--fretboard,#2B1D14)}
+.fret{stroke:var(--fretwire,#B9A27A);stroke-width:2}
+.nut{fill:var(--nut,#EFE8D8)}
+.sline{fill:none;stroke:var(--stringc,#C9C2B4);stroke-width:1.4;opacity:.75;transition:stroke .15s,stroke-width .15s}
+.sline.on{stroke:var(--accent);stroke-width:3;opacity:1}
+.strings[data-state=flat] .sline.on{stroke:var(--flat)}
+.strings[data-state=sharp] .sline.on{stroke:var(--sharp)}
+.strings[data-state=ok] .sline.on{stroke:var(--ok)}
+.str{cursor:pointer}
+.str .tab{fill:var(--surface);stroke:var(--line);stroke-width:1.2}
+.str .tabname{fill:var(--ink);font:800 17px var(--display)}
+.str .tabnum{fill:var(--muted);font:600 7.5px var(--mono)}
+.str .post{stroke:var(--line);stroke-width:2}
+.str .knob{fill:#C8CDD0;stroke:#7E868A;stroke-width:1.2}
+.str .knobhi{fill:#F4F6F7;opacity:.8}
+.str .okdot,.str .okmark{display:none}
+.str.done .okdot{display:block;fill:var(--ok)}
+.str.done .okmark{display:block;fill:none;stroke:#0B1A12;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.str.target .tab{stroke:var(--accent);stroke-width:2.2}
+.strings[data-state=flat] .str.target .tab{stroke:var(--flat)}
+.strings[data-state=sharp] .str.target .tab{stroke:var(--sharp)}
+.strings[data-state=ok] .str.target .tab{stroke:var(--ok)}
+.str.target .knob{stroke:var(--accent);stroke-width:2.4}
+.strings[data-state=flat] .str.target .knob{stroke:var(--flat)}
+.strings[data-state=sharp] .str.target .knob{stroke:var(--sharp)}
+.strings[data-state=ok] .str.target .knob{stroke:var(--ok)}
+.str.locked .tab{fill:var(--accent);stroke:var(--accent)}
+.str.locked .tabname,.str.locked .tabnum{fill:var(--bg)}
+.str .turn{fill:var(--ink);font:600 9px var(--body)}
+.str:focus-visible .tab{stroke:var(--accent);stroke-width:3}
+.settings{border-top:1px solid var(--line);padding-top:4px}
+.settings summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font:600 13px var(--body);color:var(--muted);padding:10px 2px;letter-spacing:.04em}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary::after{content:"＋";font-weight:400}
+.settings[open] summary::after{content:"−"}
+.settings[open]{display:flex;flex-direction:column;gap:14px;padding-bottom:6px}
+.setrow{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.setrow.inline{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.setrow.inline .label{flex:1;min-width:0}
+.listen{width:100%}
+.screen .status{font-size:15px;letter-spacing:.1em;margin-top:4px}
+.screen{padding-bottom:20px}
+/* compact phone layout so Listen fits without scrolling */
+.wrap{gap:10px}
+h1{font-size:23px}
+.logo{width:36px;height:36px;border-radius:9px}
+.tabs button{padding:8px}
+.screen{padding:10px 12px 12px}
+.screen .status{font-size:13.5px;margin-top:2px;min-height:18px}
+.note sub{font-size:20px;margin-top:30px}
+.headstock{max-width:330px;margin:0 auto}
+.listen{padding:13px}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -251,11 +306,6 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="wrap">
   <header>
     <div class="brand"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><defs><radialGradient id="lg-bg" cx="50%" cy="38%" r="75%"><stop offset="0" stop-color="#2A1A14"/><stop offset=".6" stop-color="#15100E"/><stop offset="1" stop-color="#0B0908"/></radialGradient><linearGradient id="lg-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3B54A"/><stop offset=".55" stop-color="#D9822C"/><stop offset="1" stop-color="#9C4A1A"/></linearGradient><linearGradient id="lg-flameL" x1=".8" y1="1" x2=".1" y2="0"><stop offset="0" stop-color="#C81E12"/><stop offset=".45" stop-color="#F2551B"/><stop offset=".8" stop-color="#FFA526"/><stop offset="1" stop-color="#FFE07A"/></linearGradient><linearGradient id="lg-flameR" x1=".2" y1="1" x2=".9" y2="0"><stop offset="0" stop-color="#C81E12"/><stop offset=".45" stop-color="#F2551B"/><stop offset=".8" stop-color="#FFA526"/><stop offset="1" stop-color="#FFE07A"/></linearGradient><linearGradient id="lg-core" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF8A1F"/><stop offset="1" stop-color="#FFF1B0"/></linearGradient><linearGradient id="lg-neck" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3B2416"/><stop offset=".5" stop-color="#5A3820"/><stop offset="1" stop-color="#3B2416"/></linearGradient></defs><rect width="512" height="512" fill="url(#lg-bg)"/><g transform="translate(256 262) scale(1.0) translate(-256 -262)"><path d="M244 214 C 222 176, 186 160, 170 124 C 158 98, 166 70, 150 40 C 186 58, 196 86, 198 110 C 206 92, 222 82, 226 60 C 240 92, 232 118, 240 138 C 248 156, 262 172, 262 214 Z" fill="url(#lg-flameL)"/><path d="M268 214 C 290 176, 326 160, 342 124 C 354 98, 346 70, 362 40 C 326 58, 316 86, 314 110 C 306 92, 290 82, 286 60 C 272 92, 280 118, 272 138 C 264 156, 250 172, 250 214 Z" fill="url(#lg-flameR)"/><path d="M256 222 C 240 200, 242 178, 256 150 C 270 178, 272 200, 256 222 Z" fill="url(#lg-core)"/><rect x="241" y="200" width="30" height="104" rx="4" fill="url(#lg-neck)"/><g stroke="#C9A36A" stroke-width="2.5" opacity=".9"><line x1="241" y1="222" x2="271" y2="222"/><line x1="241" y1="244" x2="271" y2="244"/><line x1="241" y1="264" x2="271" y2="264"/><line x1="241" y1="282" x2="271" y2="282"/></g><path d="M256 284 C 214 284, 186 302, 186 336 C 186 352, 196 362, 196 372 C 196 384, 166 394, 166 428 C 166 470, 210 488, 256 488 C 302 488, 346 470, 346 428 C 346 394, 316 384, 316 372 C 316 362, 326 352, 326 336 C 326 302, 298 284, 256 284 Z" fill="url(#lg-wood)"/><path d="M256 284 C 214 284, 186 302, 186 336 C 186 352, 196 362, 196 372 C 196 384, 166 394, 166 428 C 166 470, 210 488, 256 488 C 302 488, 346 470, 346 428 C 346 394, 316 384, 316 372 C 316 362, 326 352, 326 336 C 326 302, 298 284, 256 284 Z" fill="none" stroke="#5E2A0E" stroke-width="5"/><circle cx="256" cy="372" r="30" fill="#1A0E08"/><circle cx="256" cy="372" r="36" fill="none" stroke="#7A3A14" stroke-width="4"/><rect x="226" y="438" width="60" height="12" rx="4" fill="#3B2416"/><g stroke="#F6E6C4" stroke-width="1.6" opacity=".85"><line x1="248" y1="444" x2="248" y2="204"/><line x1="253.5" y1="444" x2="253.5" y2="204"/><line x1="258.5" y1="444" x2="258.5" y2="204"/><line x1="264" y1="444" x2="264" y2="204"/></g></g></svg><h1>Six-String Tuner</h1></div>
-    <div class="cal" aria-label="Reference pitch">
-      <button id="calDown" aria-label="Lower A4">−</button>
-      <output id="calOut">A4 440</output>
-      <button id="calUp" aria-label="Raise A4">+</button>
-    </div>
   </header>
 
   <nav class="tabs" id="tabs">
@@ -265,18 +315,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </nav>
 
   <div class="pane" id="paneTune">
-  <div class="row">
-    <span class="label">Guitar</span>
-    <div class="seg" id="inst">
-      <button data-inst="acoustic" aria-pressed="true">Acoustic</button>
-      <button data-inst="electric" aria-pressed="false">Electric</button>
-    </div>
-  </div>
-
-  <div class="row">
-    <span class="label">Tuning</span>
-    <div class="chips" id="tunings"></div>
-  </div>
+  <div class="chips" id="tunings" aria-label="Tuning"></div>
 
   <section class="screen" id="screen" aria-live="polite">
     <svg viewBox="0 0 320 172" aria-hidden="true">
@@ -288,32 +327,38 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <circle class="hub" cx="160" cy="160" r="6"></circle>
     </svg>
     <div class="note" id="note">E<sub>2</sub></div>
-    <div class="readout"><span>Hz <b id="hz">—</b></span><span>Target <b id="tgt">82.41</b></span><span>Cents <b id="cents">—</b></span></div>
-    <div class="status" id="status">Tap Listen or a string</div>
+    <div class="status" id="status">Tap Listen to start</div>
     <span class="live" id="live" hidden><i></i>Live</span>
-    <div class="meter" aria-hidden="true"><i id="lvl"></i><s id="gate"></s></div>
+    <div hidden><b id="hz">—</b><b id="tgt">82.41</b><b id="cents">—</b><div class="meter"><i id="lvl"></i><s id="gate"></s></div></div>
   </section>
 
-  <div class="row">
-    <span class="label">Noise filter</span>
-    <div class="seg seg3" id="nf">
-      <button data-nf="normal" aria-pressed="false">Normal</button>
-      <button data-nf="strong" aria-pressed="false">Strong</button>
-      <button data-nf="max" aria-pressed="false">Noisy room</button>
-    </div>
-  </div>
+  <div class="strings" id="strings" aria-label="Strings — tap a peg to hear it, tap again to lock"></div>
 
-  <div class="row">
-    <span class="label">Strings · low to high · tap to hear, tap again to lock</span>
-    <div class="strings" id="strings"></div>
-  </div>
-
-  <div class="actions">
-    <button class="listen" id="listen"><span class="dot"></span><span id="listenTxt">Listen</span></button>
-    <button class="repeat" id="repeat" aria-pressed="false">Repeat tone</button>
-  </div>
+  <button class="listen" id="listen"><span class="dot"></span><span id="listenTxt">Listen</span></button>
   <p class="msg" id="msg" hidden></p>
-  <p class="hint">Listening picks the closest string automatically. Lock a string to tune that one only. If noise moves the needle, switch the filter to Noisy room.</p>
+
+  <details class="settings" id="tuneSettings">
+    <summary>Settings</summary>
+    <div class="setrow"><span class="label">Guitar</span>
+      <div class="seg" id="inst">
+        <button data-inst="acoustic" aria-pressed="true">Acoustic</button>
+        <button data-inst="electric" aria-pressed="false">Electric</button>
+      </div></div>
+    <div class="setrow"><span class="label">Noise filter</span>
+      <div class="seg seg3" id="nf">
+        <button data-nf="normal" aria-pressed="false">Normal</button>
+        <button data-nf="strong" aria-pressed="false">Strong</button>
+        <button data-nf="max" aria-pressed="false">Noisy room</button>
+      </div></div>
+    <div class="setrow inline"><span class="label">Reference pitch</span>
+      <div class="cal">
+        <button id="calDown" aria-label="Lower A4">−</button>
+        <output id="calOut">A4 440</output>
+        <button id="calUp" aria-label="Raise A4">+</button>
+      </div></div>
+    <div class="setrow inline"><span class="label">Reference note</span>
+      <button class="repeat" id="repeat" aria-pressed="false">Repeat tone</button></div>
+  </details>
   </div>
 
   <div class="pane" id="paneChords" hidden>
@@ -510,9 +555,37 @@ function drawNeedle(){needleNow+= (needleGoal-needleNow)*0.25;$('needle').setAtt
 function renderTunings(){
  $('tunings').innerHTML=TUNINGS.map(t=>`<button class="chip" data-id="${t.id}" aria-pressed="${t===tuning}">${t.name}<small>${shortName(t)}</small></button>`).join('');
 }
+/* headstock: 3 pegs per side, strings fan to the nut; i=0 is the low string (string 6) */
+const HS={top:[3,4,5].map((k,j)=>({str:k,x:62+j*62})),bot:[2,1,0].map((k,j)=>({str:k,x:62+j*62}))};
+const NUTY=[47,55,63,79,87,95];// y at the nut for string 1..6
 function renderStrings(){
- $('strings').innerHTML=tuning.n.map((m,i)=>`<button class="str${i===target?' target':''}${i===locked?' locked':''}${done.has(i)?' done':''}" data-i="${i}" aria-label="String ${6-i}, ${nm(m)}${oc(m)}"><b>${nm(m)}</b><span>${6-i} · ${oc(m)}</span></button>`).join('');
+ const items=[];
+ const peg=(i,x,top)=>{const m=tuning.n[i],sn=6-i,py=top?40:102,ly=top?6:118,cls=`str${i===target?' target':''}${i===locked?' locked':''}${done.has(i)?' done':''}`;
+  return `<g class="${cls}" data-i="${i}" role="button" tabindex="0" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}">
+   <rect class="tab" x="${x-21}" y="${ly}" width="42" height="26" rx="9"/>
+   <text class="tabname" x="${x}" y="${ly+18}" text-anchor="middle">${nm(m)}</text>
+   <text class="tabnum" x="${x+15}" y="${ly+10}" text-anchor="middle">${sn}</text>
+   <line class="post" x1="${x}" y1="${top?ly+26:py}" x2="${x}" y2="${top?py:ly}"/>
+   <circle class="knob" cx="${x}" cy="${py}" r="11"/><circle class="knobhi" cx="${x-3}" cy="${py-3}" r="3.5"/>
+   <circle class="okdot" cx="${x+17}" cy="${top?ly+24:ly+2}" r="7"/><path class="okmark" d="M${x+13.5} ${top?ly+24:ly+2} l2.5 2.5 l4.5 -5"/>
+   <text class="turn" x="${x}" y="${top?py+28:py-18}" text-anchor="middle"></text></g>`};
+ const strLine=(i,x,top)=>{const py=top?40:102,ny=NUTY[5-i];return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${x} ${py} L292 ${ny} L360 ${ny}"/>`};
+ const all=[...HS.top.map(o=>({...o,top:true})),...HS.bot.map(o=>({...o,top:false}))];
+ $('strings').innerHTML=`<svg class="headstock" viewBox="0 0 360 150" role="group" aria-label="Guitar headstock — tap a peg to hear its note">
+  <path class="hsbody" d="M18 71 C18 46 30 36 52 34 L252 40 Q270 42 290 46 L290 104 Q270 108 252 110 L52 116 C30 114 18 104 18 79 Z"/>
+  <rect class="board" x="296" y="44" width="64" height="62"/><line class="fret" x1="332" y1="44" x2="332" y2="106"/>
+  <rect class="nut" x="290" y="43" width="6" height="64" rx="1.5"/>
+  ${all.map(o=>strLine(o.str,o.x,o.top)).join('')}
+  ${all.map(o=>peg(o.str,o.x,o.top)).join('')}
+ </svg>`;
+ setHeadState($('strings').dataset.state||'');
 }
+function setHeadState(state,cents){
+ const el=$('strings');el.dataset.state=state||'';
+ el.querySelectorAll('.turn').forEach(t=>t.textContent='');
+ const tg=el.querySelector('.str.target .turn');if(tg&&(state==='flat'||state==='sharp'))tg.textContent=state==='flat'?'↻ tighten':'↺ loosen';
+}
+$('strings').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('.str')){e.preventDefault();e.target.closest('.str').dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
 function showTarget(){
  const m=tuning.n[target];$('note').innerHTML=`${nm(m)}<sub>${oc(m)}</sub>`;$('tgt').textContent=fq(m).toFixed(2);
 }
@@ -585,7 +658,7 @@ function meter(rms,gate){
 function idle(now){
  if(now-lastHeard<700)return;
  hist=[];needleGoal=0;$('screen').classList.remove('ok');$('hz').textContent='—';$('cents').textContent='—';okSince=0;
- const st=$('status');st.className='status';st.textContent=`Listening… play string ${6-target} (${nm(tuning.n[target])})`;showTarget();
+ const st=$('status');st.className='status';st.textContent=`Play string ${6-target}`;showTarget();
 }
 let holdUntil=0,lastCents=null;
 function loop(){
@@ -614,15 +687,16 @@ function loop(){
   $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
   $('cents').textContent=(cents>0?'+':'')+cents.toFixed(0);needleGoal=Math.max(-50,Math.min(50,cents));
   const ok=Math.abs(cents)<=4;$('screen').classList.toggle('ok',ok);$('screen').classList.remove('hold');
-  if(ok){st.className='status ok';st.textContent=`In tune ✓ · string ${6-i} (${nm(m)})`;if(!okSince)okSince=now;if(now-okSince>600&&!done.has(i)){done.add(i);renderStrings()}}
+  setHeadState(ok?'ok':cents<0?'flat':'sharp');
+  if(ok){st.className='status ok';st.textContent='In tune ✓';if(!okSince)okSince=now;if(now-okSince>600&&!done.has(i)){done.add(i);renderStrings()}}
   else{okSince=0;const c=Math.abs(Math.round(cents)),far=Math.abs(cents)>50;st.className='status '+(cents<0?'flat':'sharp');
-   st.textContent=cents<0?`${far?'Way too low':c+' cents low'} · tighten ↑ string ${6-i}`:`${far?'Way too high':c+' cents high'} · loosen ↓ string ${6-i}`}
+   st.textContent=cents<0?(far?'Way too low · tune up ↑':`Tune up ↑ · ${c}¢`):(far?'Way too high · tune down ↓':`Tune down ↓ · ${c}¢`)}
  }else if(now<holdUntil){
   // keep the last reading on screen briefly after the note fades, like a clip-on tuner
   $('screen').classList.add('hold');
  }else{
-  lastCents=null;$('screen').classList.remove('hold');
-  if(rms>=gate&&r){st.className='status';st.textContent='Hearing sound… pluck one string and let it ring'}
+  lastCents=null;$('screen').classList.remove('hold');setHeadState('');
+  if(rms>=gate&&r){st.className='status';st.textContent='Pluck one string'}
   else idle(now);
  }
  drawNeedle();
@@ -643,8 +717,8 @@ async function startListening(){
   msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open the tuner link in Chrome to tune with the mic.';
  }
 }
-function stopListening(){listening=false;$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
- $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent='Tap Listen or a string';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
+function stopListening(){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
+ $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent='Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
 $('listen').onclick=()=>listening?stopListening():startListening();
 
 /* ================= Learn a song ================= */
