@@ -631,14 +631,14 @@ $('listen').onclick=()=>listening?stopListening():startListening();
 /* ================= Learn a song ================= */
 const CH=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const TYPES=[
- {id:'',label:'major',iv:[0,4,7],w:[1,1,1],prior:.06},
- {id:'m',label:'minor',iv:[0,3,7],w:[1,1,1],prior:.06},
- {id:'7',label:'7',iv:[0,4,7,10],w:[1,1,1,.7],prior:-.01},
- {id:'m7',label:'m7',iv:[0,3,7,10],w:[1,1,1,.7],prior:-.01},
+ {id:'',label:'major',iv:[0,4,7],w:[1,1,1],prior:.02},
+ {id:'m',label:'minor',iv:[0,3,7],w:[1,1,1],prior:0},
+ {id:'7',label:'7',iv:[0,4,7,10],w:[1,1,1,.7],prior:-.03},
+ {id:'m7',label:'m7',iv:[0,3,7,10],w:[1,1,1,.7],prior:-.03},
  {id:'maj7',label:'maj7',iv:[0,4,7,11],w:[1,1,1,.7],prior:-.05},
- {id:'sus2',label:'sus2',iv:[0,2,7],w:[1,1,1],prior:-.03},
- {id:'sus4',label:'sus4',iv:[0,5,7],w:[1,1,1],prior:-.03},
- {id:'add9',label:'add9',iv:[0,2,4,7],w:[1,.6,1,1],prior:-.04},
+ {id:'sus2',label:'sus2',iv:[0,2,7],w:[1,1,1],prior:.02},
+ {id:'sus4',label:'sus4',iv:[0,5,7],w:[1,1,1],prior:-.01},
+ {id:'add9',label:'add9',iv:[0,2,4,7],w:[1,.6,1,1],prior:.02},
 ];
 const NT=TYPES.length,NS=12*NT;
 const TPL=[];for(let r=0;r<12;r++)for(const t of TYPES){const v=new Float32Array(12);t.iv.forEach((iv,j)=>v[(r+iv)%12]=t.w[j]);const n=Math.hypot(...v);TPL.push(v.map(x=>x/n))}
@@ -734,11 +734,12 @@ function diagram(sh,label){
 }
 
 /* ---- audio analysis ---- */
-const SR=11025,FN=8192,HOP=2048;
-let fCos,fSin,fRev;
-function fftInit(n){fCos=new Float64Array(n/2);fSin=new Float64Array(n/2);for(let i=0;i<n/2;i++){fCos[i]=Math.cos(2*Math.PI*i/n);fSin[i]=-Math.sin(2*Math.PI*i/n)}fRev=new Uint32Array(n);const bits=Math.log2(n);for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}fRev[i]=r}}
-function fft(re,im){const n=re.length;for(let i=0;i<n;i++){const j=fRev[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
- for(let size=2;size<=n;size<<=1){const half=size>>1,step=n/size;for(let i=0;i<n;i+=size)for(let j=0,k=0;j<half;j++,k+=step){const a=i+j,b=a+half,c=fCos[k],d=fSin[k],tr=re[b]*c-im[b]*d,ti=re[b]*d+im[b]*c;re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}}
+const SR=11025,FN=8192,FNC=4096,HOP=1024;
+const TUNE={P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85};
+function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
+ for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
+ return (re,im)=>{for(let i=0;i<n;i++){const j=rv[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+  for(let size=2;size<=n;size<<=1){const half=size>>1,step=n/size;for(let i=0;i<n;i+=size)for(let j=0,k=0;j<half;j++,k+=step){const a=i+j,b=a+half,c=cs[k],d=sn[k],tr=re[b]*c-im[b]*d,ti=re[b]*d+im[b]*c;re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti}}}}
 const tick=()=>new Promise(r=>setTimeout(r,0));
 async function decodeFile(file){
  const ab=await file.arrayBuffer();const c=getCtx();
@@ -747,46 +748,70 @@ async function decodeFile(file){
  const r=await off.startRendering();return r.getChannelData(0);
 }
 async function analyse(x,prog){
- if(!fCos)fftInit(FN);
- const hann=new Float64Array(FN);for(let i=0;i<FN;i++)hann[i]=.5-.5*Math.cos(2*Math.PI*i/(FN-1));
- const re=new Float64Array(FN),im=new Float64Array(FN),mag=new Float64Array(FN/2),binHz=SR/FN;
- const nF=Math.max(1,Math.floor((x.length-FN)/HOP)+1);
- const frame=f=>{const st=f*HOP;let e=0;for(let i=0;i<FN;i++){const v=x[st+i]||0;re[i]=v*hann[i];im[i]=0;e+=v*v}fft(re,im);for(let k=0;k<FN/2;k++)mag[k]=Math.hypot(re[k],im[k]);return Math.sqrt(e/FN)};
- // pass 1: how far the recording sits from A440
- let sx=0,sy=0;const k0=Math.ceil(80/binHz),k1=Math.floor(1000/binHz);
- for(let f=0;f<nF;f+=3){frame(f);let mx=0;for(let k=k0;k<=k1;k++)if(mag[k]>mx)mx=mag[k];
-  if(mx>0)for(let k=k0;k<=k1;k++){const m=mag[k];if(m>.15*mx&&m>mag[k-1]&&m>=mag[k+1]){const a=mag[k-1],c=mag[k+1],den=a-2*m+c,d=den?.5*(a-c)/den:0;const cents=1200*Math.log2((k+d)*binHz/440),ang=2*Math.PI*cents/100;sx+=m*Math.cos(ang);sy+=m*Math.sin(ang)}}
-  if(f%45===0){prog(.12+.18*f/nF,'Checking the pitch…');await tick()}}
+ const fB=makeFFT(FN),fC=makeFFT(FNC);
+ const hB=new Float64Array(FN),hC=new Float64Array(FNC);for(let i=0;i<FN;i++)hB[i]=.5-.5*Math.cos(2*Math.PI*i/(FN-1));for(let i=0;i<FNC;i++)hC[i]=.5-.5*Math.cos(2*Math.PI*i/(FNC-1));
+ const reB=new Float64Array(FN),imB=new Float64Array(FN),mB=new Float64Array(FN/2),reC=new Float64Array(FNC),imC=new Float64Array(FNC),mC=new Float64Array(FNC/2);
+ const hzB=SR/FN,hzC=SR/FNC,nF=Math.max(1,Math.floor((x.length-FN)/HOP)+1),offC=(FN-FNC)/2;
+ const frameB=f=>{const st=f*HOP;let e=0;for(let i=0;i<FN;i++){const v=x[st+i]||0;reB[i]=v*hB[i];imB[i]=0;e+=v*v}fB(reB,imB);for(let k=0;k<FN/2;k++)mB[k]=Math.hypot(reB[k],imB[k]);return Math.sqrt(e/FN)};
+ const frameC=f=>{const st=f*HOP+offC;for(let i=0;i<FNC;i++){reC[i]=(x[st+i]||0)*hC[i];imC[i]=0}fC(reC,imC);for(let k=0;k<FNC/2;k++)mC[k]=Math.hypot(reC[k],imC[k])};
+ // 1. how far the recording sits from A440
+ let sx=0,sy=0;const k0=Math.ceil(80/hzB),k1=Math.floor(1000/hzB);
+ for(let f=0;f<nF;f+=6){frameB(f);let mx=0;for(let k=k0;k<=k1;k++)if(mB[k]>mx)mx=mB[k];
+  if(mx>0)for(let k=k0;k<=k1;k++){const m=mB[k];if(m>.15*mx&&m>mB[k-1]&&m>=mB[k+1]){const a=mB[k-1],c=mB[k+1],den=a-2*m+c,d=den?.5*(a-c)/den:0;const cents=1200*Math.log2((k+d)*hzB/440),ang=2*Math.PI*cents/100;sx+=m*Math.cos(ang);sy+=m*Math.sin(ang)}}
+  if(f%90===0){prog(.12+.13*f/nF,'Checking the pitch…');await tick()}}
  const offset=Math.atan2(sy,sx)/(2*Math.PI)*100,ref=440*Math.pow(2,offset/1200);
- // pass 2: chroma + bass
- const kLo=Math.ceil(50/binHz),kHi=Math.floor(1050/binHz);
- const pcOf=new Int8Array(FN/2),miOf=new Int8Array(FN/2),wOf=new Float32Array(FN/2);
- for(let k=kLo;k<=kHi;k++){const m=69+12*Math.log2(k*binHz/ref),r=Math.round(m);pcOf[k]=((r%12)+12)%12;miOf[k]=r;wOf[k]=Math.cos(Math.PI*(m-r))**2}
+ const maps=(n,hz,lo,hi)=>{const pc=new Int8Array(n/2),mi=new Int8Array(n/2),w=new Float32Array(n/2),k0=Math.ceil(lo/hz),k1=Math.floor(hi/hz);for(let k=k0;k<=k1;k++){const m=69+12*Math.log2(k*hz/ref),r=Math.round(m);pc[k]=((r%12)+12)%12;mi[k]=r;w[k]=Math.cos(Math.PI*(m-r))**2}return {pc,mi,w,k0,k1}};
+ const MB=maps(FN,hzB,50,262),MC=maps(FNC,hzC,110,1050);
+ // 2. treble chroma (short window, follows quick changes) + bass chroma (long window, resolves low notes)
  const chroma=new Array(nF),bass=new Array(nF),rms=new Float32Array(nF),bh=new Array(nF);
- for(let f=0;f<nF;f++){rms[f]=frame(f);const c=new Float32Array(12),b=new Float32Array(12),h=new Float32Array(64);
-  for(let k=kLo;k<=kHi;k++){const hz=k*binHz,v=Math.sqrt(mag[k])*wOf[k];if(hz>=110)c[pcOf[k]]+=v;if(hz<260){b[pcOf[k]]+=v;const mi=miOf[k];if(mi>=30&&mi<64)h[mi]+=v}}
-  chroma[f]=c;bass[f]=b;bh[f]=h;if(f%40===0){prog(.3+.45*f/nF,'Finding the chords…');await tick()}}
+ for(let f=0;f<nF;f++){rms[f]=frameB(f);const b=new Float32Array(12),h=new Float32Array(64);
+  for(let k=MB.k0;k<=MB.k1;k++){const v=Math.sqrt(mB[k])*MB.w[k];b[MB.pc[k]]+=v;const mi=MB.mi[k];if(mi>=30&&mi<64)h[mi]+=v}
+  frameC(f);const c=new Float32Array(12);for(let k=MC.k0;k<=MC.k1;k++)c[MC.pc[k]]+=Math.sqrt(mC[k])*MC.w[k];
+  chroma[f]=c;bass[f]=b;bh[f]=h;if(f%80===0){prog(.25+.45*f/nF,'Finding the chords…');await tick()}}
  const sorted=[...rms].sort((a,b)=>a-b),thr=.12*(sorted[Math.floor(sorted.length*.9)]||0);
- // lowest-note histogram (loud frames only)
  const hist=new Float64Array(64);for(let f=0;f<nF;f++){if(rms[f]<thr)continue;let t=0;for(let m=30;m<64;m++)t+=bh[f][m];if(t>0)for(let m=30;m<64;m++)hist[m]+=bh[f][m]/t}
- // chords: Viterbi over 12 roots × types + no-chord
- const S=NS+1,P=.9;let score=new Float64Array(S);const back=new Array(nF),em=new Float64Array(S);
- for(let f=0;f<nF;f++){
-  const silent=rms[f]<thr,c=chroma[f],b=bass[f];const cn=Math.hypot(...c)||1,bm=Math.max(...b)||1;
-  for(let s=0;s<NS;s++){if(silent){em[s]=0;continue}const T=TPL[s];let d=0;for(let i=0;i<12;i++)d+=T[i]*c[i];em[s]=d/cn+TYPES[s%NT].prior+.12*b[Math.floor(s/NT)]/bm}
-  em[NS]=silent?1:.3;
-  let best=-Infinity,bi=0;for(let s=0;s<S;s++)if(score[s]>best){best=score[s];bi=s}
-  const bp=new Uint8Array(S),ns=new Float64Array(S);
-  for(let s=0;s<S;s++){const stay=score[s],sw=best-P;if(f===0||stay>=sw){ns[s]=stay+em[s];bp[s]=s}else{ns[s]=sw+em[s];bp[s]=bi}}
-  score=ns;back[f]=bp;if(f%80===0){prog(.75+.15*f/nF,'Lining up the changes…');await tick()}}
- let st=0;for(let s=1;s<S;s++)if(score[s]>score[st])st=s;
- const path=new Uint8Array(nF);for(let f=nF-1;f>=0;f--){path[f]=st;st=back[f][st]}
- const dur=x.length/SR,ft=f=>Math.max(0,(f*HOP+(FN-HOP)/2)/SR);
- let segs=[];for(let f=0;f<nF;f++){const c=path[f];if(segs.length&&segs[segs.length-1].c===c)continue;if(segs.length)segs[segs.length-1].t1=ft(f);segs.push({t0:ft(f),t1:dur,c})}
- if(segs.length)segs[0].t0=0;segs=cleanSegs(segs);
+ // notes that sound through most of the song (ringing open strings) — they shouldn't decide chord extras or slash basses
+ const drone=new Float32Array(12),droneB=new Float32Array(12);{let cnt=0;for(let f=0;f<nF;f++){if(rms[f]<thr)continue;cnt++;const c=chroma[f],cm=Math.max(...c)||1,b=bass[f],bm=Math.max(...b)||1;for(let i=0;i<12;i++){if(c[i]/cm>.55)drone[i]++;if(b[i]/bm>.6)droneB[i]++}}
+  for(let i=0;i<12;i++){drone[i]=cnt?drone[i]/cnt:0;droneB[i]=cnt?droneB[i]/cnt:0}}
+ const isDrone=i=>drone[i]>.7,isDroneB=i=>droneB[i]>.55;
+ for(let f=0;f<nF;f++){const c=chroma[f];for(let i=0;i<12;i++)if(isDrone(i))c[i]*=.55}
+ // emissions: chord shape match + bass support from any chord tone (so inversions like G/B still score)
+ const TONES=[];for(let s=0;s<NS;s++){const r=Math.floor(s/NT),t=TYPES[s%NT];TONES.push(t.iv.map((iv,j)=>[(r+iv)%12,j===0?1:TUNE.inv]))}
+ const EM=new Float32Array(nF*(NS+1));
+ for(let f=0;f<nF;f++){const sil=rms[f]<thr,c=chroma[f],b=bass[f],cn=Math.hypot(...c)||1,bm=Math.max(...b)||1,o=f*(NS+1);
+  for(let s=0;s<NS;s++){if(sil){EM[o+s]=0;continue}const T=TPL[s];let d=0;for(let i=0;i<12;i++)d+=T[i]*c[i];let bt=0;for(const [pc,w] of TONES[s]){const v=w*b[pc]/bm;if(v>bt)bt=v}EM[o+s]=d/cn+TYPES[s%NT].prior+TUNE.bassW*bt}
+  EM[o+NS]=sil?1:.3}
+ const viterbi=(allowed,P)=>{const S=NS+1,ok=new Uint8Array(S);allowed.forEach(s=>ok[s]=1);ok[NS]=1;let score=new Float64Array(S).fill(-1e9);for(let s=0;s<S;s++)if(ok[s])score[s]=0;const back=new Array(nF);
+  for(let f=0;f<nF;f++){let best=-Infinity,bi=0;for(let s=0;s<S;s++)if(ok[s]&&score[s]>best){best=score[s];bi=s}const bp=new Uint8Array(S),ns=new Float64Array(S).fill(-1e9),o=f*S;
+   for(let s=0;s<S;s++){if(!ok[s])continue;const stay=score[s],sw=best-P;if(f===0||stay>=sw){ns[s]=stay+EM[o+s];bp[s]=s}else{ns[s]=sw+EM[o+s];bp[s]=bi}}score=ns;back[f]=bp}
+  let st=0;for(let s=1;s<S;s++)if(score[s]>score[st])st=s;const path=new Uint8Array(nF);for(let f=nF-1;f>=0;f--){path[f]=st;st=back[f][st]}return path};
+ prog(.72,'Lining up the changes…');await tick();
+ // 3. first pass over every chord type, then a second pass limited to the chords this song really uses
+ const all=[...Array(NS).keys()],p1=viterbi(all,TUNE.P1),dur1=new Float64Array(NS);let tot=0;for(let f=0;f<nF;f++)if(p1[f]<NS){dur1[p1[f]]++;tot++}
+ const ranked=all.filter(s=>dur1[s]>0).sort((a,b)=>dur1[b]-dur1[a]);const vocab=[];let cum=0;
+ for(const s of ranked){if(vocab.length>=2&&(cum/tot>=TUNE.vocabCum||dur1[s]/tot<TUNE.vocabMin))break;vocab.push(s);cum+=dur1[s];if(vocab.length>=12)break}
+ await tick();const path=viterbi(vocab.length>=2?vocab:all,TUNE.P2);
+ // 4. bass line on its own, to spot slash chords (G/B, D/F#…)
+ const BS=13,bp=new Array(nF);{let score=new Float64Array(BS);for(let f=0;f<nF;f++){const sil=rms[f]<thr,b=bass[f],bm=Math.max(...b)||1,em=new Float64Array(BS);for(let i=0;i<12;i++)em[i]=sil?0:b[i]/bm;em[12]=sil?1:.4;
+  let best=-Infinity,bi=0;for(let s=0;s<BS;s++)if(score[s]>best){best=score[s];bi=s}const k=new Uint8Array(BS),ns=new Float64Array(BS);for(let s=0;s<BS;s++){const stay=score[s],sw=best-TUNE.PB;if(f===0||stay>=sw){ns[s]=stay+em[s];k[s]=s}else{ns[s]=sw+em[s];k[s]=bi}}score=ns;bp[f]=k}
+  let st=0;for(let s=1;s<BS;s++)if(score[s]>score[st])st=s;var bassPath=new Uint8Array(nF);for(let f=nF-1;f>=0;f--){bassPath[f]=st;st=bp[f][st]}}
+ const dur=x.length/SR,ft=f=>Math.max(0,(f*HOP+(FN-HOP)/2)/SR),minF=Math.round(TUNE.slashMin*SR/HOP);
+ let segs=[];
+ for(let f=0;f<nF;){const c=path[f];let e=f;while(e<nF&&path[e]===c)e++;
+  if(c>=NS){segs.push({t0:ft(f),t1:ft(e),c});f=e;continue}
+  const root=Math.floor(c/NT);let i=f;
+  while(i<e){const bpc=bassPath[i];let j=i;while(j<e&&bassPath[j]===bpc)j++;
+   let slash=null;if(bpc<12&&bpc!==root&&bpc!==(root+7)%12&&!isDroneB(bpc)&&j-i>=minF){let sb=0,sr=0;for(let k=i;k<j;k++){const b=bass[k],bm=Math.max(...b)||1;sb+=b[bpc]/bm;sr+=b[root]/bm}if(sb>=TUNE.slashRatio*sr)slash=bpc}
+   const g={t0:ft(i),t1:ft(j),c};if(slash!=null)g.b=slash;
+   const last=segs[segs.length-1];if(last&&sameChord(last,g))last.t1=g.t1;else segs.push(g);i=j}
+  f=e}
+ // an add9 whose extra note is just a ringing open string is the plain chord
+ const A9=TYPES.findIndex(t=>t.id==='add9'),MJ=TYPES.findIndex(t=>t.id==='');
+ for(const g of segs){if(g.c<NS&&g.c%NT===A9){const r=Math.floor(g.c/NT);if(drone[(r+2)%12]>.5)g.c=r*NT+MJ}}
+ if(segs.length){segs[0].t0=0;segs[segs.length-1].t1=dur}segs=cleanSegs(segs);
  prog(.93,'Counting the beat…');await tick();
  const bpm=tempo(x);
- return {dur,offset,hist:[...hist],segs,bpm,feat:packFeat(chroma,bass,rms,thr)};
+ return {dur,offset,hist:[...hist],segs,bpm,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
 }
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const b64u8=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
@@ -996,7 +1021,7 @@ function refit(list){
   const bp=new Uint8Array(S),ns=new Float64Array(S);for(let s=0;s<S;s++){const stay=score[s],sw=best-P;if(f===0||stay>=sw){ns[s]=stay+em[s];bp[s]=s}else{ns[s]=sw+em[s];bp[s]=bi}}
   score=ns;back[f]=bp}
  let cur=0;for(let s=1;s<S;s++)if(score[s]>score[cur])cur=s;const path=new Uint8Array(n);for(let f=n-1;f>=0;f--){path[f]=cur;cur=back[f][cur]}
- const ft=f=>Math.max(0,(f*HOP+(FN-HOP)/2)/SR);let segs=[];
+ const ft=f=>Math.max(0,(f*(F.hop||2048)+(F.off??3072))/SR);let segs=[];
  for(let f=0;f<n;f++){const k=path[f],g=k===S-1?{c:NS}:{c:st[k].c,q:st[k].q,b:st[k].b};if(g.b==null)delete g.b;if(segs.length&&segs[segs.length-1].k===k)continue;if(segs.length)segs[segs.length-1].t1=ft(f);segs.push({...g,k,t0:ft(f),t1:A.dur})}
  if(segs.length)segs[0].t0=0;segs=cleanSegs(segs).map(({k,...g})=>g);
  const notes=A.segs.filter(g=>g.note);notes.forEach(o=>{const t=segs.find(g=>o.t0>=g.t0&&o.t0<g.t1)||segs[segs.length-1];t.note=t.note?t.note+' / '+o.note:o.note});
@@ -1021,7 +1046,7 @@ function refit2({vocab,sections,pins}){
   const root=(p.root+d)%12,bass=p.bass!=null?(p.bass+d)%12:null,ti=TYPES.findIndex(t=>t.id===QTYPE[p.q]);
   const g={c:root*NT+(ti<0?0:ti),q:p.q};if(bass!=null)g.b=bass;return {tpl:r,bp:bass??root,g,key:nameOf(g)}};
  const byKey=new Map(),get=nm=>{const p=parseChord(nm);if(!p)return null;const st=mk(p);if(!byKey.has(st.key))byKey.set(st.key,st);return byKey.get(st.key)};
- const fOf=t=>Math.max(0,Math.min(n,Math.round((t*SR-(FN-HOP)/2)/HOP))),ft=f=>Math.max(0,(f*HOP+(FN-HOP)/2)/SR);
+ const H=F.hop||2048,OFF=F.off??3072,fOf=t=>Math.max(0,Math.min(n,Math.round((t*SR-OFF)/H))),ft=f=>Math.max(0,(f*H+OFF)/SR);
  const global=vocab.map(get).filter(Boolean);
  const secAll=sections.map(x=>({...x,states:x.chords.map(get).filter(Boolean)}));
  const fallback=global.length?global:[...new Map(secAll.flatMap(x=>x.states).map(st=>[st.key,st])).values()];
