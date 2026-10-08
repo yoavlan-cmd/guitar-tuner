@@ -304,6 +304,10 @@ h1{font-size:23px}
 .artchips{display:flex;flex-wrap:wrap;gap:6px}
 .artchips button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 11px;font:500 13px var(--body);cursor:pointer}
 .artchips button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sheettop{justify-content:space-between;align-items:center}
+.drivelink{font:600 13px var(--body);color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--bg);white-space:nowrap}
+.drivelink:hover{border-color:var(--accent)}
 .msg{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes pulse{50%{opacity:.35}}
@@ -389,7 +393,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     </label>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
-      <h2>My songs</h2>
+      <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
       <div class="liblist" id="libList"></div>
     </section>
     <section class="card" id="readyCard" hidden>
@@ -505,7 +509,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     </div>
 
     <div id="sheetView" class="sheetview" hidden>
-      <div class="editrow"><button class="btn ghost" id="shBack">← Back</button></div>
+      <div class="editrow sheettop"><button class="btn ghost" id="shBack">← Back</button><a class="drivelink" id="driveLinkSheet" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
       <label class="namefield">Sheet name <input id="shName" type="text" dir="auto"></label>
 
       <div class="sheetactions">
@@ -1456,7 +1460,9 @@ let dlCap=null,mcpCap=null;
  if(!window.claude&&navigator.canShare){try{$('shShare').hidden=!navigator.canShare({files:[new File(['x'],'t.pdf',{type:'application/pdf'})]})}catch(e){}}})();
 const DEFAULT_FOLDER='https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe';
 const folderIdOf=v=>{const m=String(v||'').match(/folders\/([\w-]{10,})/)||String(v||'').trim().match(/^([\w-]{20,})$/);return m?m[1]:''};
-$('driveFolder').value=store.get('driveFolderLink',DEFAULT_FOLDER);$('driveFolder').addEventListener('change',e=>store.set('driveFolderLink',e.target.value.trim()||DEFAULT_FOLDER));
+$('driveFolder').value=store.get('driveFolderLink',DEFAULT_FOLDER);
+function syncDriveLinks(){const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
+syncDriveLinks();$('driveFolder').addEventListener('input',syncDriveLinks);$('driveFolder').addEventListener('change',e=>store.set('driveFolderLink',e.target.value.trim()||DEFAULT_FOLDER));
 async function withBusy(btn,fn){const all=[...document.querySelectorAll('.sheetactions .btn')];all.forEach(b=>b.disabled=true);try{await fn()}finally{all.forEach(b=>b.disabled=false)}}
 $('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
  shStatus('Making the PDF…');let blob;try{blob=await makePdf()}catch(e){shStatus('Couldn’t make the PDF. Check your internet connection (the PDF maker loads once) and try again.');return}
