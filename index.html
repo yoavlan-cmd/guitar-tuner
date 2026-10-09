@@ -515,6 +515,11 @@ body.wopen{overflow:hidden}
 .screen.locked .note{transform:scale(1.08);transition:transform .2s}
 .screen.locked .status{font-weight:800}
 @keyframes lockPulse{0%{box-shadow:0 0 0 3px var(--ok),0 0 0 0 color-mix(in srgb,var(--ok) 70%,transparent)}60%{box-shadow:0 0 0 3px var(--ok),0 0 0 22px transparent}100%{box-shadow:0 0 0 3px var(--ok),0 0 28px 4px color-mix(in srgb,var(--ok) 55%,transparent)}}
+.gtrline{align-self:flex-start;border:0;background:none;color:var(--muted);font:500 13px var(--body);padding:0 2px;cursor:pointer;display:flex;gap:4px;align-items:baseline}
+.gtrline b{color:var(--ink);font-weight:700}.gtrline i{font-style:normal;font-size:11px}
+.instpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.instpick .tip{font-size:12.5px;margin:0}
+.gtuned{margin:0;font-size:13px}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -558,6 +563,7 @@ body.wopen{overflow:hidden}
   </nav>
 
   <div class="pane" id="paneTune">
+  <button type="button" class="gtrline" id="gtrLine" hidden></button>
   <div class="chips" id="tunings" aria-label="Tuning"></div>
 
   <section class="screen" id="screen" aria-live="polite">
@@ -586,10 +592,7 @@ body.wopen{overflow:hidden}
   <details class="settings" id="tuneSettings">
     <summary>Settings</summary>
     <div class="setrow"><span class="label">Guitar</span>
-      <div class="seg" id="inst">
-        <button data-inst="acoustic" aria-pressed="true">Acoustic</button>
-        <button data-inst="electric" aria-pressed="false">Electric</button>
-      </div></div>
+      <div class="instpick" id="inst"></div></div>
     <div class="setrow"><span class="label">Noise filter</span>
       <div class="seg seg3" id="nf">
         <button data-nf="normal" aria-pressed="false">Normal</button>
@@ -902,10 +905,27 @@ $('strings').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e
 function showTarget(){
  const m=tuning.n[target];$('note').innerHTML=`${nm(m)}<sub>${oc(m)}</sub>`;$('tgt').textContent=fq(m).toFixed(2);
 }
-function setTuning(t){tuning=t;store.set('tuning',t.id);locked=null;target=0;done.clear();renderTunings();renderStrings();showTarget();stopRepeat()}
+function setTuning(t){tuning=t;store.set('tuning',t.id);locked=null;target=0;done.clear();renderTunings();renderStrings();showTarget();stopRepeat();try{gtrUpdate(g=>g.tuning=t.id);renderInstPick()}catch(e){}}
 $('tunings').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)setTuning(TUNINGS.find(t=>t.id===b.dataset.id))});
-$('inst').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;inst=b.dataset.inst;store.set('inst',inst);[...$('inst').children].forEach(x=>x.setAttribute('aria-pressed',x===b))});
-[...$('inst').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.inst===inst));
+/* which guitar you're tuning: one of yours from My gear (or a generic acoustic/electric) */
+const myGuitars=()=>store.get('instruments',null)||[];
+let tuneGtr=store.get('tuneInst','');
+function curGtr(){return myGuitars().find(g=>g.id===tuneGtr)||null}
+function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst)}
+function renderInstPick(){
+ const l=myGuitars();if(l.length&&!curGtr()&&tuneGtr!=='acoustic'&&tuneGtr!=='electric'){tuneGtr=l[0].id;store.set('tuneInst',tuneGtr)}
+ const opts=l.length?l.map(g=>[g.id,g.name]):[['acoustic','Acoustic'],['electric','Electric']];
+ $('inst').innerHTML=opts.map(([id,n])=>`<button type="button" class="chip" data-g="${esc(id)}" aria-pressed="${id===tuneGtr||(!l.length&&!tuneGtr&&id==='acoustic')}" dir="auto">${esc(n)}</button>`).join('')+(l.length?'':'<span class="tip">Add your guitars in <b>My gear</b> to pick them here.</span>');
+ const g=curGtr(),line=$('gtrLine');line.hidden=!g;if(g)line.innerHTML=`<span>Tuning</span> <b dir="auto">${esc(g.name)}</b>${g.tuning&&g.tuning!==tuning.id?` · usually ${esc((TUNINGS.find(t=>t.id===g.tuning)||{}).name||'')}`:''} <i>▾</i>`;
+ applyGtr();
+}
+$('inst').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;tuneGtr=b.dataset.g;store.set('tuneInst',tuneGtr);
+ const g=curGtr();if(g&&g.tuning&&g.tuning!==tuning.id){const t=TUNINGS.find(x=>x.id===g.tuning);if(t)setTuning(t)}renderInstPick()});
+$('gtrLine').onclick=()=>{const d=$('tuneSettings');d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'})};
+// remember the guitar's tuning, and when all its strings were last in tune
+function gtrUpdate(f){const l=myGuitars(),g=l.find(x=>x.id===tuneGtr);if(!g)return;f(g);store.set('instruments',l)}
+function noteAllTuned(){if(done.size<tuning.n.length)return;gtrUpdate(g=>{g.tuning=tuning.id;g.lastTuned=new Date().toISOString().slice(0,10)});renderInstPick()}
+setTimeout(renderInstPick,0);
 function setA4(v){a4=Math.max(430,Math.min(450,v));store.set('a4',a4);$('calOut').textContent='A4 '+a4;showTarget()}
 $('calDown').onclick=()=>setA4(a4-1);$('calUp').onclick=()=>setA4(a4+1);
 
@@ -1012,7 +1032,7 @@ function loop(){
   if(inZone){if(!okSince||zoneStr!==i){okSince=now;zoneStr=i}
    const held=now-okSince;scr.classList.toggle('ok',true);setHeadState('ok');
    if(held>=450){if(!scr.classList.contains('locked')){scr.classList.add('locked');try{navigator.vibrate&&navigator.vibrate([45,70,45])}catch(e){}}
-    st.className='status ok';st.textContent=`${nm(m)} in tune ✓`;if(!done.has(i)){done.add(i);renderStrings()}}
+    st.className='status ok';st.textContent=`${nm(m)} in tune ✓`;if(!done.has(i)){done.add(i);renderStrings();noteAllTuned()}}
    else{scr.classList.remove('locked');st.className='status ok';st.textContent='Right there · hold it…'}}
   else{okSince=0;zoneStr=null;scr.classList.remove('ok','locked');setHeadState(cents<0?'flat':'sharp');
    const c=Math.round(ac),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
@@ -2786,7 +2806,7 @@ const BRAND_LIST=['Yamaha','Taylor','Martin','Gibson','Epiphone','Fender','Squie
 function matchModel(brand,model){const k=(brand+' '+model).trim();if(k.length<4)return null;return MODELS.find(m=>m.re.test(k))||null}
 const instAll=()=>store.get('instruments',null)||migrateGear();
 function migrateGear(){const old=store.get('gear',[]),log=store.get('gearLog',{});const list=old.map((t,i)=>({id:'i'+Date.now().toString(36)+i,name:'My '+GEAR[t].short.toLowerCase(),type:t,brand:'',model:'',year:'',specs:{},strings:log[t]||'',added:Date.now()}));store.set('instruments',list);return list}
-const instSave=l=>store.set('instruments',l);
+const instSave=l=>{store.set('instruments',l);try{renderInstPick()}catch(e){}};
 let instEdit=null,instOpen=null;
 function daysSince(d){return Math.floor((Date.now()-new Date(d).getTime())/864e5)}
 function stringsStatus(it){const g=GEAR[it.type];const per=it.specs&&it.specs.top==='solid'?g.strings:g.strings;if(!it.strings)return {txt:'Strings: no date yet',due:false};const d=daysSince(it.strings),left=per-d;return {txt:`Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}`,due:left<0}}
@@ -2886,6 +2906,7 @@ function renderInstDetail(it){
  <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
  ${it.photo?`<img class="iphotobig" src="${it.photo}" alt="${esc(it.name)}">`:''}
  ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
+ ${it.lastTuned||it.tuning?`<p class="tip gtuned">${it.lastTuned?`Last tuned ${daysSince(it.lastTuned)===0?'today':daysSince(it.lastTuned)===1?'yesterday':daysSince(it.lastTuned)+' days ago'}`:'Usually tuned'}${it.tuning?` · ${esc((TUNINGS.find(t=>t.id===it.tuning)||{}).name||'')}`:''}</p>`:''}
  <div class="gstrings"><span class="gstat ${st.due?'due':''}">${esc(st.txt)}</span><label class="gdate">Changed on <input type="date" id="iStr" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label><button class="btn ghost" id="iStrToday" type="button">Changed them today</button></div>
  ${a.notes.length?`<details open><summary>About your ${esc(it.model||it.brand||'guitar')}</summary>${L(a.notes)}</details>`:''}
  ${it.photoNotes&&(it.photoNotes.observations||[]).concat(it.photoNotes.check||[]).length?`<details open class="aibox"><summary>From your photo</summary>${(it.photoNotes.observations||[]).length?`<ul>${it.photoNotes.observations.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}${(it.photoNotes.check||[]).length?`<b>Worth checking</b><ul>${it.photoNotes.check.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}</details>`:''}
