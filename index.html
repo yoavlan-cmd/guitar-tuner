@@ -520,6 +520,8 @@ body.wopen{overflow:hidden}
 .instpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .instpick .tip{font-size:12.5px;margin:0}
 .gtuned{margin:0;font-size:13px}
+.gtrpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px}
+.gtrline[aria-expanded="true"] i{transform:rotate(180deg);display:inline-block}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -563,7 +565,8 @@ body.wopen{overflow:hidden}
   </nav>
 
   <div class="pane" id="paneTune">
-  <button type="button" class="gtrline" id="gtrLine" hidden></button>
+  <button type="button" class="gtrline" id="gtrLine" hidden aria-expanded="false"></button>
+  <div class="gtrpick" id="gtrPick" hidden></div>
   <div class="chips" id="tunings" aria-label="Tuning"></div>
 
   <section class="screen" id="screen" aria-live="polite">
@@ -921,7 +924,8 @@ function renderInstPick(){
 }
 $('inst').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;tuneGtr=b.dataset.g;store.set('tuneInst',tuneGtr);
  const g=curGtr();if(g&&g.tuning&&g.tuning!==tuning.id){const t=TUNINGS.find(x=>x.id===g.tuning);if(t)setTuning(t)}renderInstPick()});
-$('gtrLine').onclick=()=>{const d=$('tuneSettings');d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'})};
+$('gtrLine').onclick=()=>{const p=$('gtrPick'),open=p.hidden;p.hidden=!open;$('gtrLine').setAttribute('aria-expanded',open);if(open)p.innerHTML=$('inst').innerHTML.replace(/<span class="tip">.*<\/span>/,'')};
+$('gtrPick').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const twin=$('inst').querySelector(`[data-g="${CSS.escape(b.dataset.g)}"]`);if(twin)twin.click();$('gtrPick').hidden=true;$('gtrLine').setAttribute('aria-expanded','false')});
 // remember the guitar's tuning, and when all its strings were last in tune
 function gtrUpdate(f){const l=myGuitars(),g=l.find(x=>x.id===tuneGtr);if(!g)return;f(g);store.set('instruments',l)}
 function noteAllTuned(){if(done.size<tuning.n.length)return;gtrUpdate(g=>{g.tuning=tuning.id;g.lastTuned=new Date().toISOString().slice(0,10)});renderInstPick()}
