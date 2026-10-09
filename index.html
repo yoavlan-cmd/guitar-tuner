@@ -627,6 +627,7 @@ body.wopen{overflow:hidden}
       <h2>Ready to analyse</h2>
       <p class="tip" id="readyFile" dir="auto"></p>
       <label class="tunepick">Tuning <select id="preTun"><option value="auto">Detect from the sound</option></select></label>
+      <label class="check"><input type="checkbox" id="preListen" checked> Detailed listening: an AI model on this phone hears every note (more accurate, takes a bit longer)</label>
       <label class="check" id="preReadWrap" hidden><input type="checkbox" id="preRead" checked> <span id="preReadTxt">Also read chord names shown in the video</span></label>
       <p class="tip" id="readySaved" hidden></p>
       <button class="btn wide cta" id="analyseBtn">Analyse chords</button>
@@ -1140,7 +1141,44 @@ async function decodeFile(file){
  const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(audio.duration*SR)),SR);const s=off.createBufferSource();s.buffer=audio;s.connect(off.destination);s.start();
  const r=await off.startRendering();return r.getChannelData(0);
 }
-async function analyse(x,prog){
+/* ---- detailed listening: a small AI model (Spotify's Basic Pitch, open source) hears every note ---- */
+const TFJS_URL='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js',BP_URL='https://cdn.jsdelivr.net/npm/@spotify/basic-pitch@1.0.1/model/model.json';
+let bpModel=null;
+async function decodeAt(file,rate){const ab=await file.arrayBuffer();const c=getCtx();
+ const audio=await new Promise((res,rej)=>{const p=c.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)});
+ const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(audio.duration*rate)),rate);const s=off.createBufferSource();s.buffer=audio;s.connect(off.destination);s.start();
+ return (await off.startRendering()).getChannelData(0)}
+async function transcribe(file,onP){
+ await loadScript(TFJS_URL);const tf=window.tf;if(window.__force)NTUNE.force=1;
+ try{await tf.setBackend('webgl')}catch(e){}await tf.ready();
+ if(!bpModel)bpModel=await tf.loadGraphModel(BP_URL);
+ const x=await decodeAt(file,22050);
+ const WIN=22050*2-256,OVL=30*256,HOPN=WIN-OVL,HALF=15,K=88;
+ const total=Math.max(1,Math.ceil((x.length+OVL/2)/HOPN)),nOut=Math.floor(x.length*(Math.floor(22050/256)/22050));
+ const F=new Uint8Array(nOut*K);let n=0;const t0=performance.now();
+ for(let i=0;i<total&&n<nOut;i++){
+  const buf=new Float32Array(WIN),st=i*HOPN-OVL/2;for(let j=0;j<WIN;j++){const q=st+j;buf[j]=q>=0&&q<x.length?x[q]:0}
+  const out=tf.tidy(()=>{const r=bpModel.execute(tf.tensor(buf,[1,WIN,1]),['Identity_1']);const fr=Array.isArray(r)?r[0]:r;return fr.slice([0,HALF,0],[1,fr.shape[1]-2*HALF,K])});
+  const d=await out.data();out.dispose();const T=d.length/K;
+  for(let t=0;t<T&&n<nOut;t++,n++)for(let k=0;k<K;k++)F[n*K+k]=Math.round(d[t*K+k]*255);
+  if(onP)onP((i+1)/total,(performance.now()-t0)/1000);
+  if(i===2&&!NTUNE.force){const per=(performance.now()-t0)/3,est=per*total/1000;if(est>Math.max(240,x.length/22050*1.2))throw Object.assign(new Error('slow'),{code:'too_slow',est})}
+  await tick()}
+ return {n,fps:22050/256,F};
+}
+// notes heard by the transcription model (88 keys, ~86 frames/s) turned into the analysis' note picture
+function notesToChroma(nt,nF){
+ const F=nt.F,fps=nt.fps,K=88,chroma=new Array(nF),bass=new Array(nF),w=Math.max(1,Math.round(fps*HOP/SR/2*NTUNE.win));
+ for(let f=0;f<nF;f++){const tc=(f*HOP+FN/2)/SR,c0=Math.round(tc*fps);const act=new Float32Array(K);
+  let cnt=0;for(let j=c0-w;j<=c0+w;j++){if(j<0||j>=nt.n)continue;cnt++;for(let k=0;k<K;k++){const v=F[j*K+k]/255;if(NTUNE.mean)act[k]+=v;else if(v>act[k])act[k]=v}}if(NTUNE.mean&&cnt)for(let k=0;k<K;k++)act[k]/=cnt;
+  const c=new Float32Array(12),b=new Float32Array(12);let low=-1;
+  for(let k=0;k<K;k++){const a=act[k];if(a<NTUNE.on)continue;const m=21+k;if(m<36||m>96)continue;c[m%12]+=Math.pow(a,NTUNE.pow);if(low<0&&m<64&&a>=NTUNE.bassOn)low=k}
+  if(low>=0)b[(21+low)%12]+=1;for(let k=0;k<K;k++){const m=21+k;if(m<64&&act[k]>=NTUNE.on&&k!==low)b[m%12]+=act[k]*NTUNE.bassRest}
+  chroma[f]=c;bass[f]=b}
+ return {chroma,bass};
+}
+const NTUNE={on:.3,pow:1,bassOn:.35,bassRest:.25,drone:0,win:1,mean:0,mix:.5,bmix:.65,force:0};
+async function analyse(x,prog,notes){
  const fB=makeFFT(FN),fC=makeFFT(FNC);
  const hB=new Float64Array(FN),hC=new Float64Array(FNC);for(let i=0;i<FN;i++)hB[i]=.5-.5*Math.cos(2*Math.PI*i/(FN-1));for(let i=0;i<FNC;i++)hC[i]=.5-.5*Math.cos(2*Math.PI*i/(FNC-1));
  const reB=new Float64Array(FN),imB=new Float64Array(FN),mB=new Float64Array(FN/2),reC=new Float64Array(FNC),imC=new Float64Array(FNC),mC=new Float64Array(FNC/2);
@@ -1169,13 +1207,17 @@ async function analyse(x,prog){
    for(const [h,a] of [[3,TUNE.h3],[5,TUNE.h5]]){const j=Math.round(k*h);if(j>top)continue;for(const d of [-1,0,1]){const q=j+d;mC[q]=Math.max(0,mC[q]-a*m*(d?.5:1))}}}}
   const c=new Float32Array(12);for(let k=MC.k0;k<=MC.k1;k++)c[MC.pc[k]]+=Math.sqrt(mC[k])*MC.w[k];
   chroma[f]=c;bass[f]=b;bh[f]=h;if(f%80===0){prog(.25+.45*f/nF,'Finding the chords…');await tick()}}
+ if(notes){const nc=notesToChroma(notes,nF),mx=NTUNE.mix;for(let f=0;f<nF;f++){
+  if(mx>0){const n1=v=>{const m=Math.max(...v)||1;return v.map(x=>x/m)},a=n1(chroma[f]),b2=n1(nc.chroma[f]),c=new Float32Array(12);for(let i=0;i<12;i++)c[i]=mx*a[i]+(1-mx)*b2[i];chroma[f]=c;
+   const ba=n1(bass[f]),bb=n1(nc.bass[f]),bc=new Float32Array(12);for(let i=0;i<12;i++)bc[i]=NTUNE.bmix*ba[i]+(1-NTUNE.bmix)*bb[i];bass[f]=bc}
+  else{chroma[f]=nc.chroma[f];bass[f]=nc.bass[f]}}}
  const sorted=[...rms].sort((a,b)=>a-b),thr=.12*(sorted[Math.floor(sorted.length*.9)]||0);
  const hist=new Float64Array(64);for(let f=0;f<nF;f++){if(rms[f]<thr)continue;let t=0;for(let m=30;m<64;m++)t+=bh[f][m];if(t>0)for(let m=30;m<64;m++)hist[m]+=bh[f][m]/t}
  // notes that sound through most of the song (ringing open strings) — they shouldn't decide chord extras or slash basses
  const drone=new Float32Array(12),droneB=new Float32Array(12);{let cnt=0;for(let f=0;f<nF;f++){if(rms[f]<thr)continue;cnt++;const c=chroma[f],cm=Math.max(...c)||1,b=bass[f],bm=Math.max(...b)||1;for(let i=0;i<12;i++){if(c[i]/cm>.55)drone[i]++;if(b[i]/bm>.6)droneB[i]++}}
   for(let i=0;i<12;i++){drone[i]=cnt?drone[i]/cnt:0;droneB[i]=cnt?droneB[i]/cnt:0}}
  const isDrone=i=>drone[i]>.7,isDroneB=i=>droneB[i]>.55;
- for(let f=0;f<nF;f++){const c=chroma[f];for(let i=0;i<12;i++)if(isDrone(i))c[i]*=.55}
+ if(!notes||NTUNE.drone)for(let f=0;f<nF;f++){const c=chroma[f];for(let i=0;i<12;i++)if(isDrone(i))c[i]*=.55}
  // emissions: chord shape match + bass support from any chord tone (so inversions like G/B still score)
  const TONES=[];for(let s=0;s<NS;s++){const r=Math.floor(s/NT),t=TYPES[s%NT];TONES.push(t.iv.map((iv,j)=>[(r+iv)%12,j===0?1:TUNE.inv]))}
  const EM=new Float32Array(nF*(NS+1));
@@ -1320,31 +1362,36 @@ $('doneClose').onclick=()=>{$('doneBanner').hidden=true};
 function setSteps(list,active){$('steps').innerHTML=list.map((t,i)=>`<li class="${i<active?'ok':i===active?'now':''}">${esc(t)}${i<active?' ✓':''}</li>`).join('')}
 $('analyseBtn').onclick=()=>runAnalysis(curFile);
 $('preRead').addEventListener('change',e=>store.set('readScreen2',e.target.checked));
+$('preListen').checked=store.get('detailListen',true);$('preListen').addEventListener('change',e=>store.set('detailListen',e.target.checked));
 function setReadTxt(){$('preReadTxt').textContent=claudeReads()?'Also check the video: chords written on screen and the guitarist’s hand (Claude)':'Also read chord names written in the video'}
 async function runAnalysis(file){
  if(!file)return;const pre=$('preTun').value,wantRead=!$('preReadWrap').hidden&&$('preRead').checked;
- const steps=['Read the sound','Find chords and tuning'].concat(wantRead?[claudeReads()?'Check the video: written chords and hand shapes':'Read chord names shown in the video','Match the timeline to the video']:[]);
+ const listen=store.get('detailListen',true),steps=['Read the sound'].concat(listen?['Listen to every note (AI model on this phone)']:[],['Find chords and tuning']).concat(wantRead?[claudeReads()?'Check the video: written chords and hand shapes':'Read chord names shown in the video','Match the timeline to the video']:[]);
  $('readyCard').hidden=true;songMsg('');prog(.03,'Reading the sound…');setSteps(steps,0);
  const t0=Date.now();
  try{
-  const x=await decodeFile(file);prog(.1);setSteps(steps,1);
-  const r=await analyse(x,prog);
+  const x=await decodeFile(file);prog(.1);const L=listen?1:0;setSteps(steps,1);
+  let notes=null,listenNote='';
+  if(listen){try{notes=await transcribe(file,(p,sec)=>prog(.1+.3*p,`Listening to every note… ${Math.round(p*100)}%`))}
+   catch(e){notes=null;listenNote=e&&e.code==='too_slow'?'Detailed listening would take too long on this phone, so the standard analysis was used.':'Detailed listening couldn’t start (it needs the internet the first time), so the standard analysis was used.'}
+   setSteps(steps,2)}
+  const r=await analyse(x,(p,t)=>prog(listen?.4+.55*p:p,t),notes);
   let tuning=guessTuning(r.hist,r.segs),src='detected from the sound';
   if(pre!=='auto'){tuning={id:pre,conf:'yours',why:'You chose this tuning before analysing.'};src='your choice'}
   A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now()};
   if(pre==='auto'){let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c}
   saveSong();showSong(false);$('doneBanner').hidden=true;
   let chordSrc='detected from the sound',readNote='';
-  if(wantRead){$('songView').hidden=true;$('prog').hidden=false;setSteps(steps,2);const viaC=claudeReads();prog(.9,viaC?'Claude is checking the video: written chords and hand shapes…':'Reading chord names on screen…');
+  if(wantRead){$('songView').hidden=true;$('prog').hidden=false;setSteps(steps,2+L);const viaC=claudeReads();prog(.9,viaC?'Claude is checking the video: written chords and hand shapes…':'Reading chord names on screen…');
    const res=await readFromVideo({keepTuning:pre!=='auto',onText:t=>{if(!viaC)$('progTxt').textContent=t},onStep:(i,n)=>prog(.9+.09*i/n)});
    if(res.tuningSet)src='read from the video';
-   if(res.ok){setSteps(steps,4);chordSrc=`sound + video (written chords at ${res.moments} moments${res.hands?`, hand shapes at ${res.hands}`:''})`}else readNote=res.msg||'';
+   if(res.ok){setSteps(steps,4+L);chordSrc=`sound + video (written chords at ${res.moments} moments${res.hands?`, hand shapes at ${res.hands}`:''})`}else readNote=res.msg||'';
    showSong(false);}
   prog(1,'Done');$('prog').hidden=true;
   const uniq=new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g)));
   $('doneTitle').textContent='Chord analysis finished';
   const cfx=chordConfidence();
-  $('doneText').innerHTML=(cfx?`<span class="confline ${confLvl(cfx.overall)}">Confidence ${Math.round(cfx.overall*100)}% · ${cfx.level}</span><br>`:'')+`${esc(tName(A.tuning.id))} (${esc(src)}) · ${uniq.size} chords, ${A.segs.length} changes, ${esc(chordSrc)} · took ${Math.round((Date.now()-t0)/1000)} s`+(readNote?`<br>${esc(readNote)}`:'')+(wantRead?'':'<br>Tip: if the video shows the chords, enter them under “Use the real chords” for a better timeline.');
+  $('doneText').innerHTML=(cfx?`<span class="confline ${confLvl(cfx.overall)}">Confidence ${Math.round(cfx.overall*100)}% · ${cfx.level}</span><br>`:'')+`${esc(tName(A.tuning.id))} (${esc(src)}) · ${uniq.size} chords, ${A.segs.length} changes, ${esc(chordSrc)} · took ${Math.round((Date.now()-t0)/1000)} s`+(notes?' · every note checked by the AI model':'')+(listenNote?`<br>${esc(listenNote)}`:'')+(readNote?`<br>${esc(readNote)}`:'')+(wantRead?'':'<br>Tip: if the video shows the chords, enter them under “Use the real chords” for a better timeline.');
   $('doneBanner').hidden=false;window.scrollTo({top:0});clearTimeout(window.__bt);window.__bt=setTimeout(()=>{$('doneBanner').hidden=true},7000);
  }catch(err){
   $('prog').hidden=true;showReady(file);
