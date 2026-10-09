@@ -1,5 +1,5 @@
 // Offline support for the tuner. Bump VERSION whenever index.html changes.
-const VERSION = 'tuner-v26';
+const VERSION = 'tuner-v27';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -19,10 +19,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Pages: try the network first so updates show up, fall back to the saved copy offline.
+  // Pages: always ask the server for the latest version (skipping the browser's 10-minute reuse), fall back to the saved copy offline.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(req, { cache: 'no-cache' }).then(res => {
         const copy = res.clone();
         caches.open(VERSION).then(c => c.put('./index.html', copy));
         return res;
@@ -37,7 +37,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       caches.open(VERSION).then(async c => {
         const hit = await c.match(req);
-        const net = fetch(req).then(res => { if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; }).catch(() => hit);
+        const net = fetch(req, url.origin === self.location.origin ? { cache: 'no-cache' } : {}).then(res => { if (res.ok || res.type === 'opaque') c.put(req, res.clone()); return res; }).catch(() => hit);
         return hit || net;
       })
     );

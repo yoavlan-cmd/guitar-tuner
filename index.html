@@ -2179,6 +2179,6 @@ $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();dr
 })();
 </script>
 
-<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+<script>if("serviceWorker" in navigator){const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(reloaded||!hadSW)return;reloaded=true;location.reload()});addEventListener("load",()=>{navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{})})}</script>
 </body>
 </html>
