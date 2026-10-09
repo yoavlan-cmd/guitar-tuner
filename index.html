@@ -90,7 +90,7 @@ h1{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02e
 .meter i{position:absolute;inset:0 auto 0 0;width:0;background:var(--screen-dim);transition:width .08s linear}
 .meter i.hot{background:var(--ok)}
 .meter s{position:absolute;top:0;bottom:0;width:2px;background:var(--flat);left:0}
-.tabs{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 14px var(--body);padding:10px;border-radius:10px;cursor:pointer}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .pane{display:flex;flex-direction:column;gap:14px}
@@ -390,11 +390,103 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .paper .ly.sec{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-mute);margin-top:10px}
 .gdsteps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 #driveIntro .btn{text-decoration:none;text-align:center}
+.tabs button{padding-inline:4px;font-size:13.5px;white-space:nowrap}
+body.wopen{overflow:hidden}
+.welcome{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(120% 80% at 50% 85%,#FFB02E 0%,#FF6A1A 30%,#C9301A 62%,#2A0E08 100%)}
+.wcard{width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:#FFF6EA}
+.wlogo{width:96px;height:96px;border-radius:24px;box-shadow:0 10px 30px rgba(60,10,0,.5)}
+.wtitle{font:800 40px/1 var(--display);text-transform:uppercase;letter-spacing:.03em;text-shadow:0 2px 12px rgba(80,10,0,.45)}
+.wbody{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.wbody h2{margin:6px 0 0;font:700 20px var(--body)}
+.wbody p{margin:0}
+.whey{font:700 22px var(--body)}
+.wname{font:inherit;color:inherit;background:none;border:0;border-bottom:2px dashed rgba(255,246,234,.6);padding:0;cursor:pointer}
+.wjoke{font:500 18px/1.45 var(--body);background:rgba(20,6,2,.45);border-radius:14px;padding:16px 18px;min-height:96px;display:flex;align-items:center}
+.wmore{background:none;border:0;color:#FFE7A3;font:600 14px var(--body);cursor:pointer;padding:4px 8px}
+.wgo{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:6px}
+.wgo .btn{background:rgba(20,6,2,.78);color:#FFF6EA;padding:14px 10px;font-size:15px;border:1px solid rgba(255,220,170,.25)}
+.wnameform{display:flex;flex-direction:column;gap:10px;width:100%}
+.wnameform .textin{font:500 18px var(--body);padding:13px;text-align:center;background:#FFF6EA;color:#1A0F0B;border:0}
+.wskip{background:none;border:0;color:rgba(255,246,234,.85);font:600 14px var(--body);cursor:pointer;margin-top:4px}
+.gearpick{display:flex;flex-wrap:wrap;gap:6px}
+.gearout{display:flex;flex-direction:column;gap:10px}
+.gearcard h2{font-size:18px}
+.gearcard details{border-top:1px solid var(--line);padding-top:8px}
+.gearcard summary{font:600 15px var(--body);cursor:pointer;padding:2px 0}
+.gearcard ul{margin:6px 0 2px;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:14.5px;line-height:1.45}
+.procon{display:grid;grid-template-columns:1fr;gap:8px;margin-top:6px}
+.procon b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gclean{margin:6px 0 2px;display:grid;gap:4px 0;font-size:14.5px;line-height:1.45}
+.gclean dt{font-weight:700;margin-top:4px}.gclean dd{margin:0}
+.gstrings{display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:10px;padding:10px 12px}
+.gstat{font:600 14px var(--body)}.gstat.due{color:#D9301A}
+.gdate{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.gdate input{font:500 15px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+
+.lessonbtn{margin-top:8px}
+.lesson{position:fixed;inset:0;z-index:55;background:#0E0B0A;color:#F7F2EA;display:grid;overflow:hidden;
+ grid-template-columns:42% 58%;grid-template-rows:auto auto minmax(0,1fr) auto auto;grid-template-areas:"top top" "vid vid" "neck ctl" "ban ban" "tab tab"}
+.lsTop{grid-area:top;display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+.lsX{background:none;border:0;color:#F7F2EA;font-size:20px;padding:4px 8px;cursor:pointer}
+.lsHead{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.lsHead b{font:800 17px var(--display);letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lsHead span{font-size:12px;color:#BDB4A8;text-transform:uppercase;letter-spacing:.06em}
+.lsVid{grid-area:vid;background:#000;display:flex;justify-content:center;cursor:pointer}
+.lsVid video{width:100%;max-height:34vh;display:block;object-fit:contain}
+.lsNeck{grid-area:neck;display:flex;flex-direction:column;align-items:center;min-height:0;padding:6px 4px;background:#1A1411}
+.lsNow{font:800 26px var(--display);color:#fff;line-height:1.1;min-height:30px}
+.lsNeck svg{flex:1;min-height:0;width:100%;max-width:170px}
+.lsNextC{font-size:13px;color:#FFE7A3;min-height:18px;text-align:center}
+.lsNextC b{color:#fff}
+.lsf{transition:transform .28s cubic-bezier(.3,.7,.3,1),opacity .2s}
+.lsfr{fill:#22C55E;stroke:#fff;stroke-width:1.6;transition:x .28s,width .28s}
+.lsft{fill:#fff;font:700 12px var(--body);transition:x .28s}
+.lsCtl{grid-area:ctl;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:8px}
+.lsRow{display:flex;gap:8px;align-items:center}
+.lsB{width:46px;height:46px;border-radius:50%;border:1px solid #4A3E36;background:#221A16;color:#F7F2EA;font-size:16px;cursor:pointer}
+.lsB.lsPlay{width:60px;height:60px;font-size:20px;background:#FF6A1A;border-color:#FF6A1A;color:#1A0F0B}
+.lsSpeed button,.lsLoop{border:1px solid #4A3E36;background:#221A16;color:#F7F2EA;border-radius:999px;padding:7px 11px;font:600 13px var(--body);cursor:pointer}
+.lsSpeed button[aria-pressed="true"],.lsLoop[aria-pressed="true"]{background:#F7F2EA;color:#1A0F0B;border-color:#F7F2EA}
+.lsBanner{grid-area:ban;background:#B3261E;color:#fff;text-align:center;font:800 18px var(--display);letter-spacing:.06em;padding:5px 8px;min-height:30px}
+.lsTab{grid-area:tab;background:#fff;padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.lsTab svg{width:100%;height:auto;display:block;font-family:var(--body)}
+@media (orientation:landscape){
+ .lesson{grid-template-columns:minmax(120px,19vw) 1fr;grid-template-rows:minmax(0,1fr) auto auto auto;grid-template-areas:"neck vid" "neck ban" "neck tab" "neck ctl"}
+ .lsVid video{max-height:none;height:100%}
+ .lsTop{position:absolute;top:0;left:calc(max(120px,19vw));right:0;z-index:2;justify-content:space-between;flex-direction:row-reverse;padding:6px 12px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none}
+ .lsTop>*{pointer-events:auto}.lsHead{text-align:right}.lsHead b{font-size:16px}
+ .lsBanner{font-size:15px;padding:3px 8px;min-height:0}
+ .lsTab{padding:4px 8px}
+ .lsCtl{flex-direction:row;padding:4px 6px;gap:10px}
+ .lsB{width:34px;height:34px;font-size:13px}.lsB.lsPlay{width:40px;height:40px;font-size:15px}
+ .lsSpeed button,.lsLoop{padding:5px 10px;font-size:12px}
+ .lsNow{font-size:22px}
+}
 </style>
 
+<div class="lesson" id="lesson" hidden>
+  <div class="lsTop"><button type="button" class="lsX" id="lsClose" aria-label="Close lesson">✕</button><div class="lsHead"><b id="lsTitle"></b><span id="lsArtist"></span></div></div>
+  <div class="lsVid" id="lsVidHost"></div>
+  <div class="lsNeck"><div class="lsNow" id="lsNow">—</div><svg id="lsNeckSvg" viewBox="0 0 140 330" preserveAspectRatio="xMidYMin meet"></svg><div class="lsNextC" id="lsNext"></div></div>
+  <div class="lsCtl">
+    <div class="lsRow"><button type="button" class="lsB" id="lsPrev" aria-label="Previous part">⏮</button><button type="button" class="lsB lsPlay" id="lsPlay" aria-label="Play or pause">▶</button><button type="button" class="lsB" id="lsNextBtn" aria-label="Next part">⏭</button></div>
+    <div class="lsRow lsSpeed" id="lsSpeed"><button type="button" data-r=".5">50%</button><button type="button" data-r=".75">75%</button><button type="button" data-r="1" aria-pressed="true">100%</button></div>
+    <button type="button" class="lsLoop" id="lsLoop" aria-pressed="false">↻ Loop this part</button>
+  </div>
+  <div class="lsBanner" id="lsBanner"></div>
+  <div class="lsTab" id="lsTab"></div>
+</div>
+<div class="welcome" id="welcome" role="dialog" aria-label="Welcome">
+  <div class="wcard">
+    <svg class="wlogo" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg>
+    <div class="wtitle">Guitaring</div>
+    <div class="wbody"></div>
+    <button type="button" class="wskip" id="wSkip">Skip ›</button>
+  </div>
+</div>
 <div class="wrap">
   <header>
-    <div class="brand"><svg class="logo" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 512 512"><defs>
+    <div class="brand"><svg class="logo" id="appLogoSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 512 512"><g id="appLogo"><defs>
 <radialGradient id="lg-fbg" cx="50%" cy="72%" r="78%"><stop offset="0" stop-color="#FFD54A"/><stop offset=".28" stop-color="#FFA126"/><stop offset=".6" stop-color="#FF6A1A"/><stop offset=".85" stop-color="#E4391A"/><stop offset="1" stop-color="#B21E10"/></radialGradient>
 <linearGradient id="lg-t1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#D2260F"/><stop offset="1" stop-color="#F0531A" stop-opacity=".0"/></linearGradient>
 <linearGradient id="lg-t2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFB02E" stop-opacity=".0"/></linearGradient>
@@ -402,13 +494,14 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <linearGradient id="lg-yfire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E0331A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFD54A"/></linearGradient>
 <linearGradient id="lg-pickO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#D9301A"/></linearGradient>
 <filter id="lg-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#5A0E05" flood-opacity=".55"/></filter>
-</defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><h1>Guitaring</h1></div>
+</defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg><h1>Guitaring</h1></div>
   </header>
 
   <nav class="tabs" id="tabs">
     <button data-tab="tune" aria-pressed="true">Tuner</button>
-    <button data-tab="song" aria-pressed="false">Learn a song</button>
+    <button data-tab="song" aria-pressed="false">Songs</button>
     <button data-tab="chords" aria-pressed="false">Chords</button>
+    <button data-tab="gear" aria-pressed="false">My gear</button>
   </nav>
 
   <div class="pane" id="paneTune">
@@ -459,6 +552,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </details>
   </div>
 
+  <div class="pane" id="paneGear" hidden>
+    <section class="card"><h2>My gear</h2><p class="tip">Which guitars do you have?</p><div class="gearpick" id="gearPick"></div></section>
+    <div id="gearOut" class="gearout"></div>
+  </div>
   <div class="pane" id="paneChords" hidden>
     <div class="searchrow" id="chSearchRow">
       <input id="chSearch" class="textin" type="search" placeholder="Search chords, e.g. Am7, G/B, sus2" aria-label="Search chords" autocapitalize="off" autocomplete="off" spellcheck="false">
@@ -515,6 +612,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
           <div class="kctl"><button class="kbtn" id="kPlay" type="button">▶ Play</button><button class="kbtn" id="kFull" type="button">⛶ Karaoke view</button></div>
         </div>
       </div>
+      <button class="btn cta wide lessonbtn" id="lessonBtn" type="button">▶ Open lesson view</button>
       <div class="titlerow">
         <input id="songTitle" type="text" placeholder="Song – artist" aria-label="Song title">
         <span class="chip2" id="tempoChip"></span>
@@ -1084,7 +1182,7 @@ async function analyse(x,prog){
  for(const g of segs){if(g.c<NS&&g.c%NT===A9){const r=Math.floor(g.c/NT);if(drone[(r+2)%12]>.5)g.c=r*NT+MJ}}
  if(segs.length){segs[0].t0=0;segs[segs.length-1].t1=dur}segs=cleanSegs(segs);
  const bpm=bt.bpm||tempo(x);
- return {dur,offset,hist:[...hist],segs,bpm,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
+ return {dur,offset,hist:[...hist],segs,bpm,beats:bt.beats,env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
 }
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const b64u8=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
@@ -1107,7 +1205,7 @@ function beatTimes(x){
  const P=60/bb/dt;let ph=0,pb=-1;for(let f=0;f<P;f++){let sc=0;for(let k=f;k<n;k+=P)sc+=env[Math.round(k)]||0;if(sc>pb){pb=sc;ph=f}}
  const beats=[];let pos=ph;const w=Math.max(1,Math.round(P*.12));
  while(pos<n){let bi=Math.round(pos),bv=-1;for(let d=-w;d<=w;d++){const k=Math.round(pos)+d;if(k>=0&&k<n&&env[k]>bv){bv=env[k];bi=k}}const tb=(bv>0?.6*bi+.4*pos:pos);beats.push(tb*dt);pos=tb+P}
- return {bpm:Math.round(bb),beats};
+ return {bpm:Math.round(bb),beats,env};
 }
 function tempo(x){
  const H=256,n=Math.floor(x.length/H);if(n<200)return 0;const env=new Float32Array(n);let prev=0;
@@ -1148,7 +1246,7 @@ let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=nul
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){if(!['tune','song','chords'].includes(t))t='tune';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
+function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
@@ -1193,7 +1291,7 @@ async function runAnalysis(file){
   const r=await analyse(x,prog);
   let tuning=guessTuning(r.hist,r.segs),src='detected from the sound';
   if(pre!=='auto'){tuning={id:pre,conf:'yours',why:'You chose this tuning before analysing.'};src='your choice'}
-  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,v:2,at:Date.now()};
+  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now()};
   if(pre==='auto'){let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c}
   saveSong();showSong(false);$('doneBanner').hidden=true;
   let chordSrc='detected from the sound',readNote='';
@@ -2170,6 +2268,268 @@ function renderChordDetail(n){
 }
 $('chGrid').addEventListener('click',e=>{const c=e.target.closest('.bookcard');if(!c)return;bookOpen=c.dataset.n;renderBook();window.scrollTo({top:0})});
 $('chSearch').addEventListener('input',()=>renderBook());
+/* ================= Lesson view: video + animated fretboard + tab, like a guitar lesson ================= */
+function rhythmOf(r){if(!r||!r.beats||!r.env)return {};let mx=0;const e=r.env,s=[...e].sort((a,b)=>a-b),p=s[Math.floor(s.length*.995)]||1;const q=new Uint8Array(e.length);for(let i=0;i<e.length;i++)q[i]=Math.min(255,Math.round(e[i]/p*220));
+ return {beats:r.beats.map(v=>Math.round(v*100)/100),ons:{h:256,d:u8b64(q)}}}
+async function ensureRhythm(msg){
+ if(A.beats&&A.beats.length>8&&A.ons)return true;if(!curFile)return false;
+ msg('Getting the beat of the song…');const x=await decodeFile(curFile);const bt=beatTimes(x);Object.assign(A,rhythmOf(bt));saveSong();return !!A.beats;
+}
+let LS=null;// lesson state
+function lessonModel(){
+ const segs=A.segs;let beats=(A.beats&&A.beats.length>8)?A.beats.slice():[];
+ if(!beats.length){const b=60/(A.bpm||90);for(let t=0;t<A.dur;t+=b)beats.push(t)}
+ const dif=beats.slice(1).map((v,i)=>v-beats[i]).sort((a,b)=>a-b),bp=dif[Math.floor(dif.length/2)]||.6;
+ let added=0;while(beats[0]>bp*.5){beats.unshift(beats[0]-bp);added++}
+ while(beats[beats.length-1]<A.dur+bp)beats.push(beats[beats.length-1]+bp);
+ const near=t=>{let lo=0,hi=beats.length-1;while(lo<hi){const m=(lo+hi)>>1;if(beats[m]<t)lo=m+1;else hi=m}return lo>0&&Math.abs(beats[lo-1]-t)<Math.abs(beats[lo]-t)?lo-1:lo};
+ // bars start where most chord changes land
+ const cnt=[0,0,0,0];for(let i=1;i<segs.length;i++){const t=segs[i].t0,j=near(t);if(Math.abs(beats[j]-t)<bp*.35)cnt[j%4]+=Math.min(3,segs[i].t1-segs[i].t0)}
+ let k=cnt.indexOf(Math.max(...cnt));
+ while(k>0&&beats[k]>bp*.25)k-=4;if(k<0){for(let z=0;z<-k;z++)beats.unshift(beats[0]-bp);k=0}
+ const ons=A.ons?b64u8(A.ons.d):null,oh=A.ons?A.ons.h/SR:0;
+ const strength=(t,w)=>{if(!ons)return 0;const a=Math.max(0,Math.floor((t-w)/oh)),b=Math.min(ons.length-1,Math.ceil((t+w)/oh));let m=0;for(let i=a;i<=b;i++)if(ons[i]>m)m=ons[i];return m};
+ const bars=[];
+ for(let j=k;j+4<beats.length&&beats[j]<A.dur;j+=4){const bar={t0:beats[j],t1:beats[j+4],slots:[]};
+  for(let q=0;q<4;q++){const b0=beats[j+q],b1=beats[j+q+1];for(const h of [0,1]){const t=h?(b0+b1)/2:b0;const gi=segAt(t+.02),g=A.segs[gi];bar.slots.push({t,dn:!h,g:g&&g.c<NS?g:null,s:strength(t,Math.min(.07,(b1-b0)*.22))})}}
+  bars.push(bar)}
+ const all=bars.flatMap(b=>b.slots.filter(s=>s.g).map(s=>s.s)).sort((a,b)=>a-b),p90=all[Math.floor(all.length*.9)]||0,thr=p90*.32;
+ let prev='';for(const b of bars)for(const s of b.slots){s.strum=!!s.g&&(ons?s.s>=thr&&s.s>0:s.dn);const n=s.g?nameOf(s.g):'';s.label=n&&n!==prev?n:'';prev=n}
+ // sections: yours if set in feedback, otherwise parts found from repeating chord patterns
+ let secs=(A.sections||[]).slice().sort((a,b)=>a.t-b.t).map(x=>({t:x.t,name:x.name}));
+ if(!secs.length)secs=autoSections(bars);
+ if(!secs.length)secs=[{t:0,name:A.title||'Song'}];secs[0].t=Math.min(secs[0].t,0);
+ secs.forEach((x,i)=>{x.t1=secs[i+1]?secs[i+1].t:A.dur+1});
+ bars.forEach(b=>{const m=b.t0+.1;b.sec=Math.max(0,secs.findIndex(x=>m>=x.t&&m<x.t1))});
+ // start each section on a bar line
+ secs.forEach((x,i)=>{const bi=bars.findIndex(b=>b.sec===i);if(bi>=0){x.t=bars[bi].t0;if(i>0)secs[i-1].t1=x.t}});
+ return {bars,secs,bp};
+}
+// parts of the song found by which chords each 4-bar block uses (verse-like blocks match each other)
+function autoSections(bars){
+ const blocks=[];for(let i=0;i<bars.length;i+=4){const w={};let tot=0;bars.slice(i,i+4).forEach(b=>b.slots.forEach(s=>{if(!s.g)return;const k=canon(nameOf(s.g))||nameOf(s.g);w[k]=(w[k]||0)+1;tot++}));blocks.push({t:bars[i].t0,w,tot})}
+ const cos=(a,b)=>{let d=0,na=0,nb=0;for(const k in a){na+=a[k]*a[k];if(b[k])d+=a[k]*b[k]}for(const k in b)nb+=b[k]*b[k];return na&&nb?d/Math.sqrt(na*nb):0};
+ let lab,cents;
+ for(const th of [.62,.5,.4,.3]){lab=[];cents=[];
+  for(const bl of blocks){if(bl.tot<3){lab.push(-1);continue}let best=-1,bs=0;cents.forEach((c,j)=>{const v=cos(bl.w,c);if(v>bs){bs=v;best=j}});
+   if(best>=0&&bs>=th){lab.push(best);for(const k in bl.w)cents[best][k]=(cents[best][k]||0)+bl.w[k]}else{lab.push(cents.length);cents.push({...bl.w})}}
+  if(cents.length<=5)break}
+ const out=[];blocks.forEach((bl,i)=>{const name=lab[i]<0?'No guitar':'Part '+String.fromCharCode(65+lab[i]);if(!out.length||out[out.length-1].name!==name)out.push({t:bl.t,name})});
+ return out;
+}
+/* vertical fretboard */
+const NK={sx:i=>26+i*18,fy:k=>44+k*54,top:44,frets:5};
+function neckBase(sh){const fr=sh?sh.f.filter(x=>x>0):[];const mx=Math.max(0,...fr);return mx>5?(sh.barre||Math.min(...fr)):1}
+function buildNeck(){
+ let s=`<defs><linearGradient id="lsWood" x1="0" x2="1"><stop offset="0" stop-color="#B98149"/><stop offset=".5" stop-color="#CF9A5E"/><stop offset="1" stop-color="#B07A44"/></linearGradient></defs>`;
+ s+=`<rect x="14" y="${NK.top}" width="114" height="${NK.fy(5)-NK.top+14}" fill="url(#lsWood)" rx="3"/><g id="lsInlay"></g>`;
+ s+=`<rect id="lsNut" x="14" y="${NK.top-6}" width="114" height="7" fill="#EFE6D6"/>`;
+ for(let k=1;k<=5;k++)s+=`<line x1="14" x2="128" y1="${NK.fy(k)}" y2="${NK.fy(k)}" stroke="#D9D3C8" stroke-width="2.4"/>`;
+ for(let i=0;i<6;i++)s+=`<line x1="${NK.sx(i)}" x2="${NK.sx(i)}" y1="${NK.top-6}" y2="${NK.fy(5)+14}" stroke="#F3EEE6" stroke-width="${(2.6-i*.32).toFixed(2)}"/>`;
+ s+=`<text id="lsBaseFr" x="6" y="${NK.fy(0)+32}" fill="#FFE7A3" font-size="13" font-weight="700" text-anchor="middle"></text><g id="lsOpen"></g><g id="lsGhost"></g>`;
+ for(let f=1;f<=4;f++)s+=`<g class="lsf" id="lsf${f}" style="opacity:0"><rect class="lsfr" x="-11" y="-11" width="22" height="22" rx="11"/><text class="lsft" y="4.5" text-anchor="middle">${f}</text></g>`;
+ $('lsNeckSvg').innerHTML=s;
+}
+function fingerGroups(sh){// one entry per finger: strings it holds down (more than one = barre)
+ const out={};if(!sh)return out;let auto=1;
+ sh.f.forEach((f,i)=>{if(f<=0)return;let fi=sh.fi[i]||0;if(!fi){fi=Math.min(4,auto++)}const o=out[fi]||(out[fi]={f,str:[]});if(o.f===f)o.str.push(i)});
+ return out;
+}
+function setNeck(g,ghost){
+ const sh=g?shapeForSeg(g):null,base=neckBase(sh);LS.base=base;
+ $('lsNut').style.opacity=base===1?1:0;$('lsBaseFr').textContent=base>1?base+'fr':'';
+ let inl='';for(let k=0;k<5;k++){const fr=base+k,y=(NK.fy(k)+NK.fy(k+1))/2;if([3,5,7,9,15,17].includes(fr))inl+=`<circle cx="71" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/>`;if(fr===12)inl+=`<circle cx="53" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/><circle cx="89" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/>`}
+ $('lsInlay').innerHTML=inl;
+ let op='';if(sh)sh.f.forEach((f,i)=>{const x=NK.sx(i);if(f===0)op+=`<circle cx="${x}" cy="26" r="6" fill="none" stroke="#F3EEE6" stroke-width="2.2"/>`;else if(f<0)op+=`<path d="M${x-5} 21 L${x+5} 31 M${x+5} 21 L${x-5} 31" stroke="#FF8A7A" stroke-width="2.6" stroke-linecap="round"/>`});
+ $('lsOpen').innerHTML=op;
+ const grp=fingerGroups(sh);
+ for(let f=1;f<=4;f++){const el=$('lsf'+f),o=grp[f];if(!o){el.style.opacity=0;continue}
+  const y=NK.fy(o.f-base)+27,x0=NK.sx(Math.min(...o.str)),x1=NK.sx(Math.max(...o.str)),cx=(x0+x1)/2,w=x1-x0+22;
+  el.style.opacity=1;el.style.transform=`translate(${cx}px,${y}px)`;const r=el.firstChild;r.setAttribute('x',-w/2);r.setAttribute('width',w);el.lastChild.setAttribute('x',o.str.length>1?-w/2+11:0)}
+ setGhost(ghost);
+}
+function setGhost(g){
+ if(!g){$('lsGhost').innerHTML='';return}
+ const sh=shapeForSeg(g),base=LS.base;let s='';
+ if(sh)sh.f.forEach((f,i)=>{if(f<=0)return;const k=f-base;if(k<0||k>4)return;s+=`<circle cx="${NK.sx(i)}" cy="${NK.fy(k)+27}" r="9" fill="none" stroke="#FFE27A" stroke-width="2" stroke-dasharray="3 2.5"/>`});
+ $('lsGhost').innerHTML=s;
+}
+/* tab rows */
+const BW=232;
+function slotX(q){return 20+q*26.5}
+function rowSVG(r){
+ const per=LS.per,b0=r*per,bars=LS.m.bars.slice(b0,b0+per);if(!bars.length)return '';
+ let s='';
+ bars.forEach((bar,bi)=>{const X=bi*BW;
+  for(let l=0;l<6;l++)s+=`<line x1="${X}" x2="${X+BW}" y1="${48+l*11}" y2="${48+l*11}" stroke="#9AA19E" stroke-width=".8"/>`;
+  s+=`<line x1="${X}" x2="${X}" y1="48" y2="103" stroke="#2A2F2D" stroke-width="1.2"/><text x="${X+3}" y="44" font-size="8" fill="#7A817E">${b0+bi+1}</text>`;
+  if(bar.sec!==(LS.m.bars[b0+bi-1]||{}).sec)s+=`<text x="${X+3}" y="10" font-size="8.5" font-weight="700" fill="#B3261E">${esc(LS.m.secs[bar.sec].name.toUpperCase())}</text>`;
+  if(!bar.slots.some(x=>x.g))s+=`<text x="${X+BW/2}" y="80" font-size="11" fill="#7A817E" text-anchor="middle">no guitar</text>`;
+  bar.slots.forEach((sl,q)=>{const x=X+slotX(q);
+   if(sl.label)s+=`<text x="${x-4}" y="22" font-size="11" font-weight="700" fill="#151A19">${esc(sl.label)}</text>`;
+   if(!sl.strum||!sl.g)return;const sh=shapeForSeg(sl.g);if(!sh)return;
+   const played=sh.f.map((f,i)=>({f,i})).filter(o=>o.f>=0);if(!played.length)return;
+   const yTop=48+(5-Math.max(...played.map(o=>o.i)))*11,yBot=48+(5-Math.min(...played.map(o=>o.i)))*11;
+   s+=sl.dn?`<path d="M${x+9} ${yTop-6} V${yBot+2} M${x+6} ${yBot-2} L${x+9} ${yBot+3} L${x+12} ${yBot-2}" stroke="#2A2F2D" stroke-width="1.1" fill="none"/>`:`<path d="M${x+9} ${yBot+2} V${yTop-6} M${x+6} ${yTop-2} L${x+9} ${yTop-7} L${x+12} ${yTop-2}" stroke="#2A2F2D" stroke-width="1.1" fill="none"/>`;
+   played.forEach(o=>{s+=`<text x="${x}" y="${48+(5-o.i)*11+3.6}" font-size="10" font-weight="600" text-anchor="middle" fill="#151A19" stroke="#fff" stroke-width="3" paint-order="stroke">${o.f}</text>`})});
+ });
+ const end=bars.length*BW;s+=`<line x1="${end-.6}" x2="${end-.6}" y1="48" y2="103" stroke="#2A2F2D" stroke-width="1.2"/>`;
+ s+=`<rect class="hlBar" x="0" y="28" width="${BW}" height="82" rx="7" fill="none" stroke="#E0607A" stroke-width="2" opacity="0"/><rect class="hlSlot" x="0" y="40" width="18" height="70" rx="3" fill="#22C55E" opacity="0"/>`;
+ return `<svg viewBox="0 0 ${per*BW} 112" data-row="${r}" preserveAspectRatio="xMinYMin meet">${s}</svg>`;
+}
+function renderRows(r){LS.row=r;$('lsTab').innerHTML=rowSVG(r)+(lessonTwo()?rowSVG(r+1):'')}
+function lessonPer(){return innerWidth>innerHeight?4:2}
+function lessonTwo(){return !(innerWidth>innerHeight&&innerHeight<600)}
+/* open / close / loop */
+async function openLesson(){
+ if(!A||!A.segs||!vid.src){songMsg('Open the song’s video first.');return}
+ const msg=t=>{$('lessonBtn').textContent=t};
+ try{await ensureRhythm(msg)}catch(e){}
+ msg('▶ Open lesson view');
+ LS={m:lessonModel(),per:lessonPer(),row:-1,bar:-1,slot:-1,chord:null,sec:-1,loop:false,raf:0,base:1};
+ LS.home={parent:vid.parentNode,next:vid.nextSibling,controls:vid.controls};
+ $('lsVidHost').appendChild(vid);vid.controls=false;
+ $('lsTitle').textContent=(A.title||'Lesson').toUpperCase();$('lsArtist').textContent=A.artist||tName(A.play.tun)+(A.play.capo?' · capo '+A.play.capo:'');
+ buildNeck();$('lesson').hidden=false;document.body.classList.add('wopen');
+ [...$('lsSpeed').children].forEach(b=>b.setAttribute('aria-pressed',+b.dataset.r===(vid.playbackRate||1)));
+ $('lsLoop').setAttribute('aria-pressed','false');
+ LS.raf=requestAnimationFrame(lessonTick);
+}
+function closeLesson(){
+ if(!LS)return;cancelAnimationFrame(LS.raf);vid.pause();
+ LS.home.parent.insertBefore(vid,LS.home.next);vid.controls=LS.home.controls;
+ $('lesson').hidden=true;document.body.classList.remove('wopen');LS=null;
+}
+function barAt(t){const B=LS.m.bars;let lo=0,hi=B.length-1;if(t<B[0].t0)return 0;while(lo<hi){const m=(lo+hi+1)>>1;if(B[m].t0<=t)lo=m;else hi=m-1}return lo}
+function lessonTick(){
+ if(!LS)return;const t=vid.currentTime,B=LS.m.bars,bi=barAt(t),bar=B[bi];
+ const secI=bar.sec,sec=LS.m.secs[secI];
+ if(LS.loop&&t>=sec.t1-.03&&!vid.paused){vid.currentTime=sec.t;}
+ const per=lessonPer(),two=lessonTwo();if(per!==LS.per||two!==LS.two){LS.per=per;LS.two=two;LS.row=-1;LS.bar=-1}
+ const row=Math.floor(bi/LS.per);if(row!==LS.row)renderRows(row);
+ let q=0;bar.slots.forEach((s,i)=>{if(s.t<=t+.03)q=i});
+ if(bi!==LS.bar||q!==LS.slot){LS.bar=bi;LS.slot=q;const svg=$('lsTab').firstChild;if(svg){const pos=bi-row*LS.per,hb=svg.querySelector('.hlBar'),hs=svg.querySelector('.hlSlot');hb.setAttribute('x',pos*BW+1);hb.setAttribute('opacity',1);hs.setAttribute('x',pos*BW+slotX(q)-9);hs.setAttribute('opacity',bar.slots[q].g?.28:0)}}
+ if(secI!==LS.sec){LS.sec=secI;$('lsBanner').textContent=sec.name.toUpperCase()}
+ // chord now / next
+ const gi=segAt(t),g=A.segs[gi],cur=g&&g.c<NS?g:null,name=cur?nameOf(cur):'';
+ let ni=gi+1;while(A.segs[ni]&&A.segs[ni].c>=NS)ni++;const ng=A.segs[ni],nextIn=ng?ng.t0-t:Infinity;
+ const ghost=ng&&nextIn<LS.m.bp*1.5&&cur?ng:null;
+ if(name!==LS.chord||(!!ghost)!==LS.gh){const changed=name!==LS.chord;LS.chord=name;LS.gh=!!ghost;if(changed)setNeck(cur,ghost);else setGhost(ghost);$('lsNow').textContent=name||'—'}
+ const beatsLeft=ng?Math.max(0,Math.ceil(nextIn/LS.m.bp)):0;
+ $('lsNext').innerHTML=ng?`Next <b>${esc(nameOf(ng))}</b>${nextIn<8?` in ${beatsLeft} beat${beatsLeft===1?'':'s'}`:''}`:'';
+ $('lsPlay').textContent=vid.paused?'▶':'❚❚';
+ LS.raf=requestAnimationFrame(lessonTick);
+}
+$('lessonBtn').onclick=openLesson;
+$('lsClose').onclick=closeLesson;
+$('lsPlay').onclick=()=>{if(vid.paused)vid.play().catch(()=>{});else vid.pause()};
+$('lsVidHost').addEventListener('click',()=>$('lsPlay').click());
+$('lsPrev').onclick=()=>{const t=vid.currentTime,S=LS.m.secs;let i=S.findIndex(x=>t>=x.t&&t<x.t1);if(i>0&&t-S[i].t<1.5)i--;vid.currentTime=Math.max(0,S[Math.max(0,i)].t)};
+$('lsNextBtn').onclick=()=>{const t=vid.currentTime,S=LS.m.secs,i=S.findIndex(x=>x.t>t+.1);if(i>=0)vid.currentTime=S[i].t};
+$('lsSpeed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vid.playbackRate=+b.dataset.r;try{vid.preservesPitch=true}catch(err){}[...$('lsSpeed').children].forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('lsLoop').onclick=()=>{LS.loop=!LS.loop;$('lsLoop').setAttribute('aria-pressed',LS.loop)};
+$('lsTab').addEventListener('click',e=>{const svg=e.target.closest('svg');if(!svg)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*LS.per*BW,bi=+svg.dataset.row*LS.per+Math.floor(x/BW),bar=LS.m.bars[bi];if(bar)vid.currentTime=bar.t0+.01});
+addEventListener('keydown',e=>{if(!LS)return;if(e.key==='Escape')closeLesson();else if(e.key===' '){e.preventDefault();$('lsPlay').click()}});
+
+/* ================= Welcome screen ================= */
+const JOKES=[
+ "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
+ "Metallica paused their world tour when they heard {n} started practising. They might be available soon.",
+ "Breaking: guitar shops report a sudden shortage of picks. Sources point to {n}.",
+ "Your neighbours asked for a set list, {n}. Mostly so they know when to leave.",
+ "Slash heard about you, {n}. He's considering a second hat.",
+ "Eric Clapton wrote “Tears in Heaven”. Your F chord wrote “Tears in the Living Room”. Let's fix that, {n}.",
+ "The guitar has been waiting all day, {n}. It's not angry. Just out of tune.",
+ "Rumour has it Mashina are looking for a stand-in. Warm up, {n}.",
+ "Today's forecast: 90% chance of barre chords, light showers of G/B. Dress warmly, {n}.",
+ "Jimi Hendrix set his guitar on fire. Please just tune yours, {n}.",
+ "Fun fact: 10 minutes a day beats 2 hours on Saturday. Not-so-fun fact: you knew that, {n}.",
+ "Your fingertips called, {n}. They want calluses, and they want them now.",
+ "Pearl Jam's roadie asked if you're free next summer, {n}. Mostly to carry amps. But it's a start.",
+ "Somewhere, a capo is lying in a drawer wondering what it did wrong, {n}.",
+ "Aviv Gefen just sent a sad face emoji. He heard you skipped practice yesterday, {n}.",
+ "Good news, {n}: every great guitarist once played like you. Bad news: they practised.",
+ "Your guitar picked you, {n}. Return the favour.",
+ "Radiohead wrote “Creep” in four chords. You know at least three. Let's go, {n}.",
+ "Oasis broke up over less than a missed chord change. Stay together with your guitar, {n}.",
+ "Statistically, 7 out of 10 cats leave the room when you play, {n}. The other 3 are fans.",
+ "The strings are fresh, the coffee is hot and the excuses are out of stock, {n}.",
+ "The neighbour's dog has started howling in key. That's progress, {n}.",
+ "Keith Richards is still touring. What's your excuse, {n}?",
+ "Legend says if you play “Wonderwall” perfectly, a man in a bucket hat appears. Try it, {n}."
+];
+function welcomeName(){return store.get('userName','')}
+function pickJoke(){const last=store.get('lastJoke',-1);let i;do{i=Math.floor(Math.random()*JOKES.length)}while(JOKES.length>1&&i===last);store.set('lastJoke',i);return i}
+function renderWelcome(){
+ const n=welcomeName(),w=$('welcome');
+ if(!n){w.querySelector('.wbody').innerHTML=`<h2>Welcome to Guitaring</h2><p>What should we call you?</p><form id="wName" class="wnameform"><input id="wNameIn" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" placeholder="Your first name" required><button class="btn cta">Let's go</button></form>`;
+  $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);renderWelcome()};return}
+ const j=JOKES[pickJoke()].replace(/\{n\}/g,esc(n));
+ w.querySelector('.wbody').innerHTML=`<p class="whey">Hey, <button type="button" class="wname" id="wRename" title="Change name">${esc(n)}</button>.</p><p class="wjoke" id="wJoke">${j}</p><button type="button" class="wmore" id="wMore">Another one ↻</button>
+ <div class="wgo"><button class="btn" data-go="tune">Tune up</button><button class="btn" data-go="song">Learn a song</button><button class="btn" data-go="write">Write a song</button><button class="btn" data-go="gear">My gear</button></div>`;
+ $('wMore').onclick=()=>{$('wJoke').innerHTML=JOKES[pickJoke()].replace(/\{n\}/g,esc(n))};
+ $('wRename').onclick=()=>{store.set('userName','');renderWelcome()};
+}
+function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'){setTab('song');$('writeNew').click()}else if(go)setTab(go)}
+$('welcome').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)closeWelcome(b.dataset.go)});
+$('wSkip').onclick=()=>closeWelcome('');
+document.body.classList.add('wopen');renderWelcome();
+
+/* ================= My gear: instrument adviser ================= */
+const GEAR={
+ acoustic:{name:'Acoustic (steel strings)',short:'Acoustic',strings:90,
+  pros:['Loud and full on its own: no amp, no cables, play anywhere.','Bright, ringing sound that suits strumming and singing along.','Builds finger strength fast, which makes every other guitar feel easy.'],
+  cons:['Steel strings are hard on beginner fingertips.','Higher action and thicker neck than an electric, so barre chords take more effort.','Sensitive to humidity and temperature changes.'],
+  use:['Pick weight changes the sound: thin picks for strumming, medium or heavy for single notes.','Strum from the wrist, not the elbow, with the strumming hand moving constantly even when you skip strings.','Play near the soundhole for a warm sound, near the bridge for a brighter one.','A capo lets you play songs in the singer’s key with easy open shapes.'],
+  clean:[['After every session','Wipe the strings, neck and body with a dry microfibre cloth. Sweat is what kills strings and finish.'],['At every string change','Clean the fretboard with a slightly damp cloth. On rosewood or ebony boards, rub in a few drops of fretboard oil (lemon oil) once or twice a year, never on maple boards.'],['Monthly','Polish the body with guitar polish, not household cleaners. Check that strap buttons and tuners are tight.']],
+  care:['Keep it at 45–55% humidity. In dry winters or with the air conditioner on, use a soundhole humidifier and keep it in its case.','Never leave it in a hot car or right next to a heater or air conditioner.','For everyday storage, keep it tuned to pitch rather than loosening the strings, so the neck tension stays even.'],
+  repair:['The strings sit noticeably higher than before, or the bridge starts lifting at the back edge: get it checked straight away.','Cracks in the top or sides, or buzzing that a new set of strings doesn’t fix.','The guitar won’t stay in tune, or notes higher up the neck sound out of tune even when the open strings are right (intonation).','A professional setup once a year, ideally when the season changes.']},
+ classical:{name:'Classical (nylon strings)',short:'Classical',strings:120,
+  pros:['Soft nylon strings that are gentle on the fingers.','Warm, round sound, great for fingerpicking, Spanish and Latin styles, bossa nova.','Wide neck gives fingers room for clean fingerstyle.'],
+  cons:['Wide, flat neck makes some chord shapes and barres a stretch.','Quieter than a steel-string acoustic.','Not the sound for rock or most pop strumming.'],
+  use:['Play with fingertips and nails: thumb (p) on the bass strings, index, middle and ring (i, m, a) on the treble.','Sit with the guitar on your left leg raised (a footstool or support), which keeps the wrist straight.','New nylon strings stretch for several days. Expect to retune often at first.'],
+  clean:[['After every session','Wipe the strings and body with a dry cloth.'],['At every string change','Clean the fretboard and oil it lightly once or twice a year (rosewood or ebony only).'],['Monthly','Polish the body gently. Classical guitars often have thin, delicate finishes, so use very little polish.']],
+  care:['Never put steel strings on a classical guitar. The extra tension can crack the bridge or bend the neck.','Very sensitive to dryness: use a humidifier in dry seasons and keep it in its case.','Keep it away from direct sun and heaters.'],
+  repair:['Cracks in the top, or the bridge lifting.','Buzzing that doesn’t go away with new strings.','The tuning pegs slip or grind.','A yearly check-up with a luthier.']},
+ electroacoustic:{name:'Electro-acoustic (amplified acoustic)',short:'Electro-acoustic',strings:90,
+  pros:['Everything an acoustic does, plus you can plug into an amp or PA for gigs and jams.','Built-in tuner on most models.','Easy to record: plug straight into an audio interface.'],
+  cons:['The pickup and preamp add weight and one more thing that can break.','Can feed back (howl) at high volume on stage.','Needs a battery, and an empty one usually means no sound when plugged in.'],
+  use:['Plug into an acoustic amp or the PA, not an electric guitar amp, for a natural sound.','Start with the guitar’s volume half way and turn the amp up, then fine-tune on the guitar.','If it howls, lower the bass on the preamp, turn the notch or phase control, or use a soundhole cover.','Unplug the cable when you’re not playing: on many guitars the plugged-in cable keeps the battery running.'],
+  clean:[['After every session','Wipe strings, neck and body with a dry cloth.'],['At every string change','Clean and oil the fretboard (rosewood or ebony only). Wipe the output jack with a dry cloth.'],['Monthly','Polish the body and check the battery level.']],
+  care:['Same humidity care as an acoustic: 45–55%, humidifier in dry seasons, keep it in its case.','Change the battery when the sound gets thin, distorted or crackly, or the tuner display dims. Keep a spare in the case.','Store it with the cable unplugged.'],
+  repair:['Crackling or cutting out that a new cable and battery don’t fix: the jack or pickup needs a tech.','Same body warning signs as an acoustic: bridge lifting, cracks, strings sitting higher.','A yearly setup, with a check of the electronics.']},
+ electric:{name:'Electric',short:'Electric',strings:60,
+  pros:['Thin neck, light strings and low action make it the easiest guitar to play.','Endless sounds with amps and effects, from clean to heavy.','Great for bends, solos and quiet practice with headphones.'],
+  cons:['Needs an amp (or headphones and an amp app) to sound like anything.','More gear: cables, amp, pedals, all of which can fail.','Easy to hide sloppy playing behind distortion.'],
+  use:['Practise clean first. If it sounds good clean, it will sound great with distortion.','Use the pickup selector: neck pickup for warm, rounded tones, bridge pickup for bite.','Mute strings you aren’t playing with your palm and spare fingers. Electrics ring loudly.','Turn the amp off or to standby before plugging and unplugging cables.'],
+  clean:[['After every session','Wipe strings, neck and body. Electric strings are thin and rust quickly from sweat.'],['At every string change','Clean and oil the fretboard (rosewood or ebony only), polish the frets and dust around the pickups.'],['Every few months','Clean the pots (volume and tone knobs) with contact cleaner if they crackle.']],
+  care:['Less sensitive to humidity than acoustics, but still keep it away from heat and damp.','Check that the strap buttons and the output jack are tight.','Keep cables coiled loosely. Most “broken guitar” sounds are a bad cable.'],
+  repair:['The strings get much higher or lower, or new buzzing appears: the neck may need a truss-rod adjustment by a tech.','Crackling or dropouts that a new cable doesn’t fix: the jack, switch or wiring.','Notes up the neck sound out of tune when the open strings are right (intonation).','Worn, flat frets that make notes buzz or choke on bends.','A setup once a year, or whenever you change string gauge.']}
+};
+const gearSel=()=>store.get('gear',[]);
+const gearLog=()=>store.get('gearLog',{});
+function daysSince(d){return Math.floor((Date.now()-new Date(d).getTime())/864e5)}
+function renderGear(){
+ const sel=gearSel(),log=gearLog();
+ $('gearPick').innerHTML=Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-g="${k}" aria-pressed="${sel.includes(k)}">${esc(g.short)}</button>`).join('');
+ if(!sel.length){$('gearOut').innerHTML='<p class="tip">Tap the guitars you own to get tips on playing, cleaning, care and when to see a repair tech.</p>';return}
+ $('gearOut').innerHTML=sel.map(k=>{const g=GEAR[k],last=log[k];
+  let st='<span class="gstat">When did you last change strings?</span>';
+  if(last){const d=daysSince(last),left=g.strings-d;st=`<span class="gstat ${left<0?'due':''}">Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}</span>`}
+  const L=a=>`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  return `<section class="card gearcard"><h2>${esc(g.name)}</h2>
+  <div class="gstrings">${st}<label class="gdate">Changed on <input type="date" data-log="${k}" value="${last||''}" max="${new Date().toISOString().slice(0,10)}"></label><span class="tip">Change strings about every ${Math.round(g.strings/30)} months if you play a few times a week, sooner if they sound dull, feel rough or won’t stay in tune.</span></div>
+  <details open><summary>Strengths and limits</summary><div class="procon"><div><b>Good at</b>${L(g.pros)}</div><div><b>Watch out for</b>${L(g.cons)}</div></div></details>
+  <details><summary>Playing tips</summary>${L(g.use)}</details>
+  <details><summary>Cleaning, and when</summary><dl class="gclean">${g.clean.map(([w,t])=>`<dt>${esc(w)}</dt><dd>${esc(t)}</dd>`).join('')}</dl></details>
+  <details><summary>Care and storage</summary>${L(g.care)}</details>
+  <details><summary>When to take it for repair</summary>${L(g.repair)}</details>
+  </section>`}).join('');
+}
+$('gearPick').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;let s=gearSel();const k=b.dataset.g;s=s.includes(k)?s.filter(x=>x!==k):s.concat(k);s.sort((a,b)=>Object.keys(GEAR).indexOf(a)-Object.keys(GEAR).indexOf(b));store.set('gear',s);renderGear()});
+$('gearOut').addEventListener('change',e=>{const i=e.target.closest('[data-log]');if(!i)return;const l=gearLog();if(i.value)l[i.dataset.log]=i.value;else delete l[i.dataset.log];store.set('gearLog',l);renderGear()});
+renderGear();
+
 seedBook();
 
 setBookTun(bookTun);
