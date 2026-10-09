@@ -491,6 +491,16 @@ body.wopen{overflow:hidden}
 .apibox .aion,.apibox .aioff{font-size:10px;padding:2px 8px}
 .apibox>*+*{margin-top:8px}
 .toast{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:80;background:#1A0F0B;color:#FFF6EA;border:1px solid #FF6A1A;border-radius:12px;padding:12px 14px;font:500 14px/1.4 var(--body);box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:520px;margin:0 auto}
+.confbox{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);background:var(--surface)}
+.confhead{display:flex;align-items:center;gap:12px}
+.confpc{font:800 26px/1 var(--display);min-width:62px;text-align:center;padding:6px 4px;border-radius:10px;color:#fff}
+.confhead b{display:block;font-size:15px}.confhead small{display:block;font-size:12.5px;color:var(--muted)}
+.confbox.hi .confpc{background:#2E8B57}.confbox.mid .confpc{background:#D98A1A}.confbox.lo .confpc{background:#C8372D}
+.confbox .tip{margin:0;font-size:13px}
+.qmark{display:inline-block;min-width:15px;height:15px;line-height:15px;border-radius:50%;background:#C8372D;color:#fff;font:700 10px var(--body);text-align:center;vertical-align:super;margin-left:2px}
+.blk.cf-lo{border-color:#C8372D;border-style:dashed}
+.blk.cf-mid{border-color:#D98A1A}
+.confline{font-weight:700}.confline.hi{color:#2E8B57}.confline.mid{color:#B8730F}.confline.lo{color:#C8372D}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -652,6 +662,7 @@ body.wopen{overflow:hidden}
         <div class="nowcard next"><span class="label">Next <b id="nextIn"></b></span><div id="dNext"></div><div class="nbar"><i id="nextBar"></i></div></div>
       </div>
 
+      <div class="confbox" id="confBox" hidden></div>
       <div class="timeline" id="timeline" aria-label="Chord timeline"></div>
       <div class="ctlrow">
         <div class="seg seg3 speed" id="speed">
@@ -1297,7 +1308,7 @@ function showReady(file){
  $('drop').hidden=true;$('writeNew').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
- $('preReadWrap').hidden=!/^video\//.test(file.type||'video/');setReadTxt();$('preRead').checked=store.get('readScreen',true);
+ $('preReadWrap').hidden=!/^video\//.test(file.type||'video/');setReadTxt();$('preRead').checked=store.get('readScreen2',true);
  if(saved){$('readySaved').hidden=false;$('openSaved').hidden=false;$('analyseBtn').textContent='Analyse again';
   $('readySaved').innerHTML=`You analysed this video before${saved.at?' on '+fmtDate(saved.at):''} (${esc(tName(saved.tuning.id))}).`+(saved.v>=2?'':' <b>That was made with an older version of the app</b>, so analysing again should give better results.')}
  else{$('readySaved').hidden=true;$('openSaved').hidden=true;$('analyseBtn').textContent='Analyse chords'}
@@ -1308,11 +1319,11 @@ $('openSaved').onclick=()=>{const saved=loadSong(fileKey);if(!saved)return;A=sav
 $('doneClose').onclick=()=>{$('doneBanner').hidden=true};
 function setSteps(list,active){$('steps').innerHTML=list.map((t,i)=>`<li class="${i<active?'ok':i===active?'now':''}">${esc(t)}${i<active?' ✓':''}</li>`).join('')}
 $('analyseBtn').onclick=()=>runAnalysis(curFile);
-$('preRead').addEventListener('change',e=>store.set('readScreen',e.target.checked));
-function setReadTxt(){$('preReadTxt').textContent=claudeReads()?'Also read the chords and tuning shown in the video (Claude)':'Also read chord names shown in the video'}
+$('preRead').addEventListener('change',e=>store.set('readScreen2',e.target.checked));
+function setReadTxt(){$('preReadTxt').textContent=claudeReads()?'Also check the video: chords written on screen and the guitarist’s hand (Claude)':'Also read chord names written in the video'}
 async function runAnalysis(file){
  if(!file)return;const pre=$('preTun').value,wantRead=!$('preReadWrap').hidden&&$('preRead').checked;
- const steps=['Read the sound','Find chords and tuning'].concat(wantRead?['Read chords shown in the video','Match the timeline to those chords']:[]);
+ const steps=['Read the sound','Find chords and tuning'].concat(wantRead?[claudeReads()?'Check the video: written chords and hand shapes':'Read chord names shown in the video','Match the timeline to the video']:[]);
  $('readyCard').hidden=true;songMsg('');prog(.03,'Reading the sound…');setSteps(steps,0);
  const t0=Date.now();
  try{
@@ -1324,15 +1335,16 @@ async function runAnalysis(file){
   if(pre==='auto'){let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c}
   saveSong();showSong(false);$('doneBanner').hidden=true;
   let chordSrc='detected from the sound',readNote='';
-  if(wantRead){$('songView').hidden=true;$('prog').hidden=false;setSteps(steps,2);const viaC=claudeReads();prog(.9,viaC?'Claude is reading the chords on screen…':'Reading chord names on screen…');
+  if(wantRead){$('songView').hidden=true;$('prog').hidden=false;setSteps(steps,2);const viaC=claudeReads();prog(.9,viaC?'Claude is checking the video: written chords and hand shapes…':'Reading chord names on screen…');
    const res=await readFromVideo({keepTuning:pre!=='auto',onText:t=>{if(!viaC)$('progTxt').textContent=t},onStep:(i,n)=>prog(.9+.09*i/n)});
    if(res.tuningSet)src='read from the video';
-   if(res.ok){setSteps(steps,4);chordSrc=`sound + on-screen chords at ${res.moments} moments in the video`}else readNote=res.msg||'';
+   if(res.ok){setSteps(steps,4);chordSrc=`sound + video (written chords at ${res.moments} moments${res.hands?`, hand shapes at ${res.hands}`:''})`}else readNote=res.msg||'';
    showSong(false);}
   prog(1,'Done');$('prog').hidden=true;
   const uniq=new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g)));
   $('doneTitle').textContent='Chord analysis finished';
-  $('doneText').innerHTML=`${esc(tName(A.tuning.id))} (${esc(src)}) · ${uniq.size} chords, ${A.segs.length} changes, ${esc(chordSrc)} · took ${Math.round((Date.now()-t0)/1000)} s`+(readNote?`<br>${esc(readNote)}`:'')+(wantRead?'':'<br>Tip: if the video shows the chords, enter them under “Use the real chords” for a better timeline.');
+  const cfx=chordConfidence();
+  $('doneText').innerHTML=(cfx?`<span class="confline ${confLvl(cfx.overall)}">Confidence ${Math.round(cfx.overall*100)}% · ${cfx.level}</span><br>`:'')+`${esc(tName(A.tuning.id))} (${esc(src)}) · ${uniq.size} chords, ${A.segs.length} changes, ${esc(chordSrc)} · took ${Math.round((Date.now()-t0)/1000)} s`+(readNote?`<br>${esc(readNote)}`:'')+(wantRead?'':'<br>Tip: if the video shows the chords, enter them under “Use the real chords” for a better timeline.');
   $('doneBanner').hidden=false;window.scrollTo({top:0});clearTimeout(window.__bt);window.__bt=setTimeout(()=>{$('doneBanner').hidden=true},7000);
  }catch(err){
   $('prog').hidden=true;showReady(file);
@@ -1400,8 +1412,56 @@ function updateKara(t,i){
   $('kIn').textContent=nx?(pauseNext?`after a pause`:beats!=null?`in ${beats}`:`in ${leftHere.toFixed(1)}s`):'';
   $('kProg').style.width=Math.min(100,Math.max(0,(t-g.t0)/(g.t1-g.t0)*100))+'%';$('kNext').parentElement.classList.toggle('soon',!!nx&&!pauseNext&&leftHere<1.2)}
 }
+/* ---- confidence: how sure the analysis is about each chord, from the sound and the video ---- */
+function tplOf(root,iv){const v=new Float32Array(12);iv.forEach((x,i)=>{v[(root+x)%12]=i===0?1.3:1});return v}
+function ivOf(g){const q=g.q!=null?g.q:TYPES[g.c%NT].id;return QUAL[q]||QUAL['']}
+let CONF_CANDS=null;
+function chordConfidence(){
+ if(!A||!A.segs||A.kind==='lyrics')return null;
+ const F=A.feat;let C=null,n=0,H=2048,OFF=3072;if(F&&F.c){C=b64u8(F.c);n=F.n;H=F.hop||2048;OFF=F.off??3072}
+ const fOf=t=>Math.max(0,Math.min(n,Math.round((t*SR-OFF)/H)));
+ if(!CONF_CANDS){CONF_CANDS=[];for(let r=0;r<12;r++)for(const q of ['','m','7','m7','maj7','sus2','sus4','5'])CONF_CANDS.push(tplOf(r,QUAL[q]))}
+ const cos=(a,b)=>{let d=0,na=0,nb=0;for(let i=0;i<12;i++){d+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i]}return na&&nb?d/Math.sqrt(na*nb):0};
+ const hints=A.visual||[];
+ const wt=hints.filter(h=>(h.chords||[]).length||h.current).map(h=>h.t).sort((a,b)=>a-b),W=Math.max(1.5,wt.length>1?(wt[wt.length-1]-wt[0])/(wt.length-1)*.6:1.5);
+ let tot=0,acc=0,sAcc=0,sTot=0,vid=0,unsure=0;const per=[];
+ A.segs.forEach((g,i)=>{
+  if(g.c>=NS){per.push(null);return}
+  const d=g.t1-g.t0,name=nameOf(g),k=canon(name);
+  // sound: how well the averaged notes fit this chord, compared with the best-fitting other chord
+  let s=null,margin=0;
+  if(C&&n){const f0=fOf(g.t0+.05),f1=Math.max(f0+1,fOf(g.t1-.05)),v=new Float32Array(12);for(let f=f0;f<f1&&f<n;f++)for(let j=0;j<12;j++)v[j]+=C[f*12+j];
+   const mine=tplOf(Math.floor(g.c/NT),ivOf(g)),me=cos(v,mine),same=T=>T.every((x,j)=>(x>0)===(mine[j]>0));let other=0;for(const T of CONF_CANDS){if(same(T))continue;const c=cos(v,T);if(c>other)other=c}
+   // a clear win over the nearest different chord means the sound is sure; a near tie (e.g. Dm vs Dsus2) means it isn't
+   margin=me-other;s=Math.max(0,Math.min(1,(me-.55)/.3))*Math.max(0,Math.min(1,.3+margin/.07*.7));if(d<.6)s*=.7}
+  // video: written chord names nearby, and the guitarist's hand during the chord
+  let agree=0,disagree=0;
+  for(const h of hints){const inW=h.t>=g.t0-W&&h.t<=g.t1+W,inH=h.t>=g.t0+.1&&h.t<=g.t1-.1;
+   const set=(h.chords||[]).concat(h.current?[h.current]:[]).map(canon);
+   if(inW&&set.length){if(set.includes(k))agree++;else disagree+=.5}
+   if(inH&&h.hand){if(canon(h.hand)===k)agree+=h.hc==='high'?2:1;else disagree+=h.hc==='high'?2:1}}
+  let sc=s==null?.5:s,how='sound';
+  if(agree>disagree){if(s!=null&&margin<-.05){sc=.6;how='video says so, sound differs'}else{sc=Math.min(1,Math.max(sc,.55)+.35);how='sound+video'}}
+  else if(disagree>0&&disagree>=agree){sc=Math.min(sc,.5)*.6;how='video disagrees'}
+  per.push({sc,s,how});
+  tot+=d;acc+=sc*d;if(s!=null){sTot+=d;sAcc+=s*d}if(agree>disagree)vid+=d;if(sc<.4)unsure++;
+ });
+ if(!tot)return null;
+ const overall=acc/tot;
+ return {per,overall,sound:sTot?sAcc/sTot:null,video:hints.length?vid/tot:null,unsure,level:overall>=.7?'High':overall>=.45?'Medium':'Low'};
+}
+const confLvl=x=>x>=.7?'hi':x>=.4?'mid':'lo';
+function renderConf(cf){
+ const box=$('confBox');if(!box)return;if(!cf){box.hidden=true;return}box.hidden=false;
+ const pc=Math.round(cf.overall*100),parts=[];
+ if(cf.sound!=null)parts.push(`Sound ${cf.sound>=.7?'clear':cf.sound>=.45?'partly clear':'unclear'}`);
+ parts.push(cf.video!=null?`video confirmed ${Math.round(cf.video*100)}% of the playing`:'video not checked');
+ box.className='confbox '+confLvl(cf.overall);
+ box.innerHTML=`<div class="confhead"><span class="confpc">${pc}%</span><span><b>${cf.level} confidence</b><small>${esc(parts.join(' · '))}</small></span></div>${cf.unsure?`<p class="tip">${cf.unsure} chord${cf.unsure>1?'s are':' is'} marked <span class="qmark">?</span> in the timeline: the sound was vague${cf.video!=null?' or the video disagreed':''}. Check ${cf.unsure>1?'those':'it'} by ear, or fix ${cf.unsure>1?'them':'it'} in “Use the real chords”.</p>`:cf.overall<.7&&cf.video==null?'<p class="tip">Reading the video (Claude features) usually makes this much more reliable.</p>':''}`;
+}
 function renderTimeline(){
- buildLaneSoon();$('timeline').innerHTML=A.segs.map((g,i)=>{const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));const sec=(A.sections||[]).find(x=>x.t>=g.t0-.01&&x.t<g.t1&&(i===0||x.t>=A.segs[i-1].t1-.01));return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}${g.note?' has-note':''}${g.pin?' pin':''}" data-i="${i}" style="width:${w.toFixed(0)}px">${sec?`<i>${esc(sec.name)}</i>`:''}<b>${esc(nameOf(g))}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
+ const CF=chordConfidence();A.confidence=CF?Math.round(CF.overall*100):null;renderConf(CF);
+ buildLaneSoon();$('timeline').innerHTML=A.segs.map((g,i)=>{const cq=CF&&CF.per[i];const d=g.t1-g.t0,w=Math.max(46,Math.min(220,d*16));const sec=(A.sections||[]).find(x=>x.t>=g.t0-.01&&x.t<g.t1&&(i===0||x.t>=A.segs[i-1].t1-.01));return `<button class="blk${g.c>=NS?' nc':''}${i===selIdx?' sel':''}${g.note?' has-note':''}${g.pin?' pin':''}${cq&&!g.pin?' cf-'+confLvl(cq.sc):''}" data-i="${i}" style="width:${w.toFixed(0)}px" title="${cq?esc('Confidence '+Math.round(cq.sc*100)+'% ('+cq.how+')'):''}">${sec?`<i>${esc(sec.name)}</i>`:''}<b>${esc(nameOf(g))}${cq&&cq.sc<.4&&!g.pin?'<sup class="qmark">?</sup>':''}</b><span>${mmss(g.t0)}${A.bpm?' · '+Math.max(1,Math.round(d*A.bpm/60))+'b':''}</span></button>`}).join('');
 }
 function renderChords(){
  const tot={},order=[],rep={};for(const g of A.segs){if(g.c>=NS)continue;const k=nameOf(g);if(!(k in tot)){tot[k]=0;order.push(k);rep[k]=g}tot[k]+=g.t1-g.t0}
@@ -1501,6 +1561,9 @@ function refit2({vocab,sections,pins,hints=[]}){
  const secAll=sections.map(x=>({...x,states:x.chords.map(get).filter(Boolean)}));
  const fallback=global.length?global:[...new Map(secAll.flatMap(x=>x.states).map(st=>[st.key,st])).values()];
  // chords shown on screen around each moment (from Claude reading the video): favour them there
+ const handAt=new Array(n).fill(null);
+ {const hh=hints.filter(h=>h.hand).map(h=>({t:h.t,key:(get(h.hand)||{}).key||null,w:h.hc==='high'?.75:.35})).filter(h=>h.key);
+  for(const h of hh){const f0=fOf(h.t-.7),f1=fOf(h.t+.7);for(let f=f0;f<=f1&&f<n;f++)if(!handAt[f]||handAt[f].w<h.w)handAt[f]=h}}
  const hintAt=new Array(n).fill(null);
  if(hints.length){const hs=hints.map(h=>({t:h.t,set:new Set((h.chords||[]).map(nm=>{const st=get(nm);return st&&st.key}).filter(Boolean)),cur:h.current?((get(h.current)||{}).key||null):null})).filter(h=>h.set.size||h.cur).sort((a,b)=>a.t-b.t);
   const gap=hs.length>1?(hs[hs.length-1].t-hs[0].t)/(hs.length-1):8,W=Math.max(3,gap*.6);
@@ -1519,7 +1582,7 @@ function refit2({vocab,sections,pins,hints=[]}){
   const L=rg.pattern?rg.states.length:0,S=states.length+1,NCi=S-1;let score=new Float64Array(S).fill(0);const back=[];
   const trans=(i,j)=>{if(i===j)return 0;if(i===NCi||j===NCi)return -P;if(L&&i<L&&j<L)return j===(i+1)%L?-P:-2.6*P;return -P};
   for(let f=rg.f0;f<rg.f1;f++){const sil=SL[f]===1;let cn=0;for(let i=0;i<12;i++)cn+=C[f*12+i]**2;cn=Math.sqrt(cn)||1;const pk=pinAt[f];
-   const em=new Float64Array(S);for(let s2=0;s2<S-1;s2++){const st=states[s2];if(sil){em[s2]=0}else{let dd=0;for(let i=0;i<12;i++)dd+=st.tpl[i]*C[f*12+i];em[s2]=dd/cn+.3*B[f*12+st.bp]/255}if(pk)em[s2]+=pk===st.key?3:-3;const hv=hintAt[f];if(hv&&!pk&&!sil){em[s2]+=hv.cur===st.key?.35:hv.set.has(st.key)?.12:-.12}}
+   const em=new Float64Array(S);for(let s2=0;s2<S-1;s2++){const st=states[s2];if(sil){em[s2]=0}else{let dd=0;for(let i=0;i<12;i++)dd+=st.tpl[i]*C[f*12+i];em[s2]=dd/cn+.3*B[f*12+st.bp]/255}if(pk)em[s2]+=pk===st.key?3:-3;const hv=hintAt[f];if(hv&&!pk&&!sil){em[s2]+=hv.cur===st.key?.35:hv.set.has(st.key)?.12:-.12}const hd=handAt[f];if(hd&&!pk&&!sil&&hd.key===st.key)em[s2]+=hd.w}
    em[NCi]=(sil?1:.25)+(pk?(pk==='NC'?3:-3):0);
    const ns=new Float64Array(S),bp=new Uint8Array(S);
    for(let j=0;j<S;j++){let best=-Infinity,bi=0;if(f===rg.f0){best=0;bi=j}else for(let i=0;i<S;i++){const v=score[i]+trans(i,j);if(v>best){best=v;bi=i}}ns[j]=best+em[j];bp[j]=bi}
@@ -1612,25 +1675,33 @@ async function readFromVideo(opts={}){
  if(!claudeReads())return readFromVideoOCR(opts);
  if(!vid.videoWidth)return {ok:false,msg:'Open the song’s video to read the chords shown in it.'};
  const msg=$('knownMsg'),dur=vid.duration||A.dur,per=Math.max(1,Math.min(imgLimit,10));
- const total=Math.min(60,Math.max(per,Math.round(dur/5))),calls=Math.min(6,Math.ceil(total/per)),N=Math.min(total,calls*per);
- const times=[...Array(N)].map((_,i)=>Math.min(dur-.2,dur*(i+.5)/N));
+ const total=Math.min(60,Math.max(per,Math.round(dur/4))),calls=Math.min(6,Math.ceil(total/per)),N=Math.min(total,calls*per);
+ // half the frames spread evenly (written chords), half in the middle of chords the sound found (the guitarist's hand)
+ const nEven=Math.ceil(N*.6),even=[...Array(nEven)].map((_,i)=>Math.min(dur-.2,dur*(i+.5)/nEven));
+ const mids=A.segs.filter(g=>g.c<NS&&g.t1-g.t0>=.9).sort((a,b)=>(b.t1-b.t0)-(a.t1-a.t0)).map(g=>(g.t0+g.t1)/2);
+ const pick=[];for(const m of mids){if(pick.length>=N-nEven)break;if(!pick.concat(even).some(x=>Math.abs(x-m)<1.2))pick.push(m)}
+ const times=even.concat(pick).sort((a,b)=>a-b);
  const ids=TUNINGS.map(t=>`${t.id} = ${t.name}`).join('; ');
  const hints=[],votes={tuning:{},capo:{}},order=[];
  try{
   for(let c=0;c<calls;c++){const ts=times.slice(c*per,(c+1)*per);if(!ts.length)break;
-   msg.textContent=`Reading the chords on screen… part ${c+1} of ${calls}`;if(opts.onStep)opts.onStep(c,calls);
+   msg.textContent=`Checking the video: written chords and hand shapes… part ${c+1} of ${calls}`;if(opts.onStep)opts.onStep(c,calls);
    const frames=await grabFramesAt(ts);
    const prompt=`These ${frames.length} images are frames from a guitar video, in order, taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
-For each frame, read only guitar chord information shown on screen: chord names written above tab or notation, chord diagrams, or chord names shown as on-screen captions. If one chord is visibly highlighted or marked as the one being played now, give it as "current". Also note the tuning (for example string names at the start of a tab such as D A D G B E, or text like "Drop D") and any capo marking.
+For each frame:
+1. Read the guitar chord information written on screen: chord names above tab or notation, chord diagrams, or chord names shown as captions. If one chord is visibly highlighted or marked as the one being played now, give it as "current".
+2. Look at the guitarist's fretting hand on the neck. If the hand and frets are clear enough to tell which chord shape is being held, name that shape as the guitarist forms it (with a capo, a C shape is still "C"), with your confidence. If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
+Also note the tuning (for example string names at the start of a tab such as D A D G B E, or text like "Drop D") and any capo you can see on the neck or written on screen.
 Do not transcribe lyrics or any other text. If a frame shows no chord names, give an empty list.
 Tuning ids: ${ids}.
-Reply with only JSON: {"tuning": one tuning id or null, "tuning_evidence": short string, "capo": number or null, "frames": [{"t": seconds, "chords": [chord names left to right], "current": chord name or null}]}`;
+Reply with only JSON: {"tuning": one tuning id or null, "tuning_evidence": short string, "capo": number or null, "frames": [{"t": seconds, "chords": [chord names left to right], "current": chord name or null, "hand": chord shape name or null, "hand_conf": "high"|"medium"|"low"|null}]}`;
    const r=await sampleFn.json(prompt,{images:frames.map(f=>f.blob)});
    if(r&&r.tuning&&TUNINGS.some(t=>t.id===r.tuning))votes.tuning[r.tuning]=(votes.tuning[r.tuning]||0)+1;
    if(r&&Number.isInteger(r.capo)&&r.capo>=0&&r.capo<=7)votes.capo[r.capo]=(votes.capo[r.capo]||0)+1;
    const fr=Array.isArray(r&&r.frames)?r.frames:[];
    fr.forEach((x,i)=>{const t=Number.isFinite(+x.t)?+x.t:ts[i];const chords=(Array.isArray(x.chords)?x.chords:[]).map(String).filter(y=>parseChord(y));const cur=x.current&&parseChord(String(x.current))?String(x.current):null;
-    if(chords.length||cur){hints.push({t,chords,current:cur});chords.concat(cur?[cur]:[]).forEach(y=>{if(!order.some(o=>canon(o)===canon(y)))order.push(y)})}});
+    const hand=x.hand&&parseChord(String(x.hand))&&x.hand_conf!=='low'?String(x.hand):null;
+    if(chords.length||cur||hand){hints.push({t,chords,current:cur,hand,hc:hand?x.hand_conf||'medium':null});chords.concat(cur?[cur]:[]).forEach(y=>{if(!order.some(o=>canon(o)===canon(y)))order.push(y)})}});
   }
   return finishVisual({hints,order,votes,opts,how:'read by Claude'});
  }catch(e){const m=e&&e.code==='not_granted'?'Claude’s help isn’t allowed on this page.':e&&e.code==='rate_limited'?'Too many requests right now; try “Read chords from the video” again later.':e&&e.code==='images_unavailable'?'This view can’t send pictures to Claude.':'Couldn’t read the video this time. Try “Read chords from the video” again, or type the chords in.';msg.textContent=m;
@@ -1734,15 +1805,21 @@ async function readFromVideoOCR(opts={}){
  }catch(e){const m=e&&e.code==='ocr_load'?'Couldn’t download the text reader. Check the internet connection and try “Read chords from the video” again.':'Couldn’t read the chord names this time. Try “Read chords from the video” again, or type the chords in.';say(m);return {ok:false,msg:m}}
  finally{try{vid.currentTime=was}catch(e){}}
 }
-async function finishVisual({hints,order,votes,opts,how}){
+async function finishVisual({hints,order,votes,opts,how}){order=order.slice();
  const msg=$('knownMsg'),note=[];let tuningSet=false;const top=o=>Object.entries(o).sort((a,b)=>b[1]-a[1])[0];
  const tv=top(votes.tuning);if(!opts.keepTuning&&tv){const id=tv[0];if(id!==A.tuning.id||A.tuning.conf!=='high'){A.tuning={id,conf:'high',why:'Read from the chords and tab shown in the video.'};A.play.tun=id;A.play.capo=0;tuningSet=true}note.push('tuning '+tName(id))}
  const cv=top(votes.capo);if(cv&&+cv[0]){A.play.capo=+cv[0];note.push('capo on fret '+cv[0])}
  A.visual=hints;fillFeedback();
+ const hands=hints.filter(h=>h.hand),written=hints.filter(h=>(h.chords&&h.chords.length)||h.current).length;
+ if(order.length<2&&hands.length>=2){// no chord names on screen: use the sound's chords plus the shapes seen on the hand
+  const cnt={};hands.forEach(h=>{const k=canon(h.hand);cnt[k]=(cnt[k]||0)+(h.hc==='high'?2:1)});
+  const snd=[...new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g)))];
+  order=snd.concat(hands.map(h=>h.hand).filter((h,i,a)=>cnt[canon(h)]>=2&&a.findIndex(x=>canon(x)===canon(h))===i&&!snd.some(x=>canon(x)===canon(h))));
+ }
  if(order.length<2){saveSong();renderAll();const m='No chord names were found on screen'+(note.length?' ('+note.join(', ')+')':'')+'. The timeline uses the sound only.';msg.textContent=m;return {ok:false,tuningSet,msg:m}}
  $('knownIn').value=order.join(' ');
- const ok=await applyKnown(order.join(' '),`matched to the chords shown in the video at ${hints.length} moments`+(note.length?' ('+note.join(', ')+')':''));
- return {ok,tuningSet,count:new Set(order.map(canon)).size,moments:hints.length,how};
+ const ok=await applyKnown(order.join(' '),`matched to the video: written chords at ${written} moments, hand shapes at ${hands.length}`+(note.length?' ('+note.join(', ')+')':''));
+ return {ok,tuningSet,count:new Set(order.map(canon)).size,moments:written,hands:hands.length,how};
 }
 $('readVid').onclick=async()=>{const btn=$('readVid');btn.disabled=true;try{const r=await readFromVideo({});if(r.ok){$('doneTitle').textContent='Chords read from the video';$('doneText').textContent=`${tName(A.tuning.id)} · ${r.count} chords · timeline redone`;$('doneBanner').hidden=false}}finally{btn.disabled=false}};
 $('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg('');$('vidIn').click()};
