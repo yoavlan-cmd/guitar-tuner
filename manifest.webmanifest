@@ -1,7 +1,7 @@
 {
-  "name": "Six-String Tuner",
-  "short_name": "Tuner",
-  "description": "Guitar tuner with standard, drop and open tunings.",
+  "name": "Guitaring",
+  "short_name": "Guitaring",
+  "description": "Tune your guitar, learn songs from videos and write chord sheets.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
