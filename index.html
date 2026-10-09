@@ -501,6 +501,20 @@ body.wopen{overflow:hidden}
 .blk.cf-lo{border-color:#C8372D;border-style:dashed}
 .blk.cf-mid{border-color:#D98A1A}
 .confline{font-weight:700}.confline.hi{color:#2E8B57}.confline.mid{color:#B8730F}.confline.lo{color:#C8372D}
+.fine{position:relative;width:min(300px,86%);height:22px;margin:6px auto 0;border-radius:11px;background:rgba(127,127,127,.14);opacity:.35;transition:opacity .2s}
+.fine.on{opacity:1}
+.fine .fzone{position:absolute;left:calc(50% - 9.2%);width:18.4%;top:0;bottom:0;border-radius:11px;background:color-mix(in srgb,var(--ok) 28%,transparent)}
+.fine .fmid{position:absolute;left:50%;top:3px;bottom:3px;width:2px;margin-left:-1px;background:var(--ok);opacity:.8}
+.fine i{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--screen-dim);transition:left .12s linear,background .15s;box-shadow:0 0 0 3px rgba(0,0,0,.15)}
+.fine i.flat{background:var(--flat)}.fine i.sharp{background:var(--sharp)}.fine i.ok{background:var(--ok)}
+.fine em{position:absolute;top:24px;font:500 10px var(--mono);font-style:normal;color:var(--screen-dim)}.fine .fl{left:0}.fine .fr{right:0}
+.screen.ok .fine{box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 60%,transparent)}
+.lockbadge{position:absolute;top:46%;right:22px;width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;font:800 26px/46px var(--body);text-align:center;opacity:0;transform:scale(.4);transition:opacity .2s,transform .25s cubic-bezier(.3,1.6,.5,1);pointer-events:none}
+.screen.locked .lockbadge{opacity:1;transform:scale(1)}
+.screen.locked{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok),0 0 28px 4px color-mix(in srgb,var(--ok) 55%,transparent);animation:lockPulse 1.4s ease-out 1}
+.screen.locked .note{transform:scale(1.08);transition:transform .2s}
+.screen.locked .status{font-weight:800}
+@keyframes lockPulse{0%{box-shadow:0 0 0 3px var(--ok),0 0 0 0 color-mix(in srgb,var(--ok) 70%,transparent)}60%{box-shadow:0 0 0 3px var(--ok),0 0 0 22px transparent}100%{box-shadow:0 0 0 3px var(--ok),0 0 28px 4px color-mix(in srgb,var(--ok) 55%,transparent)}}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -557,6 +571,8 @@ body.wopen{overflow:hidden}
     </svg>
     <div class="note" id="note">E<sub>2</sub></div>
     <div class="status" id="status">Tap Listen to start</div>
+    <div class="fine" id="fine" aria-hidden="true"><span class="fzone"></span><span class="fmid"></span><i id="fineDot"></i><em class="fl">−15¢</em><em class="fr">+15¢</em></div>
+    <div class="lockbadge" id="lockBadge" aria-hidden="true">✓</div>
     <span class="live" id="live" hidden><i></i>Live</span>
     <button class="mode" id="modeChip" type="button">Auto</button>
     <div hidden><b id="hz">—</b><b id="tgt">82.41</b><b id="cents">—</b><div class="meter"><i id="lvl"></i><s id="gate"></s></div></div>
@@ -958,10 +974,11 @@ function meter(rms,gate){
 }
 function idle(now){
  if(now-lastHeard<700)return;
- hist=[];needleGoal=0;$('screen').classList.remove('ok');$('hz').textContent='—';$('cents').textContent='—';okSince=0;
+ hist=[];needleGoal=0;$('screen').classList.remove('ok','locked');setFine(null);$('hz').textContent='—';$('cents').textContent='—';okSince=0;
  const st=$('status');st.className='status';st.textContent=locked!=null?`Play string ${6-locked} (${nm(tuning.n[locked])})`:'Play any string';showTarget();
 }
-let holdUntil=0,lastCents=null;
+let holdUntil=0,lastCents=null,trend=[],zoneStr=null;
+function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
 function loop(){
  raf=requestAnimationFrame(loop);analyser.getFloatTimeDomainData(data);
  const now=performance.now(),cfg=NF[nfMode];
@@ -983,20 +1000,29 @@ function loop(){
   let i=locked;if(i==null){let best=1e9;tuning.n.forEach((m,k)=>{const cc=Math.abs(1200*Math.log2(med/fq(m)));if(cc<best){best=cc;i=k}})}
   if(i!==target){target=i;renderStrings()}
   const m=tuning.n[i];let cents=1200*Math.log2(med/fq(m));
-  lastCents=lastCents==null||Math.abs(lastCents-cents)>15?cents:lastCents*.6+cents*.4;cents=lastCents;
+  // smooth small wobbles, follow real peg turns quickly
+  if(lastCents==null||Math.abs(lastCents-cents)>15)lastCents=cents;else{const d=Math.abs(lastCents-cents),a=d<1.5?.18:d<4?.35:.6;lastCents=lastCents*(1-a)+cents*a}cents=lastCents;
+  trend.push({t:now,c:Math.abs(cents)});trend=trend.filter(x=>now-x.t<700);
   const heard=Math.round(69+12*Math.log2(med/a4));
   $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
   $('cents').textContent=(cents>0?'+':'')+cents.toFixed(0);needleGoal=Math.max(-50,Math.min(50,cents));
-  const ok=Math.abs(cents)<=4;$('screen').classList.toggle('ok',ok);$('screen').classList.remove('hold');
-  setHeadState(ok?'ok':cents<0?'flat':'sharp');
-  if(ok){st.className='status ok';st.textContent='In tune ✓';if(!okSince)okSince=now;if(now-okSince>600&&!done.has(i)){done.add(i);renderStrings()}}
-  else{okSince=0;const c=Math.abs(Math.round(cents)),far=Math.abs(cents)>50;st.className='status '+(cents<0?'flat':'sharp');
-   st.textContent=cents<0?(far?'Way too low · tune up ↑':`Tune up ↑ · ${c}¢`):(far?'Way too high · tune down ↓':`Tune down ↓ · ${c}¢`)}
+  // in the zone: enter at ±3¢, stay until ±5¢ (no flicker at the edge); hold it for half a second to lock in
+  const ac=Math.abs(cents),inZone=zoneStr===i&&okSince?ac<=5:ac<=3;
+  const scr=$('screen');scr.classList.remove('hold');setFine(cents,inZone);
+  if(inZone){if(!okSince||zoneStr!==i){okSince=now;zoneStr=i}
+   const held=now-okSince;scr.classList.toggle('ok',true);setHeadState('ok');
+   if(held>=450){if(!scr.classList.contains('locked')){scr.classList.add('locked');try{navigator.vibrate&&navigator.vibrate([45,70,45])}catch(e){}}
+    st.className='status ok';st.textContent=`${nm(m)} in tune ✓`;if(!done.has(i)){done.add(i);renderStrings()}}
+   else{scr.classList.remove('locked');st.className='status ok';st.textContent='Right there · hold it…'}}
+  else{okSince=0;zoneStr=null;scr.classList.remove('ok','locked');setHeadState(cents<0?'flat':'sharp');
+   const c=Math.round(ac),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
+   let hint='';if(!far&&trend.length>4&&now-trend[0].t>450){const d=trend[0].c-ac;if(d>1.5)hint=' · closer';else if(d<-1.5)hint=' · wrong way'}
+   st.textContent=cents<0?(far?'Way too low · tune up ↑':`Tune up ↑ · ${c}¢${hint}`):(far?'Way too high · tune down ↓':`Tune down ↓ · ${c}¢${hint}`)}
  }else if(now<holdUntil){
   // keep the last reading on screen briefly after the note fades, like a clip-on tuner
   $('screen').classList.add('hold');
  }else{
-  lastCents=null;$('screen').classList.remove('hold');setHeadState('');
+  lastCents=null;trend=[];$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
   if(rms>=gate&&r){st.className='status';st.textContent='Pluck one string'}
   else idle(now);
  }
