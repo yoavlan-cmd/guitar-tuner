@@ -485,7 +485,11 @@ body.wopen{overflow:hidden}
 .iphotobig{width:100%;max-height:300px;object-fit:cover;border-radius:12px}
 .aion,.aioff{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
 .aion{background:var(--accent);color:var(--bg)}.aioff{border:1px solid var(--line);color:var(--muted)}
-#apiCard .textin{font-family:var(--body)}
+#apiCard .textin{font-family:var(--body);margin:6px 0}
+.apibox{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;display:flex;flex-direction:column;gap:8px}
+.apibox summary{font:600 13px var(--body);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px}
+.apibox .aion,.apibox .aioff{font-size:10px;padding:2px 8px}
+.apibox>*+*{margin-top:8px}
 .toast{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:80;background:#1A0F0B;color:#FFF6EA;border:1px solid #FF6A1A;border-radius:12px;padding:12px 14px;font:500 14px/1.4 var(--body);box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:520px;margin:0 auto}
 </style>
 
@@ -604,10 +608,10 @@ body.wopen{overflow:hidden}
       <span>Type the lyrics, then tap words to put chords above them.</span>
     </button>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
-    <section class="card" id="apiCard" hidden></section>
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
       <div class="liblist" id="libList"></div>
+      <details class="apibox" id="apiCard" hidden></details>
     </section>
     <section class="card" id="readyCard" hidden>
       <h2>Ready to analyse</h2>
@@ -1782,8 +1786,8 @@ function claudeOn(fn,lim){sampleFn=fn;imgLimit=lim;setReadTxt();$('aiAsk').hidde
 function claudeOff(){sampleFn=null;imgLimit=0;setReadTxt();$('aiAsk').hidden=true;$('aiNote').textContent='Add your Claude key under Songs → Claude features to turn this on. The search links work everywhere.';try{renderGear()}catch(e){}}
 function renderAiCard(){
  const c=$('apiCard');if(window.claude){c.hidden=true;return}c.hidden=false;const k=apiKey();
- c.innerHTML=k?`<div class="cardhead"><h2>Claude features</h2><span class="aion">On</span></div><p class="tip">Reading chords from videos, photo analysis, guitar advice and song suggestions use your key (${esc(k.slice(0,10))}…${esc(k.slice(-4))}). It’s stored only on this phone.</p><div class="editrow"><button class="btn ghost" id="aiTest" type="button">Test it</button><button class="btn ghost danger" id="aiRemove" type="button">Remove key</button></div><p class="tip" id="aiMsg" role="status"></p>`
- :`<div class="cardhead"><h2>Claude features</h2><span class="aioff">Off</span></div><p class="tip">Turn on chord reading from video frames, photo analysis, model-specific guitar advice and smarter feedback by adding your own Claude API key.</p>
+ c.innerHTML=k?`<summary>Claude features <span class="aion">On</span></summary><p class="tip">Reading chords from videos, photo analysis, guitar advice and song suggestions use your key (${esc(k.slice(0,10))}…${esc(k.slice(-4))}). It’s stored only on this phone.</p><div class="editrow"><button class="btn ghost" id="aiTest" type="button">Test it</button><button class="btn ghost danger" id="aiRemove" type="button">Remove key</button></div><p class="tip" id="aiMsg" role="status"></p>`
+ :`<summary>Claude features <span class="aioff">Off</span></summary><p class="tip">Turn on chord reading from video frames, photo analysis, model-specific guitar advice and smarter feedback by adding your own Claude API key.</p>
  <ol class="tip gdsteps"><li>Go to <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>, sign in, and add a few dollars of credit under Billing.</li><li>Under API keys, tap <b>Create key</b> and copy it.</li><li>Paste it here.</li></ol>
  <input id="aiKeyIn" class="textin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"><button class="btn cta wide" id="aiSave" type="button">Save and test</button><p class="tip" id="aiMsg" role="status">Usage is billed to your API account: about 1 cent per photo or question, about 15 cents to read the chords from a 5-minute video. The key is stored only on this phone and sent only to Anthropic.</p>`;
  const test=async()=>{$('aiMsg').textContent='Testing…';try{const t=await apiCall('Reply with the single word OK.',{},10);$('aiMsg').textContent=/ok/i.test(t)?'Working. Claude features are on.':'Claude answered, so the key works.';return true}catch(e){$('aiMsg').textContent=apiErr(e);return false}};
