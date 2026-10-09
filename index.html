@@ -462,6 +462,31 @@ body.wopen{overflow:hidden}
  .lsSpeed button,.lsLoop{padding:5px 10px;font-size:12px}
  .lsNow{font-size:22px}
 }
+.instlist{display:flex;flex-direction:column;gap:6px}
+.instrow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:11px 13px;cursor:pointer;font:inherit}
+.instrow b{font-size:16px}.instrow span{font-size:13px;color:var(--muted)}.instrow span.due{color:#D9301A;font-weight:600}
+.chips2{display:flex;flex-wrap:wrap;gap:6px;text-transform:none;letter-spacing:0;font-weight:500}
+.specgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.instform .namefield input{width:100%;min-width:0}
+.specchips{display:flex;flex-wrap:wrap;gap:5px}.specchips span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 9px;color:var(--muted)}
+.aibox{background:var(--bg);border-radius:10px;padding:8px 12px!important;border:0!important}
+.aibox b{display:block;margin-top:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.aibox p{margin:6px 0;font-size:14.5px;line-height:1.45}
+.instdel{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.instrow{flex-direction:row;align-items:center;gap:12px}
+.itxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ithumb{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:0 0 auto;background:var(--surface)}
+.ithumb.none{display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid var(--line)}
+.iphoto{display:flex;flex-direction:column;align-items:center;gap:8px}
+.iphoto img,.iphoto0{width:150px;height:150px;border-radius:18px;object-fit:cover;border:1px solid var(--line)}
+.iphoto0{display:flex;align-items:center;justify-content:center;font-size:52px;background:var(--bg)}
+.iphotobtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.iphoto .tip{text-align:center;margin:0}
+.iphotobig{width:100%;max-height:300px;object-fit:cover;border-radius:12px}
+.aion,.aioff{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+.aion{background:var(--accent);color:var(--bg)}.aioff{border:1px solid var(--line);color:var(--muted)}
+#apiCard .textin{font-family:var(--body)}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:80;background:#1A0F0B;color:#FFF6EA;border:1px solid #FF6A1A;border-radius:12px;padding:12px 14px;font:500 14px/1.4 var(--body);box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:520px;margin:0 auto}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -553,7 +578,6 @@ body.wopen{overflow:hidden}
   </div>
 
   <div class="pane" id="paneGear" hidden>
-    <section class="card"><h2>My gear</h2><p class="tip">Which guitars do you have?</p><div class="gearpick" id="gearPick"></div></section>
     <div id="gearOut" class="gearout"></div>
   </div>
   <div class="pane" id="paneChords" hidden>
@@ -580,6 +604,7 @@ body.wopen{overflow:hidden}
       <span>Type the lyrics, then tap words to put chords above them.</span>
     </button>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
+    <section class="card" id="apiCard" hidden></section>
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
       <div class="liblist" id="libList"></div>
@@ -1725,7 +1750,58 @@ $('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('c
 function renderLinks(){const t=(A&&A.title)||'';if(!t){$('links').innerHTML='<p class="tip">Type the song name above to get search links.</p>';return}
  const q=[['Acoustic',t+' acoustic'],['Unplugged / live',t+' unplugged live'],['Guitar lesson',t+' guitar lesson'],['Acoustic cover',t+' acoustic cover']];
  $('links').innerHTML=q.map(([l,s])=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(s)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}
-(async()=>{try{if(window.claude&&window.claude.use)sampleFn=await window.claude.use('sample')}catch(e){sampleFn=null}if(sampleFn){try{const lim=await sampleFn.limits();imgLimit=lim&&lim.images?lim.images.maxCount:0}catch(e){imgLimit=0}setReadTxt();$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.'}})();
+/* ---- phone app: Claude features through your own API key ---- */
+const API_URL='https://api.anthropic.com/v1/messages',API_MODEL='claude-sonnet-5-5';
+const apiKey=()=>store.get('apiKey','');
+const blobB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+async function apiCall(prompt,opts={},maxTokens=3000){
+ const content=[];
+ for(const im of (opts.images||[]).slice(0,10)){const b=im instanceof Blob?im:new Blob([im]);content.push({type:'image',source:{type:'base64',media_type:b.type&&/^image\/(jpeg|png|webp|gif)$/.test(b.type)?b.type:'image/jpeg',data:await blobB64(b)}})}
+ content.push({type:'text',text:prompt});
+ let r;
+ try{r=await fetch(API_URL,{method:'POST',signal:opts.signal,headers:{'content-type':'application/json','x-api-key':apiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:API_MODEL,max_tokens:maxTokens,messages:[{role:'user',content}]})})}
+ catch(e){if(e&&e.name==='AbortError')throw Object.assign(new Error('cancelled'),{code:'cancelled'});throw Object.assign(new Error('Couldn’t reach Claude. Check the internet connection.'),{code:'network'})}
+ if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}
+  const code=r.status===429||r.status===529?'rate_limited':r.status===401||r.status===403?'bad_key':r.status===400&&/credit|balance/i.test(m)?'no_credit':'api_error';
+  throw Object.assign(new Error(m||('Claude error '+r.status)),{code})}
+ const d=await r.json();return (d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+}
+function makeApiSample(){
+ const s=async(prompt,opts={})=>({text:await apiCall(prompt,opts),truncated:false});
+ s.limits=async()=>({maxPromptBytes:262144,images:{maxCount:10,maxInputBytes:2e7,mediaTypes:['image/jpeg','image/png','image/webp']}});
+ s.json=async(prompt,opts={})=>{const t=await apiCall(prompt+'\n\nAnswer with the JSON only, no other text.',opts);
+  const m=t.replace(/```(?:json)?/g,'').match(/[\[{][\s\S]*[\]}]/);if(!m)throw Object.assign(new Error('invalid_json'),{code:'invalid_json'});
+  try{return JSON.parse(m[0])}catch(e){throw Object.assign(new Error('invalid_json'),{code:'invalid_json'})}};
+ s.viaApi=true;
+ // key, credit and connection problems get a clear note wherever Claude was used
+ const wrap=f=>async(...a)=>{try{return await f(...a)}catch(e){if(e&&['bad_key','no_credit','network','api_error'].includes(e.code))toast(apiErr(e));throw e}};
+ const w=wrap(s),wj=wrap(s.json);w.json=wj;w.limits=s.limits;w.viaApi=true;return w;
+}
+function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.innerHTML=m;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>{t.hidden=true},7000)}
+function claudeOn(fn,lim){sampleFn=fn;imgLimit=lim;setReadTxt();$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.';if(!$('readyCard').hidden&&curFile)showReady(curFile);try{renderGear()}catch(e){}}
+function claudeOff(){sampleFn=null;imgLimit=0;setReadTxt();$('aiAsk').hidden=true;$('aiNote').textContent='Add your Claude key under Songs → Claude features to turn this on. The search links work everywhere.';try{renderGear()}catch(e){}}
+function renderAiCard(){
+ const c=$('apiCard');if(window.claude){c.hidden=true;return}c.hidden=false;const k=apiKey();
+ c.innerHTML=k?`<div class="cardhead"><h2>Claude features</h2><span class="aion">On</span></div><p class="tip">Reading chords from videos, photo analysis, guitar advice and song suggestions use your key (${esc(k.slice(0,10))}…${esc(k.slice(-4))}). It’s stored only on this phone.</p><div class="editrow"><button class="btn ghost" id="aiTest" type="button">Test it</button><button class="btn ghost danger" id="aiRemove" type="button">Remove key</button></div><p class="tip" id="aiMsg" role="status"></p>`
+ :`<div class="cardhead"><h2>Claude features</h2><span class="aioff">Off</span></div><p class="tip">Turn on chord reading from video frames, photo analysis, model-specific guitar advice and smarter feedback by adding your own Claude API key.</p>
+ <ol class="tip gdsteps"><li>Go to <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>, sign in, and add a few dollars of credit under Billing.</li><li>Under API keys, tap <b>Create key</b> and copy it.</li><li>Paste it here.</li></ol>
+ <input id="aiKeyIn" class="textin" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…"><button class="btn cta wide" id="aiSave" type="button">Save and test</button><p class="tip" id="aiMsg" role="status">Usage is billed to your API account: about 1 cent per photo or question, about 15 cents to read the chords from a 5-minute video. The key is stored only on this phone and sent only to Anthropic.</p>`;
+ const test=async()=>{$('aiMsg').textContent='Testing…';try{const t=await apiCall('Reply with the single word OK.',{},10);$('aiMsg').textContent=/ok/i.test(t)?'Working. Claude features are on.':'Claude answered, so the key works.';return true}catch(e){$('aiMsg').textContent=apiErr(e);return false}};
+ if(k){$('aiTest').onclick=test;$('aiRemove').onclick=()=>{store.set('apiKey','');claudeOff();renderAiCard()};return}
+ $('aiSave').onclick=async()=>{const v=$('aiKeyIn').value.trim();if(!/^sk-ant-/.test(v)){$('aiMsg').textContent='That doesn’t look like a Claude API key. It starts with sk-ant-.';return}
+  store.set('apiKey',v);if(await test()){claudeOn(makeApiSample(),10);renderAiCard();$('aiMsg').textContent='Working. Claude features are on.'}else{store.set('apiKey','')}};
+}
+function apiErr(e){const c=e&&e.code;
+ if(c==='bad_key')return 'Claude didn’t accept this key. Check you copied all of it, or create a new one.';
+ if(c==='no_credit')return 'The key works, but the account has no credit. Add some under Billing on platform.claude.com.';
+ if(c==='rate_limited')return 'Claude is busy right now. Try again in a minute.';
+ if(c==='network')return 'Couldn’t reach Claude. Check the internet connection.';
+ return 'Claude returned an error'+(e&&e.message?': '+esc(e.message):'.');}
+(async()=>{let fn=null;try{if(window.claude&&window.claude.use)fn=await window.claude.use('sample')}catch(e){fn=null}
+ if(fn){let lim=0;try{const l=await fn.limits();lim=l&&l.images?l.images.maxCount:0}catch(e){}claudeOn(fn,lim)}
+ else if(!window.claude&&apiKey())claudeOn(makeApiSample(),10);
+ else if(!window.claude)claudeOff();
+ renderAiCard()})();
 let aiCtl=null;
 $('aiAsk').onclick=async()=>{
  if(!sampleFn||!A)return;const out=$('aiOut'),btn=$('aiAsk');
@@ -2506,29 +2582,190 @@ const GEAR={
   care:['Less sensitive to humidity than acoustics, but still keep it away from heat and damp.','Check that the strap buttons and the output jack are tight.','Keep cables coiled loosely. Most “broken guitar” sounds are a bad cable.'],
   repair:['The strings get much higher or lower, or new buzzing appears: the neck may need a truss-rod adjustment by a tech.','Crackling or dropouts that a new cable doesn’t fix: the jack, switch or wiring.','Notes up the neck sound out of tune when the open strings are right (intonation).','Worn, flat frets that make notes buzz or choke on bends.','A setup once a year, or whenever you change string gauge.']}
 };
-const gearSel=()=>store.get('gear',[]);
-const gearLog=()=>store.get('gearLog',{});
+/* ---- my instruments: each guitar with its own details and advice ---- */
+const SPEC_Q={
+ top:{label:'Top',for:['acoustic','classical','electroacoustic'],opts:[['solid','Solid wood'],['laminate','Laminate (layered)'],['unknown','Not sure']]},
+ board:{label:'Fretboard',for:['acoustic','classical','electroacoustic','electric'],opts:[['rosewood','Rosewood / pau ferro / walnut'],['ebony','Ebony'],['maple','Maple (light colour, lacquered)'],['unknown','Not sure']]},
+ finish:{label:'Finish',for:['acoustic','classical','electroacoustic','electric'],opts:[['gloss','Gloss'],['satin','Satin / matte'],['nitro','Nitrocellulose (vintage-style)'],['unknown','Not sure']]},
+ elec:{label:'Pickup system',for:['electroacoustic'],opts:[['active','Preamp with battery'],['passive','Passive pickup (no battery)'],['unknown','Not sure']]},
+ bridge:{label:'Bridge',for:['electric'],opts:[['fixed','Fixed bridge'],['vintage','Tremolo / whammy bar (Strat-style)'],['floyd','Locking tremolo (Floyd Rose / Edge)'],['bigsby','Bigsby vibrato'],['unknown','Not sure']]},
+ pickups:{label:'Pickups',for:['electric'],opts:[['single','Single-coils'],['humbucker','Humbuckers'],['mixed','Mixed (e.g. H-S-S)'],['active','Active pickups (battery)'],['unknown','Not sure']]},
+ body:{label:'Body',for:['electric'],opts:[['solid','Solid body'],['semi','Semi-hollow / hollow'],['unknown','Not sure']]}
+};
+// common models, matched on "brand model"; specs fill the form, notes go to that guitar only
+const MODELS=[
+ {re:/yamaha.*\b(f[gs])\s?-?(8\d\d|7\d\d)/i,type:'acoustic',s:{top:'solid',board:'rosewood',finish:'gloss'},n:['A solid spruce top on a budget guitar: its sound gets fuller and more open the more you play it.','Back and sides are laminate, so it copes with humidity changes better than an all-solid guitar.']},
+ {re:/yamaha.*\bf[gs]\s?-?(1|5)\d\d\b|yamaha.*\bf3\d\d/i,type:'acoustic',s:{top:'laminate',board:'rosewood',finish:'gloss'},n:['Laminate top: very tough and stable, a good guitar to take anywhere.']},
+ {re:/yamaha.*\bc\s?-?(40|45|70|80)\b/i,type:'classical',s:{top:'laminate',board:'rosewood',finish:'gloss'},n:['A laminate-top student classical: robust and forgiving. A good set of normal-tension nylon strings makes a big difference to its sound.']},
+ {re:/yamaha.*\b(cg|cgx|ntx|gc)\s?-?\d/i,type:'classical',s:{top:'solid',board:'ebony'},n:['Solid-top Yamaha classical: keep humidity steady, it’s the part that makes the sound and the part most sensitive to dryness.']},
+ {re:/yamaha.*\bapx/i,type:'electroacoustic',s:{elec:'active',board:'rosewood',finish:'gloss'},n:['Thin body: less bass when played unplugged, but very resistant to feedback on stage.','The preamp runs on a battery, so keep a spare in the case.']},
+ {re:/yamaha.*\b(a[123]|ac[1-5]|fsx|fgx|ll\d+.*are)/i,type:'electroacoustic',s:{top:'solid',elec:'active'},n:['Yamaha preamps run on batteries. When the sound thins out or crackles, change the battery first.']},
+ {re:/taylor.*\bgs\s?mini/i,type:'acoustic',s:{top:'solid',board:'ebony'},n:['Smaller body and shorter scale than a full-size guitar: slightly lower string tension, so it’s easy on the fingers. Many players use slightly heavier strings on it to fill out the sound.','The “-e” versions have a pickup system with a battery.']},
+ {re:/taylor.*\b1\d\d/i,type:'acoustic',s:{top:'solid',board:'ebony'},n:['100 series: solid top with layered back and sides, so it’s more forgiving of humidity than Taylor’s all-solid guitars.','Taylor’s bolt-on neck makes neck adjustments (resets) easier and cheaper than on glued-neck guitars.']},
+ {re:/taylor.*\b2\d\d/i,type:'acoustic',s:{top:'solid',board:'ebony'},n:['200 series: solid top with layered back and sides on most models.','Taylor’s bolt-on neck makes neck adjustments (resets) easier and cheaper than on glued-neck guitars.']},
+ {re:/taylor.*\b[3-9]\d\d/i,type:'acoustic',s:{top:'solid',board:'ebony',finish:'gloss'},n:['All-solid Taylor: beautiful tone, and the most sensitive to dry air. A humidifier in dry seasons is a must.','Taylor’s ES2 pickup (on “-e” models) is powered by a 9 V battery inside the body.','Taylor’s bolt-on neck makes neck adjustments (resets) easier and cheaper than on glued-neck guitars.']},
+ {re:/martin.*\b(d|hd|om|000|00)-?(15|16|17|18|21|28|35|42|45)/i,type:'acoustic',s:{top:'solid',board:'ebony'},n:['All-solid Martin: it rewards care. Keep humidity at 45–55% all year, especially in Israeli summers with the air conditioner on and in dry winters.','Have a tech check the neck angle every few years. Older solid guitars sometimes need a neck reset.']},
+ {re:/martin.*\b(d|000|00|lx|dx|gpc|dc)?-?x\d|martin.*\blx/i,type:'acoustic',s:{top:'unknown'},n:['Martin X series and the Little Martin use a high-pressure laminate for much of the body: very tough against humidity and knocks, great as a go-anywhere guitar.']},
+ {re:/gibson.*\b(j-?45|hummingbird|dove|j-?200|sj)/i,type:'acoustic',s:{top:'solid',board:'rosewood',finish:'nitro'},n:['Nitrocellulose finish: some rubber and vinyl stand pads and straps can react with it and leave marks. Use nitro-safe stands and polish.','Its glued-in neck means a future neck reset is a luthier job.']},
+ {re:/gibson.*\b(les\s?paul|lp)\b/i,type:'electric',s:{body:'solid',bridge:'fixed',pickups:'humbucker',board:'rosewood',finish:'nitro'},n:['Angled headstock: the most common Les Paul injury is a cracked headstock from a fall. Never lean it against a wall or amp, use a stand or the case.','Heavy guitar: a wide padded strap saves your shoulder.','Nitrocellulose finish: use nitro-safe stands and polish.']},
+ {re:/gibson.*\bsg\b/i,type:'electric',s:{body:'solid',bridge:'fixed',pickups:'humbucker',board:'rosewood',finish:'nitro'},n:['The neck joins the body high up, so the neck can dip when you let go (“neck dive”). A grippy suede strap helps.','Angled headstock: never lean it against a wall, use a stand or the case.']},
+ {re:/(gibson|epiphone).*\b(es-?3[34]5|es-?3[34]9|casino|riviera|dot)\b/i,type:'electric',s:{body:'semi',bridge:'fixed',pickups:'humbucker'},n:['Semi-hollow body: warm and airy, but it can feed back with lots of gain or volume. Face away from the amp, or lower the gain.']},
+ {re:/epiphone.*\b(les\s?paul|lp)/i,type:'electric',s:{body:'solid',bridge:'fixed',pickups:'humbucker',finish:'gloss'},n:['Angled headstock: never lean it against a wall or amp, use a stand or the case.','A great guitar to learn setup on. A professional setup and new strings often make it feel like a much more expensive instrument.']},
+ {re:/epiphone.*\bsg\b/i,type:'electric',s:{body:'solid',bridge:'fixed',pickups:'humbucker'},n:['Light and comfortable, but the neck can dip when you let go. A grippy strap helps.']},
+ {re:/(fender|squier).*\bstrat/i,type:'electric',s:{body:'solid',bridge:'vintage',pickups:'single'},n:['Positions 2 and 4 on the 5-way switch are the classic “in-between” Strat sounds. They also cancel hum.','The tremolo can pull strings out of tune when you bend. Stretch new strings well, and lubricate the nut slots with graphite (a soft pencil) at string changes.']},
+ {re:/(fender|squier).*\btele/i,type:'electric',s:{body:'solid',bridge:'fixed',pickups:'single'},n:['Fixed bridge: stays in tune well and string changes are simple.','Single-coil pickups hum near screens and lights. Turn away from the hum source.']},
+ {re:/(fender|squier).*\b(jazzmaster|jaguar|mustang)/i,type:'electric',s:{body:'solid',bridge:'vintage',pickups:'single'},n:['Offset vibrato: gentle and expressive. Strings 10s or heavier help keep them seated in the bridge.']},
+ {re:/(fender).*\b(cd-?60|cd-?140|cc-?60|fa-?\d+|redondo|malibu|newporter)/i,type:'acoustic',s:{top:'unknown',board:'rosewood'},n:['Check the label inside: many of these have a solid spruce top (the “S” in CD-60S), which makes them more sensitive to dry air than all-laminate versions.']},
+ {re:/ibanez.*\b(rg|s|jem|js)\s?\d/i,type:'electric',s:{body:'solid',pickups:'humbucker',board:'rosewood'},n:['Thin, fast neck built for speed. If yours has an Edge locking tremolo, change strings one at a time so the bridge stays balanced.']},
+ {re:/ibanez.*\b(aeg|aew|aem|aeb)/i,type:'electroacoustic',s:{elec:'active'},n:['Slim cutaway body designed for stage use. The preamp runs on a battery.']},
+ {re:/prs.*\b(custom|ce|s2|se|mccarty|silver\s?sky)/i,type:'electric',s:{body:'solid',pickups:'humbucker',board:'rosewood'},n:['Many PRS models split the humbuckers into single-coil sounds with the tone knob pull or a mini-switch. Try it for cleaner, brighter tones.']},
+ {re:/gretsch/i,type:'electric',s:{body:'semi',bridge:'bigsby'},n:['Hollow and semi-hollow Gretsch guitars feed back easily at high volume.','Bigsby vibrato: a gentle shimmer, not dive-bombs. String changes are easier if you bend the string end into a hook before slipping it onto the bar.']},
+ {re:/ovation|adamas|applause/i,type:'electroacoustic',s:{elec:'active'},n:['Round back: comfortable on stage, but it slides off the lap. A strap helps even when sitting.','Very feedback-resistant, which is why it’s a stage classic. The preamp runs on a battery.']},
+ {re:/takamine/i,type:'electroacoustic',s:{elec:'active'},n:['Takamine preamps run on a battery (often a 9 V or AA pack behind the preamp). When the sound weakens or crackles, change it first.']},
+ {re:/cordoba.*\bfusion/i,type:'classical',s:{top:'solid'},n:['Fusion series: narrower neck than a traditional classical, plus a cutaway and pickup. Easier for players coming from steel-string guitars.']},
+ {re:/cordoba|alhambra|admira|raimundo|esteve|hanika|ramirez/i,type:'classical',s:{top:'solid'},n:['Solid-top classical: humidity care matters. The top is thin and sensitive to dry air.','Tie the strings carefully at the bridge with an extra loop on the trebles so they don’t slip.']},
+ {re:/seagull|art\s?&?\s?lutherie|simon\s?&?\s?patrick|norman/i,type:'acoustic',s:{top:'solid'},n:['Godin’s Canadian acoustics (Seagull, Art & Lutherie) mostly use a solid cedar or spruce top with laminate back and sides: a warm sound that matures with playing.','The tapered headstock keeps the strings in a straight line, which helps tuning stability.']},
+ {re:/godin.*\b(a6|a12|multiac|grand\s?concert)/i,type:'electroacoustic',s:{elec:'active'},n:['Chambered body built for stage: very resistant to feedback, but quieter unplugged than a normal acoustic.']},
+ {re:/(cort|harley\s?benton|washburn|ibanez|epiphone|squier|yamaha|jackson|esp|ltd|schecter)/i,type:null,s:{},n:[]}
+];
+const BRAND_LIST=['Yamaha','Taylor','Martin','Gibson','Epiphone','Fender','Squier','Ibanez','PRS','Gretsch','Takamine','Ovation','Cordoba','Alhambra','Admira','Seagull','Godin','Cort','Harley Benton','Washburn','Guild','Eastman','Jackson','ESP','LTD','Schecter','Lâg','Sigma','Furch','Breedlove','Rickenbacker'];
+function matchModel(brand,model){const k=(brand+' '+model).trim();if(k.length<4)return null;return MODELS.find(m=>m.re.test(k))||null}
+const instAll=()=>store.get('instruments',null)||migrateGear();
+function migrateGear(){const old=store.get('gear',[]),log=store.get('gearLog',{});const list=old.map((t,i)=>({id:'i'+Date.now().toString(36)+i,name:'My '+GEAR[t].short.toLowerCase(),type:t,brand:'',model:'',year:'',specs:{},strings:log[t]||'',added:Date.now()}));store.set('instruments',list);return list}
+const instSave=l=>store.set('instruments',l);
+let instEdit=null,instOpen=null;
 function daysSince(d){return Math.floor((Date.now()-new Date(d).getTime())/864e5)}
+function stringsStatus(it){const g=GEAR[it.type];const per=it.specs&&it.specs.top==='solid'?g.strings:g.strings;if(!it.strings)return {txt:'Strings: no date yet',due:false};const d=daysSince(it.strings),left=per-d;return {txt:`Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}`,due:left<0}}
 function renderGear(){
- const sel=gearSel(),log=gearLog();
- $('gearPick').innerHTML=Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-g="${k}" aria-pressed="${sel.includes(k)}">${esc(g.short)}</button>`).join('');
- if(!sel.length){$('gearOut').innerHTML='<p class="tip">Tap the guitars you own to get tips on playing, cleaning, care and when to see a repair tech.</p>';return}
- $('gearOut').innerHTML=sel.map(k=>{const g=GEAR[k],last=log[k];
-  let st='<span class="gstat">When did you last change strings?</span>';
-  if(last){const d=daysSince(last),left=g.strings-d;st=`<span class="gstat ${left<0?'due':''}">Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}</span>`}
-  const L=a=>`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
-  return `<section class="card gearcard"><h2>${esc(g.name)}</h2>
-  <div class="gstrings">${st}<label class="gdate">Changed on <input type="date" data-log="${k}" value="${last||''}" max="${new Date().toISOString().slice(0,10)}"></label><span class="tip">Change strings about every ${Math.round(g.strings/30)} months if you play a few times a week, sooner if they sound dull, feel rough or won’t stay in tune.</span></div>
-  <details open><summary>Strengths and limits</summary><div class="procon"><div><b>Good at</b>${L(g.pros)}</div><div><b>Watch out for</b>${L(g.cons)}</div></div></details>
-  <details><summary>Playing tips</summary>${L(g.use)}</details>
-  <details><summary>Cleaning, and when</summary><dl class="gclean">${g.clean.map(([w,t])=>`<dt>${esc(w)}</dt><dd>${esc(t)}</dd>`).join('')}</dl></details>
-  <details><summary>Care and storage</summary>${L(g.care)}</details>
-  <details><summary>When to take it for repair</summary>${L(g.repair)}</details>
-  </section>`}).join('');
+ const l=instAll();
+ if(instEdit){renderInstForm();return}
+ if(instOpen){const it=l.find(x=>x.id===instOpen);if(it){renderInstDetail(it);return}instOpen=null}
+ $('gearOut').innerHTML=`<section class="card"><div class="cardhead"><h2>My gear</h2><button class="btn" id="instAdd" type="button">+ Add a guitar</button></div>
+ ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">🎸</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
+ :'<p class="tip">Add the guitars you own: give each one a name, its brand and model, and get advice for that exact instrument. They stay here until you remove them.</p>'}</section>`;
+ $('instAdd').onclick=()=>{instEdit={id:'',name:'',type:'acoustic',brand:'',model:'',year:'',specs:{},strings:''};renderGear()};
 }
-$('gearPick').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;let s=gearSel();const k=b.dataset.g;s=s.includes(k)?s.filter(x=>x!==k):s.concat(k);s.sort((a,b)=>Object.keys(GEAR).indexOf(a)-Object.keys(GEAR).indexOf(b));store.set('gear',s);renderGear()});
-$('gearOut').addEventListener('change',e=>{const i=e.target.closest('[data-log]');if(!i)return;const l=gearLog();if(i.value)l[i.dataset.log]=i.value;else delete l[i.dataset.log];store.set('gearLog',l);renderGear()});
+$('gearOut').addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r){instOpen=r.dataset.open;renderGear();window.scrollTo({top:0})}});
+function specFields(it){return Object.entries(SPEC_Q).filter(([k,q])=>q.for.includes(it.type)).map(([k,q])=>`<label class="namefield">${esc(q.label)}<select data-spec="${k}"><option value="">Choose…</option>${q.opts.map(([v,t])=>`<option value="${v}" ${it.specs[k]===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`).join('')}
+
+function dataUrlBlob(u){const [h,b]=u.split(','),m=h.match(/:(.*?);/)[1],s=atob(b),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return new Blob([a],{type:m})}
+// shrink a photo so it fits on the phone (about 40–70 KB)
+function shrinkPhoto(file,max=560){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.78))};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
+function wirePhoto(it,sync){
+ $('iPhotoIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;sync();try{it.photo=await shrinkPhoto(f);it._pmsg=claudeReads()?'Nice. Tap “Let Claude look at the photo” to fill in the details from it.':'Photo added.';it.photoNotes=null}catch(err){it._pmsg='That image couldn’t be opened. Try a JPG or PNG photo.'}renderInstForm()};
+ if($('iPhotoDel'))$('iPhotoDel').onclick=()=>{sync();it.photo='';it.photoNotes=null;it._pmsg='';renderInstForm()};
+ if($('iPhotoAsk'))$('iPhotoAsk').onclick=async()=>{sync();const b=$('iPhotoAsk');b.disabled=true;b.textContent='Claude is looking…';
+  const opts=k=>SPEC_Q[k].opts.map(o=>o[0]).filter(v=>v!=='unknown').join('|');
+  const prompt=`This is a photo of a guitarist's own guitar. Report only what you can see or what is strongly indicated (for example a readable logo or a distinctive design). Use null when unsure; never guess a model you can't support.
+Reply with only JSON: {"type": "acoustic"|"classical"|"electroacoustic"|"electric"|null, "brand": string|null, "model": string|null, "confidence": "high"|"medium"|"low", "specs": {"top": "${opts('top')}"|null, "board": "${opts('board')}"|null, "finish": "${opts('finish')}"|null, "elec": "${opts('elec')}"|null, "bridge": "${opts('bridge')}"|null, "pickups": "${opts('pickups')}"|null, "body": "${opts('body')}"|null}, "observations": [short sentences about notable visible features, e.g. cutaway, preamp on the side, pickup layout], "check": [short sentences on visible things worth checking, e.g. rusty strings, worn frets, a crack, a lifting bridge; empty if none]}
+Notes: a classical guitar has nylon strings tied at the bridge and a wide slotted headstock; an electro-acoustic has a preamp panel or an output jack; "top" solid vs laminate is usually not visible, so give null unless obvious.`;
+  try{const r=await sampleFn.json(prompt,{images:[dataUrlBlob(it.photo)]});
+   const filled=[];
+   if(r&&r.type&&GEAR[r.type]&&r.type!==it.type){it.type=r.type;filled.push('type')}
+   if(r&&r.brand&&!it.brand){it.brand=String(r.brand);filled.push('brand')}
+   if(r&&r.model&&!it.model&&r.confidence!=='low'){it.model=String(r.model);filled.push('model')}
+   if(r&&r.specs)for(const [k,v] of Object.entries(r.specs)){if(v&&SPEC_Q[k]&&SPEC_Q[k].for.includes(it.type)&&SPEC_Q[k].opts.some(o=>o[0]===v)&&(!it.specs[k]||it.specs[k]==='unknown')){it.specs[k]=v;filled.push(SPEC_Q[k].label.toLowerCase())}}
+   it.photoNotes={observations:(r&&r.observations)||[],check:(r&&r.check)||[],at:Date.now()};
+   it._pmsg=(r&&r.brand?`Looks like ${[r.brand,r.model].filter(Boolean).join(' ')}${r.confidence?` (${r.confidence} confidence)`:''}. `:'Claude couldn’t tell the brand from this photo. ')+(filled.length?`Filled in: ${filled.join(', ')}. Check them before saving.`:'Nothing new to fill in.');
+  }catch(err){it._pmsg=err&&err.code==='rate_limited'?'Too many requests right now. Try again in a little while.':'Claude couldn’t look at the photo this time. Try again.'}
+  renderInstForm()};
+}
+function renderInstForm(){
+ const it=instEdit,m=matchModel(it.brand,it.model);
+ $('gearOut').innerHTML=`<section class="card instform"><h2>${it.id?'Edit guitar':'Add a guitar'}</h2>
+ <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">🎸</div>'}<div class="iphotobtns"><label class="btn ghost">📷 ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn" id="iPhotoAsk">Let Claude look at the photo</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
+ <label class="namefield">Name it <input id="iName" type="text" dir="auto" maxlength="40" placeholder="e.g. Old faithful, The red one" value="${esc(it.name)}"></label>
+ <div class="namefield">Type<div class="chips2" id="iType">${Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${it.type===k}">${esc(g.short)}</button>`).join('')}</div></div>
+ <div class="wrow"><label class="namefield">Brand <input id="iBrand" type="text" list="iBrands" autocomplete="off" value="${esc(it.brand)}" placeholder="e.g. Yamaha"></label><label class="namefield">Year <input id="iYear" type="text" inputmode="numeric" maxlength="4" value="${esc(it.year)}" placeholder="optional"></label></div>
+ <datalist id="iBrands">${BRAND_LIST.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+ <label class="namefield">Model <input id="iModel" type="text" autocomplete="off" value="${esc(it.model)}" placeholder="e.g. FG800, Stratocaster, GS Mini-e"></label>
+ <p class="tip" id="iMatch">${m&&m.n.length?'✓ Recognised. The details below were filled in for this model; change anything that’s different on yours.':(it.brand||it.model)?'Not in the app’s list yet. Fill in what you know below; “Not sure” is fine.':'The model is usually on a label inside the soundhole, or on the back of the headstock.'}</p>
+ <div class="specgrid" id="iSpecs">${specFields(it)}</div>
+ <label class="namefield">Strings last changed <input id="iStrings" type="date" value="${esc(it.strings)}" max="${new Date().toISOString().slice(0,10)}"></label>
+ <div class="editrow"><button class="btn cta" id="iSave" type="button">${it.id?'Save changes':'Add to my gear'}</button><button class="btn ghost" id="iCancel" type="button">Cancel</button></div></section>`;
+ const sync=()=>{it.name=$('iName').value.trim();it.brand=$('iBrand').value.trim();it.model=$('iModel').value.trim();it.year=$('iYear').value.trim();it.strings=$('iStrings').value};
+ const recheck=()=>{sync();const mm=matchModel(it.brand,it.model);if(mm&&mm.n.length&&mm!==it._m){it._m=mm;if(mm.type&&mm.type!==it.type)it.type=mm.type;it.specs={...it.specs,...mm.s};renderInstForm();const f=$('iModel');f.focus();f.setSelectionRange(f.value.length,f.value.length)}else if(!mm&&it._m){it._m=null;$('iMatch').textContent='Not in the app’s list yet. Fill in what you know below; “Not sure” is fine.'}};
+ $('iBrand').addEventListener('change',recheck);$('iModel').addEventListener('input',()=>{clearTimeout(it._t);it._t=setTimeout(recheck,500)});
+ $('iType').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;sync();it.type=b.dataset.t;renderInstForm()};
+ $('iSpecs').onchange=e=>{const s=e.target.closest('[data-spec]');if(s){if(s.value)it.specs[s.dataset.spec]=s.value;else delete it.specs[s.dataset.spec]}};
+ $('iCancel').onclick=()=>{instEdit=null;renderGear()};
+ wirePhoto(it,sync);
+ $('iSave').onclick=()=>{sync();if(!it.name)it.name=[it.brand,it.model].filter(Boolean).join(' ')||'My '+GEAR[it.type].short.toLowerCase();
+  const l=instAll();const clean={id:it.id||'i'+Date.now().toString(36),name:it.name,type:it.type,brand:it.brand,model:it.model,year:it.year,specs:it.specs,strings:it.strings,added:it.added||Date.now(),ai:it.ai,photo:it.photo||'',photoNotes:it.photoNotes||null};
+  if(it.ai&&it._key&&it._key!==(it.brand+'|'+it.model))delete clean.ai;
+  const i=l.findIndex(x=>x.id===clean.id);if(i>=0)l[i]=clean;else l.push(clean);instSave(l);
+  if(clean.photo&&!(instAll().find(x=>x.id===clean.id)||{}).photo){clean.photo='';l[l.findIndex(x=>x.id===clean.id)]=clean;instSave(l);$('iPhotoMsg').textContent='This phone’s storage is full, so the photo couldn’t be saved. The rest was saved.';instEdit=null;instOpen=clean.id;setTimeout(renderGear,2200);return}
+  instEdit=null;instOpen=clean.id;renderGear();window.scrollTo({top:0})};
+}
+// advice for this guitar: the type's basics, adjusted by its specs and model
+function instAdvice(it){
+ const g=GEAR[it.type],sp=it.specs||{},m=matchModel(it.brand,it.model);
+ const pros=[...g.pros],cons=[...g.cons],use=[...g.use],care=[...g.care],repair=[...g.repair];let clean=g.clean.map(x=>[...x]);
+ if(sp.top==='solid'){care.unshift('Solid top: it makes the sound and it reacts most to humidity. Keep it at 45–55% and watch for a sunken or bulging top.');pros.push('Solid top: the tone keeps opening up over the years as you play it.')}
+ if(sp.top==='laminate'){pros.push('Laminate top: tough against knocks, heat and humidity swings. A great travel and beach guitar.');cons.push('Laminate top: a slightly less open sound than solid wood, and it changes less with age.')}
+ const noOil=t=>t.replace(' On rosewood or ebony boards, rub in a few drops of fretboard oil (lemon oil) once or twice a year, never on maple boards.','').replace('Clean the fretboard and oil it lightly once or twice a year (rosewood or ebony only).','Clean the fretboard with a slightly damp cloth.').replace('Clean and oil the fretboard (rosewood or ebony only).','Clean the fretboard with a slightly damp cloth.').replace('Clean and oil the fretboard (rosewood or ebony only),','Clean the fretboard,');
+ clean=clean.map(([w,t])=>[w,noOil(t)]);
+ if(sp.board==='maple')clean.push(['Maple fretboard','Wipe it with a slightly damp cloth. Never oil a lacquered maple board.']);
+ else if(sp.board!=='rosewood'&&sp.board!=='ebony')clean.push(['Fretboard','If it’s dark, unfinished wood (rosewood, ebony), oil it lightly once or twice a year at a string change. If it’s light, lacquered maple, never oil it.']);
+ if(sp.board==='rosewood'||sp.board==='ebony')clean.push(['Once or twice a year',`Rub a few drops of fretboard oil into the ${sp.board} fretboard at a string change, then wipe off the excess. It keeps the wood from drying and cracking.`]);
+ if(sp.finish==='nitro')care.push('Nitrocellulose finish: some rubber or vinyl stand pads, straps and gig-bag linings can react with it and leave marks. Use nitro-safe stands and polish, and avoid silicone polishes.');
+ if(sp.finish==='satin')clean.push(['Satin finish','Don’t polish it with gloss polish or rub hard: it leaves shiny patches. A dry or slightly damp cloth is enough.']);
+ if(sp.elec==='active')care.push('Your preamp runs on a battery: unplug the cable after playing (it often keeps the preamp on) and keep a spare battery in the case.');
+ if(sp.elec==='passive')pros.push('Passive pickup: no battery to run flat. It usually sounds best through an acoustic amp or a preamp/DI box.');
+ if(sp.bridge==='vintage'){use.push('Use the tremolo arm gently, and stretch new strings well. Graphite (a soft pencil) in the nut slots helps it return to pitch.');repair.push('The guitar goes flat after using the bar, or the bridge plate tilts much more than before: the tremolo springs need adjusting.')}
+ if(sp.bridge==='floyd'){use.push('Locking tremolo: tune with the fine tuners on the bridge once the nut is locked. Unlock the nut for big tuning changes.');clean.push(['At string changes','Change strings one at a time (or block the bridge with a piece of wood or a block) so the bridge stays level.']);repair.push('The bridge no longer sits parallel to the body after tuning: the springs need balancing, a quick job for a tech.')}
+ if(sp.bridge==='bigsby')use.push('Bigsby: a gentle shimmer, not dive-bombs. Bend the string end into a hook before slipping it onto the bar at string changes.');
+ if(sp.bridge==='fixed')pros.push('Fixed bridge: stays in tune well and string changes are quick.');
+ if(sp.pickups==='single')cons.push('Single-coil pickups hum near screens and lights. Turn away from the source, or use the in-between positions if you have them.');
+ if(sp.pickups==='humbucker')pros.push('Humbuckers: quiet (no hum), thick and warm, great with distortion.');
+ if(sp.pickups==='active')care.push('Active pickups use a 9 V battery. Unplug the cable when you finish, since it switches them on, and change the battery when the sound gets thin or distorts.');
+ if(sp.body==='semi')cons.push('Semi-hollow body: feeds back at high volume or gain. Face away from the amp.');
+ const notes=m?m.n:[];
+ return {pros,cons,use,care,repair,clean,notes};
+}
+function renderInstDetail(it){
+ const a=instAdvice(it),g=GEAR[it.type],st=stringsStatus(it),L=x=>`<ul>${x.map(y=>`<li>${esc(y)}</li>`).join('')}</ul>`;
+ const specTxt=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean);
+ const ai=it.ai;
+ $('gearOut').innerHTML=`<section class="card gearcard">
+ <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">Edit</button></div>
+ <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
+ ${it.photo?`<img class="iphotobig" src="${it.photo}" alt="${esc(it.name)}">`:''}
+ ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
+ <div class="gstrings"><span class="gstat ${st.due?'due':''}">${esc(st.txt)}</span><label class="gdate">Changed on <input type="date" id="iStr" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label><button class="btn ghost" id="iStrToday" type="button">Changed them today</button></div>
+ ${a.notes.length?`<details open><summary>About your ${esc(it.model||it.brand||'guitar')}</summary>${L(a.notes)}</details>`:''}
+ ${it.photoNotes&&(it.photoNotes.observations||[]).concat(it.photoNotes.check||[]).length?`<details open class="aibox"><summary>From your photo</summary>${(it.photoNotes.observations||[]).length?`<ul>${it.photoNotes.observations.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}${(it.photoNotes.check||[]).length?`<b>Worth checking</b><ul>${it.photoNotes.check.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}</details>`:''}
+ <div id="iAi">${ai?aiHTML(it):''}</div>
+ ${sampleFn&&!ai&&(it.brand||it.model)?`<button class="btn ghost wide" id="iAsk" type="button">Ask Claude about this exact model</button>`:''}
+ <details ${a.notes.length?'':'open'}><summary>Strengths and limits</summary><div class="procon"><div><b>Good at</b>${L(a.pros)}</div><div><b>Watch out for</b>${L(a.cons)}</div></div></details>
+ <details><summary>Playing tips</summary>${L(a.use)}</details>
+ <details><summary>Cleaning, and when</summary><dl class="gclean">${a.clean.map(([w,t])=>`<dt>${esc(w)}</dt><dd>${esc(t)}</dd>`).join('')}</dl></details>
+ <details><summary>Care and storage</summary>${L(a.care)}</details>
+ <details><summary>When to take it for repair</summary>${L(a.repair)}</details>
+ <div class="instdel"><button class="btn ghost danger" id="iDel" type="button">Remove this guitar</button><div class="confirm" id="iDelC" hidden><span>Remove “${esc(it.name)}” from your gear? (Sold it? Congrats.)</span><button class="btn danger" id="iDelY" type="button">Remove</button><button class="btn ghost" id="iDelN" type="button">Keep</button></div></div>
+ </section>`;
+ const upd=f=>{const l=instAll(),x=l.find(y=>y.id===it.id);if(x){f(x);instSave(l)}renderGear()};
+ $('iBack').onclick=()=>{instOpen=null;renderGear()};
+ $('iEdit').onclick=()=>{instEdit={...it,specs:{...it.specs},_key:it.brand+'|'+it.model};renderGear()};
+ $('iStr').onchange=e=>upd(x=>x.strings=e.target.value);
+ $('iStrToday').onclick=()=>upd(x=>x.strings=new Date().toISOString().slice(0,10));
+ $('iDel').onclick=()=>{$('iDelC').hidden=false};$('iDelN').onclick=()=>{$('iDelC').hidden=true};
+ $('iDelY').onclick=()=>{instSave(instAll().filter(x=>x.id!==it.id));instOpen=null;renderGear()};
+ if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
+}
+function aiHTML(it){const a=it.ai,L=x=>Array.isArray(x)&&x.length?`<ul>${x.map(y=>`<li>${esc(String(y))}</li>`).join('')}</ul>`:'';
+ return `<details open class="aibox"><summary>From Claude: your ${esc([it.brand,it.model].filter(Boolean).join(' '))}</summary>${a.summary?`<p>${esc(a.summary)}</p>`:''}${a.specs&&a.specs.length?`<b>Typical specs</b>${L(a.specs)}`:''}${a.strengths&&a.strengths.length?`<b>What it does best</b>${L(a.strengths)}`:''}${a.weaknesses&&a.weaknesses.length?`<b>Limits</b>${L(a.weaknesses)}`:''}${a.known_issues&&a.known_issues.length?`<b>Things to watch on this model</b>${L(a.known_issues)}`:''}${a.care&&a.care.length?`<b>Care for this model</b>${L(a.care)}`:''}${a.strings?`<b>Strings</b><p>${esc(a.strings)}</p>`:''}${a.setup&&a.setup.length?`<b>Setup tips</b>${L(a.setup)}`:''}<p class="tip">Claude’s general knowledge of this model. Details can differ by year and version.</p></details>`}
+async function askClaudeInst(it){
+ const b=$('iAsk');b.disabled=true;b.textContent='Claude is looking into your guitar…';
+ const sp=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown').map(([k,v])=>`${k}: ${v}`).join(', ');
+ const prompt=`A guitarist owns this instrument: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}, type ${GEAR[it.type].name}${sp?`, they say: ${sp}`:''}.
+Give accurate, practical advice specific to this exact model. If you don't know this exact model, say so in the summary and base the advice on the closest model you do know, saying which. Don't invent specs you aren't confident about. Keep each item to one short sentence.
+Reply with only JSON: {"summary": string, "specs": [strings], "strengths": [strings], "weaknesses": [strings], "known_issues": [strings], "care": [strings], "strings": string (recommended string type and gauge), "setup": [strings]}`;
+ try{const opt={modelTier:'default'};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];const r=await sampleFn.json(prompt+(opt.images?'\nA photo of this exact guitar is attached; use it to confirm the version and to spot anything worth checking.':''),opt);const l=instAll(),x=l.find(y=>y.id===it.id);if(x&&r){x.ai=r;x.aiAt=Date.now();instSave(l)}renderGear()}
+ catch(e){b.disabled=false;b.textContent=e&&e.code==='rate_limited'?'Too many requests. Try again in a little while.':'Couldn’t reach Claude. Tap to try again.'}
+}
 renderGear();
+
 
 seedBook();
 
