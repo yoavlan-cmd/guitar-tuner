@@ -1,5 +1,5 @@
 // Offline support for the tuner. Bump VERSION whenever index.html changes.
-const VERSION = 'tuner-v23';
+const VERSION = 'tuner-v24';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -32,7 +32,7 @@ self.addEventListener('fetch', e => {
   }
 
   // Fonts and app files: serve the saved copy, refresh it in the background.
-  const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdnjs.cloudflare.com';
+  const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'cdn.jsdelivr.net';
   if (isFont || url.origin === self.location.origin) {
     e.respondWith(
       caches.open(VERSION).then(async c => {
