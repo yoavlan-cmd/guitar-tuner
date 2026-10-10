@@ -369,6 +369,15 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wl.sec{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:10px}
 .ww{display:inline-flex;flex-direction:column;align-items:flex-start;border:0;background:none;color:var(--ink);font:inherit;padding:2px 3px;border-radius:6px;cursor:pointer;min-width:18px}
 .ww .c{font:700 14px var(--mono);color:var(--accent);min-height:18px;line-height:18px;white-space:nowrap}
+.wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
+.wl.slots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl.slots .ww .t{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
+.shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
+.shotbig{position:fixed;inset:0;z-index:70;background:#000d;display:flex;align-items:center;justify-content:center;padding:12px}.shotbig img{max-width:100%;max-height:100%;object-fit:contain}
+.shotcol{display:flex;flex-direction:column;gap:4px;flex:0 0 auto;max-height:260px;overflow:auto}.shotcol img{width:64px}
+.shotlist{display:flex;flex-direction:column;gap:6px}.shotrow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:6px}.shotrow img{width:56px;height:72px;object-fit:cover;border-radius:6px;cursor:zoom-in}.shotinfo{flex:1;display:flex;flex-direction:column}.shotinfo b{font-size:16px}.shotinfo small{color:var(--muted)}.shotbtns{display:flex;gap:4px}.shotbtns .btn{padding:6px 10px}
+#shotCard .editrow{flex-wrap:wrap}
+.shotthumbs{display:flex;gap:6px;flex-wrap:wrap}.shotthumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.paper .ly.slots{column-gap:1.4em}
 .ww .c:empty::before{content:"+";color:var(--line);font-weight:400}
 .ww:hover,.ww:focus-visible{background:var(--bg)}
 .ww.on{background:var(--accent);color:var(--bg)}.ww.on .c{color:var(--bg)}
@@ -683,6 +692,12 @@ body.wopen{overflow:hidden}
       <b>Choose a song video</b>
       <span>MP4 works best. The sound is analysed on this device and nothing is uploaded.</span>
     </label>
+    <button class="drop write" id="shotNew" type="button">
+      <b>Chord sheet from a screenshot</b>
+      <span>One or more screenshots of a song, top first. Claude reads the chords and lyrics and joins them; you check and edit before anything is saved.</span>
+    </button>
+    <input id="shotIn" type="file" accept="image/*" multiple hidden>
+    <section class="card" id="shotCard" hidden></section>
     <button class="drop write" id="writeNew" type="button">
       <b>Write a song sheet</b>
       <span>Type the lyrics, then tap words to put chords above them.</span>
@@ -840,11 +855,14 @@ body.wopen{overflow:hidden}
         <textarea id="wLyrics" class="lyricsin" dir="auto" rows="14" placeholder="Type or paste the lyrics, English or Hebrew.
 
 [Chorus] on its own line marks a section.
-For a line with chords only, type dashes: Intro - - - -"></textarea>
+For a chords-only part (intro, solo, ending), use the buttons below."></textarea>
+        <div class="wslot"><span>Add a chords-only part where the cursor is:</span><div class="idchips"><button type="button" class="chip" data-part="Intro">Intro</button><button type="button" class="chip" data-part="Instrumental">Instrumental</button><button type="button" class="chip" data-part="Solo">Solo</button><button type="button" class="chip" data-part="Ending">Ending</button><button type="button" class="chip" data-part="">No label</button></div></div>
         <button class="btn cta wide" id="wNext">Next: add chords</button>
       </section>
       <section class="card" id="wStep2" hidden>
-        <p class="tip">Tap a word to put a chord above it. Tap it again to change or remove the chord.</p>
+        <div class="shotnote" id="wShotNote" hidden></div>
+        <p class="tip">Tap a word to put a chord above it. Tap it again to change or remove the chord. In a chords-only line, each ♪ is a spot for one chord.</p>
+        <button type="button" class="btn ghost" id="wIns">＋ Add a chords-only line</button>
         <div class="wlines" id="wLines"></div>
         <button class="btn cta wide" id="wDone">Make the chord sheet</button>
       </section>
@@ -1449,7 +1467,7 @@ $('vidIn').addEventListener('change',async e=>{
 });
 $('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 function showReady(file){
- $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
+ $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
  $('preReadWrap').hidden=!/^video\//.test(file.type||'video/');setReadTxt();$('preRead').checked=store.get('readScreen2',true);
@@ -1501,7 +1519,7 @@ async function runAnalysis(file){
  }
 }
 function showSong(fromSave){
- $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
+ $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
@@ -2095,7 +2113,7 @@ function renderLib(){
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
-function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}}
+function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}}
 
 /* ---- sheet content ---- */
 function printify(svg){
@@ -2154,7 +2172,7 @@ function sheetHTML(print){
 }
 function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function showSheet(){
- wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
+ wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
  const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');window.scrollTo({top:0});
 }
@@ -2379,7 +2397,10 @@ renderLib();
 // A.lc = [{t: line text, ch: {wordIndex: chord name}}]; chord names are the shapes you play (with the capo on).
 const isSecLine=t=>/^\s*\[[^\]]{1,40}\]\s*$/.test(t);
 const wordsOf=t=>t.trim()?t.trim().split(/\s+/):[];
-let wFromWriter=false,wSel=null;
+// a chords-only spot is a dash-like token: "♪", "—", "-", "|"
+const isSlot=w=>/^(?:♪|[-–—|·_.]+)$/.test(w),slotLine=t=>{const w=wordsOf(t);return w.length>0&&w.every(isSlot)};
+const SLOTS=n=>Array(n).fill('♪').join(' ');
+let wFromWriter=false,wSel=null,wInsMode=false;
 function segFromName(name,tun,capo){const p=parseChord(name);if(!p)return null;const d=tshift(tun,capo),ti=TYPES.findIndex(x=>x.id===QTYPE[p.q]);const g={c:((p.root+d)%12)*NT+(ti<0?0:ti),q:p.q};if(p.bass!=null)g.b=(p.bass+d)%12;return g}
 function lyricChords(a){const out=[];(a.lc||[]).forEach(L=>Object.keys(L.ch||{}).sort((x,y)=>x-y).forEach(k=>{const n=L.ch[k];if(n&&!out.includes(n))out.push(n)}));return out}
 function newWritten(){return {kind:'lyrics',title:'',artist:'',lyrics:'',lc:[],segs:[],dur:0,offset:0,tuning:{id:'std',conf:'yours',why:'Set by you.'},play:{tun:'std',capo:0},v:2,at:Date.now()}}
@@ -2416,10 +2437,10 @@ $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</opti
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
 function openWriter(a,step){
  vid.pause();A=a;A.made=false;wFromWriter=false;
- ['drop','writeNew','draftCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
+ ['drop','writeNew','draftCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
  $('wArtists').innerHTML=knownArtists().map(t=>`<option value="${esc(t)}">`).join('');
- $('wBlank').hidden=!!A.libId;setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
+ $('wBlank').hidden=!!A.libId;wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';renderShotNote();setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
 }
 function setWStep(n){
  if(n===2){A.lyrics=$('wLyrics').value;A.lc=remapLines(A.lyrics,A.lc||[]);renderWLines()}
@@ -2430,7 +2451,9 @@ function renderWLines(){
  $('wLines').innerHTML=lc.every(L=>!L.t.trim())?'<p class="tip">Add the lyrics in step 1 first.</p>':lc.map((L,i)=>{
   if(!L.t.trim())return '<div class="wl blank"></div>';
   if(isSecLine(L.t))return `<div class="wl sec" dir="auto">${esc(L.t.trim().slice(1,-1))}</div>`;
-  return `<div class="wl" dir="auto">${wordsOf(L.t).map((w,j)=>`<button type="button" class="ww${wSel&&wSel.i===i&&wSel.j===j?' on':''}" data-i="${i}" data-j="${j}"><span class="c" dir="ltr">${esc(L.ch[j]||'')}</span><span class="t">${esc(w)}</span></button>`).join('')}</div>`}).join('');
+  const ws=wordsOf(L.t),sl=ws.some(isSlot);
+  return `<div class="wl${sl?' slots':''}" dir="auto">${ws.map((w,j)=>`<button type="button" class="ww${wSel&&wSel.i===i&&wSel.j===j?' on':''}" data-i="${i}" data-j="${j}"><span class="c" dir="ltr">${esc(L.ch[j]||'')}</span><span class="t">${esc(isSlot(w)?'♪':w)}</span></button>`).join('')}${sl?`<button type="button" class="wadd" data-add="${i}" aria-label="Add a spot for another chord">＋</button>`:''}</div>`}).join('');
+ if(wInsMode){const box=$('wLines'),rows=[...box.children];rows.forEach((el,k)=>el.insertAdjacentHTML('beforebegin',`<button type="button" class="wins" data-ins="${k}">＋ Put the chords-only line here</button>`));box.insertAdjacentHTML('beforeend',`<button type="button" class="wins" data-ins="${rows.length}">＋ Put it at the end</button>`)}
 }
 // chords offered in the picker: this song's chords, your chord book, then common chords
 const COMMONQ=['','m','7','m7','maj7','sus2','sus4','add9','5','6','9','dim'];
@@ -2457,14 +2480,22 @@ function pickerHTML(q){
  return h;
 }
 function openPicker(i,j){
- wSel={i,j};renderWLines();const w=wordsOf(A.lc[i].t)[j];$('wPickWord').textContent='“'+w+'”';
+ wSel={i,j};renderWLines();const w=wordsOf(A.lc[i].t)[j];$('wPickWord').textContent=isSlot(w)?'this spot':'“'+w+'”';
  $('wPickQ').value='';$('wPickList').innerHTML=pickerHTML('');$('wPickDel').hidden=!A.lc[i].ch[j];$('wPick').hidden=false;
  setTimeout(()=>{try{$('wPickQ').focus({preventScroll:true})}catch(e){}},60);
 }
 function closePicker(){$('wPick').hidden=true;wSel=null;renderWLines()}
 function setWordChord(name){if(!wSel)return;const L=A.lc[wSel.i];if(name)L.ch[wSel.j]=name;else delete L.ch[wSel.j];
  const n=wSel;closePicker();saveDraft();const b=$('wLines').querySelector(`.ww[data-i="${n.i}"][data-j="${n.j}"]`);if(b)b.focus({preventScroll:true})}
-$('wLines').addEventListener('click',e=>{const b=e.target.closest('.ww');if(b)openPicker(+b.dataset.i,+b.dataset.j)});
+$('wLines').addEventListener('click',e=>{
+ const ins=e.target.closest('[data-ins]');if(ins){const k=+ins.dataset.ins;A.lc.splice(k,0,{t:SLOTS(4),ch:{}});wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';syncLyricsFromLines();renderWLines();saveDraft();return}
+ const add=e.target.closest('[data-add]');if(add){const L=A.lc[+add.dataset.add];L.t=L.t.trim()+' ♪';syncLyricsFromLines();renderWLines();saveDraft();return}
+ const b=e.target.closest('.ww');if(b)openPicker(+b.dataset.i,+b.dataset.j)});
+function syncLyricsFromLines(){A.lyrics=(A.lc||[]).map(L=>L.t).join('\n');$('wLyrics').value=A.lyrics}
+$('wIns').onclick=()=>{wInsMode=!wInsMode;$('wIns').textContent=wInsMode?'Cancel':'＋ Add a chords-only line';renderWLines();if(wInsMode){const f=$('wLines').querySelector('.wins');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})}};
+document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>{const ta=$('wLyrics'),v=ta.value,pos=ta.selectionStart==null?v.length:ta.selectionStart;
+ const before=v.slice(0,pos),after=v.slice(pos),lab=b.dataset.part,ins=(before&&!before.endsWith('\n')?'\n':'')+(lab?`[${lab}]\n`:'')+SLOTS(4)+(after&&!after.startsWith('\n')?'\n':'');
+ ta.value=before+ins+after;const c=(before+ins).length;ta.focus();try{ta.setSelectionRange(c,c)}catch(e){}if(A){A.lyrics=ta.value;saveDraft()}});
 $('wPickQ').addEventListener('input',e=>{$('wPickList').innerHTML=pickerHTML(e.target.value)});
 $('wPickQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=$('wPickList').querySelector('button[data-c]');if(b)setWordChord(b.dataset.c)}else if(e.key==='Escape')closePicker()});
 $('wPickList').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(b)setWordChord(b.dataset.c)});
@@ -2478,6 +2509,99 @@ $('wTitle').addEventListener('input',e=>{A.title=e.target.value.trim();saveDraft
 $('wArtist').addEventListener('input',e=>{A.artist=e.target.value.trim().replace(/\s+/g,' ');saveDraft()});
 $('wTun').addEventListener('change',e=>{A.play.tun=e.target.value;A.tuning={id:A.play.tun,conf:'yours',why:'Set by you.'};saveDraft()});
 $('wCapo').addEventListener('change',e=>{A.play.capo=+e.target.value;saveDraft()});
+
+/* ---- chord sheet from a screenshot: Claude reads it, you check and edit it in the writer ---- */
+function renderShotNote(){const n=$('wShotNote');if(!n)return;const sh=A&&A.shots;
+ if(!sh||!sh.length){n.hidden=true;n.innerHTML='';return}n.hidden=false;
+ n.innerHTML=`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div><div><b>📷 Claude made this from your screenshot${sh.length>1?'s':''}.</b> Compare it with the picture (tap to enlarge) and fix anything that’s off: tap a word to change its chord, or go back to step 1 to fix the words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">Claude’s note: ${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
+ n.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>{const d=document.createElement('div');d.className='shotbig';d.innerHTML=`<img src="${sh[+im.dataset.big]}" alt="">`;d.onclick=()=>d.remove();document.body.appendChild(d)});
+ $('wShotDrop').onclick=()=>{store.set('writeDraft',null);$('writeView').hidden=true;A=null;showLanding()};
+}
+function tunFromName(t){t=String(t||'').toLowerCase();if(!t||/^standard|^e standard/.test(t))return 'std';const m=TUNINGS.find(x=>x.name.toLowerCase()===t)||TUNINGS.find(x=>t.includes(x.name.toLowerCase()))||TUNINGS.find(x=>x.name.toLowerCase().includes(t));return m?m.id:'std'}
+const fixChord=c=>{c=String(c||'').trim().replace(/♯/g,'#').replace(/♭/g,'b');return canon(c)?c:''};
+function sheetFromShot(r){
+ const a=newWritten();a.title=String(r.title||'').trim();a.artist=String(r.artist||'').trim();a.play.tun=tunFromName(r.tuning);a.play.capo=Math.max(0,Math.min(12,parseInt(r.capo)||0));
+ const lc=[];
+ for(const L of (r.lines||[])){const ty=L&&L.type;
+  if(ty==='blank'){lc.push({t:'',ch:{}});continue}
+  if(ty==='section'){const t=String(L.text||'').replace(/[\[\]:]/g,'').trim();if(t)lc.push({t:`[${t}]`,ch:{}});continue}
+  if(ty==='chords'){const cs=(L.chords||[]).map(c=>fixChord(typeof c==='string'?c:c&&c.chord)).filter(Boolean);if(!cs.length)continue;const ch={};cs.forEach((c,j)=>ch[j]=c);lc.push({t:SLOTS(cs.length),ch});continue}
+  const t=String(L.text||'').replace(/\s+/g,' ').trim();if(!t)continue;const ws=wordsOf(t),ch={};let extra=[];
+  for(const c of (L.chords||[])){const name=fixChord(c&&c.chord);if(!name)continue;let j=parseInt(c.word);if(isNaN(j)||j<0)j=0;
+   if(j>=ws.length){extra.push(name);continue}while(ch[j]&&j<ws.length-1)j++;if(ch[j])extra.push(name);else ch[j]=name}
+  let txt=ws.join(' ');extra.forEach(n=>{ch[wordsOf(txt).length]=n;txt+=' ♪'});lc.push({t:txt,ch})}
+ while(lc.length&&!lc[lc.length-1].t.trim())lc.pop();
+ a.lc=lc;a.lyrics=lc.map(L=>L.t).join('\n');a.shotNote=String(r.note||'').slice(0,300);return a;
+}
+// screenshots are lined up in order first (top of the song first), then read together
+let shotStage=[];const SHOT_MAX=8;
+async function shotAdd(files){
+ const room=Math.max(0,SHOT_MAX-shotStage.length),list=[...files].filter(f=>/^image\//.test(f.type)||!f.type).sort((x,y)=>(x.lastModified||0)-(y.lastModified||0)||String(x.name).localeCompare(String(y.name),undefined,{numeric:true})).slice(0,room);
+ const card=$('shotCard');card.hidden=false;if(!shotStage.length)card.innerHTML='<p class="tip">Opening the screenshots…</p>';
+ for(const f of list){try{shotStage.push({big:await shrinkPhoto(f,1600),small:await shrinkPhoto(f,480)})}catch(e){}}
+ renderShotStage(files.length>list.length?`Up to ${SHOT_MAX} screenshots per song.`:'');
+}
+function renderShotStage(msg){
+ const card=$('shotCard'),n=shotStage.length;if(!n){card.hidden=true;card.innerHTML='';return}card.hidden=false;
+ const lab=i=>n===1?'':i===0?'Beginning':i===n-1?'End':'Middle';
+ card.innerHTML=`<div class="drafthead"><span class="sic">📷</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>In order from the top of the song. Overlaps between them are fine.</small></span></div>
+ <div class="shotlist">${shotStage.map((x,i)=>`<div class="shotrow"><img src="${x.small}" alt="Screenshot ${i+1}" data-big="${i}"><div class="shotinfo"><b>${i+1}</b><small>${lab(i)}</small></div><div class="shotbtns"><button type="button" class="btn ghost" data-up="${i}" ${i?'':'disabled'} aria-label="Move up">↑</button><button type="button" class="btn ghost" data-dn="${i}" ${i<n-1?'':'disabled'} aria-label="Move down">↓</button><button type="button" class="btn ghost danger" data-rm="${i}" aria-label="Remove">✕</button></div></div>`).join('')}</div>
+ ${msg?`<p class="tip">${esc(msg)}</p>`:''}
+ <div class="editrow">${n<SHOT_MAX?`<button type="button" class="btn ghost" id="shotMore">＋ Add the next screenshot</button>`:''}<button type="button" class="btn cta" id="shotGoRead">✨ Make the sheet from ${n===1?'it':'all '+n}</button></div>
+ <button type="button" class="linkbtn" id="shotCancel">Cancel</button>`;
+ card.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>{const d=document.createElement('div');d.className='shotbig';d.innerHTML=`<img src="${shotStage[+im.dataset.big].big}" alt="">`;d.onclick=()=>d.remove();document.body.appendChild(d)});
+ card.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;[shotStage[i-1],shotStage[i]]=[shotStage[i],shotStage[i-1]];renderShotStage()});
+ card.querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{const i=+b.dataset.dn;[shotStage[i+1],shotStage[i]]=[shotStage[i],shotStage[i+1]];renderShotStage()});
+ card.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{shotStage.splice(+b.dataset.rm,1);renderShotStage()});
+ if($('shotMore'))$('shotMore').onclick=()=>$('shotIn').click();
+ $('shotGoRead').onclick=()=>shotRead();$('shotCancel').onclick=()=>{shotStage=[];renderShotStage()};
+}
+// safety net: if the same lines show up at the bottom of one screenshot and the top of the next, keep them once
+const lineKey=L=>L.type+'|'+String(L.text||'').replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
+function dropOverlaps(lines){
+ if(!lines.some(L=>L&&L.img!=null))return lines;
+ const groups=[];let cur=null;for(const L of lines){const im=L.img!=null?+L.img:(cur?cur.img:1);if(!cur||im!==cur.img){cur={img:im,lines:[]};groups.push(cur)}cur.lines.push(L)}
+ const out=[];
+ for(const g of groups){
+  const tail=out.filter(x=>x.type!=='blank'),head=g.lines.filter(x=>x.type!=='blank');let best=0;
+  if(out.length)for(let n=Math.min(head.length,tail.length,12);n>=1;n--){
+   if(tail.slice(-n).map(lineKey).join('\n')===head.slice(0,n).map(lineKey).join('\n')){const w=String(head[0].text||'').split(/\s+/).length;if(n>=2||w>=3||head[0].type==='chords'){best=n;break}}}
+  let skip=best;for(const L of g.lines){if(skip>0){if(L.type!=='blank')skip--;continue}out.push(L)}
+ }
+ return out;
+}
+async function shotRead(){
+ const card=$('shotCard'),stage=shotStage.slice(),n=stage.length;if(!n)return;
+ if(!sampleFn){card.hidden=false;card.innerHTML=`<p class="tip">Reading screenshots needs Claude features. Turn them on under My songs › Claude features (at the bottom), then try again.</p>`;return}
+ const lim=Math.max(1,Math.min(SHOT_MAX,imgLimit||SHOT_MAX));
+ if(n>lim){renderShotStage(`Claude can read up to ${lim} pictures at once here. Remove ${n-lim}.`);return}
+ card.innerHTML=`<div class="shotthumbs">${stage.map(x=>`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">🤖 Claude is reading ${n===1?'the screenshot':`all ${n} screenshots and joining them`}… this takes a few seconds.</p>`;
+ const multi=n>1;
+ const prompt=`${multi?`These ${n} images are screenshots of ONE song's chord sheet, in order: image 1 is the beginning, image ${n} is the end. The person scrolled between screenshots, so the bottom of one image is often repeated at the top of the next (the overlap), and a line can be cut in half at an image edge.`:'This image is a chord sheet (chords written above the lyrics) for one song.'} It may be in English or Hebrew. Transcribe the whole song exactly, once, from start to end.
+Rules:
+${multi?`- Join the images into one continuous song. Lines that appear in two images because of the overlap must appear ONCE. Lines cut at an image edge: use the image where the line is complete.
+- Don't confuse the overlap with real repeats: a chorus that the song really sings twice (in different places of the sheet) must stay twice. The overlap is only the same lines at the bottom of image N and the top of image N+1.
+- Give each line "img": the number of the image you took it from (1-${n}).
+`:''}- Keep the lyric lines exactly as written (same words, same order, original language). Don't translate or fix them. Skip app buttons, ads, page headers, status bars and anything that isn't the song.
+- For every lyric line, list the chords written above it, each with "word": the 0-based index of the word in that line (words split by spaces, counted in reading order; for Hebrew the first word is the rightmost one) that the chord sits above or right before. A chord after the last word gets the index of the word count.
+- Lines that have only chords (intro, interludes, solo, ending, or chords between parts) become {"type":"chords","chords":[the chords in order]}. If such a line has a label like "Intro:", put a section line before it.
+- Section labels (Chorus, Verse 2, פזמון, בית, מעבר, etc.) become {"type":"section","text":label}. Keep a blank line between parts as {"type":"blank"}.
+- Write chords the standard way (Am, F#m7, Bb, G/B, Dsus4, Cadd9). If the sheet says capo or a special tuning, report it.
+- If something is unreadable, cut off${multi?', or a part of the song seems to be missing between two screenshots':''}, transcribe what you can and say so in "note".
+Reply with only JSON: {"title": string or "", "artist": string or "", "capo": number (0 if none), "tuning": "Standard" or the tuning name, "lines": [{"type":"lyrics","text":"...","chords":[{"word":0,"chord":"Am"}]${multi?',"img":1':''}} | {"type":"chords","chords":["Am","F"]${multi?',"img":1':''}} | {"type":"section","text":"Chorus"} | {"type":"blank"}], "note": "" or a short note about anything unclear}`;
+ try{const r=await sampleFn.json(prompt,{images:stage.map(x=>dataUrlBlob(x.big)),modelTier:'default'});
+  if(!r||!Array.isArray(r.lines)||!r.lines.length)throw {code:'empty'};
+  r.lines=dropOverlaps(r.lines.filter(Boolean));
+  const a=sheetFromShot(r);if(!a.lc.some(L=>L.t.trim()))throw {code:'empty'};
+  a.shots=stage.map(x=>x.small);shotStage=[];card.hidden=true;card.innerHTML='';
+  try{store.set('writeDraft',a)}catch(e){a.shots=a.shots.slice(0,2);try{store.set('writeDraft',a)}catch(e2){delete a.shots}}
+  openWriter(a,2);
+ }catch(e){renderShotStage(e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':e&&e.code==='empty'?'Claude couldn’t find a chord sheet in these pictures. Try clearer screenshots that show the chords above the lyrics.':'Couldn’t reach Claude. Check the connection and try again.')}
+}
+$('shotNew').onclick=()=>{const d=draftNow(),card=$('shotCard');if(!d||shotStage.length){$('shotIn').click();return}
+ card.hidden=false;card.innerHTML=`<div class="confirm"><span>Reading screenshots replaces your unfinished sheet “${esc(d.title||'Untitled song')}”.</span><button class="btn" type="button" id="shotGo">Continue</button><button class="btn ghost" type="button" id="shotNo">Cancel</button></div>`;
+ $('shotGo').onclick=()=>{card.hidden=true;$('shotIn').click()};$('shotNo').onclick=()=>{card.hidden=true}};
+$('shotIn').onchange=e=>{if(e.target.files.length)shotAdd(e.target.files);e.target.value=''};
 $('writeNew').onclick=()=>{const d=store.get('writeDraft',null);openWriter(d&&d.kind==='lyrics'?d:newWritten())};
 $('wBlank').onclick=()=>{store.set('writeDraft',null);openWriter(newWritten(),1)};
 $('wBack').onclick=()=>{saveDraft();$('writeView').hidden=true;A=null;showLanding()};
@@ -2485,7 +2609,7 @@ $('wDone').onclick=()=>{
  A.lyrics=$('wLyrics').value;if(!A.lc||!A.lc.length)A.lc=remapLines(A.lyrics,[]);
  if(!A.title)A.title=(wordsOf((A.lc.find(L=>L.t.trim()&&!isSecLine(L.t))||{t:''}).t).slice(0,5).join(' '))||'My song';
  try{bookAdd(lyricChords(A),A.title)}catch(e){}
- A.made=true;saveDraft();$('writeView').hidden=true;showSheet();wFromWriter=true;
+ A.made=true;delete A.shots;saveDraft();$('writeView').hidden=true;showSheet();wFromWriter=true;
  $('shStatus').textContent='Check the sheet, then save it to My songs, as a PDF or to Google Drive.';
 };
 function writtenSheetHTML(print){
@@ -2499,8 +2623,9 @@ function writtenSheetHTML(print){
  h+=`<h3>Lyrics &amp; chords</h3><div class="lyr">${(A.lc||[]).map(L=>{
   if(!L.t.trim())return '<div class="ly blank"></div>';
   if(isSecLine(L.t))return `<div class="ly sec" dir="auto">${esc(L.t.trim().slice(1,-1))}</div>`;
-  const ws=wordsOf(L.t),has=ws.some((_,j)=>L.ch[j]);
-  return `<div class="ly${has?'':' nochords'}" dir="auto">${ws.map((w,j)=>`<span class="lw"><b dir="ltr">${esc(L.ch[j]||'')}</b><span>${esc(w)}</span></span>`).join('')}</div>`}).join('')}</div>`;
+  const ws=wordsOf(L.t),has=ws.some((_,j)=>L.ch[j]),sl=ws.length>0&&ws.every(isSlot);
+  if(sl&&!has)return '';
+  return `<div class="ly${has?'':' nochords'}${sl?' slots':''}" dir="auto">${ws.map((w,j)=>isSlot(w)?(L.ch[j]?`<span class="lw"><b dir="ltr">${esc(L.ch[j])}</b><span>${ws.every(isSlot)?'':'&nbsp;'}</span></span>`:''):`<span class="lw"><b dir="ltr">${esc(L.ch[j]||'')}</b><span>${esc(w)}</span></span>`).join('')}</div>`}).join('')}</div>`;
  if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
  h+=`<div class="foot">Guitaring · ${fmtDate(Date.now())}</div>`;
  return h;
