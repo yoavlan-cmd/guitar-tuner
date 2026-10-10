@@ -549,7 +549,7 @@ body.wopen{overflow:hidden}
 .apibox.flat{border-top:0;padding-top:0;margin-top:0}.apibox.flat>summary{display:none}
 .libcount{font-weight:400}
 .ctlpic{background:var(--bg);border-radius:12px;padding:8px;display:flex;justify-content:center}
-.ctlsvg{width:100%;max-width:360px;height:auto}
+.ctlsvg{width:100%;max-width:420px;height:auto}
 .cbadge{cursor:pointer}.cbadge.on circle{fill:#FF6A1A;stroke:#fff;stroke-width:2}
 .ctlnote{margin:6px 0 0;font-size:12.5px}
 .ctllist{margin:6px 0 4px;padding-left:22px;display:flex;flex-direction:column;gap:6px}
@@ -3143,24 +3143,61 @@ const CT={knob:(x,y)=>`<circle cx="${x}" cy="${y}" r="9" fill="#2A2A2A" stroke="
  selector:(x,y)=>`<circle cx="${x}" cy="${y}" r="10" fill="#1F1F1F" stroke="#BDBDBD" stroke-width="2"/>${[-60,-30,0,30,60].map(a=>{const r=a*Math.PI/180;return `<line x1="${x+13*Math.sin(r)}" y1="${y-13*Math.cos(r)}" x2="${x+16*Math.sin(r)}" y2="${y-16*Math.cos(r)}" stroke="#BDBDBD" stroke-width="1.5"/>`}).join('')}<line x1="${x}" y1="${y}" x2="${x+5}" y2="${y-8}" stroke="#FFB300" stroke-width="2.5"/>`,
  arm:(x,y)=>`<path d="M${x} ${y} q 14 2 22 22" stroke="#E0E0E0" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="${x+22}" cy="${y+22}" r="3.5" fill="#FFF"/>`,
  battery:(x,y)=>`<rect x="${x-10}" y="${y-7}" width="20" height="14" rx="2" fill="#E0A100"/><rect x="${x+10}" y="${y-3}" width="3" height="6" fill="#E0A100"/><text x="${x}" y="${y+3}" font-size="7" text-anchor="middle" fill="#1A1A1A" font-weight="700">9V</text>`};
-const badge=(x,y,i)=>`<g class="cbadge" data-c="${i}"><circle cx="${x}" cy="${y}" r="8.5" fill="var(--accent)"/><text x="${x}" y="${y+3.6}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${i+1}</text></g>`;
+const badge=(x,y,i,r)=>{r=r||8.5;return `<g class="cbadge" data-c="${i}"><circle cx="${x}" cy="${y}" r="${r}" fill="var(--accent)" stroke="#111" stroke-width="1"/><text x="${x}" y="${y+r*.42}" font-size="${r*1.15}" font-weight="700" text-anchor="middle" fill="#fff">${i+1}</text></g>`};
 function guitarSVG(key,c){
- const B={strat:'M70 40 C40 30 20 60 34 92 C18 120 30 168 80 176 C120 182 170 178 196 160 C222 140 220 110 206 96 C232 88 236 60 214 50 C196 42 176 58 160 64 C130 70 104 60 70 40Z',
-  lp:'M60 54 C30 60 18 98 40 122 C24 150 46 182 96 184 C150 188 198 176 214 148 C228 122 212 100 200 92 C210 74 196 50 170 52 C150 54 140 70 120 66 C100 62 88 50 60 54Z',
-  tele:'M56 50 C28 56 20 96 36 116 C22 146 40 178 92 182 C150 186 200 178 216 150 C230 124 216 96 204 88 L204 60 C204 52 190 48 182 54 C160 66 120 64 100 54 C86 48 70 46 56 50Z'}[CTL[key].body];
- const pu=CTL[key].pu||[],puX=key==='lp'?[104,154]:pu.length===2?[100,158]:[92,124,156];
- let s=`<path d="${B}" fill="#B5382A" stroke="#7A1F14" stroke-width="2"/><rect x="0" y="98" width="62" height="16" fill="#C9955A"/>`;
- // neck stub, pickguard tint, pickups, bridge
- s+=`<path d="M70 84 C90 70 170 72 190 88 C200 120 180 150 120 154 C84 156 68 130 70 84Z" fill="#F4EFE6" opacity="${key==='lp'?0:.9}"/>`;
- pu.forEach((p,i)=>{const x=puX[i];s+=p==='H'?`<rect x="${x-9}" y="88" width="18" height="40" rx="2" fill="#1E1E1E"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x-4}" cy="${92+j*6.5}" r="1.4" fill="#BBB"/><circle cx="${x+4}" cy="${92+j*6.5}" r="1.4" fill="#BBB"/>`).join('')}`:`<rect x="${x-5}" y="88" width="10" height="40" rx="5" fill="#F2F0EA" stroke="#999"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x}" cy="${92+j*6.5}" r="1.4" fill="#777"/>`).join('')}`});
- s+=`<rect x="186" y="90" width="8" height="36" rx="2" fill="#C8C8C8"/>`;for(let j=0;j<6;j++)s+=`<line x1="0" y1="${100+j*2.6}" x2="190" y2="${100+j*2.6}" stroke="#EEE" stroke-width=".6" opacity=".8"/>`;
- // control positions per guitar style
- const P={strat:{blade:[164,120],knob:[[140,158],[172,164],[204,164]],arm:[196,108],jack:[226,146]},hss:{blade:[164,120],knob:[[140,158],[172,164],[204,164]],arm:[196,108],jack:[226,146]},
-  lp:{toggle:[88,64],knob:[[148,146],[182,142],[160,182],[196,178]],jack:[226,150]},tele:{blade:[156,140],knob:[[186,152],[216,154]],jack:[230,124]},hh:{toggle:[150,146],knob:[[176,160],[208,164]],jack:[228,150]}}[key];
- let ki=0;const pos=c.map(x=>{if(x.k==='knob'){const p=P.knob[ki++%P.knob.length];return p}if(x.k==='blade'||x.k==='toggle')return P.blade||P.toggle;if(x.k==='arm')return P.arm||[194,124];if(x.k==='jack')return P.jack;if(x.k==='battery')return [120,172];return [120,170]});
- c.forEach((x,i)=>{const [X,Y]=pos[i];s+=(CT[x.k]||CT.knob)(X,Y)});
- c.forEach((x,i)=>{const [X,Y]=pos[i];const dx=x.k==='arm'?20:x.k==='jack'?4:-13,dy=x.k==='arm'?-8:x.k==='jack'?-17:-15;s+=badge(X+dx,Y+dy,i)});
- return `<svg viewBox="0 0 240 200" class="ctlsvg">${s}</svg>`;
+ // horizontal guitar: headstock on the left, low E string on top, treble side (cutaway, knobs) at the bottom
+ const body=CTL[key].body,NUT=50,JOIN=body==='lp'?262:252,L=(JOIN-NUT)/(1-Math.pow(2,-22/12)),fx=n=>NUT+L*(1-Math.pow(2,-n/12));
+ const BODY={
+  lp:'M250 77 C238 70 222 52 236 38 C248 26 270 32 286 42 C296 48 306 26 330 16 C356 6 386 22 392 56 C398 90 396 128 384 148 C368 174 330 176 308 164 C294 156 284 150 268 152 C252 154 236 152 226 140 C218 130 222 118 234 110 C240 106 246 104 250 103Z',
+  strat:'M252 77 C246 66 228 54 212 40 C202 30 208 17 225 19 C244 21 262 40 282 42 C300 44 312 22 336 16 C366 8 392 30 394 64 C398 98 396 120 384 142 C368 170 324 172 302 160 C290 154 278 152 266 156 C248 162 230 166 221 157 C214 148 234 128 252 103Z',
+  tele:'M252 77 C246 60 238 40 252 30 C264 22 286 30 300 30 C318 30 330 16 352 14 C380 12 396 40 396 90 C396 130 388 166 354 168 C326 170 314 154 296 152 C280 150 270 158 256 158 C240 158 232 144 238 132 C244 120 252 112 252 103Z'}[body];
+ const PAL={lp:['#F6B04A','#B8321E','#4A0F08','#EFE3C2'],strat:['#F7C24E','#B5501C','#2A1408','#9A6A3A'],tele:['#F2CD8A','#E2AE62','#B07A34','#7A5222']}[body];
+ const neckMaple=body!=='lp',gid='gb'+key;
+ let s=`<defs><radialGradient id="${gid}" cx="62%" cy="52%" r="62%"><stop offset="0" stop-color="${PAL[0]}"/><stop offset=".55" stop-color="${PAL[1]}"/><stop offset="1" stop-color="${PAL[2]}"/></radialGradient></defs>`;
+ // body (+ cream binding on the Les Paul)
+ s+=`<path d="${BODY}" fill="url(#${gid})" stroke="${PAL[3]}" stroke-width="${body==='lp'?3:2}"/>`;
+ // pickguards
+ if(body==='strat')s+=`<path d="M246 75 C240 58 252 46 270 48 C290 50 302 62 326 62 L334 72 L334 108 C346 118 380 126 380 142 C380 156 344 160 316 156 C290 152 266 140 254 126 C246 118 246 108 246 104Z" fill="#F4F1EA" stroke="#BDB7A8" stroke-width="1"/>`;
+ if(body==='tele')s+=`<path d="M246 75 C242 56 256 44 274 44 C290 44 300 58 312 66 L312 112 C304 126 290 138 272 140 C256 142 244 130 246 112Z" fill="#161616"/><rect x="314" y="118" width="70" height="20" rx="10" fill="#C9C9C9" stroke="#8E8E8E" transform="rotate(6 349 128)"/>`;
+ if(body==='lp')s+=`<path d="M264 107 L306 107 C306 118 296 128 280 129 C266 130 258 120 264 107Z" fill="#EFE3C2" opacity=".92"/>`;
+ // headstock
+ const head={lp:`<path d="M${NUT} 79 L14 66 C6 64 2 70 4 76 C2 82 2 98 4 104 C2 110 6 116 14 114 L${NUT} 101Z" fill="#141414" stroke="#7A7A7A"/>`+[0,1,2].map(i=>`<circle cx="${40-i*11}" cy="${74-i*3}" r="2" fill="#E9E9E9"/><rect x="${37-i*11}" y="${62-i*3}" width="6" height="7" rx="2" fill="#E8DFC8"/><circle cx="${40-i*11}" cy="${106+i*3}" r="2" fill="#E9E9E9"/><rect x="${37-i*11}" y="${111+i*3}" width="6" height="7" rx="2" fill="#E8DFC8"/>`).join(''),
+  strat:`<path d="M${NUT} 80 C44 74 36 66 24 64 C10 62 2 68 4 76 C6 82 12 84 12 90 C12 96 6 100 8 104 C12 108 30 104 ${NUT} 100Z" fill="#E8C98A" stroke="#B88A45"/>`+[0,1,2,3,4,5].map(i=>`<circle cx="${43-i*6.2}" cy="${79-i*2+(i>3?(i-3)*2:0)}" r="1.8" fill="#DADADA"/><rect x="${41-i*6.2}" y="${58-i*1.2}" width="4" height="7" rx="1.5" fill="#9E9E9E"/>`).join(''),
+  tele:`<path d="M${NUT} 80 L14 74 C6 72 2 76 4 82 L8 102 C10 106 30 104 ${NUT} 100Z" fill="#E8C98A" stroke="#B88A45"/>`+[0,1,2,3,4,5].map(i=>`<circle cx="${44-i*6.6}" cy="${81-i*1.1}" r="1.8" fill="#DADADA"/><rect x="${42-i*6.6}" y="${64-i*1}" width="4" height="7" rx="1.5" fill="#9E9E9E"/>`).join('')}[body];
+ s+=head;
+ // neck + frets + dots
+ s+=`<path d="M${NUT} 80 L${JOIN} 77 L${JOIN} 103 L${NUT} 100Z" fill="${neckMaple?'#E8C98A':'#3A2214'}" stroke="${neckMaple?'#B88A45':'#EFE3C2'}" stroke-width="${neckMaple?.8:1.2}"/>`;
+ s+=`<rect x="${NUT-2}" y="79.5" width="3" height="21" fill="#F4EFDF"/>`;
+ for(let n=1;n<=22;n++){const x=fx(n);if(x<JOIN-1)s+=`<line x1="${x}" y1="${80-3*(x-NUT)/(JOIN-NUT)}" x2="${x}" y2="${100+3*(x-NUT)/(JOIN-NUT)}" stroke="#B9B9B9" stroke-width=".9"/>`}
+ const dot=neckMaple?'#1A1A1A':'#EFE3C2';[3,5,7,9,15,17,19,21].forEach(n=>{const x=(fx(n)+fx(n-1))/2;s+=body==='lp'?`<rect x="${x-2.2}" y="86" width="4.4" height="8" fill="${dot}" opacity=".9"/>`:`<circle cx="${x}" cy="90" r="1.9" fill="${dot}"/>`});
+ {const x=(fx(12)+fx(11))/2;s+=body==='lp'?`<rect x="${x-2.5}" y="85" width="5" height="10" fill="${dot}"/>`:`<circle cx="${x}" cy="85" r="1.9" fill="${dot}"/><circle cx="${x}" cy="95" r="1.9" fill="${dot}"/>`}
+ // pickups
+ const pu=CTL[key].pu||[],puX=pu.length===2?(body==='tele'?[266,334]:[278,320]):[266,292,320];
+ pu.forEach((p,i)=>{const x=puX[i],rot=(body==='strat'&&i===pu.length-1&&p==='S')||(body==='tele'&&i===1)?`transform="rotate(-8 ${x} 90)"`:'';
+  if(p==='H')s+=`<g ${rot}>${body==='lp'?`<rect x="${x-12}" y="71" width="24" height="38" rx="3" fill="#EFE3C2"/>`:''}<rect x="${x-9}" y="74" width="18" height="32" rx="2" fill="#1A1A1A" stroke="#444"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x-4.2}" cy="${80+j*4}" r="1.3" fill="#C8C8C8"/><circle cx="${x+4.2}" cy="${80+j*4}" r="1.3" fill="#C8C8C8"/>`).join('')}</g>`;
+  else s+=`<g ${rot}><rect x="${x-5.5}" y="73" width="11" height="34" rx="5.5" fill="${body==='tele'&&i===0?'#D0D0D0':'#F7F5EE'}" stroke="#9A9A9A"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x}" cy="${80+j*4}" r="1.3" fill="#6E6E6E"/>`).join('')}</g>`});
+ // bridges
+ let END;
+ if(body==='lp'){s+=`<rect x="338" y="74" width="6" height="32" rx="2" fill="#D6D6D6" stroke="#8A8A8A"/><rect x="354" y="72" width="8" height="36" rx="4" fill="#D6D6D6" stroke="#8A8A8A"/>`;END=356}
+ else if(body==='strat'){s+=`<rect x="338" y="72" width="26" height="36" rx="3" fill="#D9D9D9" stroke="#8A8A8A"/>${[0,1,2,3,4,5].map(j=>`<rect x="342" y="${78.5+j*3.8}" width="9" height="2.6" fill="#A8A8A8"/>`).join('')}`;END=358}
+ else{s+=`<path d="M318 68 L370 68 C374 68 376 72 376 76 L376 104 C376 108 374 112 370 112 L318 112Z" fill="#D9D9D9" stroke="#8A8A8A"/>`;s+=`<g transform="rotate(-8 334 90)"><rect x="328.5" y="73" width="11" height="34" rx="5.5" fill="#F7F5EE" stroke="#9A9A9A"/>${[0,1,2,3,4,5].map(j=>`<circle cx="334" cy="${80+j*4}" r="1.3" fill="#6E6E6E"/>`).join('')}</g>`+[0,1,2].map(j=>`<rect x="354" y="${77+j*9}" width="7" height="8" rx="3" fill="#BEBEBE" stroke="#7A7A7A"/>`).join('');END=368}
+ // strings
+ for(let j=0;j<6;j++){const y0=81.5+j*3.4,y1=80.5+j*3.8;s+=`<line x1="${NUT-14}" y1="${y0-.4}" x2="${NUT}" y2="${y0}" stroke="#DCDCDC" stroke-width="${.5+(5-j)*.12}"/><line x1="${NUT}" y1="${y0}" x2="${END}" y2="${y1}" stroke="#ECECEC" stroke-width="${.5+(5-j)*.12}" opacity=".9"/>`}
+ // controls: [x,y] per kind
+ const P={strat:{blade:[302,118],knob:[[322,128],[344,138],[366,144]],arm:[356,108],jack:[324,160]},
+  hss:{blade:[302,118],knob:[[322,128],[344,138],[366,144]],arm:[356,108],jack:[324,160]},
+  hh:{toggle:[300,124],knob:[[326,130],[350,140]],jack:[324,160]},
+  lp:{toggle:[256,44],knob:[[318,126],[324,154],[346,122],[354,148]],jack:[376,158]},
+  tele:{blade:[324,124],knob:[[349,127],[374,130]],jack:[354,166]}}[key];
+ let ki=0;const pos=c.map(x=>{if(x.k==='knob')return P.knob[ki++%P.knob.length];if(x.k==='blade'||x.k==='toggle')return P.blade||P.toggle;if(x.k==='arm')return P.arm||[362,108];if(x.k==='jack')return P.jack;return [282,160]});
+ c.forEach((x,i)=>{const [X,Y]=pos[i];const k=x.k==='blade'&&P.toggle?'toggle':x.k==='toggle'&&P.blade?'blade':x.k;
+  if(k==='arm')s+=`<path d="M${X} ${Y} C${X+8} ${Y+6} ${X+18} ${Y+8} ${X+30} ${Y+4}" stroke="#F2F2F2" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="${X+30}" cy="${Y+4}" r="3.5" fill="#FFF"/>`;
+  else if(k==='blade')s+=`<g transform="rotate(-28 ${X} ${Y})">${CT.blade(X,Y)}</g>`;
+  else if(k==='knob')s+=`<circle cx="${X}" cy="${Y}" r="9" fill="${body==='lp'?'#E9C46A':'#F4F1EA'}" stroke="#555" stroke-width="1"/><circle cx="${X}" cy="${Y}" r="5.5" fill="none" stroke="${body==='lp'?'#8A6A1A':'#BBB'}" stroke-width=".8"/><line x1="${X}" y1="${Y}" x2="${X}" y2="${Y-7}" stroke="#333" stroke-width="1.5"/>`;
+  else if(k==='jack'&&body!=='strat')s+=`<rect x="${X-9}" y="${Y-5}" width="18" height="10" rx="3" fill="#C9C9C9" stroke="#777"/><circle cx="${X}" cy="${Y}" r="3" fill="#1A1A1A"/>`;
+  else s+=(CT[k]||CT.knob)(X,Y)});
+ c.forEach((x,i)=>{const [X,Y]=pos[i];const o=x.k==='arm'?[32,-8]:x.k==='blade'?[-15,8]:x.k==='toggle'?[13,-6]:x.k==='jack'?[14,0]:[9,-10];s+=badge(X+o[0],Y+o[1],i,7.5)});
+ return `<svg viewBox="0 0 400 180" class="ctlsvg">${s}</svg>`;
 }
 function panelSVG(c,amp){
  const per=amp?6:5,rows=Math.ceil(c.length/per),W=300,H=rows*64+(amp?24:16);
