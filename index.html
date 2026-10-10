@@ -2534,7 +2534,7 @@ $('chTun').addEventListener('click',e=>{const b=e.target.closest('button');if(b)
 function normQ(q){return q.trim().toLowerCase().replace(/\s+/g,'').replace(/sharp/g,'#').replace(/♯/g,'#').replace(/♭/g,'b').replace(/flat/g,'b').replace(/minor/g,'m').replace(/major/g,'maj')}
 function renderBook(){
  if(bookOpen){renderChordDetail(bookOpen);return}
- const b=bookGet(),q=normQ($('chSearch').value);let names=Object.keys(b).sort((x,y)=>ROOTORD(x)-ROOTORD(y));
+ const b=bookGet(),q=normQ($('chSearch').value);let names=Object.keys(b).sort((x,y)=>(b[y].songs||[]).length-(b[x].songs||[]).length||ROOTORD(x)-ROOTORD(y));// most-used first
  const total=names.length;
  if(q)names=names.filter(n=>n.toLowerCase().includes(q)||(q.length>=2&&canon(q.charAt(0).toUpperCase()+q.slice(1))===n));
  const typed=q&&canon(q.charAt(0).toUpperCase()+q.slice(1));
@@ -2542,7 +2542,7 @@ function renderBook(){
  if(typed&&!b[typed])h+=`<button class="bookcard extra" data-n="${esc(typed)}">${diagram(voicings(typed,bookTun)[0]||null,typed)}<small>Not in your book yet · tap to see shapes</small></button>`;
  h+=names.map(n=>{const v=voicings(n,bookTun)[0];return `<button class="bookcard" data-n="${esc(n)}">${v?diagram(v,n):diagram(null,n)}<small>${b[n].songs.length?b[n].songs.length+' song'+(b[n].songs.length>1?'s':''):'added by you'}</small></button>`}).join('');
  $('chGrid').innerHTML=h||(total?'<p class="tip">No chords match. Try a root like “A” or a type like “sus2”.</p>':'<p class="tip">Chords from every song you analyse land here automatically. You can also search for any chord, like Am7 or G/B.</p>');
- $('chCount').textContent=total?`${total} chord${total>1?'s':''} in your book${q?` · ${names.length} shown`:''}`:'';
+ $('chCount').textContent=total?`${total} chord${total>1?'s':''} in your book · most used first${q?` · ${names.length} shown`:''}`:'';
  $('chGrid').hidden=false;$('chDetail').hidden=true;$('chSearchRow').hidden=false;
 }
 function renderChordDetail(n){
