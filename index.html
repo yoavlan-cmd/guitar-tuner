@@ -378,7 +378,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shotlist{display:flex;flex-direction:column;gap:6px}.shotrow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:6px}.shotrow img{width:56px;height:72px;object-fit:cover;border-radius:6px;cursor:zoom-in}.shotinfo{flex:1;display:flex;flex-direction:column}.shotinfo b{font-size:16px}.shotinfo small{color:var(--muted)}.shotbtns{display:flex;gap:4px}.shotbtns .btn{padding:6px 10px}
 #shotCard .editrow{flex-wrap:wrap}
 .shotthumbs{display:flex;gap:6px;flex-wrap:wrap}.shotthumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px}
-.paper .ly.slots{column-gap:1.4em}
+.paper .ly.slots{column-gap:1.4em}.paper .lw.sl{margin-inline-start:.8em}
 .ww .c:empty::before{content:"+";color:var(--line);font-weight:400}
 .ww:hover,.ww:focus-visible{background:var(--bg)}
 .ww.on{background:var(--accent);color:var(--bg)}.ww.on .c{color:var(--bg)}
@@ -2542,13 +2542,34 @@ function renderShotNote(){const n=$('wShotNote');if(!n)return;const sh=A&&A.shot
 }
 function tunFromName(t){t=String(t||'').toLowerCase();if(!t||/^standard|^e standard/.test(t))return 'std';const m=TUNINGS.find(x=>x.name.toLowerCase()===t)||TUNINGS.find(x=>t.includes(x.name.toLowerCase()))||TUNINGS.find(x=>x.name.toLowerCase().includes(t));return m?m.id:'std'}
 const fixChord=c=>{c=String(c||'').trim().replace(/♯/g,'#').replace(/♭/g,'b');return canon(c)?c:''};
+// "[Am]Look at the [F]stars" -> words with the chord over the word that follows it
+function inlineLine(src){
+ const parts=src.replace(/\s+/g,' ').trim().split(/(\[[^\]]*\])/);let plain='';const marks=[];
+ for(const p of parts){const m=p.match(/^\[([^\]]*)\]$/);if(m){const c=fixChord(m[1]);if(c)marks.push({pos:plain.length,c})}else plain+=p}
+ const spans=[];plain.replace(/\S+/g,(w,i)=>{spans.push({w,s:i,e:i+w.length});return w});
+ const ch={},extra=[];
+ for(const {pos,c} of marks){let j=spans.findIndex(sp=>pos<sp.e);if(j<0){extra.push(c);continue}while(ch[j]&&j<spans.length-1)j++;if(ch[j]){extra.push(c);continue}ch[j]=c}
+ let words=spans.map(sp=>sp.w);extra.forEach(c=>{ch[words.length]=c;words.push('♪')});
+ if(!words.length)return null;return {t:words.join(' '),ch};
+}
+// a chord row that Claude kept separate from the lyric under it: spread its chords over that lyric line
+function mergeChordRows(lines){
+ const out=[];for(let i=0;i<lines.length;i++){const L=lines[i],nx=lines[i+1];
+  if(L&&L.type==='chords'&&nx&&nx.type==='lyrics'&&!/\[[^\]]+\]/.test(String(nx.text||''))&&!(nx.chords&&nx.chords.length)&&(L.chords||[]).length){
+   const ws=wordsOf(String(nx.text||'')),cs=L.chords.map(c=>typeof c==='string'?c:c&&c.chord).filter(Boolean);
+   if(ws.length){out.push({...nx,chords:cs.map((c,k)=>({word:Math.min(ws.length-1,Math.round(k*ws.length/cs.length)),chord:c}))});i++;continue}}
+  out.push(L)}
+ return out;
+}
 function sheetFromShot(r){
+ r.lines=mergeChordRows(r.lines||[]);
  const a=newWritten();a.title=String(r.title||'').trim();a.artist=String(r.artist||'').trim();a.play.tun=tunFromName(r.tuning);a.play.capo=Math.max(0,Math.min(12,parseInt(r.capo)||0));
  const lc=[];
  for(const L of (r.lines||[])){const ty=L&&L.type;
   if(ty==='blank'){lc.push({t:'',ch:{}});continue}
   if(ty==='section'){const t=String(L.text||'').replace(/[\[\]:]/g,'').trim();if(t)lc.push({t:`[${t}]`,ch:{}});continue}
   if(ty==='chords'){const cs=(L.chords||[]).map(c=>fixChord(typeof c==='string'?c:c&&c.chord)).filter(Boolean);if(!cs.length)continue;const ch={};cs.forEach((c,j)=>ch[j]=c);lc.push({t:SLOTS(cs.length),ch});continue}
+  if(/\[[^\]]+\]/.test(String(L.text||''))){const x=inlineLine(String(L.text));if(x)lc.push(x);continue}
   const t=String(L.text||'').replace(/\s+/g,' ').trim();if(!t)continue;const ws=wordsOf(t),ch={};let extra=[];
   for(const c of (L.chords||[])){const name=fixChord(c&&c.chord);if(!name)continue;let j=parseInt(c.word);if(isNaN(j)||j<0)j=0;
    if(j>=ws.length){extra.push(name);continue}while(ch[j]&&j<ws.length-1)j++;if(ch[j])extra.push(name);else ch[j]=name}
@@ -2590,7 +2611,7 @@ function renderShotStage(msg){
  $('shotGoRead').onclick=()=>shotRead();$('shotCancel').onclick=()=>{shotStage=[];renderShotStage()};
 }
 // safety net: if the same lines show up at the bottom of one screenshot and the top of the next, keep them once
-const lineKey=L=>L.type+'|'+String(L.text||'').replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
+const lineKey=L=>L.type+'|'+String(L.text||'').replace(/\[[^\]]*\]/g,m=>m.replace(/\s/g,'')).replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
 function dropOverlaps(lines){
  if(!lines.some(L=>L&&L.img!=null))return lines;
  const groups=[];let cur=null;for(const L of lines){const im=L.img!=null?+L.img:(cur?cur.img:1);if(!cur||im!==cur.img){cur={img:im,lines:[]};groups.push(cur)}cur.lines.push(L)}
@@ -2616,12 +2637,12 @@ ${multi?`- Join the images into one continuous song. Lines that appear in two im
 - Don't confuse the overlap with real repeats: a chorus that the song really sings twice (in different places of the sheet) must stay twice. The overlap is only the same lines at the bottom of image N and the top of image N+1.
 - Give each line "img": the number of the image you took it from (1-${n}).
 `:''}- Keep the lyric lines exactly as written (same words, same order, original language). Don't translate or fix them. Skip app buttons, ads, page headers, status bars and anything that isn't the song.
-- For every lyric line, list the chords written above it, each with "word": the 0-based index of the word in that line (words split by spaces, counted in reading order; for Hebrew the first word is the rightmost one) that the chord sits above or right before. A chord after the last word gets the index of the word count.
-- Lines that have only chords (intro, interludes, solo, ending, or chords between parts) become {"type":"chords","chords":[the chords in order]}. If such a line has a label like "Intro:", put a section line before it.
+- IMPORTANT: on the sheet, chords are written on their own line ABOVE a lyric line. Merge each such chord line into the lyric line below it, writing every chord inline in square brackets right before the word (or syllable) it sits above, like ChordPro: "[Am]Look at the [F]stars, look how they [C]shine". Use the horizontal position of each chord over the lyric to choose the word. In Hebrew lines, keep normal reading order (right to left) and put each [chord] right before the Hebrew word it sits above, e.g. "[Am]תראי את [G/B]הכוכבים". A chord that sits after the end of the lyric goes at the end: "...they shine [G]".
+- Only lines with chords and NO lyric line under them (intro, interludes, solo, ending, chords between parts) become {"type":"chords","chords":[the chords in order]}. If such a line has a label like "Intro:", put a section line before it.
 - Section labels (Chorus, Verse 2, פזמון, בית, מעבר, etc.) become {"type":"section","text":label}. Keep a blank line between parts as {"type":"blank"}.
 - Write chords the standard way (Am, F#m7, Bb, G/B, Dsus4, Cadd9). If the sheet says capo or a special tuning, report it.
 - If something is unreadable, cut off${multi?', or a part of the song seems to be missing between two screenshots':''}, transcribe what you can and say so in "note".
-Reply with only JSON: {"title": string or "", "artist": string or "", "capo": number (0 if none), "tuning": "Standard" or the tuning name, "lines": [{"type":"lyrics","text":"...","chords":[{"word":0,"chord":"Am"}]${multi?',"img":1':''}} | {"type":"chords","chords":["Am","F"]${multi?',"img":1':''}} | {"type":"section","text":"Chorus"} | {"type":"blank"}], "note": "" or a short note about anything unclear}`;
+Reply with only JSON: {"title": string or "", "artist": string or "", "capo": number (0 if none), "tuning": "Standard" or the tuning name, "lines": [{"type":"lyrics","text":"[Am]lyric with [F]inline chords"${multi?',"img":1':''}} | {"type":"chords","chords":["Am","F"]${multi?',"img":1':''}} | {"type":"section","text":"Chorus"} | {"type":"blank"}], "note": "" or a short note about anything unclear}`;
  try{const r=await sampleFn.json(prompt,{images:stage.map(x=>dataUrlBlob(x.big)),modelTier:'default'});
   if(!r||!Array.isArray(r.lines)||!r.lines.length)throw {code:'empty'};
   r.lines=dropOverlaps(r.lines.filter(Boolean));
@@ -2658,7 +2679,7 @@ function writtenSheetHTML(print){
   if(isSecLine(L.t))return `<div class="ly sec" dir="auto">${esc(L.t.trim().slice(1,-1))}</div>`;
   const ws=wordsOf(L.t),has=ws.some((_,j)=>L.ch[j]),sl=ws.length>0&&ws.every(isSlot);
   if(sl&&!has)return '';
-  return `<div class="ly${has?'':' nochords'}${sl?' slots':''}" dir="auto">${ws.map((w,j)=>isSlot(w)?(L.ch[j]?`<span class="lw"><b dir="ltr">${esc(L.ch[j])}</b><span>${ws.every(isSlot)?'':'&nbsp;'}</span></span>`:''):`<span class="lw"><b dir="ltr">${esc(L.ch[j]||'')}</b><span>${esc(w)}</span></span>`).join('')}</div>`}).join('')}</div>`;
+  return `<div class="ly${has?'':' nochords'}${sl?' slots':''}" dir="auto">${ws.map((w,j)=>isSlot(w)?(L.ch[j]?`<span class="lw${sl?'':' sl'}"><b dir="ltr">${esc(L.ch[j])}</b><span>${ws.every(isSlot)?'':'&nbsp;'}</span></span>`:''):`<span class="lw"><b dir="ltr">${esc(L.ch[j]||'')}</b><span>${esc(w)}</span></span>`).join('')}</div>`}).join('')}</div>`;
  if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
  h+=`<div class="foot">Guitaring · ${fmtDate(Date.now())}</div>`;
  return h;
