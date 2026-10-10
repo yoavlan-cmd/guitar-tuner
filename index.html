@@ -546,6 +546,8 @@ body.wopen{overflow:hidden}
 .gcsugg{display:flex;flex-wrap:wrap;gap:6px}.gcsugg .chip{white-space:normal;text-align:start}
 .gcin{display:flex;gap:6px;align-items:flex-end}.gcin textarea{flex:1;min-width:0;font:400 15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 11px;resize:none}
 .linkbtn{background:none;border:0;color:var(--muted);font:500 12.5px var(--body);text-decoration:underline;cursor:pointer;align-self:flex-start;padding:0}
+.apibox.flat{border-top:0;padding-top:0;margin-top:0}.apibox.flat>summary{display:none}
+.libcount{font-weight:400}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -667,7 +669,7 @@ body.wopen{overflow:hidden}
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
       <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span>📁</span> My songs folder in Google Drive <span>↗</span></a>
-      <div class="liblist" id="libList"></div>
+      <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
       <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
       <details class="apibox" id="apiCard" hidden></details>
     </section>
@@ -2063,7 +2065,11 @@ function renderLib(){
   const dr=e.drive?(e.drive.at>=e.saved?'<span class="badge">In Drive</span>':'<span class="badge old">Drive copy older</span>'):'';
   return `<button class="libitem" data-id="${esc(e.id)}"><b dir="auto">${esc(e.name)}${dr}</b><span>${d.artist?`<span dir="auto">${esc(d.artist)}</span> · `:''}${esc(t)} · saved ${fmtDate(e.saved)}</span></button>`}).join('')
   :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
+ // with a Drive folder button the list stays tucked away; without one it's the main view
+ const hasFolder=!$('folderBtn').hidden;$('libCount').textContent=l.length?'('+l.length+')':'';
+ $('libSaved').hidden=hasFolder&&!l.length;const ls=$('libSaved');if(!hasFolder)ls.open=true;else if(!ls._mine)ls.open=false;$('libSaved').classList.toggle('flat',!hasFolder);
 }
+$('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
 function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib()}
 
@@ -2174,7 +2180,7 @@ const DEFAULT_FOLDER='https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8W
 const folderIdOf=v=>{const m=String(v||'').match(/folders\/([\w-]{10,})/)||String(v||'').trim().match(/^([\w-]{20,})$/);return m?m[1]:''};
 $('driveFolder').value=store.get('driveFolderLink',DEFAULT_FOLDER);
 function myFolderUrl(){const v=store.get('myFolder',null);if(v!==null)return v;if(/^yoav\b/i.test(store.get('userName','')))return DEFAULT_FOLDER;const r=store.get('gd.root','');return r?'https://drive.google.com/drive/folders/'+r:''}
-function syncDriveLinks(){const fb=$('folderBtn'),fu=window.claude?'https://drive.google.com/drive/folders/'+(folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER)):myFolderUrl();if(fb){fb.hidden=!fu;if(fu)fb.href=fu}if($('folderIn')&&document.activeElement!==$('folderIn'))$('folderIn').value=fu||'';if(!window.claude){['driveLinkSheet'].forEach(k=>{const a=$(k);if(!a)return;a.hidden=!fu;if(fu){a.href=fu;a.textContent='My songs folder ↗'}});return}const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
+function syncDriveLinks(){const fb=$('folderBtn'),fu=window.claude?'https://drive.google.com/drive/folders/'+(folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER)):myFolderUrl();if(fb){fb.hidden=!fu;if(fu)fb.href=fu;try{renderLib()}catch(e){}}if($('folderIn')&&document.activeElement!==$('folderIn'))$('folderIn').value=fu||'';if(!window.claude){['driveLinkSheet'].forEach(k=>{const a=$(k);if(!a)return;a.hidden=!fu;if(fu){a.href=fu;a.textContent='My songs folder ↗'}});return}const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
 syncDriveLinks();$('driveFolder').addEventListener('input',syncDriveLinks);
 $('folderSave').onclick=()=>{const v=$('folderIn').value.trim();if(v&&!/^https:\/\/(drive|docs)\.google\.com\//.test(v)){$('folderMsg').textContent='That doesn’t look like a Google Drive link. Open the folder in Drive, tap Share › Copy link, and paste it here.';return}
  store.set('myFolder',v);if(window.claude&&v){$('driveFolder').value=v;store.set('driveFolderLink',v)}syncDriveLinks();$('folderMsg').textContent=v?'Saved. The button above opens this folder.':'Removed.'};
