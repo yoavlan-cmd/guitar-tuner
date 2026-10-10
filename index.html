@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+[hidden]{display:none!important}
 /* Layout: one-hand phone tool — tuning chips, a dark pedal-style display with needle, six string keys, one big listen button */
 :root{
   --bg:#E8ECEA; --surface:#F7F9F8; --ink:#18201E; --muted:#5A6762; --line:#C8D1CD; --accent:#2B6A58;
@@ -486,6 +487,14 @@ body.wopen{overflow:hidden}
 .aion,.aioff{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
 .aion{background:var(--accent);color:var(--bg)}.aioff{border:1px solid var(--line);color:var(--muted)}
 #apiCard .textin{font-family:var(--body);margin:6px 0}
+.ideabox{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:10px 0;display:flex;flex-direction:column;gap:10px;background:var(--bg)}.ideabox>summary{display:flex;gap:10px;align-items:center;cursor:pointer;list-style:none}.ideabox>summary::-webkit-details-marker{display:none}
+.ideabox>*+*{margin-top:10px}.idscan{display:flex;flex-direction:column;gap:8px}.idpick{text-align:center;cursor:pointer}.idq{display:flex;flex-direction:column;gap:6px}.idq>b{font-size:13px;color:var(--muted)}.idchips{display:flex;flex-wrap:wrap;gap:6px}
+.idlist summary{font:600 13px var(--body);color:var(--muted);cursor:pointer}.idlist p{font-size:13px;margin:6px 0}.idlevel{background:var(--surface);border-radius:10px;padding:8px 10px}
+.idres{display:flex;flex-direction:column;gap:10px}.idcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.idtop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.idtop>div{display:flex;flex-direction:column}.idtop b{font-size:16px}.idtop>div span{color:var(--muted);font-size:13.5px}
+.iddiff{color:var(--accent);font-size:11px;white-space:nowrap;text-align:end;letter-spacing:1px}.iddiff i{font-style:normal;opacity:.25}.iddiff small{display:block;color:var(--muted);letter-spacing:0;font-size:11px}
+.idwhy{font-size:14px;margin:0}.idmeta .badge{margin:0 6px 0 0}.idch{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.idch span{font:600 13px var(--body);border:1px solid var(--line);border-radius:8px;padding:2px 7px}.idch span.new{border-color:#FF8A3D;color:#FF8A3D}.idch small{width:100%;color:var(--muted);font-size:11.5px}
+.idact{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.idact .btn{padding:6px 10px;font-size:13px;text-decoration:none}.idwant a{color:var(--accent)}.idwant{display:flex;gap:8px;align-items:center;font-size:13.5px;margin:6px 0}.idwant span{flex:1}
 .apibox{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;display:flex;flex-direction:column;gap:8px}
 .apibox summary{font:600 13px var(--body);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px}
 .apibox .aion,.apibox .aioff{font-size:10px;padding:2px 8px}
@@ -681,6 +690,7 @@ body.wopen{overflow:hidden}
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
       <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span>📁</span> My songs folder in Google Drive <span>↗</span></a>
+      <details class="ideabox" id="ideaBox"></details>
       <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
       <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
       <details class="apibox" id="apiCard" hidden></details>
@@ -1996,8 +2006,8 @@ function makeApiSample(){
  const w=wrap(s),wj=wrap(s.json);w.json=wj;w.limits=s.limits;w.viaApi=true;return w;
 }
 function toast(m){let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.innerHTML=m;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>{t.hidden=true},7000)}
-function claudeOn(fn,lim){sampleFn=fn;imgLimit=lim;setReadTxt();$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.';if(!$('readyCard').hidden&&curFile)showReady(curFile);try{renderGear()}catch(e){}}
-function claudeOff(){sampleFn=null;imgLimit=0;setReadTxt();$('aiAsk').hidden=true;$('aiNote').textContent='Add your Claude key under Songs → Claude features to turn this on. The search links work everywhere.';try{renderGear()}catch(e){}}
+function claudeOn(fn,lim){sampleFn=fn;imgLimit=lim;setReadTxt();$('aiAsk').hidden=false;$('aiNote').textContent='Claude reads the detected tuning and chords and suggests fixes, an easier way to play, and versions that fit your taste. It can’t hear the video, so it relies on the title.';if(!$('readyCard').hidden&&curFile)showReady(curFile);try{renderGear()}catch(e){}try{renderIdeas()}catch(e){}}
+function claudeOff(){sampleFn=null;imgLimit=0;setReadTxt();$('aiAsk').hidden=true;$('aiNote').textContent='Add your Claude key under Songs → Claude features to turn this on. The search links work everywhere.';try{renderGear()}catch(e){}try{renderIdeas()}catch(e){}}
 function renderAiCard(){
  const c=$('apiCard');if(window.claude){c.hidden=true;return}c.hidden=false;const k=apiKey();
  c.innerHTML=k?`<summary>Claude features <span class="aion">On</span></summary><p class="tip">Reading chords from videos, photo analysis, guitar advice and song suggestions use your key (${esc(k.slice(0,10))}…${esc(k.slice(-4))}). It’s stored only on this phone.</p><div class="editrow"><button class="btn ghost" id="aiTest" type="button">Test it</button><button class="btn ghost danger" id="aiRemove" type="button">Remove key</button></div><p class="tip" id="aiMsg" role="status"></p>`
@@ -2185,7 +2195,7 @@ async function makePdf(){
 const fileName=()=>(($('shName').value.trim()||A.title||'Chord sheet').replace(/[\\/:*?"<>|]+/g,' ').trim()||'Chord sheet')+'.pdf';
 let dlCap=null,mcpCap=null;
 (async()=>{try{if(window.claude&&window.claude.use){[dlCap,mcpCap]=await Promise.all([window.claude.use('downloads'),window.claude.use('mcp')])}}catch(e){}
- if(mcpCap){$('shDrive').hidden=false;$('driveCfg').hidden=false}
+ if(mcpCap){$('shDrive').hidden=false;$('driveCfg').hidden=false;try{renderIdeas()}catch(e){}}
  setTimeout(()=>{if(!mcpCap&&ownDrive()){$('shDrive').hidden=false;gdPreload()}syncDriveLinks();renderDriveIntro()},0);
  if(!window.claude&&navigator.canShare){try{$('shShare').hidden=!navigator.canShare({files:[new File(['x'],'t.pdf',{type:'application/pdf'})]})}catch(e){}}})();
 const DEFAULT_FOLDER='https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe';
@@ -3275,6 +3285,140 @@ function renderInstDetail(it){
  if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
  renderGearChat(it);wireControls(it);
 }
+
+/* ---- song ideas: scan the songs folder, then ask Claude for songs that fit the style, bands and level ---- */
+const IDEA_STYLES=[['folder','Like my folder'],['il-rock','Israeli rock'],['il-pop','Hebrew pop and ballads'],['acoustic','Acoustic singer-songwriter'],['funk','Funk rock'],['classic','Classic rock'],['alt','Indie and alternative'],['blues','Blues'],['reggae','Reggae and surf'],['campfire','Campfire singalongs'],['90s','90s and 2000s']];
+const IDEA_LEVELS=[['easier','Easier'],['same','My level'],['step','A step up'],['hard','Challenge me']];
+const IDEA_LANG=[['both','Both'],['he','Hebrew'],['en','English']];
+const CHORD_RE=/^[A-G](?:#|b)?(?:maj7|maj9|maj|m7b5|m7|m9|m6|m11|mmaj7|m|dim7|dim|aug|sus2|sus4|sus|add9|add11|7sus4|7b9|7#9|13|11|9|7|6|5)?(?:\/[A-G](?:#|b)?)?$/;
+function chordsInText(t){const out=new Map();String(t||'').replace(/\\#/g,'#').replace(/[‎‏‪-‮]/g,'').split(/\n/).forEach(l=>{const w=l.trim().split(/[\s|]+/).filter(Boolean);if(!w.length||w.length>14)return;const c=w.filter(x=>CHORD_RE.test(x));if(c.length&&c.length/w.length>=.75)c.forEach(x=>out.set(x,(out.get(x)||0)+1))});return [...out.keys()]}
+const cleanName=t=>String(t||'').replace(/[‎‏‪-‮]/g,'').replace(/\.(pdf|docx?|txt|rtf|odt|jpe?g|png|mp4|mov|m4a|mp3)$/i,'').replace(/^(copy of|עותק של)\s+/i,'').replace(/\s+/g,' ').trim();
+const junkName=t=>!t||/^(untitled( document)?|מסמך ללא שם|document\d*|img[_-]?\d+|vid[_-]?\d+|\d+)$/i.test(t);
+// "Artist - Title" (or the folder's artist)
+function songFromName(raw,folder){let t=cleanName(raw),a=folder||'';if(junkName(t))return null;
+ const m=t.match(/^(.+?)\s*[-–—]\s*(.+)$/);if(m){a=a||m[1].trim();t=m[2].trim()}
+ return {a,t}}
+const ideaKey=s=>normArt(s.a)+'|'+normArt(s.t);
+function mergeSongs(list){const m=new Map();list.forEach(s=>{if(!s||!s.t)return;const k=ideaKey(s),o=m.get(k);if(o){o.ch=[...new Set([...(o.ch||[]),...(s.ch||[])])]}else m.set(k,{a:s.a||'',t:s.t,ch:s.ch||[]})});return [...m.values()]}
+function localSongs(){return libAll().map(e=>({a:(e.data&&e.data.artist)||'',t:cleanName(e.name),ch:[]})).filter(s=>s.t)}
+function knownChords(ix){const set=new Set(Object.keys(store.get(BOOKK,{})||{}));(ix&&ix.songs||[]).forEach(s=>(s.ch||[]).forEach(c=>set.add(c)));return [...set]}
+// scan with Claude's Drive connector (Claude version)
+async function scanViaMcp(fid,onP){
+ const q=async(query,snip)=>{let all=[],tok;for(let i=0;i<4;i++){const r=await mcpCap.callTool(DRIVE,'search_files',{query,pageSize:100,...(snip?{snippetVerbosity:'BRIEF'}:{excludeContentSnippets:true}),...(tok?{pageToken:tok}:{})});const p=(r&&r.payload)||{};all=all.concat(p.files||[]);tok=p.nextPageToken;if(!tok)break}return all};
+ onP('Looking at your artist folders…');const top=await q(`parentId = '${fid}'`,false);
+ const folders=top.filter(f=>f.mimeType===FOLDER_MT),names=new Map(folders.map(f=>[f.id,f.title]));let songs=[];
+ top.filter(f=>f.mimeType!==FOLDER_MT).forEach(f=>{const s=songFromName(f.title,'');if(s)songs.push(s)});
+ for(let i=0;i<folders.length;i+=8){const grp=folders.slice(i,i+8);onP(`Reading songs… (${Math.min(i+8,folders.length)} of ${folders.length} artists)`);
+  const files=await q(grp.map(f=>`parentId = '${f.id}'`).join(' or '),true);
+  files.filter(f=>f.mimeType!==FOLDER_MT).forEach(f=>{const s=songFromName(f.title,names.get(f.parentId)||'');if(s){s.ch=chordsInText(f.contentSnippet);songs.push(s)}})}
+ return {songs,artists:folders.map(f=>f.title)};
+}
+// scan with the user's own Google sign-in (phone app). Reading existing files needs read access to Drive.
+let gdRoTok=null,gdRoExp=0;
+function gdTokenRO(){return new Promise((res,rej)=>{if(gdRoTok&&Date.now()<gdRoExp-60000)return res(gdRoTok);if(!gdReady())return rej({code:'gd_load'});
+ const c=google.accounts.oauth2.initTokenClient({client_id:GDRIVE_CLIENT_ID,scope:'https://www.googleapis.com/auth/drive.readonly',login_hint:store.get('gd.email','')||undefined,
+  callback:r=>{if(!r||r.error)return rej({code:r&&r.error||'gd_denied'});gdRoTok=r.access_token;gdRoExp=Date.now()+(+r.expires_in||3600)*1000;res(gdRoTok)},error_callback:e=>rej({code:e&&e.type==='popup_closed'?'gd_closed':'gd_popup'})});c.requestAccessToken({prompt:''})})}
+async function scanViaOwn(fid,onP){
+ const get=async u=>{const r=await fetch(u,{headers:{Authorization:'Bearer '+gdRoTok}});if(!r.ok)throw {code:r.status===401?'gd_auth':'gd_http',message:'HTTP '+r.status};return u.includes('/export')?r.text():r.json()};
+ const list=async qq=>{let all=[],tok='';for(let i=0;i<5;i++){const r=await get(`${GD_API}?q=${encodeURIComponent(qq)}&fields=nextPageToken,files(id,name,mimeType,parents)&pageSize=200${tok?'&pageToken='+tok:''}`);all=all.concat(r.files||[]);tok=r.nextPageToken;if(!tok)break}return all};
+ onP('Looking at your artist folders…');const top=await list(`'${fid}' in parents and trashed=false`);
+ const folders=top.filter(f=>f.mimeType===FOLDER_MT),names=new Map(folders.map(f=>[f.id,f.name]));let files=top.filter(f=>f.mimeType!==FOLDER_MT).map(f=>({...f,folder:''}));
+ for(let i=0;i<folders.length;i+=10){onP(`Reading songs… (${Math.min(i+10,folders.length)} of ${folders.length} artists)`);const grp=folders.slice(i,i+10);
+  (await list(`(${grp.map(f=>`'${f.id}' in parents`).join(' or ')}) and trashed=false and mimeType!='${FOLDER_MT}'`)).forEach(f=>files.push({...f,folder:names.get((f.parents||[])[0])||''}))}
+ const songs=[];let n=0;
+ for(const f of files){const s=songFromName(f.name,f.folder);if(!s)continue;
+  if(f.mimeType==='application/vnd.google-apps.document'&&n<40){n++;onP(`Reading chords… (${n})`);try{s.ch=chordsInText(await get(`${GD_API}/${f.id}/export?mimeType=text/plain`))}catch(e){}}
+  songs.push(s)}
+ return {songs,artists:folders.map(f=>f.name)};
+}
+function saveIndex(found,src){const old=store.get('songIndex',null);const songs=mergeSongs([...(src==='picker'&&old?old.songs:[]),...found.songs,...localSongs()]);
+ const artists=[...new Set([...(src==='picker'&&old?old.artists||[]:[]),...(found.artists||[]),...songs.map(s=>s.a).filter(Boolean)])];
+ const ix={at:Date.now(),src,songs,artists};store.set('songIndex',ix);return ix}
+async function ideaScan(){
+ const msg=$('idMsg'),btn=$('idScan'),onP=t=>{msg.textContent=t};if(btn)btn.disabled=true;
+ try{let found;
+  if(mcpCap){const fid=folderIdOf(($('driveFolder').value||DEFAULT_FOLDER).trim())||folderIdOf(DEFAULT_FOLDER);found=await scanViaMcp(fid,onP);saveIndex(found,'drive')}
+  else if(ownDrive()){const fid=folderIdOf(myFolderUrl());if(!fid){msg.textContent='Add your songs folder link first (Songs folder link, below).';return}const tp=gdTokenRO();onP('Waiting for Google sign-in…');await tp;found=await scanViaOwn(fid,onP);saveIndex(found,'drive')}
+  else return;
+  renderIdeas();$('idMsg').textContent='Scan done.';
+ }catch(e){msg.innerHTML=mcpCap?driveErr(e).replace('save to','read'):gdErr(e).replace(/saved/,'read')}finally{if(btn)btn.disabled=false}
+}
+async function ideaPick(files){
+ const songs=[...files].map(f=>songFromName(f.name,'')).filter(Boolean);
+ for(const f of [...files].slice(0,30)){if(/^text\//.test(f.type)||/\.txt$/i.test(f.name)){try{const s=songFromName(f.name,'');const x=songs.find(y=>y.t===s.t);if(x)x.ch=chordsInText(await f.text())}catch(e){}}}
+ saveIndex({songs,artists:[]},'picker');renderIdeas();$('idMsg').textContent=`Added ${songs.length} song${songs.length===1?'':'s'}. Pick another artist folder to add more.`;
+}
+function ideaSummary(ix){const by=new Map();ix.songs.forEach(s=>{const k=s.a||'(artist not in the file name)';by.set(k,(by.get(k)||[]).concat(s))});return by}
+function ideaPrefs(){return {styles:['folder'],bands:[],other:'',level:'same',lang:'both',...(store.get('ideaPrefs',{})||{})}}
+function renderIdeas(){
+ const box=$('ideaBox');if(!box)return;const ix=store.get('songIndex',null),p=ideaPrefs(),res=store.get('ideas',null),want=store.get('ideaWant',[]);
+ const canDrive=!!mcpCap||ownDrive();
+ const scanBtns=`${canDrive?`<button class="btn ${ix?'ghost':''}" id="idScan" type="button">${ix?'🔄 Scan the folder again':'🔍 Scan my songs folder'}</button>`:''}
+  ${!mcpCap?`<label class="btn ghost idpick">📂 ${canDrive?'Or pick':'Pick'} song files from Drive<input type="file" id="idFiles" multiple hidden></label>${canDrive?'':'<span class="bhint">Open your songs folder in the picker (Google Drive › your folder › an artist), long-press to select all the songs, then tap Select. Repeat for each artist folder.</span>'}`:''}`;
+ const by=ix?ideaSummary(ix):new Map(),kc=ix?knownChords(ix):[];const nA=[...by.keys()].filter(k=>!k.startsWith('(')).length;
+ const chip=(grp,v,l,on)=>`<button type="button" class="chip" data-g="${grp}" data-v="${esc(v)}" aria-pressed="${on}" dir="auto">${esc(l)}</button>`;
+ box.innerHTML=`<summary><span class="sic">🎯</span><span class="stx"><b>Song ideas for you</b><small>New songs that fit your style, favourite bands and level, based on what’s in your folder</small></span></summary>
+ ${ix?`<p class="tip idsum">Your folder: <b>${nA}</b> artist${nA===1?'':'s'}, <b>${ix.songs.length}</b> song${ix.songs.length===1?'':'s'}${kc.length?`, <b>${kc.length}</b> chords you already play`:''}. Scanned ${fmtDate(ix.at)}.</p>
+  <details class="idlist"><summary>See what was found</summary>${[...by].map(([a,l])=>`<p dir="auto"><b>${esc(a)}</b> · ${l.map(s=>esc(s.t)).join(', ')}</p>`).join('')}</details>`
+  :`<p class="tip">First, let the app look at your songs folder: the artists, the songs, and the chords in them. That’s how it learns your taste and level.</p>`}
+ <div class="idscan">${scanBtns}</div>
+ <p class="tip" id="idMsg" role="status"></p>
+ ${ix?`<div class="idq"><b>Style</b><div class="idchips">${IDEA_STYLES.map(([v,l])=>chip('styles',v,l,p.styles.includes(v))).join('')}</div></div>
+ ${ix.artists.length?`<div class="idq"><b>More like these bands</b><div class="idchips">${ix.artists.map(a=>chip('bands',a,a,p.bands.includes(a))).join('')}</div></div>`:''}
+ <div class="idq"><b>Other bands you like</b><input class="textin" id="idOther" dir="auto" placeholder="e.g. Mashina, Coldplay" value="${esc(p.other)}"></div>
+ <div class="idq"><b>Difficulty</b><div class="idchips">${IDEA_LEVELS.map(([v,l])=>chip('level',v,l,p.level===v)).join('')}</div></div>
+ <div class="idq"><b>Language</b><div class="idchips">${IDEA_LANG.map(([v,l])=>chip('lang',v,l,p.lang===v)).join('')}</div></div>
+ ${sampleFn?`<button class="btn wide" id="idGo" type="button">✨ Suggest songs</button>`:`<p class="tip">Turn on Claude features (Claude features, at the bottom of this card) to get suggestions.</p>`}
+ ${res&&res.level?`<p class="tip idlevel">🎚️ <b>Your level:</b> <span dir="auto">${esc(res.level)}</span></p>`:''}
+ <div class="idres">${res&&res.list?res.list.map((s,i)=>ideaCardHTML(s,i,kc)).join(''):''}</div>`:''}
+ ${want.length?`<details class="idlist" open><summary>Want to learn (${want.length})</summary>${want.map((s,i)=>`<div class="idwant"><span dir="auto"><b>${esc(s.title)}</b> · ${esc(s.artist)}</span><a href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><button type="button" class="linkbtn" data-unwant="${i}">Remove</button></div>`).join('')}</details>`:''}`;
+ wireIdeas();
+}
+const isHeb=s=>/[֐-׿]/.test((s.title||'')+(s.artist||''));
+const chordsLink=s=>isHeb(s)?'https://www.tab4u.com/resultsSimple?tab=songs&q='+encodeURIComponent(s.title+' '+s.artist):'https://www.ultimate-guitar.com/search.php?search_type=title&value='+encodeURIComponent(s.artist+' '+s.title);
+const listenLink=s=>'https://www.youtube.com/results?search_query='+encodeURIComponent(s.artist+' '+s.title);
+function ideaCardHTML(s,i,kc){const d=Math.max(1,Math.min(5,+s.difficulty||3)),known=new Set(kc),ch=(s.chords||[]).slice(0,10);
+ return `<div class="idcard" data-i="${i}"><div class="idtop"><div><b dir="auto">${esc(s.title)}</b><span dir="auto">${esc(s.artist)}</span></div><span class="iddiff" title="Difficulty ${d} of 5">${'●'.repeat(d)}<i>${'●'.repeat(5-d)}</i><small>${['','Easy','Easy+','Medium','Harder','Hard'][d]}</small></span></div>
+ <p class="idwhy" dir="auto">${esc(s.why||'')}</p>
+ <div class="idmeta">${s.style?`<span class="badge">${esc(s.style)}</span>`:''}${s.capo?`<span class="badge">Capo ${esc(String(s.capo))}</span>`:''}${s.tuning&&!/^standard/i.test(s.tuning)?`<span class="badge">${esc(s.tuning)}</span>`:''}</div>
+ ${ch.length?`<div class="idch">${ch.map(c=>`<span class="${known.size&&!known.has(c)?'new':''}">${esc(c)}</span>`).join('')}${known.size&&ch.some(c=>!known.has(c))?'<small>Orange = a chord that’s new for you</small>':''}</div>`:''}
+ <div class="idact"><a class="btn ghost" href="${chordsLink(s)}" target="_blank" rel="noopener">🎼 Chords ↗</a><a class="btn ghost" href="${listenLink(s)}" target="_blank" rel="noopener">▶ Listen ↗</a><button type="button" class="btn ghost" data-want="${i}">★ Want to learn</button><button type="button" class="linkbtn" data-no="${i}">Not for me</button></div></div>`}
+function wireIdeas(){
+ const box=$('ideaBox');if($('idScan'))$('idScan').onclick=ideaScan;
+ if($('idFiles'))$('idFiles').onchange=e=>{if(e.target.files.length)ideaPick(e.target.files);e.target.value=''};
+ box.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const p=ideaPrefs(),g=b.dataset.g,v=b.dataset.v;if(g==='styles'||g==='bands'){p[g]=p[g].includes(v)?p[g].filter(x=>x!==v):p[g].concat(v)}else p[g]=v;store.set('ideaPrefs',p);
+  box.querySelectorAll(`[data-g="${g}"]`).forEach(x=>x.setAttribute('aria-pressed',g==='styles'||g==='bands'?p[g].includes(x.dataset.v):x.dataset.v===v))});
+ if($('idOther'))$('idOther').onchange=e=>{const p=ideaPrefs();p.other=e.target.value.trim();store.set('ideaPrefs',p)};
+ if($('idGo'))$('idGo').onclick=ideaAsk;
+ const res=store.get('ideas',null);
+ box.querySelectorAll('[data-want]').forEach(b=>b.onclick=()=>{const s=res.list[+b.dataset.want];const w=store.get('ideaWant',[]);if(!w.some(x=>x.title===s.title&&x.artist===s.artist))w.unshift({title:s.title,artist:s.artist});store.set('ideaWant',w.slice(0,40));renderIdeas()});
+ box.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{const s=res.list[+b.dataset.no];const no=store.get('ideaNo',[]);no.push(s.artist+' – '+s.title);store.set('ideaNo',no.slice(-80));res.list.splice(+b.dataset.no,1);store.set('ideas',res);renderIdeas()});
+ box.querySelectorAll('[data-unwant]').forEach(b=>b.onclick=()=>{const w=store.get('ideaWant',[]);w.splice(+b.dataset.unwant,1);store.set('ideaWant',w);renderIdeas()});
+}
+async function ideaAsk(){
+ const ix=store.get('songIndex',null);if(!ix||!sampleFn)return;const p=ideaPrefs();if($('idOther')){p.other=$('idOther').value.trim();store.set('ideaPrefs',p)}
+ const btn=$('idGo'),msg=$('idMsg');btn.disabled=true;btn.textContent='Claude is picking songs for you…';msg.textContent='';
+ const by=ideaSummary(ix),kc=knownChords(ix);
+ const lib=[...by].map(([a,l])=>`${a}: ${l.slice(0,25).map(s=>s.t+(s.ch&&s.ch.length?` [${s.ch.slice(0,12).join(' ')}]`:'')).join('; ')}`).join('\n').slice(0,9000);
+ const gear=myGuitars().map(g=>`${g.name} (${GEAR[g.type].short})`).join(', ');
+ const styles=p.styles.map(v=>(IDEA_STYLES.find(x=>x[0]===v)||[,v])[1]);
+ const lv={easier:'easier than their current songs, to build confidence',same:'about the same level as their current songs',step:'a small step above their level: at most 1–2 new chords or one new technique per song',hard:'clearly harder, to challenge them (barre chords, faster changes, riffs)'}[p.level];
+ const avoid=[...store.get('ideaNo',[]),...store.get('ideaWant',[]).map(s=>s.artist+' – '+s.title)].slice(-60).join('; ');
+ const prompt=`You recommend songs to learn on guitar. Here is what this guitarist already has in their songs folder (artist: songs [chords found in the sheet]):
+${lib}
+Chords they already play: ${kc.join(' ')||'unknown'}
+${gear?`Their guitars: ${gear}\n`:''}What they want now:
+- Style: ${styles.join(', ')||'like their folder'}${p.styles.includes('folder')?' (match the overall taste of the folder)':''}
+${p.bands.length?`- More like these bands: ${p.bands.join(', ')}\n`:''}${p.other?`- Other bands they like: ${p.other}\n`:''}- Difficulty: ${lv}
+- Language: ${{both:'Hebrew and English songs, mixed',he:'Hebrew songs only',en:'English songs only'}[p.lang]}
+Rules: suggest 10 real, well-known songs you are confident exist, with the artist spelled the usual way (Hebrew songs with Hebrew titles and artist names). Do NOT suggest songs already in their folder${avoid?` or these: ${avoid}`:''}. Mix a few songs by bands they have with songs by similar artists they don't have yet. Judge difficulty from the chords they know: say which chords each song uses (the common, simple version of the chords, as most chord sites show it), and a capo position if the usual version uses one.
+Reply with JSON: {"level": one short sentence describing their current level based on the folder, "suggestions": [{"title": string, "artist": string, "style": short genre label, "difficulty": 1-5, "chords": [chord names], "capo": number or 0, "tuning": "Standard" or the tuning name, "why": one short sentence on why it fits them, mentioning what's new to learn if anything}]}`;
+ try{const r=await sampleFn.json(prompt,{modelTier:'default'});const list=(r&&r.suggestions||[]).filter(s=>s&&s.title&&s.artist).slice(0,12);if(!list.length)throw new Error('empty');
+  const have=new Set(ix.songs.map(s=>normArt(s.t)));const fresh=list.filter(s=>!have.has(normArt(s.title)));
+  store.set('ideas',{at:Date.now(),level:r.level||'',list:fresh});renderIdeas();const f=$('ideaBox').querySelector('.idres');if(f)f.scrollIntoView({behavior:'smooth',block:'start'})}
+ catch(e){btn.disabled=false;btn.textContent='✨ Suggest songs';msg.textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get suggestions. Try again.'}
+}
+setTimeout(()=>{try{renderIdeas()}catch(e){}},0);
 
 /* ask Claude about this one piece of gear: it knows which item, its details and your earlier questions */
 const GQ={guitar:['Which strings should I use on it?','How do I lower the action myself?','It buzzes on one fret. What should I check?','How should I store it in summer with the air conditioner on?'],
