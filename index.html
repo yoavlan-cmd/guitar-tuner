@@ -373,7 +373,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wtin{width:100%;font:400 16px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px}.wt.sec .wtin{font-weight:700;color:var(--muted)}.wt.blank .wtin{background:transparent;border-style:dashed}
 .wtbtns{display:flex;gap:14px;justify-content:flex-end}.wtbtns .linkbtn{font-size:12.5px}.linkbtn.danger{color:#E5533D}
 .wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
-.wl.slots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl.slots .ww .t{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
+.wl.slots.allslots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl .ww .t.slot{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
 .shotbig{position:fixed;inset:0;z-index:80;background:#000;display:flex;flex-direction:column}.shotbar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:#111;color:#fff;font:600 15px var(--body)}.shotbar span{flex:1}.shotbar button{border:0;border-radius:999px;width:44px;height:44px;font-size:20px;background:#2a2a2a;color:#fff;cursor:pointer}.shotbar button:disabled{opacity:.3}.shotbar .shotx{background:#fff;color:#000;font-size:22px;font-weight:700}.shotscroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}.shotscroll img{display:block;width:100%;height:auto}
 .shotcol{display:flex;flex-direction:column;gap:4px;flex:0 0 auto;max-height:260px;overflow:auto}.shotcol img{width:64px}
@@ -2492,7 +2492,7 @@ function renderWLines(){
   if(!L.t.trim())return '<div class="wl blank"></div>';
   if(isSecLine(L.t))return `<div class="wl sec" dir="auto">${esc(L.t.trim().slice(1,-1))}</div>`;
   const ws=wordsOf(L.t),sl=ws.some(isSlot);
-  return `<div class="wl${sl?' slots':''}${ws.every(isSlot)&&/[\u0590-\u05FF]/.test(A.lyrics||'')?' rtlrow':''}" dir="auto">${ws.map((w,j)=>`<button type="button" class="ww${wSel&&wSel.i===i&&wSel.j===j?' on':''}" data-i="${i}" data-j="${j}"><span class="c" dir="ltr">${esc(L.ch[j]||'')}</span><span class="t">${esc(isSlot(w)?'♪':w)}</span></button>`).join('')}${sl?`<button type="button" class="wadd" data-add="${i}" aria-label="Add a spot for another chord">＋</button>`:''}</div>`}).join('');
+  return `<div class="wl${sl?' slots':''}${ws.every(isSlot)?' allslots':''}${ws.every(isSlot)&&/[\u0590-\u05FF]/.test(A.lyrics||'')?' rtlrow':''}" dir="auto">${ws.map((w,j)=>`<button type="button" class="ww${wSel&&wSel.i===i&&wSel.j===j?' on':''}" data-i="${i}" data-j="${j}"><span class="c" dir="ltr">${esc(L.ch[j]||'')}</span><span class="t${isSlot(w)?' slot':''}">${esc(isSlot(w)?'♪':w)}</span></button>`).join('')}${sl?`<button type="button" class="wadd" data-add="${i}" aria-label="Add a spot for another chord">＋</button>`:''}</div>`}).join('');
  if(wInsMode){const box=$('wLines'),rows=[...box.children];rows.forEach((el,k)=>el.insertAdjacentHTML('beforebegin',`<button type="button" class="wins" data-ins="${k}">＋ Put the chords-only line here</button>`));box.insertAdjacentHTML('beforeend',`<button type="button" class="wins" data-ins="${rows.length}">＋ Put it at the end</button>`)}
 }
 // chords offered in the picker: this song's chords, your chord book, then common chords
@@ -2644,7 +2644,8 @@ const SEC_RE=/^(פתיחה|בית|בית\s*\d+|פזמון|פזמון\s*\d+|מע�
 const hasHeb=t=>/[֐-׿]/.test(t);
 // a screenshot -> black text on white, whatever the site's colours (dark mode, coloured chord chips)
 function sheetInk(img){
- const c=document.createElement('canvas'),k=Math.min(1,1400/img.width);c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);
+ const tall=img.height/img.width>1.5,top=tall?Math.round(img.height*.045):0,bot=tall?Math.round(img.height*.055):0,sh=img.height-top-bot;
+ const c=document.createElement('canvas'),k=Math.min(1,1400/img.width);c.width=Math.round(img.width*k);c.height=Math.round(sh*k);const g=c.getContext('2d');g.drawImage(img,0,top,img.width,sh,0,0,c.width,c.height);
  const im=g.getImageData(0,0,c.width,c.height),d=im.data;let sum=0,n=0;for(let i=0;i<d.length;i+=40){sum+=.299*d[i]+.587*d[i+1]+.114*d[i+2];n++}const dark=sum/n<128;
  for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2],ink=dark?l>150:l<120;d[i]=d[i+1]=d[i+2]=ink?0:255}
  g.putImageData(im,0,0);
@@ -2654,7 +2655,7 @@ function sheetInk(img){
 function loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src})}
 async function ocrImageWords(src){
  const im=await loadImg(src),c=sheetInk(im);
- const flat=r=>{const out=[];for(const b of r.data.blocks||[])for(const p of b.paragraphs||[])for(const l of p.lines||[])for(const w of l.words||[]){const t=String(w.text||'').trim();if(!t)continue;out.push({s:t,cf:w.confidence,x0:w.bbox.x0,x1:w.bbox.x1,y:(w.bbox.y0+w.bbox.y1)/2,h:w.bbox.y1-w.bbox.y0})}return out};
+ const flat=r=>{const out=[];for(const b of r.data.blocks||[])for(const p of b.paragraphs||[])for(const l of p.lines||[])for(const w of l.words||[]){const t=String(w.text||'').replace(/[\u200e\u200f\u202a-\u202e]/g,'').trim();if(!t)continue;out.push({s:t,cf:w.confidence,x0:w.bbox.x0,x1:w.bbox.x1,y0:w.bbox.y0,y1:w.bbox.y1,y:(w.bbox.y0+w.bbox.y1)/2,h:w.bbox.y1-w.bbox.y0})}return out};
  let words=flat(await ocrHE.recognize(c,{},{blocks:true}));
  // short labels (בית, פזמון…) are often misread on their own; read those rows again as one line of Hebrew
  {const hs=words.map(w=>w.h).sort((a,b)=>a-b),H=hs[Math.floor(hs.length/2)]||20,rows=[];
@@ -2669,7 +2670,8 @@ async function ocrImageWords(src){
   // chips side by side can come back glued together: EmBmEmCDCBmD -> Em Bm Em C D C Bm D
   const parts=String(w.s).match(/[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|m6|madd9|m|dim7|dim|aug|sus2|sus4|add9|7sus4|13|11|9|7|6|5)?(?:\/[A-G](?:#|b)?)?/g);
   if(parts&&parts.length>1&&parts.join('')===w.s){const tot=w.s.length;let pos=0;for(const pt of parts){const a0=pos/tot,a1=(pos+pt.length)/tot;chords.push({...w,s:pt,c:pt,x0:w.x0+(w.x1-w.x0)*a0,x1:w.x0+(w.x1-w.x0)*a1});pos+=pt.length}}}
- return {words,chords};
+ const edge=w=>w.y0<=4||w.y1>=c.height-4;words=words.filter(w=>!edge(w));
+ return {words,chords:chords.filter(w=>!edge(w)),H:c.height};
 }
 // PDF text with positions (no reading errors: the text is in the file)
 async function pdfWords(file,onP){
@@ -2698,16 +2700,22 @@ function wordsToLines(input,img){
   const cs=r.w.map(x=>x.isChord?x.s:chordTok(x.s.replace(/[|]/g,'')));const rep=r.w.filter(x=>/^[x×]\d+$/i.test(x.s)).length;
   const nC=cs.filter(Boolean).length;r.chord=r.w.some(x=>x.isChord)||(nC>0&&nC+rep>=r.w.length*.6&&!r.heb);if(r.chord)r.heb=false;r.cs=r.w.map((x,i)=>cs[i]?{c:cs[i],cx:(x.x0+x.x1)/2}:null).filter(Boolean);
   r.cf=r.w.reduce((s,x)=>s+(x.cf||0),0)/r.w.length;
-  const plain=txt.replace(/[:：\-–—\[\](){}|]/g,'').trim();r.sec=!r.chord&&r.w.length<=3&&SEC_RE.test(plain)});
+  const plain=txt.replace(/[:：\-–—\[\](){}|]/g,'').trim();r.sec=!r.chord&&r.w.length<=3&&SEC_RE.test(plain);
+  if(!r.chord&&!r.sec){// clean stray symbols and misreads; rows that aren't song text (status bar, icons, buttons) are skipped
+   r.w=r.w.filter(x=>!/^[^\p{L}\p{N}]+$/u.test(x.s)&&!(r.heb&&/^[A-Za-z0-9]{1,2}$/.test(x.s)));
+   const t2=r.w.map(x=>x.s).join(' '),letters=(t2.match(/\p{L}/gu)||[]).length,chars=t2.replace(/\s/g,'').length;
+   r.junk=!r.w.length||/\d{1,2}:\d{2}/.test(t2)||letters<4||letters/Math.max(1,chars)<.7}});
  const pitch=(()=>{const g=[];for(let i=1;i<rows.length;i++)g.push(rows[i].y-rows[i-1].y);g.sort((a,b)=>a-b);return g[Math.floor(g.length*.3)]||H*1.6})();
  const out=[];let prevY=null;
  for(let i=0;i<rows.length;i++){const r=rows[i];
   if(r.cf<35&&!r.chord)continue;
+  if(r.junk)continue;
+  if(r.chord&&r.cs.length===1&&!(rows[i+1]&&!rows[i+1].chord&&rows[i+1].y-r.y<pitch*1.6)&&r.w.length>1)continue;
   if(prevY!=null&&r.y-prevY>pitch*1.9&&out.length&&out[out.length-1].type!=='blank')out.push({type:'blank',img});
   prevY=r.y;
-  if(r.sec){out.push({type:'section',text:r.w.map(x=>x.s).join(' ').replace(/[:：\[\](){}|]/g,'').trim(),img});continue}
+  if(r.sec){out.push({type:'section',text:r.w.map(x=>x.s).join(' ').replace(/[:：\[\](){}|]/g,'').replace(/\s+[0OoIl|]$/,'').trim(),img});continue}
   const nx=rows[i+1];
-  if(r.chord&&nx&&!nx.chord&&!nx.sec&&nx.y-r.y<pitch*1.6&&nx.cf>=35){
+  if(r.chord&&nx&&!nx.chord&&!nx.sec&&!nx.junk&&nx.y-r.y<pitch*1.6&&nx.cf>=35){
    // put each chord before the lyric word under it
    const L=nx.w,marks=L.map(()=>[]),tail=[];
    for(const ch of r.cs){let j=L.findIndex(w=>ch.cx>=w.x0-H*.25&&ch.cx<=w.x1+H*.25);
@@ -2716,9 +2724,9 @@ function wordsToLines(input,img){
      if(beyondEnd){tail.push(ch.c);continue}if(beforeStart)j=0;else{let best=1e9;L.forEach((w,k)=>{const d=Math.min(Math.abs(ch.cx-w.x0),Math.abs(ch.cx-w.x1));if(d<best){best=d;j=k}})}}
     marks[j].push(ch.c)}
    const text=L.map((w,k)=>marks[k].map(c=>`[${c}]`).join('')+w.s).join(' ')+(tail.length?' '+tail.map(c=>`[${c}]`).join(' '):'');
-   out.push({type:'lyrics',text,img});prevY=nx.y;i++;continue}
+   out.push({type:'lyrics',text,img,yr:input.H?r.y/input.H:null});prevY=nx.y;i++;continue}
   if(r.chord){const cs=r.cs.slice().sort((a,b)=>a.cx-b.cx).map(x=>x.c);out.push({type:'chords',chords:cs,img});continue}
-  out.push({type:'lyrics',text:r.w.map(x=>x.s).join(' '),img})}
+  out.push({type:'lyrics',text:r.w.map(x=>x.s).join(' '),img,yr:input.H?r.y/input.H:null})}
  return out;
 }
 // overlap check that tolerates small reading differences
@@ -2764,7 +2772,7 @@ function renderShotStage(msg){
  $('shotGoRead').onclick=()=>shotRead();$('shotCancel').onclick=()=>{shotStage=[];shotManual=false;renderShotStage()};
 }
 // safety net: if the same lines show up at the bottom of one screenshot and the top of the next, keep them once
-const lineKey=L=>L.type+'|'+String(L.text||'').replace(/\[[^\]]*\]/g,m=>m.replace(/\s/g,'')).replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
+const lineKey=L=>L.type+'|'+String(L.text||'').replace(/[\u200e\u200f\u202a-\u202e]/g,'').replace(L.type==='lyrics'?/\[[^\]]*\]/g:/$^/,'').replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
 function dropOverlaps(lines){
  if(!lines.some(L=>L&&L.img!=null))return lines;
  const groups=[];let cur=null;for(const L of lines){const im=L.img!=null?+L.img:(cur?cur.img:1);if(!cur||im!==cur.img){cur={img:im,lines:[]};groups.push(cur)}cur.lines.push(L)}
@@ -2784,6 +2792,11 @@ async function shotRead(){
   if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)))}
   else{say('Getting the reader ready…');await ocrSheetReady(say);
    for(let k=0;k<stage.length;k++){say(`Reading screenshot ${k+1} of ${stage.length} on your phone…`);const w=await ocrImageWords(stage[k].big);r.lines.push(...wordsToLines(w,k+1))}}
+  if(stage.length>1){const key=L=>String(L.text||'').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();const seen={};
+   r.lines.forEach(L=>{if(L.type!=='lyrics'||L.yr==null)return;const k=key(L);(seen[k]=seen[k]||[]).push(L)});
+   const sticky=new Set();Object.values(seen).forEach(list=>{const imgs=new Set(list.map(x=>x.img));if(imgs.size<2)return;
+    const ys=list.map(x=>x.yr);if(Math.max(...ys)-Math.min(...ys)<.035)list.forEach(x=>sticky.add(x))});
+   r.lines=r.lines.filter(L=>!sticky.has(L))}
   if(!r.lines.some(L=>L.type==='lyrics'||L.type==='chords'))throw {code:'empty'};
   const lowConf=!stage[0].pdf;r.note=lowConf?'Read on your phone from the picture, so a few letters or chords may be misread. Compare with the screenshot.':'';
   r.lines=dropOverlaps(r.lines.filter(Boolean));
