@@ -372,7 +372,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
 .wl.slots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl.slots .ww .t{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
-.shotbig{position:fixed;inset:0;z-index:70;background:#000d;display:flex;align-items:center;justify-content:center;padding:12px}.shotbig img{max-width:100%;max-height:100%;object-fit:contain}
+.shotbig{position:fixed;inset:0;z-index:80;background:#000;display:flex;flex-direction:column}.shotbar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:#111;color:#fff;font:600 15px var(--body)}.shotbar span{flex:1}.shotbar button{border:0;border-radius:999px;width:44px;height:44px;font-size:20px;background:#2a2a2a;color:#fff;cursor:pointer}.shotbar button:disabled{opacity:.3}.shotbar .shotx{background:#fff;color:#000;font-size:22px;font-weight:700}.shotscroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}.shotscroll img{display:block;width:100%;height:auto}
 .shotcol{display:flex;flex-direction:column;gap:4px;flex:0 0 auto;max-height:260px;overflow:auto}.shotcol img{width:64px}
 .shotlist{display:flex;flex-direction:column;gap:6px}.shotrow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:6px}.shotrow img{width:56px;height:72px;object-fit:cover;border-radius:6px;cursor:zoom-in}.shotinfo{flex:1;display:flex;flex-direction:column}.shotinfo b{font-size:16px}.shotinfo small{color:var(--muted)}.shotbtns{display:flex;gap:4px}.shotbtns .btn{padding:6px 10px}
 #shotCard .editrow{flex-wrap:wrap}
@@ -688,6 +688,7 @@ body.wopen{overflow:hidden}
 
   <div class="pane" id="paneSong" hidden>
     <section class="card" id="driveIntro" hidden></section>
+    <div id="resumeCard" hidden></div>
     <label class="drop" for="vidIn" id="drop">
       <b>Choose a song video</b>
       <span>MP4 works best. The sound is analysed on this device and nothing is uploaded.</span>
@@ -1449,7 +1450,28 @@ const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
 function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
-$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setTab(b.dataset.tab);if(b.dataset.tab==='song')songsHome()});
+// the Songs tab always opens on the Songs home page; whatever you were in the middle of is kept (draft card or a "back to" button)
+let songsResume=null;
+function songsHome(){
+ try{
+  if(!$('prog').hidden){window.scrollTo({top:0});return}// an analysis is running: stay with it
+  if(!$('writeView').hidden){saveDraft();$('writeView').hidden=true;A=null}
+  else if(!$('sheetView').hidden){if(A&&A.kind==='lyrics'&&!A.libId){A=null}else if(A){songsResume={view:'sheet',A,fileKey,name:$('shName').value.trim()||A.title||'your sheet'}}}
+  else if(!$('songView').hidden&&A){songsResume={view:'song',A,fileKey,name:A.title||'your song'}}
+  else if(!$('readyCard').hidden&&curFile){songsResume={view:'ready',fileKey,name:curFile.name||'your video'}}
+  try{vid.pause()}catch(e){}
+  showLanding();window.scrollTo({top:0});
+ }catch(e){}
+}
+function renderResume(){
+ const c=$('resumeCard');if(!c)return;const r=songsResume,ok=r&&(r.view==='sheet'?!!r.A:r.view==='song'?!!(r.A&&r.fileKey===fileKey&&vid.src):!!(r.fileKey===fileKey&&curFile));
+ if(!ok||$('drop').hidden){c.hidden=true;if(!ok)songsResume=null;return}
+ c.hidden=false;c.innerHTML=`<button type="button" class="btn ghost wide" id="resumeGo">↩ Back to “<span dir="auto">${esc(r.name)}</span>”</button>`;
+ $('resumeGo').onclick=()=>{const x=songsResume;songsResume=null;c.hidden=true;if(!x)return;
+  if(x.view==='sheet'){A=x.A;fileKey=x.fileKey||fileKey;showSheet()}else if(x.view==='song'){A=x.A;showSong(false)}
+  else{['drop','writeNew','draftCard','shotNew','shotCard','libCard'].forEach(k=>$(k).hidden=true);$('readyCard').hidden=false}window.scrollTo({top:0})};
+}
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
@@ -1467,7 +1489,7 @@ $('vidIn').addEventListener('change',async e=>{
 });
 $('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 function showReady(file){
- $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
+ $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
  $('preReadWrap').hidden=!/^video\//.test(file.type||'video/');setReadTxt();$('preRead').checked=store.get('readScreen2',true);
@@ -1519,7 +1541,7 @@ async function runAnalysis(file){
  }
 }
 function showSong(fromSave){
- $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
+ $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
@@ -2113,7 +2135,7 @@ function renderLib(){
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
-function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}}
+function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}try{renderResume()}catch(e){}}
 
 /* ---- sheet content ---- */
 function printify(svg){
@@ -2172,7 +2194,7 @@ function sheetHTML(print){
 }
 function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function showSheet(){
- wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
+ wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
  const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');window.scrollTo({top:0});
 }
@@ -2437,7 +2459,7 @@ $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</opti
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
 function openWriter(a,step){
  vid.pause();A=a;A.made=false;wFromWriter=false;
- ['drop','writeNew','draftCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
+ ['drop','writeNew','draftCard','resumeCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
  $('wArtists').innerHTML=knownArtists().map(t=>`<option value="${esc(t)}">`).join('');
  $('wBlank').hidden=!!A.libId;wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';renderShotNote();setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
@@ -2514,7 +2536,7 @@ $('wCapo').addEventListener('change',e=>{A.play.capo=+e.target.value;saveDraft()
 function renderShotNote(){const n=$('wShotNote');if(!n)return;const sh=A&&A.shots;
  if(!sh||!sh.length){n.hidden=true;n.innerHTML='';return}n.hidden=false;
  n.innerHTML=`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div><div><b>📷 Claude made this from your screenshot${sh.length>1?'s':''}.</b> Compare it with the picture (tap to enlarge) and fix anything that’s off: tap a word to change its chord, or go back to step 1 to fix the words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">Claude’s note: ${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
- n.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>{const d=document.createElement('div');d.className='shotbig';d.innerHTML=`<img src="${sh[+im.dataset.big]}" alt="">`;d.onclick=()=>d.remove();document.body.appendChild(d)});
+ n.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotBigMem&&shotBigMem.length===sh.length?shotBigMem:sh,+im.dataset.big));
  $('wShotDrop').onclick=()=>{store.set('writeDraft',null);$('writeView').hidden=true;A=null;showLanding()};
 }
 function tunFromName(t){t=String(t||'').toLowerCase();if(!t||/^standard|^e standard/.test(t))return 'std';const m=TUNINGS.find(x=>x.name.toLowerCase()===t)||TUNINGS.find(x=>t.includes(x.name.toLowerCase()))||TUNINGS.find(x=>x.name.toLowerCase().includes(t));return m?m.id:'std'}
@@ -2533,6 +2555,16 @@ function sheetFromShot(r){
  while(lc.length&&!lc[lc.length-1].t.trim())lc.pop();
  a.lc=lc;a.lyrics=lc.map(L=>L.t).join('\n');a.shotNote=String(r.note||'').slice(0,300);return a;
 }
+// full-size screenshot viewer: scroll through it, step between screenshots, close with ✕ (or the phone's back button)
+function showShots(list,i){
+ let k=i;const d=document.createElement('div');d.className='shotbig';d.setAttribute('role','dialog');d.setAttribute('aria-label','Screenshot');
+ const draw=()=>{d.innerHTML=`<div class="shotbar"><button type="button" class="shotprev" aria-label="Previous screenshot" ${k?'':'disabled'}>‹</button><span>Screenshot ${k+1}${list.length>1?` of ${list.length}`:''}${list.length>1?(k===0?' · beginning':k===list.length-1?' · end':''):''}</span><button type="button" class="shotnext" aria-label="Next screenshot" ${k<list.length-1?'':'disabled'}>›</button><button type="button" class="shotx" aria-label="Close">✕</button></div><div class="shotscroll"><img src="${list[k]}" alt="Screenshot ${k+1}"></div>`;
+  d.querySelector('.shotprev').onclick=()=>{if(k>0){k--;draw()}};d.querySelector('.shotnext').onclick=()=>{if(k<list.length-1){k++;draw()}};d.querySelector('.shotx').onclick=()=>close(true)};
+ const onPop=()=>close(false);
+ function close(viaBtn){if(!d.isConnected)return;d.remove();document.body.style.overflow='';removeEventListener('popstate',onPop);if(viaBtn&&history.state&&history.state.shot)history.back()}
+ draw();document.body.appendChild(d);document.body.style.overflow='hidden';try{history.pushState({shot:1},'');addEventListener('popstate',onPop)}catch(e){}
+}
+let shotBigMem=null;// full-quality copies of the screenshots behind the draft being reviewed (this session only)
 // screenshots are lined up in order first (top of the song first), then read together
 let shotStage=[];const SHOT_MAX=8;
 async function shotAdd(files){
@@ -2544,12 +2576,12 @@ async function shotAdd(files){
 function renderShotStage(msg){
  const card=$('shotCard'),n=shotStage.length;if(!n){card.hidden=true;card.innerHTML='';return}card.hidden=false;
  const lab=i=>n===1?'':i===0?'Beginning':i===n-1?'End':'Middle';
- card.innerHTML=`<div class="drafthead"><span class="sic">📷</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>In order from the top of the song. Overlaps between them are fine.</small></span></div>
+ card.innerHTML=`<div class="drafthead"><span class="sic">📷</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>In order from the top of the song. Tap a picture to see it full size. Overlaps between them are fine.</small></span></div>
  <div class="shotlist">${shotStage.map((x,i)=>`<div class="shotrow"><img src="${x.small}" alt="Screenshot ${i+1}" data-big="${i}"><div class="shotinfo"><b>${i+1}</b><small>${lab(i)}</small></div><div class="shotbtns"><button type="button" class="btn ghost" data-up="${i}" ${i?'':'disabled'} aria-label="Move up">↑</button><button type="button" class="btn ghost" data-dn="${i}" ${i<n-1?'':'disabled'} aria-label="Move down">↓</button><button type="button" class="btn ghost danger" data-rm="${i}" aria-label="Remove">✕</button></div></div>`).join('')}</div>
  ${msg?`<p class="tip">${esc(msg)}</p>`:''}
  <div class="editrow">${n<SHOT_MAX?`<button type="button" class="btn ghost" id="shotMore">＋ Add the next screenshot</button>`:''}<button type="button" class="btn cta" id="shotGoRead">✨ Make the sheet from ${n===1?'it':'all '+n}</button></div>
  <button type="button" class="linkbtn" id="shotCancel">Cancel</button>`;
- card.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>{const d=document.createElement('div');d.className='shotbig';d.innerHTML=`<img src="${shotStage[+im.dataset.big].big}" alt="">`;d.onclick=()=>d.remove();document.body.appendChild(d)});
+ card.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotStage.map(x=>x.big),+im.dataset.big));
  card.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;[shotStage[i-1],shotStage[i]]=[shotStage[i],shotStage[i-1]];renderShotStage()});
  card.querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{const i=+b.dataset.dn;[shotStage[i+1],shotStage[i]]=[shotStage[i],shotStage[i+1]];renderShotStage()});
  card.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{shotStage.splice(+b.dataset.rm,1);renderShotStage()});
@@ -2593,7 +2625,7 @@ Reply with only JSON: {"title": string or "", "artist": string or "", "capo": nu
   if(!r||!Array.isArray(r.lines)||!r.lines.length)throw {code:'empty'};
   r.lines=dropOverlaps(r.lines.filter(Boolean));
   const a=sheetFromShot(r);if(!a.lc.some(L=>L.t.trim()))throw {code:'empty'};
-  a.shots=stage.map(x=>x.small);shotStage=[];card.hidden=true;card.innerHTML='';
+  a.shots=stage.map(x=>x.small);shotBigMem=stage.map(x=>x.big);shotStage=[];card.hidden=true;card.innerHTML='';
   try{store.set('writeDraft',a)}catch(e){a.shots=a.shots.slice(0,2);try{store.set('writeDraft',a)}catch(e2){delete a.shots}}
   openWriter(a,2);
  }catch(e){renderShotStage(e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':e&&e.code==='empty'?'Claude couldn’t find a chord sheet in these pictures. Try clearer screenshots that show the chords above the lyrics.':'Couldn’t reach Claude. Check the connection and try again.')}
