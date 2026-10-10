@@ -930,7 +930,11 @@ const TUNINGS=[
  {id:'openc',name:'Open C',n:[36,43,48,55,60,64]},
 ];
 const $=id=>document.getElementById(id);
-const store={get(k,d){try{const v=localStorage.getItem('tuner.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('tuner.'+k,JSON.stringify(v))}catch(e){}}};
+let gearRemoving=null;// id the person is deliberately removing
+const store={get(k,d){try{const v=localStorage.getItem('tuner.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{
+ if(k==='instruments'&&Array.isArray(v)){try{const old=JSON.parse(localStorage.getItem('tuner.instruments')||'[]')||[],ids=new Set(v.map(x=>x&&x.id)),lost=old.filter(x=>x&&x.id&&!ids.has(x.id)&&x.id!==gearRemoving);
+  if(lost.length){const keep=JSON.parse(localStorage.getItem('tuner.gearLost')||'[]').filter(x=>!lost.some(y=>y.id===x.id));localStorage.setItem('tuner.gearLost',JSON.stringify(keep.concat(lost).slice(-10)))}}catch(e){}}
+ localStorage.setItem('tuner.'+k,JSON.stringify(v))}catch(e){}}};
 
 let a4=store.get('a4',440), inst=store.get('inst','acoustic');
 let tuning=TUNINGS.find(t=>t.id===store.get('tuning','std'))||TUNINGS[0];
@@ -1004,7 +1008,7 @@ $('inst').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!
 $('gtrLine').onclick=()=>{const p=$('gtrPick'),open=p.hidden;p.hidden=!open;$('gtrLine').setAttribute('aria-expanded',open);if(open)p.innerHTML=$('inst').innerHTML.replace(/<span class="tip">.*<\/span>/,'')};
 $('gtrPick').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const twin=$('inst').querySelector(`[data-g="${CSS.escape(b.dataset.g)}"]`);if(twin)twin.click();$('gtrPick').hidden=true;$('gtrLine').setAttribute('aria-expanded','false')});
 // remember the guitar's tuning, and when all its strings were last in tune
-function gtrUpdate(f){const l=myGuitars(),g=l.find(x=>x.id===tuneGtr);if(!g)return;f(g);store.set('instruments',l)}
+function gtrUpdate(f){const l=store.get('instruments',null)||[],g=l.find(x=>x.id===tuneGtr&&!/amp$/.test(x.type));if(!g)return;f(g);store.set('instruments',l)}
 function noteAllTuned(){if(done.size<tuning.n.length)return;gtrUpdate(g=>{g.tuning=tuning.id;g.lastTuned=new Date().toISOString().slice(0,10)});renderInstPick()}
 setTimeout(renderInstPick,0);
 function setA4(v){a4=Math.max(430,Math.min(450,v));store.set('a4',a4);$('calOut').textContent='A4 '+a4;showTarget()}
@@ -3275,9 +3279,13 @@ function renderGear(){
  if(instEdit){renderInstForm();return}
  if(instOpen){const it=l.find(x=>x.id===instOpen);if(it){renderInstDetail(it);return}instOpen=null}
  gearVisit=null;
+ const lost=(store.get('gearLost',[])||[]).filter(x=>x&&x.id&&!l.some(y=>y.id===x.id));
  $('gearOut').innerHTML=`<section class="card"><div class="cardhead"><h2>My gear</h2><button class="btn" id="instAdd" type="button">+ Add gear</button></div>
+ ${lost.length?`<div class="confirm lostbox"><span>↩ Removed without you asking (an app bug). Bring back:</span>${lost.map(x=>`<button class="btn" type="button" data-restore="${esc(x.id)}">${GEAR[x.type]&&GEAR[x.type].amp?'🔊':'🎸'} ${esc(x.name)}</button>`).join('')}<button class="btn ghost" type="button" id="lostNo">Not needed</button></div>`:''}
  ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">${GEAR[it.type].amp?'🔊':'🎸'}</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
  :'<p class="tip">Add the guitars and amps you own: give each one a name, its brand and model, and get advice for that exact piece of gear. They stay here until you remove them.</p>'}</section>`;
+ document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>{const all=store.get('gearLost',[])||[],x=all.find(y=>y.id===b.dataset.restore);if(x){instSave(instAll().concat(x));store.set('gearLost',all.filter(y=>y.id!==x.id))}renderGear()});
+ if($('lostNo'))$('lostNo').onclick=()=>{store.set('gearLost',[]);renderGear()};
  $('instAdd').onclick=()=>{instEdit={id:'',name:'',type:'acoustic',brand:'',model:'',year:'',specs:{},strings:''};renderGear()};
 }
 $('gearOut').addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r){instOpen=r.dataset.open;renderGear();window.scrollTo({top:0})}});
@@ -3646,7 +3654,7 @@ function renderInstDetail(it){
  $('iStr').onchange=e=>upd(x=>x.strings=e.target.value);
  $('iStrToday').onclick=()=>upd(x=>x.strings=new Date().toISOString().slice(0,10));
  $('iDel').onclick=()=>{$('iDelC').hidden=false};$('iDelN').onclick=()=>{$('iDelC').hidden=true};
- $('iDelY').onclick=()=>{instSave(instAll().filter(x=>x.id!==it.id));instOpen=null;renderGear()};
+ $('iDelY').onclick=()=>{gearRemoving=it.id;instSave(instAll().filter(x=>x.id!==it.id));gearRemoving=null;instOpen=null;renderGear()};
  if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
  renderGearChat(it);wireControls(it);
  const ds=[...$('gearOut').querySelectorAll('details')];ds.forEach((d,i)=>{d.open=!!(keepOpen&&keepOpen.length===ds.length&&keepOpen[i])});gearVisit=it.id;
