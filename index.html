@@ -548,6 +548,15 @@ body.wopen{overflow:hidden}
 .linkbtn{background:none;border:0;color:var(--muted);font:500 12.5px var(--body);text-decoration:underline;cursor:pointer;align-self:flex-start;padding:0}
 .apibox.flat{border-top:0;padding-top:0;margin-top:0}.apibox.flat>summary{display:none}
 .libcount{font-weight:400}
+.ctlpic{background:var(--bg);border-radius:12px;padding:8px;display:flex;justify-content:center}
+.ctlsvg{width:100%;max-width:360px;height:auto}
+.cbadge{cursor:pointer}.cbadge.on circle{fill:#FF6A1A;stroke:#fff;stroke-width:2}
+.ctlnote{margin:6px 0 0;font-size:12.5px}
+.ctllist{margin:6px 0 4px;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.ctllist li{cursor:pointer;border-radius:8px;padding:6px 8px;margin-left:-6px}
+.ctllist li b{display:block;font-size:14.5px}.ctllist li span{display:block;font-size:13.5px;line-height:1.4}.ctllist li em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);margin-top:2px}
+.ctllist li.on{background:color-mix(in srgb,#FF6A1A 14%,transparent);box-shadow:inset 3px 0 0 #FF6A1A}
+.ctllist li::marker{font-weight:700;color:var(--accent)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -2993,7 +3002,7 @@ function renderInstForm(){
  wirePhoto(it,sync);
  $('iSave').onclick=()=>{sync();if(!it.name)it.name=[it.brand,it.model].filter(Boolean).join(' ')||'My '+GEAR[it.type].short.toLowerCase();if(GEAR[it.type].amp)it.strings='';
   const l=instAll();const clean={id:it.id||'i'+Date.now().toString(36),name:it.name,type:it.type,brand:it.brand,model:it.model,year:it.year,specs:it.specs,strings:it.strings,added:it.added||Date.now(),ai:it.ai,photo:it.photo||'',photoNotes:it.photoNotes||null};
-  if(it.ai&&it._key&&it._key!==(it.brand+'|'+it.model))delete clean.ai;
+  if(it._key&&it._key!==(it.brand+'|'+it.model)){delete clean.ai;delete clean.controls}else{clean.controls=it.controls}
   const i=l.findIndex(x=>x.id===clean.id);if(i>=0)l[i]=clean;else l.push(clean);instSave(l);
   if(clean.photo&&!(instAll().find(x=>x.id===clean.id)||{}).photo){clean.photo='';l[l.findIndex(x=>x.id===clean.id)]=clean;instSave(l);$('iPhotoMsg').textContent='This phone’s storage is full, so the photo couldn’t be saved. The rest was saved.';instEdit=null;instOpen=clean.id;setTimeout(renderGear,2200);return}
   instEdit=null;instOpen=clean.id;renderGear();window.scrollTo({top:0})};
@@ -3032,6 +3041,160 @@ function instAdvice(it){
  const notes=m?m.n:[];
  return {pros,cons,use,care,repair,clean,notes};
 }
+/* ---- controls and switches: a labelled drawing of each electric item's knobs, switches and sockets ---- */
+const C_=(n,k,d,t)=>({n,k,d,t});
+const CTL={
+ strat:{body:'strat',pu:['S','S','S'],c:[
+  C_('5-way pickup switch','blade','Picks which pickups you hear. 1 (toward the bridge) = bridge pickup, bright and biting. 2 = bridge + middle. 3 = middle. 4 = middle + neck. 5 = neck, warm and round.','Positions 2 and 4 are the famous “quacky” Strat sounds, and they cancel hum.'),
+  C_('Volume','knob','Overall loudness of the guitar.','Roll it back to about 7 to clean up a distorted amp without touching the amp.'),
+  C_('Tone 1 (neck)','knob','Softens the treble of the neck pickup.','Turn it down for a smooth, jazzy lead sound.'),
+  C_('Tone 2 (middle/bridge)','knob','Softens the treble of the middle pickup, and on many newer Strats the bridge too.','Bring it to 7–8 to tame a harsh bridge pickup.'),
+  C_('Tremolo arm','arm','Bends all the strings down (or slightly up) for vibrato.','Push gently. Hard dives knock vintage-style Strats out of tune.'),
+  C_('Output jack','jack','Where the cable goes in.','If the sound crackles when you touch the cable, the jack is loose: tighten its nut.')]},
+ hss:{body:'strat',pu:['S','S','H'],c:[
+  C_('5-way pickup switch','blade','1 = bridge humbucker (thick and loud), 2 = bridge + middle (often coil-split), 3 = middle, 4 = middle + neck, 5 = neck.','Use 1 for distortion and 4 for clean funk and pop.'),
+  C_('Volume','knob','Overall loudness.','Rolling back slightly cleans up the humbucker.'),
+  C_('Tone','knob','Softens the treble.','Keep it high on the humbucker; it’s already warm.'),
+  C_('Tone 2 / coil split','knob','Second tone, or on some models a push-pull that turns the humbucker into a single-coil.','Pull it up (if it’s a push-pull) for a brighter, Strat-like bridge sound.'),
+  C_('Tremolo arm','arm','Adds vibrato by moving the bridge.','Gentle use keeps it in tune.'),
+  C_('Output jack','jack','Where the cable goes in.','Tighten the nut if the sound cuts out.')]},
+ lp:{body:'lp',pu:['H','H'],c:[
+  C_('3-way toggle','toggle','Up (“Rhythm”) = neck pickup, warm. Middle = both pickups. Down (“Treble”) = bridge pickup, bright and biting.','Set the neck volume a bit lower than the bridge, then use the toggle to jump between rhythm and lead.'),
+  C_('Neck volume','knob','Loudness of the neck pickup.','In the middle toggle position, it blends the two pickups.'),
+  C_('Bridge volume','knob','Loudness of the bridge pickup.','Turning one volume to 0 in the middle position silences the whole guitar on many Les Pauls.'),
+  C_('Neck tone','knob','Treble of the neck pickup.','Turn it down to about 3 for the classic “woman tone”.'),
+  C_('Bridge tone','knob','Treble of the bridge pickup.','Keep it near 10 for leads.'),
+  C_('Output jack','jack','On the side of the body.','Use a right-angle plug: it’s less likely to break if you step on the cable.')]},
+ tele:{body:'tele',pu:['S','S'],c:[
+  C_('3-way blade switch','blade','Toward the bridge = bridge pickup (twangy). Middle = both. Toward the neck = neck pickup (warm).','The middle position is great for clean strumming.'),
+  C_('Volume','knob','Overall loudness.','Swell notes in by rolling the volume up after you pick.'),
+  C_('Tone','knob','Softens the treble.','A little roll-off makes the bridge pickup less piercing.'),
+  C_('Output jack','jack','On the side of the body, in a cup.','Tele jacks loosen over time. Tighten the cup if it rattles.')]},
+ hh:{body:'strat',pu:['H','H'],c:[
+  C_('3-way pickup switch','toggle','Bridge pickup, both, or neck pickup.','Bridge for riffs, neck for warm leads.'),
+  C_('Volume','knob','Overall loudness.','Roll it back to clean up the sound.'),
+  C_('Tone','knob','Softens the treble.','Push-pull versions may split the humbuckers into single-coils.'),
+  C_('Output jack','jack','Where the cable goes in.','Tighten the nut if it crackles.')]},
+ preamp:{c:[
+  C_('Volume','knob','How loud the guitar is when plugged in.','Start at about two thirds and set the overall level on the amp or PA.'),
+  C_('Bass','slider','Low frequencies: body and boom.','Cut it a little if the sound is boomy or feeds back.'),
+  C_('Middle','slider','The body of the tone.','Small cuts here make a piezo sound less “quacky”.'),
+  C_('Treble','slider','Brightness and pick attack.','Too much sounds thin and harsh.'),
+  C_('Presence / brilliance','slider','Extra sparkle on top (not on every preamp).','Use sparingly.'),
+  C_('Notch / anti-feedback','knob','Cuts one narrow frequency where the guitar howls.','When it feeds back, turn it slowly until the howl stops.'),
+  C_('Phase','button','Flips the signal’s phase.','Try it when you get low boomy feedback on stage; keep whichever sounds fuller.'),
+  C_('Tuner','button','Built-in tuner; often mutes the output while on.','Press it, tune, press again to unmute.'),
+  C_('Battery compartment','battery','Powers the preamp (often a 9 V or 2× AA).','Weak battery = thin or crackly sound. Keep a spare in the case.'),
+  C_('Output jack (strap button)','jack','The cable plugs into the strap button at the bottom of the body.','Unplug after playing: on many guitars the plugged cable keeps the battery running.')]},
+ elamp:{c:[
+  C_('Input','jack','Plug your guitar in here.','Turn the volume down before plugging in to avoid a loud pop.'),
+  C_('Gain','knob','How hard the preamp is driven: low is clean, high is distorted.','Raise it until the sound just breaks up; less gain usually sounds better.'),
+  C_('Volume / channel level','knob','The loudness of the channel.','Balance clean and drive channels so switching doesn’t jump in volume.'),
+  C_('Bass','knob','Low end.','Lower it at high volumes to keep the sound tight.'),
+  C_('Middle','knob','Body and punch: what helps you cut through a band.','Scooping the mids sounds big alone but disappears in a band.'),
+  C_('Treble','knob','Brightness and bite.','Set it last, after gain and middle.'),
+  C_('Reverb','knob','Adds space, like playing in a room or hall.','A little goes a long way: 2–3 is often enough.'),
+  C_('Master','knob','Overall output level of the amp.','On amps with gain and master, set gain for the sound and master for the loudness.'),
+  C_('Channel / boost','button','Switches between clean and drive channels, or adds a boost.','A footswitch lets you change channels while playing.'),
+  C_('Headphones / rec out','jack','Silent practice or recording.','Plugging headphones in usually mutes the speaker.'),
+  C_('Power','switch','Turns the amp on and off.','Turn the master down before switching on or off.')]},
+ acamp:{c:[
+  C_('Ch 1 input (instrument)','jack','Plug your acoustic guitar in here.','Use the guitar’s own volume at about two thirds.'),
+  C_('Ch 1 volume / gain','knob','Level of the guitar channel.','Raise it until the clip light flashes on hard strums, then back off a little.'),
+  C_('Ch 1 bass / middle / treble','knob','Tone of the guitar channel.','Start flat at 12 o’clock and cut what sounds bad.'),
+  C_('Notch / anti-feedback','knob','Removes the frequency that howls.','Turn it slowly while the guitar is feeding back until the howl disappears.'),
+  C_('Phase','button','Flips the signal’s phase to fight low-frequency feedback.','Try both settings on stage; keep the fuller one.'),
+  C_('Ch 2 input (mic)','jack','For a vocal mic (XLR) or a second instrument.','Phantom power (if present) is only for condenser mics.'),
+  C_('Ch 2 volume and EQ','knob','Level and tone of the mic channel.','Cut the bass on vocals to reduce rumble and handling noise.'),
+  C_('Effects (reverb / chorus)','knob','Adds space or shimmer.','Reverb at about 3 sounds natural; chorus adds width.'),
+  C_('Master','knob','Overall loudness.','Set channel levels first, then the master.'),
+  C_('DI out','jack','Sends your sound to a PA mixer.','Use it for bigger rooms: the amp becomes your monitor.'),
+  C_('Aux in / headphones','jack','Play along with music, or practise silently.','Keep the backing track a bit quieter than your guitar.'),
+  C_('Power','switch','On and off.','Master down before switching.')]}
+};
+// which drawing fits this item
+function ctlKey(it){const g=GEAR[it.type],sp=it.specs||{},k=(it.brand+' '+it.model).toLowerCase();
+ if(it.type==='electroacoustic')return 'preamp';
+ if(it.type==='elamp'||it.type==='acamp')return it.type;
+ if(it.type!=='electric')return null;
+ if(/strat/.test(k))return sp.pickups==='humbucker'||sp.pickups==='mixed'?'hss':'strat';
+ if(/tele/.test(k))return 'tele';
+ if(/les\s?paul|\blp\b|\bsg\b|335|es-/.test(k))return 'lp';
+ if(sp.pickups==='mixed')return 'hss';if(sp.pickups==='humbucker'||sp.pickups==='active')return sp.bridge==='fixed'?'lp':'hh';
+ if(sp.pickups==='single')return sp.bridge==='fixed'?'tele':'strat';return 'strat'}
+function ctlList(it,key){let c=it.controls&&it.controls.length?it.controls.map(x=>C_(String(x.name||''),String(x.kind||'knob'),String(x.what||''),String(x.tip||''))):CTL[key].c.slice();
+ if(!(it.controls&&it.controls.length)){const sp=it.specs||{};
+  if(key==='elamp'&&sp.ampkind==='tube')c.splice(c.length-1,0,C_('Standby','switch','Keeps the tubes warm but silent.','Power on with standby engaged, wait about a minute, then switch standby off.'));
+  if(key==='elamp'&&sp.ampkind==='modeling'){c.splice(1,0,C_('Amp type','selector','Chooses which classic amp is being modelled: clean, crunch, lead and more.','Pick the amp type first, then set gain and EQ.'));c.splice(8,0,C_('Effects (mod / delay / FX)','knob','Built-in effects like chorus, delay and more.','The companion app gives deeper control and saves presets.'),C_('Tap tempo','button','Sets the delay time by tapping in time with the song.','Tap at least three times on the beat.'))}
+  if((key==='elamp'||key==='acamp')&&sp.power==='battery')c.push(C_('Battery / charging','battery','Runs the amp without a socket.','Charge after use; don’t leave it on the charger for weeks.'));
+  if(GEAR[it.type].type!=='amp'&&(sp.pickups==='active'))c.push(C_('Battery (back plate)','battery','Powers the active pickups (9 V).','Unplug the cable when you finish: it switches the pickups on.'));
+  if(sp.bridge==='floyd')c=c.map(x=>x.k==='arm'?C_('Locking tremolo + fine tuners','arm','Dive and pull up without going out of tune. Fine tuners on the bridge adjust pitch once the nut is locked.','Unlock the nut (three clamps on the headstock) for big tuning changes.'):x);
+  if(sp.bridge==='bigsby')c=c.map(x=>x.k==='arm'?C_('Bigsby vibrato','arm','Gentle, shimmering vibrato from the big tailpiece.','Not for dive-bombs; keep it subtle.'):x);
+  if(sp.bridge==='fixed')c=c.filter(x=>x.k!=='arm');}
+ return c}
+// drawings
+const CT={knob:(x,y)=>`<circle cx="${x}" cy="${y}" r="9" fill="#2A2A2A" stroke="#BDBDBD" stroke-width="2"/><line x1="${x}" y1="${y}" x2="${x}" y2="${y-7}" stroke="#EEE" stroke-width="2"/>`,
+ slider:(x,y)=>`<rect x="${x-3}" y="${y-12}" width="6" height="24" rx="3" fill="#555"/><rect x="${x-7}" y="${y-3}" width="14" height="7" rx="2" fill="#DDD"/>`,
+ toggle:(x,y)=>`<circle cx="${x}" cy="${y}" r="8" fill="#C9C9C9" stroke="#888"/><line x1="${x}" y1="${y}" x2="${x+5}" y2="${y-11}" stroke="#F2F2F2" stroke-width="3" stroke-linecap="round"/>`,
+ blade:(x,y)=>`<rect x="${x-14}" y="${y-3}" width="28" height="6" rx="3" fill="#555"/><rect x="${x-3}" y="${y-7}" width="6" height="14" rx="2" fill="#F2F2F2"/>`,
+ jack:(x,y)=>`<circle cx="${x}" cy="${y}" r="8" fill="#9A9A9A"/><circle cx="${x}" cy="${y}" r="4" fill="#1A1A1A"/>`,
+ button:(x,y)=>`<rect x="${x-8}" y="${y-7}" width="16" height="14" rx="3" fill="#3C3C3C" stroke="#AAA"/><circle cx="${x}" cy="${y}" r="2.5" fill="#2ECC71"/>`,
+ switch:(x,y)=>`<rect x="${x-6}" y="${y-10}" width="12" height="20" rx="2" fill="#B71C1C"/><rect x="${x-4}" y="${y-8}" width="8" height="8" rx="1" fill="#E53935"/>`,
+ selector:(x,y)=>`<circle cx="${x}" cy="${y}" r="10" fill="#1F1F1F" stroke="#BDBDBD" stroke-width="2"/>${[-60,-30,0,30,60].map(a=>{const r=a*Math.PI/180;return `<line x1="${x+13*Math.sin(r)}" y1="${y-13*Math.cos(r)}" x2="${x+16*Math.sin(r)}" y2="${y-16*Math.cos(r)}" stroke="#BDBDBD" stroke-width="1.5"/>`}).join('')}<line x1="${x}" y1="${y}" x2="${x+5}" y2="${y-8}" stroke="#FFB300" stroke-width="2.5"/>`,
+ arm:(x,y)=>`<path d="M${x} ${y} q 14 2 22 22" stroke="#E0E0E0" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="${x+22}" cy="${y+22}" r="3.5" fill="#FFF"/>`,
+ battery:(x,y)=>`<rect x="${x-10}" y="${y-7}" width="20" height="14" rx="2" fill="#E0A100"/><rect x="${x+10}" y="${y-3}" width="3" height="6" fill="#E0A100"/><text x="${x}" y="${y+3}" font-size="7" text-anchor="middle" fill="#1A1A1A" font-weight="700">9V</text>`};
+const badge=(x,y,i)=>`<g class="cbadge" data-c="${i}"><circle cx="${x}" cy="${y}" r="8.5" fill="var(--accent)"/><text x="${x}" y="${y+3.6}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${i+1}</text></g>`;
+function guitarSVG(key,c){
+ const B={strat:'M70 40 C40 30 20 60 34 92 C18 120 30 168 80 176 C120 182 170 178 196 160 C222 140 220 110 206 96 C232 88 236 60 214 50 C196 42 176 58 160 64 C130 70 104 60 70 40Z',
+  lp:'M60 54 C30 60 18 98 40 122 C24 150 46 182 96 184 C150 188 198 176 214 148 C228 122 212 100 200 92 C210 74 196 50 170 52 C150 54 140 70 120 66 C100 62 88 50 60 54Z',
+  tele:'M56 50 C28 56 20 96 36 116 C22 146 40 178 92 182 C150 186 200 178 216 150 C230 124 216 96 204 88 L204 60 C204 52 190 48 182 54 C160 66 120 64 100 54 C86 48 70 46 56 50Z'}[CTL[key].body];
+ const pu=CTL[key].pu||[],puX=key==='lp'?[104,154]:pu.length===2?[100,158]:[92,124,156];
+ let s=`<path d="${B}" fill="#B5382A" stroke="#7A1F14" stroke-width="2"/><rect x="0" y="98" width="62" height="16" fill="#C9955A"/>`;
+ // neck stub, pickguard tint, pickups, bridge
+ s+=`<path d="M70 84 C90 70 170 72 190 88 C200 120 180 150 120 154 C84 156 68 130 70 84Z" fill="#F4EFE6" opacity="${key==='lp'?0:.9}"/>`;
+ pu.forEach((p,i)=>{const x=puX[i];s+=p==='H'?`<rect x="${x-9}" y="88" width="18" height="40" rx="2" fill="#1E1E1E"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x-4}" cy="${92+j*6.5}" r="1.4" fill="#BBB"/><circle cx="${x+4}" cy="${92+j*6.5}" r="1.4" fill="#BBB"/>`).join('')}`:`<rect x="${x-5}" y="88" width="10" height="40" rx="5" fill="#F2F0EA" stroke="#999"/>${[0,1,2,3,4,5].map(j=>`<circle cx="${x}" cy="${92+j*6.5}" r="1.4" fill="#777"/>`).join('')}`});
+ s+=`<rect x="186" y="90" width="8" height="36" rx="2" fill="#C8C8C8"/>`;for(let j=0;j<6;j++)s+=`<line x1="0" y1="${100+j*2.6}" x2="190" y2="${100+j*2.6}" stroke="#EEE" stroke-width=".6" opacity=".8"/>`;
+ // control positions per guitar style
+ const P={strat:{blade:[164,120],knob:[[140,158],[172,164],[204,164]],arm:[196,108],jack:[226,146]},hss:{blade:[164,120],knob:[[140,158],[172,164],[204,164]],arm:[196,108],jack:[226,146]},
+  lp:{toggle:[88,64],knob:[[148,146],[182,142],[160,182],[196,178]],jack:[226,150]},tele:{blade:[156,140],knob:[[186,152],[216,154]],jack:[230,124]},hh:{toggle:[150,146],knob:[[176,160],[208,164]],jack:[228,150]}}[key];
+ let ki=0;const pos=c.map(x=>{if(x.k==='knob'){const p=P.knob[ki++%P.knob.length];return p}if(x.k==='blade'||x.k==='toggle')return P.blade||P.toggle;if(x.k==='arm')return P.arm||[194,124];if(x.k==='jack')return P.jack;if(x.k==='battery')return [120,172];return [120,170]});
+ c.forEach((x,i)=>{const [X,Y]=pos[i];s+=(CT[x.k]||CT.knob)(X,Y)});
+ c.forEach((x,i)=>{const [X,Y]=pos[i];const dx=x.k==='arm'?20:x.k==='jack'?4:-13,dy=x.k==='arm'?-8:x.k==='jack'?-17:-15;s+=badge(X+dx,Y+dy,i)});
+ return `<svg viewBox="0 0 240 200" class="ctlsvg">${s}</svg>`;
+}
+function panelSVG(c,amp){
+ const per=amp?6:5,rows=Math.ceil(c.length/per),W=300,H=rows*64+(amp?24:16);
+ let s=`<rect x="2" y="2" width="${W-4}" height="${H-4}" rx="10" fill="${amp?'#232323':'#2E3532'}" stroke="${amp?'#C9A227':'#6B7570'}" stroke-width="2"/>`;
+ if(amp)s+=`<rect x="10" y="${H-14}" width="${W-20}" height="6" rx="3" fill="#C9A227" opacity=".35"/>`;
+ c.forEach((x,i)=>{const r=Math.floor(i/per),col=i%per,n=Math.min(per,c.length-r*per),X=W/(n+1)*(col+1),Y=36+r*64;s+=(CT[x.k]||CT.knob)(X,Y);s+=`<text x="${X}" y="${Y+26}" font-size="8" text-anchor="middle" fill="#E8E8E8">${esc(x.n.length>14?x.n.slice(0,13)+'…':x.n)}</text>`+badge(X-14,Y-14,i)});
+ return `<svg viewBox="0 0 ${W} ${H}" class="ctlsvg">${s}</svg>`;
+}
+function controlsHTML(it){
+ const key=ctlKey(it);if(!key)return '';
+ const c=ctlList(it,key),guitar=it.type==='electric',exact=!!(it.controls&&it.controls.length);
+ const pic=guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
+ const label=it.type==='electroacoustic'?'The built-in preamp: what each control does':/amp$/.test(it.type)?'What each knob, button and socket does':'What each knob and switch does';
+ return `<details class="ctlbox" open><summary><span class="sic">🎛️</span><span class="stx"><b>Controls and switches</b><small>${label}. Tap a number.</small></span></summary>
+ <div class="ctlpic">${pic}</div>
+ <p class="tip ctlnote">${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>
+ <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>💡 ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
+ ${sampleFn&&(it.brand||it.model)?`<button class="btn ghost wide" id="ctlAsk" type="button">🤖 ${exact?'Refresh':'Get'} the exact controls of my ${esc(it.model||it.brand)} from Claude</button>`:''}
+ <p class="tip" id="ctlMsg" role="status"></p></details>`;
+}
+function wireControls(it){
+ const box=document.querySelector('.ctlbox');if(!box)return;
+ const pick=i=>{box.querySelectorAll('.cbadge').forEach(b=>b.classList.toggle('on',+b.dataset.c===i));box.querySelectorAll('.ctllist li').forEach(l=>l.classList.toggle('on',+l.dataset.c===i));const li=box.querySelector(`.ctllist li[data-c="${i}"]`);if(li)li.scrollIntoView({behavior:'smooth',block:'nearest'})};
+ box.querySelectorAll('.cbadge').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.c)));
+ box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>pick(+l.dataset.c)));
+ const ask=$('ctlAsk');if(ask)ask.onclick=async()=>{ask.disabled=true;$('ctlMsg').textContent='Claude is looking up your exact model…';
+  const prompt=`List the physical controls of this ${GEAR[it.type].name}: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}${it.type==='electroacoustic'?' (the built-in preamp and pickup system)':''}.
+Include every knob, switch, button, selector, slider, socket/jack and battery compartment a player uses, in the order they appear (front panel first, then back or side). Only include controls you are confident this model has. If you don't know this exact model, say so in "note" and list the controls of the closest model you know.
+For each: a short name as printed on the item, its kind, what it does in one sentence, and one practical tip.
+Reply with only JSON: {"note": string or null, "controls": [{"name": string, "kind": "knob"|"slider"|"switch"|"toggle"|"blade"|"button"|"selector"|"jack"|"battery"|"arm", "what": string, "tip": string}]}`;
+  try{const opt={};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];const r=await sampleFn.json(prompt,opt);const list=Array.isArray(r&&r.controls)?r.controls.filter(x=>x&&x.name).slice(0,24):[];
+   if(!list.length)throw new Error('none');const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.controls=list;x.controlsNote=r.note||'';store.set('instruments',l)}it.controls=list;renderGear()}
+  catch(e){ask.disabled=false;$('ctlMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get the controls this time. Try again.'}};
+}
 function renderInstDetail(it){
  const a=instAdvice(it),g=GEAR[it.type],st=stringsStatus(it),L=x=>`<ul>${x.map(y=>`<li>${esc(y)}</li>`).join('')}</ul>`;
  const specTxt=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean);
@@ -3045,6 +3208,7 @@ function renderInstDetail(it){
  ${g.amp?`<p class="tip gtuned">${esc(st.txt)}</p>`:''}<div class="gstrings" ${g.amp?'hidden':''}><span class="gstat ${st.due?'due':''}">${esc(st.txt)}</span><label class="gdate">Changed on <input type="date" id="iStr" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label><button class="btn ghost" id="iStrToday" type="button">🔄 I changed them today</button><span class="bhint">Tap after fitting new strings. The app reminds you when the next set is due.</span></div>
  ${a.notes.length?`<details open><summary><span class="sic">✨</span><span class="stx"><b>About your ${esc(it.model||it.brand||'guitar')}</b><small>Notes for this exact model</small></span></summary>${L(a.notes)}</details>`:''}
  ${it.photoNotes&&(it.photoNotes.observations||[]).concat(it.photoNotes.check||[]).length?`<details open class="aibox"><summary><span class="sic">📷</span><span class="stx"><b>From your photo</b><small>What Claude noticed in the picture</small></span></summary>${(it.photoNotes.observations||[]).length?`<ul>${it.photoNotes.observations.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}${(it.photoNotes.check||[]).length?`<b>Worth checking</b><ul>${it.photoNotes.check.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}</details>`:''}
+ ${controlsHTML(it)}
  <div id="iAi">${ai?aiHTML(it):''}</div>
  ${sampleFn&&!ai&&(it.brand||it.model)?`<button class="btn ghost wide" id="iAsk" type="button">🤖 Get Claude’s profile of this exact model</button><span class="bhint">One tap: typical specs, known issues, care and ${g.amp?'starting settings':'string advice'}, saved here.</span>`:''}
  <details ${a.notes.length?'':'open'}><summary><span class="sic">⚖️</span><span class="stx"><b>Strengths and limits</b><small>What it’s great at, and what to watch out for</small></span></summary><div class="procon"><div><b>Good at</b>${L(a.pros)}</div><div><b>Watch out for</b>${L(a.cons)}</div></div></details>
@@ -3063,7 +3227,7 @@ function renderInstDetail(it){
  $('iDel').onclick=()=>{$('iDelC').hidden=false};$('iDelN').onclick=()=>{$('iDelC').hidden=true};
  $('iDelY').onclick=()=>{instSave(instAll().filter(x=>x.id!==it.id));instOpen=null;renderGear()};
  if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
- renderGearChat(it);
+ renderGearChat(it);wireControls(it);
 }
 
 /* ask Claude about this one piece of gear: it knows which item, its details and your earlier questions */
