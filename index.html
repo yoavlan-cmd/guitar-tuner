@@ -544,6 +544,9 @@ body.wopen{overflow:hidden}
 .gca{align-self:flex-start;max-width:92%;background:var(--bg);border-radius:14px 14px 14px 4px;padding:8px 12px;font-size:14.5px;line-height:1.45}
 .gca p{margin:0 0 6px}.gca p:last-child{margin:0}.gca ul{margin:4px 0;padding-left:18px}
 .gcsugg{display:flex;flex-wrap:wrap;gap:6px}.gcsugg .chip{white-space:normal;text-align:start}
+.gcimgs{display:flex;gap:6px;flex-wrap:wrap}.gcimgs img{width:64px;height:64px;object-fit:cover;border-radius:10px;display:block}.gcth{position:relative}.gcth button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:#000c;color:#fff;font-size:13px;line-height:22px;padding:0;cursor:pointer}
+.gcadd{display:flex;gap:6px}.gcadd label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line);border-radius:12px;padding:8px;font-size:13.5px;cursor:pointer;color:var(--ink)}.gcadd input{display:none}
+.gcq .gcimgs{justify-content:flex-end;margin-bottom:6px}.gcq .gcimgs img{width:72px;height:72px;border:2px solid #fff6}
 .gcin{display:flex;gap:6px;align-items:flex-end}.gcin textarea{flex:1;min-width:0;font:400 15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 11px;resize:none}
 .linkbtn{background:none;border:0;color:var(--muted);font:500 12.5px var(--body);text-decoration:underline;cursor:pointer;align-self:flex-start;padding:0}
 .apibox.flat{border-top:0;padding-top:0;margin-top:0}.apibox.flat>summary{display:none}
@@ -3277,22 +3280,32 @@ function renderInstDetail(it){
 const GQ={guitar:['Which strings should I use on it?','How do I lower the action myself?','It buzzes on one fret. What should I check?','How should I store it in summer with the air conditioner on?'],
  amp:['What settings should I start with?','Is it loud enough for a small gig?','How do I stop feedback with my acoustic?','Which of my guitars sounds best through it?']};
 function fmtAnswer(t){const lines=String(t).trim().split(/\n+/);let h='',ul=false;for(const l of lines){const m=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/);if(m){if(!ul){h+='<ul>';ul=true}h+=`<li>${esc(m[1]).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}</li>`}else{if(ul){h+='</ul>';ul=false}h+=`<p>${esc(l).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}</p>`}}if(ul)h+='</ul>';return h}
+let gcPend={id:null,imgs:[]};
 function renderGearChat(it){
  const box=$('gChat');if(!box)return;const g=GEAR[it.type],hist=it.chat||[],qs=GQ[g.amp?'amp':'guitar'];
  box.innerHTML=`<div class="gchead"><span class="sic">💬</span><span class="stx"><b>Ask Claude about ${esc(it.name)}</b><small>Claude knows this is your ${esc([it.brand,it.model].filter(Boolean).join(' ')||g.short)} and what’s on this page.</small></span></div>
- ${hist.map(h=>`<div class="gcq" dir="auto">${esc(h.q)}</div><div class="gca" dir="auto">${fmtAnswer(h.a)}</div>`).join('')}
+ ${hist.map(h=>`<div class="gcq" dir="auto">${h.imgs&&h.imgs.length?`<div class="gcimgs">${h.imgs.map(u=>`<img src="${u}" alt="Your photo">`).join('')}</div>`:''}${esc(h.q)}</div><div class="gca" dir="auto">${fmtAnswer(h.a)}</div>`).join('')}
  ${sampleFn?`${hist.length?'':`<div class="gcsugg">${qs.map(q=>`<button type="button" class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
- <div class="gcin"><textarea id="gcText" rows="2" dir="auto" placeholder="Ask anything about this ${g.amp?'amp':'guitar'}…"></textarea><button class="btn" id="gcSend" type="button">Ask</button></div>
+ ${gcPend.id===it.id&&gcPend.imgs.length?`<div class="gcimgs" id="gcPend">${gcPend.imgs.map((x,i)=>`<div class="gcth"><img src="${x.big}" alt="Photo to send"><button type="button" data-rm="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>`:''}
+ ${imgLimit>0?`<div class="gcadd"><label>📷 Take a photo<input type="file" accept="image/*" capture="environment" id="gcCam"></label><label>🖼️ From gallery<input type="file" accept="image/*" multiple id="gcGal"></label></div>`:''}
+ <div class="gcin"><textarea id="gcText" rows="2" dir="auto" placeholder="Ask anything about this ${g.amp?'amp':'guitar'}… (you can add a photo)"></textarea><button class="btn" id="gcSend" type="button">Ask</button></div>
  <p class="tip" id="gcMsg" role="status"></p>${hist.length?'<button type="button" class="linkbtn" id="gcClear">Clear this conversation</button>':''}`
  :'<p class="tip">Turn on Claude features (Songs › Claude features) to ask questions here.</p>'}`;
  if(!sampleFn)return;
+ if(gcPend.id!==it.id)gcPend={id:it.id,imgs:[]};
+ const addFiles=async fl=>{const room=Math.max(0,Math.min(3,imgLimit-(it.photo?1:0))-gcPend.imgs.length);const files=[...fl].filter(f=>/^image\//.test(f.type)||!f.type).slice(0,room);
+  if(!room){$('gcMsg').textContent='Up to 3 photos per question.';return}$('gcMsg').textContent='Preparing photo…';
+  const keep=$('gcText').value;for(const f of files){try{gcPend.imgs.push({big:await shrinkPhoto(f,1280),small:await shrinkPhoto(f,200)})}catch(e){}}
+  renderGearChat(it);$('gcText').value=keep;$('gcMsg').textContent=gcPend.imgs.length?'Photo added. Type your question (or just tap Ask).':'Couldn’t read that image.'};
+ ['gcCam','gcGal'].forEach(id=>{const el=$(id);if(el)el.onchange=e=>{if(e.target.files.length)addFiles(e.target.files);e.target.value=''}});
+ box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const keep=$('gcText').value;gcPend.imgs.splice(+b.dataset.rm,1);renderGearChat(it);$('gcText').value=keep});
  box.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{$('gcText').value=b.dataset.q;askGear(it)});
  $('gcSend').onclick=()=>askGear(it);
  $('gcText').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGear(it)}});
  if($('gcClear'))$('gcClear').onclick=()=>{const l=instAll(),x=l.find(y=>y.id===it.id);if(x){delete x.chat;store.set('instruments',l)}it.chat=[];renderGearChat(it)};
 }
 async function askGear(it){
- const q=$('gcText').value.trim();if(!q)return;const btn=$('gcSend');btn.disabled=true;$('gcMsg').textContent='Claude is thinking…';
+ const pend=gcPend.id===it.id?gcPend.imgs.slice():[];let q=$('gcText').value.trim();if(!q&&!pend.length)return;if(!q)q='What do you see in this photo? Anything I should know or do?';const btn=$('gcSend');btn.disabled=true;$('gcMsg').textContent='Claude is thinking…';
  const g=GEAR[it.type],sp=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>`${SPEC_Q[k].label}: ${(SPEC_Q[k].opts.find(o=>o[0]===v)||[,v])[1]}`).join('; ');
  const others=instAll().filter(x=>x.id!==it.id).map(x=>`${x.name} (${[x.brand,x.model].filter(Boolean).join(' ')||GEAR[x.type].short}, ${GEAR[x.type].short})`).join('; ');
  const facts=[`Item: "${it.name}", a ${g.name}`,it.brand||it.model?`Brand/model: ${[it.brand,it.model].filter(Boolean).join(' ')}${it.year?' ('+it.year+')':''}`:'',sp?`Details: ${sp}`:'',
@@ -3303,12 +3316,12 @@ async function askGear(it){
  const prompt=`You are a friendly, expert guitar technician and teacher inside a guitar app. The user is on the page for one specific piece of their gear and is asking about it. Answer about THIS item unless they clearly ask about something else.
 ${facts}
 ${prev?`Earlier in this conversation:\n${prev}\n`:''}
-Their question: """${q}"""
+${pend.length?`They attached ${pend.length} photo${pend.length>1?'s':''} with this question (the first image${pend.length>1?'s':''} attached). Look at ${pend.length>1?'them':'it'} carefully and refer to what you actually see.\n`:''}Their question: """${q}"""
 Answer practically and specifically for this item, in the language they wrote in. Keep it short: a few sentences or up to 6 bullet points. If something depends on details you don't have, say what to check. If the issue could damage the instrument or needs a technician, say so plainly. Plain text, bullets with "- " are fine, no headings.`;
- try{const opt={};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];
-  const r=await sampleFn(prompt+(opt.images?'\nA photo of this item is attached.':''),opt);const a=(r&&r.text||'').trim();if(!a)throw new Error('empty');
-  const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.chat=(x.chat||[]).concat({q,a,t:Date.now()}).slice(-12);store.set('instruments',l);it.chat=x.chat}
-  renderGearChat(it);const last=[...$('gChat').querySelectorAll('.gca')].pop();if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});
+ try{const opt={},ims=pend.map(x=>dataUrlBlob(x.big));if(it.photo&&imgLimit>ims.length)ims.push(dataUrlBlob(it.photo));if(ims.length)opt.images=ims;
+  const r=await sampleFn(prompt+(it.photo&&ims.length>pend.length?'\nThe last image is their profile photo of this item, for reference.':''),opt);const a=(r&&r.text||'').trim();if(!a)throw new Error('empty');
+  const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.chat=(x.chat||[]).concat(pend.length?{q,a,t:Date.now(),imgs:pend.map(p=>p.small)}:{q,a,t:Date.now()}).slice(-12);store.set('instruments',l);it.chat=x.chat}
+  gcPend={id:it.id,imgs:[]};renderGearChat(it);const last=[...$('gChat').querySelectorAll('.gca')].pop();if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});
  }catch(e){btn.disabled=false;$('gcMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude. Try again.'}
 }
 function aiHTML(it){const a=it.ai,L=x=>Array.isArray(x)&&x.length?`<ul>${x.map(y=>`<li>${esc(String(y))}</li>`).join('')}</ul>`:'';
