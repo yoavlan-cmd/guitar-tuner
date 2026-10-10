@@ -369,6 +369,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wl.sec{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:10px}
 .ww{display:inline-flex;flex-direction:column;align-items:flex-start;border:0;background:none;color:var(--ink);font:inherit;padding:2px 3px;border-radius:6px;cursor:pointer;min-width:18px}
 .ww .c{font:700 14px var(--mono);color:var(--accent);min-height:18px;line-height:18px;white-space:nowrap}
+.wt{display:flex;flex-direction:column;gap:3px;padding:6px 0;border-bottom:1px solid var(--line)}.wt .wtch{font:700 12.5px var(--mono);color:var(--accent)}.wt .wtch small{font:400 11px var(--body);color:var(--muted)}
+.wtin{width:100%;font:400 16px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px}.wt.sec .wtin{font-weight:700;color:var(--muted)}.wt.blank .wtin{background:transparent;border-style:dashed}
+.wtbtns{display:flex;gap:14px;justify-content:flex-end}.wtbtns .linkbtn{font-size:12.5px}.linkbtn.danger{color:#E5533D}
 .wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
 .wl.slots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl.slots .ww .t{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
@@ -863,7 +866,8 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
       </section>
       <section class="card" id="wStep2" hidden>
         <div class="shotnote" id="wShotNote" hidden></div>
-        <p class="tip">Tap a word to put a chord above it. Tap it again to change or remove the chord. In a chords-only line, each ♪ is a spot for one chord.</p>
+        <div class="seg" id="wMode"><button type="button" data-m="ch" aria-pressed="true">🎸 Chords</button><button type="button" data-m="tx" aria-pressed="false">✏️ Text &amp; lines</button></div>
+        <p class="tip" id="wModeTip">Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.</p>
         <button type="button" class="btn ghost" id="wIns">＋ Add a chords-only line</button>
         <div class="wlines" id="wLines"></div>
         <button class="btn cta wide" id="wDone">Make the chord sheet</button>
@@ -873,6 +877,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
           <div class="pickhead"><span>Chord above <b id="wPickWord" dir="auto"></b></span><button type="button" class="pickx" id="wPickClose" aria-label="Close">✕</button></div>
           <input id="wPickQ" class="textin" type="search" placeholder="Search chords: Am, G/B, Cadd9…" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
           <div class="picklist" id="wPickList"></div>
+          <div class="editrow" id="wPickMove" hidden><button type="button" class="btn ghost" id="wPickPrev">◀ Previous word</button><button type="button" class="btn ghost" id="wPickNext">Next word ▶</button></div>
           <button type="button" class="btn ghost" id="wPickDel" hidden>Remove chord</button>
         </div>
       </div>
@@ -2423,7 +2428,7 @@ const wordsOf=t=>t.trim()?t.trim().split(/\s+/):[];
 // a chords-only spot is a dash-like token: "♪", "—", "-", "|"
 const isSlot=w=>/^(?:♪|[-–—|·_.]+)$/.test(w),slotLine=t=>{const w=wordsOf(t);return w.length>0&&w.every(isSlot)};
 const SLOTS=n=>Array(n).fill('♪').join(' ');
-let wFromWriter=false,wSel=null,wInsMode=false;
+let wFromWriter=false,wSel=null,wInsMode=false,wMode='ch';
 function segFromName(name,tun,capo){const p=parseChord(name);if(!p)return null;const d=tshift(tun,capo),ti=TYPES.findIndex(x=>x.id===QTYPE[p.q]);const g={c:((p.root+d)%12)*NT+(ti<0?0:ti),q:p.q};if(p.bass!=null)g.b=(p.bass+d)%12;return g}
 function lyricChords(a){const out=[];(a.lc||[]).forEach(L=>Object.keys(L.ch||{}).sort((x,y)=>x-y).forEach(k=>{const n=L.ch[k];if(n&&!out.includes(n))out.push(n)}));return out}
 function newWritten(){return {kind:'lyrics',title:'',artist:'',lyrics:'',lc:[],segs:[],dur:0,offset:0,tuning:{id:'std',conf:'yours',why:'Set by you.'},play:{tun:'std',capo:0},v:2,at:Date.now()}}
@@ -2463,13 +2468,25 @@ function openWriter(a,step){
  ['drop','writeNew','draftCard','resumeCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
  $('wArtists').innerHTML=knownArtists().map(t=>`<option value="${esc(t)}">`).join('');
- $('wBlank').hidden=!!A.libId;wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';renderShotNote();setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
+ $('wBlank').hidden=!!A.libId;wInsMode=false;wMode='ch';document.querySelectorAll('#wMode [data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m==='ch'));$('wModeTip').textContent='Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.';$('wIns').hidden=false;$('wIns').textContent='＋ Add a chords-only line';renderShotNote();setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
 }
 function setWStep(n){
  if(n===2){A.lyrics=$('wLyrics').value;A.lc=remapLines(A.lyrics,A.lc||[]);renderWLines()}
  [...$('wSteps').children].forEach(b=>b.setAttribute('aria-pressed',+b.dataset.s===n));$('wStep1').hidden=n!==1;$('wStep2').hidden=n!==2;saveDraft();
 }
+function renderWText(){
+ const lc=A.lc||[];
+ $('wLines').innerHTML=lc.map((L,i)=>{const sl=slotLine(L.t),sec=isSecLine(L.t),chs=Object.keys(L.ch||{}).sort((a,b)=>a-b).map(k=>L.ch[k]).filter(Boolean);
+  const tools=`<div class="wtbtns"><button type="button" class="linkbtn" data-tadd="${i}">＋ Line below</button><button type="button" class="linkbtn danger" data-tdel="${i}" aria-label="Delete this line">🗑 Delete</button></div>`;
+  if(sl)return `<div class="wt slot"><div class="wtch">Chords only: <b dir="ltr">${esc(chs.join('  ')||'(empty)')}</b> <small>(edit in Chords)</small></div>${tools}</div>`;
+  return `<div class="wt${sec?' sec':''}${L.t.trim()?'':' blank'}">${chs.length?`<div class="wtch" dir="ltr" style="text-align:${hasHeb(L.t)?'right':'left'}">${esc((hasHeb(L.t)?chs.slice().reverse():chs).join('  '))}</div>`:''}<input class="wtin" data-ti="${i}" dir="auto" value="${esc(L.t)}" placeholder="${L.t.trim()?'':'Empty line (gap between parts)'}">${tools}</div>`}).join('')+
+  `<button type="button" class="wins" data-tadd="${lc.length-1}">＋ Add a line at the end</button>`;
+}
+function setLineText(i,t,base){const L=A.lc[i];if(!L)return;const n=wordsOf(t).length,ch={},src=base||L.ch||{};
+ Object.keys(src).map(Number).sort((a,b)=>a-b).forEach(k=>{if(!src[k])return;let j=Math.min(k,Math.max(0,n-1));while(ch[j]!=null&&j<n-1)j++;if(n&&ch[j]==null)ch[j]=src[k]});
+ L.t=t;L.ch=ch;syncLyricsFromLines();saveDraft()}
 function renderWLines(){
+ if(wMode==='tx'){renderWText();return}
  const lc=A.lc||[];
  $('wLines').innerHTML=lc.every(L=>!L.t.trim())?'<p class="tip">Add the lyrics in step 1 first.</p>':lc.map((L,i)=>{
   if(!L.t.trim())return '<div class="wl blank"></div>';
@@ -2504,17 +2521,26 @@ function pickerHTML(q){
 }
 function openPicker(i,j){
  wSel={i,j};renderWLines();const w=wordsOf(A.lc[i].t)[j];$('wPickWord').textContent=isSlot(w)?'this spot':'“'+w+'”';
- $('wPickQ').value='';$('wPickList').innerHTML=pickerHTML('');$('wPickDel').hidden=!A.lc[i].ch[j];$('wPick').hidden=false;
+ $('wPickQ').value='';$('wPickList').innerHTML=pickerHTML('');$('wPickDel').hidden=!A.lc[i].ch[j];$('wPickMove').hidden=!A.lc[i].ch[j];$('wPick').hidden=false;
  setTimeout(()=>{try{$('wPickQ').focus({preventScroll:true})}catch(e){}},60);
 }
 function closePicker(){$('wPick').hidden=true;wSel=null;renderWLines()}
 function setWordChord(name){if(!wSel)return;const L=A.lc[wSel.i];if(name)L.ch[wSel.j]=name;else delete L.ch[wSel.j];
  const n=wSel;closePicker();saveDraft();const b=$('wLines').querySelector(`.ww[data-i="${n.i}"][data-j="${n.j}"]`);if(b)b.focus({preventScroll:true})}
-$('wLines').addEventListener('click',e=>{
+$('wLines').addEventListener('click',e=>{if(wMode==='tx')return;
  const ins=e.target.closest('[data-ins]');if(ins){const k=+ins.dataset.ins;A.lc.splice(k,0,{t:SLOTS(4),ch:{}});wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';syncLyricsFromLines();renderWLines();saveDraft();return}
  const add=e.target.closest('[data-add]');if(add){const L=A.lc[+add.dataset.add];L.t=L.t.trim()+' ♪';syncLyricsFromLines();renderWLines();saveDraft();return}
  const b=e.target.closest('.ww');if(b)openPicker(+b.dataset.i,+b.dataset.j)});
 function syncLyricsFromLines(){A.lyrics=(A.lc||[]).map(L=>L.t).join('\n');$('wLyrics').value=A.lyrics}
+$('wLines').addEventListener('focusin',e=>{const t=e.target.closest('.wtin');if(t){const L=A.lc[+t.dataset.ti];t._base=L?{...L.ch}:{}}});
+$('wLines').addEventListener('input',e=>{const t=e.target.closest('.wtin');if(!t)return;setLineText(+t.dataset.ti,t.value,t._base)});
+$('wLines').addEventListener('change',e=>{const t=e.target.closest('.wtin');if(t)renderWText()});
+$('wLines').addEventListener('keydown',e=>{const t=e.target.closest('.wtin');if(!t||e.key!=='Enter')return;e.preventDefault();const i=+t.dataset.ti;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus()});
+$('wLines').addEventListener('click',e=>{if(wMode!=='tx')return;
+ const ad=e.target.closest('[data-tadd]');if(ad){const i=+ad.dataset.tadd;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus();return}
+ const dl=e.target.closest('[data-tdel]');if(dl){const i=+dl.dataset.tdel,row=dl.closest('.wt');A.lc.splice(i,1);syncLyricsFromLines();saveDraft();renderWText();return}});
+document.querySelectorAll('#wMode [data-m]').forEach(b=>b.onclick=()=>{wMode=b.dataset.m;document.querySelectorAll('#wMode [data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===wMode));
+ $('wModeTip').textContent=wMode==='tx'?'Fix or delete any line, add new lines, or type [Chorus] / [פזמון] on a line for a label. Chords stay on their words.':'Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.';$('wIns').hidden=wMode==='tx';wInsMode=false;renderWLines()});
 $('wIns').onclick=()=>{wInsMode=!wInsMode;$('wIns').textContent=wInsMode?'Cancel':'＋ Add a chords-only line';renderWLines();if(wInsMode){const f=$('wLines').querySelector('.wins');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})}};
 document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>{const ta=$('wLyrics'),v=ta.value,pos=ta.selectionStart==null?v.length:ta.selectionStart;
  const before=v.slice(0,pos),after=v.slice(pos),lab=b.dataset.part,ins=(before&&!before.endsWith('\n')?'\n':'')+(lab?`[${lab}]\n`:'')+SLOTS(4)+(after&&!after.startsWith('\n')?'\n':'');
@@ -2523,6 +2549,9 @@ $('wPickQ').addEventListener('input',e=>{$('wPickList').innerHTML=pickerHTML(e.t
 $('wPickQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=$('wPickList').querySelector('button[data-c]');if(b)setWordChord(b.dataset.c)}else if(e.key==='Escape')closePicker()});
 $('wPickList').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(b)setWordChord(b.dataset.c)});
 $('wPickDel').onclick=()=>setWordChord('');
+// move a chord to the word before/after it (in reading order); swaps if that word already has one
+function moveChord(d){if(!wSel)return;const L=A.lc[wSel.i],n=wordsOf(L.t).length,to=wSel.j+d;if(to<0||to>=n)return;const a=L.ch[wSel.j],b=L.ch[to];if(b)L.ch[wSel.j]=b;else delete L.ch[wSel.j];L.ch[to]=a;const i=wSel.i;closePicker();saveDraft();openPicker(i,to)}
+$('wPickPrev').onclick=()=>moveChord(-1);$('wPickNext').onclick=()=>moveChord(1);
 $('wPickClose').onclick=closePicker;
 $('wPick').addEventListener('click',e=>{if(e.target===$('wPick'))closePicker()});
 $('wSteps').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setWStep(+b.dataset.s)});
