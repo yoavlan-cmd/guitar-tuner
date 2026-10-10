@@ -182,6 +182,7 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .sheetactions{display:flex;flex-wrap:wrap;gap:6px}
 .btn.danger{color:var(--sharp);border-color:var(--sharp)}
 .btn.danger:not(.ghost){background:var(--sharp);color:#fff}
+.draftcard{border:1px solid var(--accent);display:flex;flex-direction:column;gap:6px}.drafthead{display:flex;gap:10px;align-items:center}.draftname{margin:2px 0 0;font-size:15px}.draftcard .editrow{flex-wrap:wrap}
 .confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;background:var(--surface);border:1px solid var(--sharp);border-radius:10px;padding:10px}
 .tip a{color:var(--accent);font-weight:600}
 .paperwrap{overflow-x:auto;border-radius:6px;box-shadow:0 1px 0 var(--line),0 6px 24px rgba(0,0,0,.12)}
@@ -686,6 +687,7 @@ body.wopen{overflow:hidden}
       <b>Write a song sheet</b>
       <span>Type the lyrics, then tap words to put chords above them.</span>
     </button>
+    <section class="card draftcard" id="draftCard" hidden></section>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
@@ -1447,7 +1449,7 @@ $('vidIn').addEventListener('change',async e=>{
 });
 $('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 function showReady(file){
- $('drop').hidden=true;$('writeNew').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
+ $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
  $('preReadWrap').hidden=!/^video\//.test(file.type||'video/');setReadTxt();$('preRead').checked=store.get('readScreen2',true);
@@ -1499,7 +1501,7 @@ async function runAnalysis(file){
  }
 }
 function showSong(fromSave){
- $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
+ $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
  curIdx=-1;selIdx=-1;$('editBox').hidden=true;
@@ -2093,7 +2095,7 @@ function renderLib(){
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
-function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib()}
+function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}}
 
 /* ---- sheet content ---- */
 function printify(svg){
@@ -2152,7 +2154,7 @@ function sheetHTML(print){
 }
 function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function showSheet(){
- wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
+ wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
  const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');window.scrollTo({top:0});
 }
@@ -2214,7 +2216,7 @@ $('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
  else{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);shStatus('PDF saved to your downloads.')}
 });
 $('shShare').onclick=()=>withBusy($('shShare'),async()=>{
- shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});shStatus('Shared. To keep it in Drive, pick Drive and your Guitar sheets folder.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
+ shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});clearAfterDrive('✅ Shared.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
 });
 const blobToB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
 const pickId=p=>p&&(p.id||(p.file&&p.file.id)||(p.files&&p.files[0]&&p.files[0].id))||'';
@@ -2253,6 +2255,12 @@ $('shDrive').onclick=()=>withBusy($('shDrive'),async()=>{
  shStatus('Checking your artist folders…');await listArtistFolders(fid);shStatus('');
  $('shArtist').value=A.artist||'';renderArtistChips();$('artistAsk').hidden=false;$('shArtist').focus();
 });
+/* once a sheet is safely in Drive, the app lets go of it: the page clears and the phone copy is removed */
+function clearAfterDrive(msg){
+ try{if(A&&A.libId){libWrite(libAll().filter(e=>e.id!==A.libId))}store.set('writeDraft',null);
+  if(fileKey){try{localStorage.removeItem('tuner.song.'+fileKey)}catch(e){}store.set('songs',store.get('songs',[]).filter(x=>x!==fileKey))}}catch(e){}
+ try{vid.pause()}catch(e){}A=null;fileKey='';showLanding();window.scrollTo({top:0});toast(msg+' The sheet was cleared from the app.');
+}
 async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(artist);await withBusy($('shDrive'),async()=>{
  const ent=saveToLib();if(!ent)return;
  const link=($('driveFolder').value||DEFAULT_FOLDER).trim(),fid=folderIdOf(link);store.set('driveFolderLink',link);
@@ -2272,7 +2280,7 @@ async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(
   const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
   if(e2){e2.drive={id,url,at:Date.now(),folder:artist||''};libWrite(l)}
   const toTrash=[...new Set([...existing,old].filter(x=>x&&x!==id))];for(const t of toTrash){try{await mcpCap.callTool(DRIVE,'trash_file',{fileId:t})}catch(e){}}
-  updateSheetButtons();shStatus(`Saved to Drive in Guitar sheets${artist?' › '+esc(artist):''}${toTrash.length?' (replaced the earlier copy)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`);
+  clearAfterDrive(`✅ Saved to Drive in Guitar sheets${artist?' › '+esc(artist):''}${toTrash.length?' (replaced the earlier copy)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`);
  }catch(e){shStatus(driveErr(e))}
 })}
 /* ---- Phone app: each person saves to their own Google Drive ---- */
@@ -2361,7 +2369,7 @@ async function doOwnDriveSave(artist){await withBusy($('shDrive'),async()=>{
   const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
   if(old&&old!==r.id){try{await gdFetch(`${GD_API}/${old}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}
   if(e2){e2.drive={id:r.id,url:r.url,at:Date.now(),folder:artist||''};libWrite(l)}
-  updateSheetButtons();shStatus(`Saved to your Drive in Guitar sheets${artist?' › '+esc(artist):''}${r.replaced||(old&&old!==r.id)?' (replaced the earlier copy)':''}. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open it ↗</a>`);
+  clearAfterDrive(`✅ Saved to your Drive in Guitar sheets${artist?' › '+esc(artist):''}${r.replaced||(old&&old!==r.id)?' (replaced the earlier copy)':''}. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open it ↗</a>`);
  }catch(e){shStatus(gdErr(e))}
 })}
 renderLib();
@@ -2375,7 +2383,28 @@ let wFromWriter=false,wSel=null;
 function segFromName(name,tun,capo){const p=parseChord(name);if(!p)return null;const d=tshift(tun,capo),ti=TYPES.findIndex(x=>x.id===QTYPE[p.q]);const g={c:((p.root+d)%12)*NT+(ti<0?0:ti),q:p.q};if(p.bass!=null)g.b=(p.bass+d)%12;return g}
 function lyricChords(a){const out=[];(a.lc||[]).forEach(L=>Object.keys(L.ch||{}).sort((x,y)=>x-y).forEach(k=>{const n=L.ch[k];if(n&&!out.includes(n))out.push(n)}));return out}
 function newWritten(){return {kind:'lyrics',title:'',artist:'',lyrics:'',lc:[],segs:[],dur:0,offset:0,tuning:{id:'std',conf:'yours',why:'Set by you.'},play:{tun:'std',capo:0},v:2,at:Date.now()}}
-function saveDraft(){if(A&&A.kind==='lyrics'){if(A.libId)libSync();else store.set('writeDraft',A)}}
+function saveDraft(){if(A&&A.kind==='lyrics'){A.edited=Date.now();if(A.libId)libSync();else store.set('writeDraft',A)}}
+// an unfinished song sheet stays on the Songs page until it's finished (sent to Drive) or thrown away
+function draftNow(){const d=store.get('writeDraft',null);return d&&d.kind==='lyrics'&&((d.lyrics||'').trim()||(d.title||'').trim())?d:null}
+function renderDraft(){
+ const card=$('draftCard');if(!card)return;const d=draftNow(),landing=!$('drop').hidden;
+ if(!d||!landing){card.hidden=true;if(landing)$('writeNew').hidden=false;return}
+ $('writeNew').hidden=true;card.hidden=false;
+ const nCh=(d.lc||[]).reduce((n,L)=>n+Object.values(L.ch||{}).filter(Boolean).length,0),first=(d.lc&&d.lc.find(L=>L.t.trim()&&!isSecLine(L.t))||{t:(d.lyrics||'').split('\n').find(x=>x.trim())||''}).t;
+ const name=(d.title||'').trim()||wordsOf(first).slice(0,5).join(' ')||'Untitled song',when=d.edited||d.at;
+ card.innerHTML=`<div class="drafthead"><span class="sic">📝</span><span class="stx"><b>${d.made?'Chord sheet not in Drive yet':'Unfinished song sheet'}</b><small>${d.made?'You made the sheet but haven’t sent it to Drive':'You haven’t made the chord sheet yet'}</small></span></div>
+ <p class="draftname" dir="auto"><b>${esc(name)}</b>${d.artist?` · ${esc(d.artist)}`:''}</p>
+ <p class="tip">${nCh?`${nCh} chord${nCh===1?'':'s'} placed`:'No chords yet'}${when?` · last edited ${new Date(when).toLocaleString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'})}`:''}</p>
+ <div class="editrow"><button class="btn" id="dCont" type="button">${d.made?'Open the sheet':'✏️ Continue editing'}</button><button class="btn ghost" id="dNew" type="button">Start a new one</button><button class="btn ghost danger" id="dDel" type="button">Discard</button></div>
+ <div class="confirm" id="dConf" hidden><span id="dConfTxt"></span><button class="btn danger" id="dYes" type="button">Discard it</button><button class="btn ghost" id="dNo" type="button">Keep it</button></div>`;
+ let after=null;const ask=(t,f)=>{$('dConfTxt').textContent=t;after=f;$('dConf').hidden=false};
+ $('dCont').onclick=()=>{const x=draftNow();if(!x)return renderDraft();if(x.made){vid.pause();A=x;fileKey='';showSheet();wFromWriter=true}else openWriter(x)};
+ $('dDel').onclick=()=>ask(`Throw away “${name}”? This can’t be undone.`,()=>{});
+ $('dNew').onclick=()=>ask(`Starting a new sheet throws away “${name}”.`,()=>openWriter(newWritten(),1));
+ $('dNo').onclick=()=>{$('dConf').hidden=true};
+ $('dYes').onclick=()=>{store.set('writeDraft',null);$('dConf').hidden=true;if(after)after();renderDraft()};
+}
+setTimeout(()=>{try{renderDraft()}catch(e){}},0);
 // keep chords on lines whose text did not change when the lyrics are edited
 function remapLines(text,old){
  const lines=text.replace(/\r/g,'').split('\n'),used=new Set();
@@ -2386,8 +2415,8 @@ function remapLines(text,old){
 $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
 function openWriter(a,step){
- vid.pause();A=a;wFromWriter=false;
- ['drop','writeNew','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
+ vid.pause();A=a;A.made=false;wFromWriter=false;
+ ['drop','writeNew','draftCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
  $('wArtists').innerHTML=knownArtists().map(t=>`<option value="${esc(t)}">`).join('');
  $('wBlank').hidden=!!A.libId;setWStep(step||(A.lyrics&&A.lyrics.trim()?2:1));window.scrollTo({top:0});
@@ -2456,7 +2485,7 @@ $('wDone').onclick=()=>{
  A.lyrics=$('wLyrics').value;if(!A.lc||!A.lc.length)A.lc=remapLines(A.lyrics,[]);
  if(!A.title)A.title=(wordsOf((A.lc.find(L=>L.t.trim()&&!isSecLine(L.t))||{t:''}).t).slice(0,5).join(' '))||'My song';
  try{bookAdd(lyricChords(A),A.title)}catch(e){}
- saveDraft();$('writeView').hidden=true;showSheet();wFromWriter=true;
+ A.made=true;saveDraft();$('writeView').hidden=true;showSheet();wFromWriter=true;
  $('shStatus').textContent='Check the sheet, then save it to My songs, as a PDF or to Google Drive.';
 };
 function writtenSheetHTML(print){
