@@ -695,10 +695,10 @@ body.wopen{overflow:hidden}
       <span>MP4 works best. The sound is analysed on this device and nothing is uploaded.</span>
     </label>
     <button class="drop write" id="shotNew" type="button">
-      <b>Chord sheet from a screenshot</b>
-      <span>One or more screenshots of a song, top first. Claude reads the chords and lyrics and joins them; you check and edit before anything is saved.</span>
+      <b>Chord sheet from screenshots or a PDF</b>
+      <span>Screenshots of a song, or a PDF from the site’s Print › Save as PDF (most accurate). Read on your phone; you check and edit before anything is saved.</span>
     </button>
-    <input id="shotIn" type="file" accept="image/*" multiple hidden>
+    <input id="shotIn" type="file" accept="image/*,application/pdf,.pdf" multiple hidden>
     <section class="card" id="shotCard" hidden></section>
     <button class="drop write" id="writeNew" type="button">
       <b>Write a song sheet</b>
@@ -2536,7 +2536,7 @@ $('wCapo').addEventListener('change',e=>{A.play.capo=+e.target.value;saveDraft()
 /* ---- chord sheet from a screenshot: Claude reads it, you check and edit it in the writer ---- */
 function renderShotNote(){const n=$('wShotNote');if(!n)return;const sh=A&&A.shots;
  if(!sh||!sh.length){n.hidden=true;n.innerHTML='';return}n.hidden=false;
- n.innerHTML=`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div><div><b>📷 Claude made this from your screenshot${sh.length>1?'s':''}.</b> Compare it with the picture (tap to enlarge) and fix anything that’s off: tap a word to change its chord, or go back to step 1 to fix the words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">Claude’s note: ${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
+ n.innerHTML=`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div><div><b>📷 Made from your screenshot${sh.length>1?'s':''}.</b> Compare it with the picture (tap to enlarge) and fix anything that’s off: tap a word to change its chord, or go back to step 1 to fix the words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
  n.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotBigMem&&shotBigMem.length===sh.length?shotBigMem:sh,+im.dataset.big));
  $('wShotDrop').onclick=()=>{store.set('writeDraft',null);$('writeView').hidden=true;A=null;showLanding()};
 }
@@ -2603,6 +2603,98 @@ function showShots(list,i){
  draw();document.body.appendChild(d);document.body.style.overflow='hidden';try{history.pushState({shot:1},'');addEventListener('popstate',onPop)}catch(e){}
 }
 let shotBigMem=null;// full-quality copies of the screenshots behind the draft being reviewed (this session only)
+
+/* ---- reading chord sheets on the phone itself (screenshots: OCR, PDFs: their text). Claude isn't used for this ---- */
+const PDF_JS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',PDF_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let ocrHE=null,ocrCH=null;
+async function ocrSheetReady(onP){if(ocrHE)return ocrHE;try{await loadScript(OCR_JS)}catch(e){throw {code:'ocr_load'}}
+ onP&&onP('Getting the text reader ready (a few MB, first time only)…');
+ try{ocrHE=await Tesseract.createWorker(['heb','eng'],1,{});await ocrHE.setParameters({tessedit_pageseg_mode:'4',preserve_interword_spaces:'1'});
+  ocrCH=await Tesseract.createWorker('eng',1,{});await ocrCH.setParameters({tessedit_pageseg_mode:'11',tessedit_char_whitelist:'ABCDEFGHabdgijmsu#0123456789/+()x'})}catch(e){ocrHE=null;ocrCH=null;throw {code:'ocr_load'}}return ocrHE}
+const SEC_RE=/^(פתיחה|בית|בית\s*\d+|פזמון|פזמון\s*\d+|מעבר|גשר|סיום|סולו|אינטרו|אאוטרו|הקדמה|intro|verse(\s*\d+)?|chorus|pre-?chorus|bridge|outro|ending|solo|interlude|instrumental|riff|coda|tag)$/i;
+const hasHeb=t=>/[֐-׿]/.test(t);
+// a screenshot -> black text on white, whatever the site's colours (dark mode, coloured chord chips)
+function sheetInk(img){
+ const c=document.createElement('canvas'),k=Math.min(1,1400/img.width);c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);
+ const im=g.getImageData(0,0,c.width,c.height),d=im.data;let sum=0,n=0;for(let i=0;i<d.length;i+=40){sum+=.299*d[i]+.587*d[i+1]+.114*d[i+2];n++}const dark=sum/n<128;
+ for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2],ink=dark?l>150:l<120;d[i]=d[i+1]=d[i+2]=ink?0:255}
+ g.putImageData(im,0,0);
+ // scale up small text for the reader
+ if(c.width<1000){const u=document.createElement('canvas'),f=1000/c.width;u.width=1000;u.height=Math.round(c.height*f);const ug=u.getContext('2d');ug.imageSmoothingEnabled=false;ug.drawImage(c,0,0,u.width,u.height);return u}
+ return c}
+function loadImg(src){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src})}
+async function ocrImageWords(src){
+ const im=await loadImg(src),c=sheetInk(im);
+ const flat=r=>{const out=[];for(const b of r.data.blocks||[])for(const p of b.paragraphs||[])for(const l of p.lines||[])for(const w of l.words||[]){const t=String(w.text||'').trim();if(!t)continue;out.push({s:t,cf:w.confidence,x0:w.bbox.x0,x1:w.bbox.x1,y:(w.bbox.y0+w.bbox.y1)/2,h:w.bbox.y1-w.bbox.y0})}return out};
+ let words=flat(await ocrHE.recognize(c,{},{blocks:true}));
+ // short labels (בית, פזמון…) are often misread on their own; read those rows again as one line of Hebrew
+ {const hs=words.map(w=>w.h).sort((a,b)=>a-b),H=hs[Math.floor(hs.length/2)]||20,rows=[];
+  words.slice().sort((a,b)=>a.y-b.y).forEach(w=>{const r=rows.find(r=>Math.abs(r.y-w.y)<H*.55);if(r)r.w.push(w);else rows.push({y:w.y,w:[w]})});
+  for(const r of rows){if(r.w.length>2||r.w.every(w=>w.cf>=70)||r.w.some(w=>chordTok(w.s)))continue;
+   const x0=Math.max(0,Math.min(...r.w.map(w=>w.x0))-H),x1=Math.min(c.width,Math.max(...r.w.map(w=>w.x1))+H),y0=Math.max(0,r.y-H),y1=Math.min(c.height,r.y+H);
+   try{await ocrHE.setParameters({tessedit_pageseg_mode:'7'});const t=String((await ocrHE.recognize(c,{rectangle:{left:Math.round(x0),top:Math.round(y0),width:Math.round(x1-x0),height:Math.round(y1-y0)}})).data.text||'').replace(/[^\u0590-\u05FFa-zA-Z0-9 :]/g,'').trim();
+    if(t&&SEC_RE.test(t.replace(/:/g,'').trim())){words=words.filter(w=>!r.w.includes(w));words.push({s:t,cf:90,x0,x1,y:r.y,h:H})}}catch(e){}finally{try{await ocrHE.setParameters({tessedit_pageseg_mode:'4'})}catch(e){}}}}
+ const rawCh=flat(await ocrCH.recognize(c,{},{blocks:true})),chords=[];
+ for(const w0 of rawCh){const w={...w0,s:String(w0.s).replace(/[x×]\d+$/i,'')};if(!w.s)continue;const one=chordTok(w.s);
+  if(one){if(w.cf>=45||/^[A-G]$/.test(one))chords.push({...w,c:one});continue}
+  // chips side by side can come back glued together: EmBmEmCDCBmD -> Em Bm Em C D C Bm D
+  const parts=String(w.s).match(/[A-G](?:#|b)?(?:maj7|maj9|m7b5|m7|m9|m6|madd9|m|dim7|dim|aug|sus2|sus4|add9|7sus4|13|11|9|7|6|5)?(?:\/[A-G](?:#|b)?)?/g);
+  if(parts&&parts.length>1&&parts.join('')===w.s){const tot=w.s.length;let pos=0;for(const pt of parts){const a0=pos/tot,a1=(pos+pt.length)/tot;chords.push({...w,s:pt,c:pt,x0:w.x0+(w.x1-w.x0)*a0,x1:w.x0+(w.x1-w.x0)*a1});pos+=pt.length}}}
+ return {words,chords};
+}
+// PDF text with positions (no reading errors: the text is in the file)
+async function pdfWords(file,onP){
+ try{await loadScript(PDF_JS)}catch(e){throw {code:'pdf_load'}}const lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc=PDF_WORKER;
+ const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise,pages=[];
+ for(let n=1;n<=Math.min(doc.numPages,8);n++){onP&&onP(`Reading page ${n} of ${doc.numPages}…`);const pg=await doc.getPage(n),vp=pg.getViewport({scale:1}),tc=await pg.getTextContent(),out=[];
+  for(const it of tc.items){const str=String(it.str||'');if(!str.trim())continue;const [a,,,dd,e,f]=it.transform,h=Math.abs(dd)||Math.abs(a)||10,w=it.width||str.length*h*.5,y=vp.height-f-h/2;
+   const rtl=it.dir==='rtl'||hasHeb(str),total=str.length||1;let pos=0;
+   str.split(/(\s+)/).forEach(tok=>{const len=tok.length;if(tok.trim()){const a0=pos/total,a1=(pos+len)/total;const x0=rtl?e+w*(1-a1):e+w*a0,x1=rtl?e+w*(1-a0):e+w*a1;out.push({s:tok,cf:99,x0,x1,y,h})}pos+=len})}
+  pages.push(out)}
+ return pages;
+}
+// words with positions -> lines: chord rows above lyric rows become [chord]lyric lines
+function wordsToLines(input,img){
+ let words=Array.isArray(input)?input:input.words,chB=Array.isArray(input)?null:input.chords;
+ if(chB){// rows where the chord reader found chords and the text reader found (almost) no Hebrew/English words are chord rows: take the chord reader's version
+  const hs0=words.concat(chB).map(w=>w.h).sort((a,b)=>a-b),H0=hs0[Math.floor(hs0.length/2)]||12,used=new Set(),keep=[];
+  const bands=[];chB.slice().sort((a,b)=>a.y-b.y).forEach(c=>{const bd=bands.find(b=>Math.abs(b.y-c.y)<H0*.55);if(bd)bd.c.push(c);else bands.push({y:c.y,c:[c]})});
+  for(const bd of bands){const inBand=words.filter(w=>Math.abs(w.y-bd.y)<H0*.6),heb=inBand.reduce((n,w)=>n+(w.s.match(/[\u0590-\u05FF]/g)||[]).length,0),lat=inBand.reduce((n,w)=>n+(w.s.match(/[a-z]{3,}/gi)||[]).filter(x=>!chordTok(x)).length,0);
+   if(heb<=3+bd.c.length&&lat<=Math.max(1,bd.c.length/2)){inBand.forEach(w=>used.add(w));bd.c.forEach(c=>keep.push({s:c.c,cf:99,x0:c.x0,x1:c.x1,y:bd.y,h:c.h,isChord:true}))}}
+  words=words.filter(w=>!used.has(w)).concat(keep)}
+ if(!words.length)return [];const hs=words.map(w=>w.h).sort((a,b)=>a-b),H=hs[Math.floor(hs.length/2)]||12;
+ const ws=words.slice().sort((a,b)=>a.y-b.y),rows=[];
+ for(const w of ws){const r=rows[rows.length-1];if(r&&Math.abs(w.y-r.y)<H*.55){r.w.push(w);r.y=(r.y*(r.w.length-1)+w.y)/r.w.length}else rows.push({y:w.y,w:[w]})}
+ rows.forEach(r=>{const txt=r.w.map(x=>x.s).join(' ');r.heb=hasHeb(txt);r.w.sort((a,b)=>r.heb?b.x0-a.x0:a.x0-b.x0);
+  const cs=r.w.map(x=>x.isChord?x.s:chordTok(x.s.replace(/[|]/g,'')));const rep=r.w.filter(x=>/^[x×]\d+$/i.test(x.s)).length;
+  const nC=cs.filter(Boolean).length;r.chord=r.w.some(x=>x.isChord)||(nC>0&&nC+rep>=r.w.length*.6&&!r.heb);if(r.chord)r.heb=false;r.cs=r.w.map((x,i)=>cs[i]?{c:cs[i],cx:(x.x0+x.x1)/2}:null).filter(Boolean);
+  r.cf=r.w.reduce((s,x)=>s+(x.cf||0),0)/r.w.length;
+  const plain=txt.replace(/[:：\-–—\[\](){}|]/g,'').trim();r.sec=!r.chord&&r.w.length<=3&&SEC_RE.test(plain)});
+ const pitch=(()=>{const g=[];for(let i=1;i<rows.length;i++)g.push(rows[i].y-rows[i-1].y);g.sort((a,b)=>a-b);return g[Math.floor(g.length*.3)]||H*1.6})();
+ const out=[];let prevY=null;
+ for(let i=0;i<rows.length;i++){const r=rows[i];
+  if(r.cf<35&&!r.chord)continue;
+  if(prevY!=null&&r.y-prevY>pitch*1.9&&out.length&&out[out.length-1].type!=='blank')out.push({type:'blank',img});
+  prevY=r.y;
+  if(r.sec){out.push({type:'section',text:r.w.map(x=>x.s).join(' ').replace(/[:：\[\](){}|]/g,'').trim(),img});continue}
+  const nx=rows[i+1];
+  if(r.chord&&nx&&!nx.chord&&!nx.sec&&nx.y-r.y<pitch*1.6&&nx.cf>=35){
+   // put each chord before the lyric word under it
+   const L=nx.w,marks=L.map(()=>[]),tail=[];
+   for(const ch of r.cs){let j=L.findIndex(w=>ch.cx>=w.x0-H*.25&&ch.cx<=w.x1+H*.25);
+    if(j<0){const minX=Math.min(...L.map(w=>w.x0)),maxX=Math.max(...L.map(w=>w.x1));
+     const beyondEnd=nx.heb?ch.cx<minX:ch.cx>maxX,beforeStart=nx.heb?ch.cx>maxX:ch.cx<minX;
+     if(beyondEnd){tail.push(ch.c);continue}if(beforeStart)j=0;else{let best=1e9;L.forEach((w,k)=>{const d=Math.min(Math.abs(ch.cx-w.x0),Math.abs(ch.cx-w.x1));if(d<best){best=d;j=k}})}}
+    marks[j].push(ch.c)}
+   const text=L.map((w,k)=>marks[k].map(c=>`[${c}]`).join('')+w.s).join(' ')+(tail.length?' '+tail.map(c=>`[${c}]`).join(' '):'');
+   out.push({type:'lyrics',text,img});prevY=nx.y;i++;continue}
+  if(r.chord){const cs=r.cs.slice().sort((a,b)=>a.cx-b.cx).map(x=>x.c);out.push({type:'chords',chords:cs,img});continue}
+  out.push({type:'lyrics',text:r.w.map(x=>x.s).join(' '),img})}
+ return out;
+}
+// overlap check that tolerates small reading differences
+function simText(a,b){a=String(a);b=String(b);if(a===b)return 1;const m=a.length,n=b.length;if(!m||!n)return 0;let prev=Array(n+1).fill(0).map((_,j)=>j);
+ for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}return 1-prev[n]/Math.max(m,n)}
 // screenshots are lined up in order first (top of the song first), then read together
 let shotStage=[];const SHOT_MAX=8;
 // when was a screenshot taken? 1) the phone's file name (Screenshot_20261010-231512…), 2) the photo's EXIF date, 3) the file date
@@ -2616,6 +2708,7 @@ async function timeFromExif(f){try{if(!/jpe?g/i.test(f.type||f.name))return 0;co
   if((mk&0xFF00)!==0xFF00)break;o+=2+len}}catch(e){}return 0}
 let shotManual=false;// once you move a screenshot yourself, new ones are added at the end instead of re-sorting
 async function shotAdd(files){
+ const pdf=[...files].find(f=>/pdf/i.test(f.type)||/\.pdf$/i.test(f.name));if(pdf){shotStage=[{pdf,small:'',big:'',t:0,name:pdf.name}];shotRead();return}
  const room=Math.max(0,SHOT_MAX-shotStage.length),all=[...files].filter(f=>/^image\//.test(f.type)||!f.type);
  const card=$('shotCard');card.hidden=false;if(!shotStage.length)card.innerHTML='<p class="tip">Opening the screenshots…</p>';
  const items=[];let seq=0;
@@ -2650,45 +2743,26 @@ function dropOverlaps(lines){
  for(const g of groups){
   const tail=out.filter(x=>x.type!=='blank'),head=g.lines.filter(x=>x.type!=='blank');let best=0;
   if(out.length)for(let n=Math.min(head.length,tail.length,12);n>=1;n--){
-   if(tail.slice(-n).map(lineKey).join('\n')===head.slice(0,n).map(lineKey).join('\n')){const w=String(head[0].text||'').split(/\s+/).length;if(n>=2||w>=3||head[0].type==='chords'){best=n;break}}}
+   const A1=tail.slice(-n).map(lineKey),B1=head.slice(0,n).map(lineKey);if(A1.every((k,q)=>k.split('|')[0]===B1[q].split('|')[0]&&simText(k,B1[q])>=.82)){const w=String(head[0].text||'').split(/\s+/).length;if(n>=2||w>=3||head[0].type==='chords'){best=n;break}}}
   let skip=best;for(const L of g.lines){if(skip>0){if(L.type!=='blank')skip--;continue}out.push(L)}
  }
  return out;
 }
 async function shotRead(){
  const card=$('shotCard'),stage=shotStage.slice(),n=stage.length;if(!n)return;
- if(!sampleFn){card.hidden=false;card.innerHTML=`<p class="tip">Reading screenshots needs Claude features. Turn them on under My songs › Claude features (at the bottom), then try again.</p>`;return}
- const lim=Math.max(1,Math.min(SHOT_MAX,imgLimit||SHOT_MAX));
- if(n>lim){renderShotStage(`Claude can read up to ${lim} pictures at once here. Remove ${n-lim}.`);return}
- card.innerHTML=`<div class="shotthumbs">${stage.map(x=>`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">🤖 Claude is reading ${n===1?'the screenshot':`all ${n} screenshots and joining them`}… this takes a few seconds.</p>`;
- const multi=n>1;
- const prompt=`${multi?`These ${n} images are screenshots of ONE song's chord sheet, in order: image 1 is the beginning, image ${n} is the end. The person scrolled between screenshots, so the bottom of one image is usually repeated at the top of the next (the overlap), and a line can be cut in half at an image edge.`:'This image is a chord sheet for one song: chords are written above the lyric lines.'} The song may be in Hebrew or English.
-Your job: transcribe the WHOLE song, every lyric line, word for word, with every chord, in ChordPro-style text. Do not summarize, shorten or skip anything: write every verse and every chorus each time it appears on the sheet, even when it repeats.
-
-Output format (plain text, no JSON, no code fences):
-TITLE: <song title, or empty>
-ARTIST: <artist, or empty>
-CAPO: <number, 0 if none>
-TUNING: <Standard, or the tuning written on the sheet>
-NOTE: <one short sentence about anything unreadable or cut off, or empty>
----
-then the song, one line per line of the sheet:
-- A lyric line with its chords: put each chord in square brackets inline, right before the word it sits above, based on where the chord is horizontally above the lyric. Example: [C]יש אומרים [D]שצבעים זה עולם של נדמה  or  [Am]Look at the [F]stars. Hebrew stays in normal reading order (right to left), and the chord goes right before the Hebrew word it is above. A chord placed after the end of the lyric goes at the end of the line.
-- Chords that have no lyrics under them (intro, interlude, solo, ending): one line with only the chords, like: [Em] [Bm] [Em] [C] [D]  (add xN at the end if the sheet says to repeat, e.g. [Em] [C] x4)
-- A section label (פתיחה, בית, פזמון, מעבר, סיום, Intro, Verse, Chorus…): a line starting with # , like: # פזמון
-- An empty line between parts.
-${multi?`- Before the lines you take from each image, write a marker line: @image 1, @image 2, … Lines repeated because of the overlap between image N and N+1 must be written ONCE. A chorus that really appears twice in different places of the sheet stays twice.
-`:''}- Ignore app buttons, menus, ads, page headers and status bars.
-- Write chords the standard way: Am, F#m7, Bb, G/B, Dsus4, Cmaj7.`;
- try{const res=await sampleFn(prompt,{images:stage.map(x=>dataUrlBlob(x.big)),modelTier:'default',maxTokens:12000});
-  const r=parseShotText(res&&res.text||'');
-  if(!r.lines.some(L=>L.type==='lyrics'))throw {code:r.lines.length?'nolyrics':'empty'};
+  const say=t=>{card.innerHTML=`<div class="shotthumbs">${stage.map(x=>x.pdf?`<span class="badge">PDF · ${esc(x.name||'')}</span>`:`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">📖 ${t}</p>`};
+ try{const r={title:'',artist:'',capo:0,tuning:'Standard',note:'',lines:[]};
+  if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)))}
+  else{say('Getting the reader ready…');await ocrSheetReady(say);
+   for(let k=0;k<stage.length;k++){say(`Reading screenshot ${k+1} of ${stage.length} on your phone…`);const w=await ocrImageWords(stage[k].big);r.lines.push(...wordsToLines(w,k+1))}}
+  if(!r.lines.some(L=>L.type==='lyrics'||L.type==='chords'))throw {code:'empty'};
+  const lowConf=!stage[0].pdf;r.note=lowConf?'Read on your phone from the picture, so a few letters or chords may be misread. Compare with the screenshot.':'';
   r.lines=dropOverlaps(r.lines.filter(Boolean));
   const a=sheetFromShot(r);if(!a.lc.some(L=>L.t.trim()))throw {code:'empty'};
-  a.shots=stage.map(x=>x.small);shotBigMem=stage.map(x=>x.big);shotStage=[];shotManual=false;card.hidden=true;card.innerHTML='';
+  a.shots=stage.filter(x=>!x.pdf).map(x=>x.small);shotBigMem=stage.filter(x=>!x.pdf).map(x=>x.big);shotStage=[];shotManual=false;card.hidden=true;card.innerHTML='';
   try{store.set('writeDraft',a)}catch(e){a.shots=a.shots.slice(0,2);try{store.set('writeDraft',a)}catch(e2){delete a.shots}}
   openWriter(a,2);
- }catch(e){renderShotStage(e&&e.code==='nolyrics'?'Claude found only chords and no lyrics. Try again; if it keeps happening, use clearer screenshots with the lyrics fully visible.':e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':e&&e.code==='empty'?'Claude couldn’t find a chord sheet in these pictures. Try clearer screenshots that show the chords above the lyrics.':'Couldn’t reach Claude. Check the connection and try again.')}
+ }catch(e){renderShotStage(e&&e.code==='ocr_load'?'Couldn’t download the text reader. Check the internet connection and try again.':e&&e.code==='pdf_load'?'Couldn’t open the PDF reader. Check the internet connection and try again.':e&&e.code==='nolyrics'?'Claude found only chords and no lyrics. Try again; if it keeps happening, use clearer screenshots with the lyrics fully visible.':e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':e&&e.code==='empty'?'No chords or lyrics were found in these pictures. Try clearer screenshots that show the chords above the lyrics, or a PDF from the site.':'Couldn’t reach Claude. Check the connection and try again.')}
 }
 $('shotNew').onclick=()=>{const d=draftNow(),card=$('shotCard');if(!d||shotStage.length){$('shotIn').click();return}
  card.hidden=false;card.innerHTML=`<div class="confirm"><span>Reading screenshots replaces your unfinished sheet “${esc(d.title||'Untitled song')}”.</span><button class="btn" type="button" id="shotGo">Continue</button><button class="btn ghost" type="button" id="shotNo">Cancel</button></div>`;
