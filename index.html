@@ -522,6 +522,8 @@ body.wopen{overflow:hidden}
 .gtuned{margin:0;font-size:13px}
 .gtrpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px}
 .gtrline[aria-expanded="true"] i{transform:rotate(180deg);display:inline-block}
+.folderbtn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:var(--accent);color:var(--bg);padding:13px 14px;font-size:15px}
+.folderbtn span:last-child{opacity:.8}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -641,8 +643,10 @@ body.wopen{overflow:hidden}
     </button>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
-      <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
+      <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
+      <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span>📁</span> My songs folder in Google Drive <span>↗</span></a>
       <div class="liblist" id="libList"></div>
+      <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
       <details class="apibox" id="apiCard" hidden></details>
     </section>
     <section class="card" id="readyCard" hidden>
@@ -2147,8 +2151,12 @@ let dlCap=null,mcpCap=null;
 const DEFAULT_FOLDER='https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe';
 const folderIdOf=v=>{const m=String(v||'').match(/folders\/([\w-]{10,})/)||String(v||'').trim().match(/^([\w-]{20,})$/);return m?m[1]:''};
 $('driveFolder').value=store.get('driveFolderLink',DEFAULT_FOLDER);
-function syncDriveLinks(){if(!window.claude){const r=store.get('gd.root','');['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(!a)return;a.hidden=!r;if(r){a.href='https://drive.google.com/drive/folders/'+r;a.textContent='My Guitar sheets ↗'}});return}const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
-syncDriveLinks();$('driveFolder').addEventListener('input',syncDriveLinks);$('driveFolder').addEventListener('change',e=>store.set('driveFolderLink',e.target.value.trim()||DEFAULT_FOLDER));
+function myFolderUrl(){const v=store.get('myFolder',null);if(v!==null)return v;if(/^yoav\b/i.test(store.get('userName','')))return DEFAULT_FOLDER;const r=store.get('gd.root','');return r?'https://drive.google.com/drive/folders/'+r:''}
+function syncDriveLinks(){const fb=$('folderBtn'),fu=window.claude?'https://drive.google.com/drive/folders/'+(folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER)):myFolderUrl();if(fb){fb.hidden=!fu;if(fu)fb.href=fu}if($('folderIn')&&document.activeElement!==$('folderIn'))$('folderIn').value=fu||'';if(!window.claude){['driveLinkSheet'].forEach(k=>{const a=$(k);if(!a)return;a.hidden=!fu;if(fu){a.href=fu;a.textContent='My songs folder ↗'}});return}const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
+syncDriveLinks();$('driveFolder').addEventListener('input',syncDriveLinks);
+$('folderSave').onclick=()=>{const v=$('folderIn').value.trim();if(v&&!/^https:\/\/(drive|docs)\.google\.com\//.test(v)){$('folderMsg').textContent='That doesn’t look like a Google Drive link. Open the folder in Drive, tap Share › Copy link, and paste it here.';return}
+ store.set('myFolder',v);if(window.claude&&v){$('driveFolder').value=v;store.set('driveFolderLink',v)}syncDriveLinks();$('folderMsg').textContent=v?'Saved. The button above opens this folder.':'Removed.'};
+$('folderClear').onclick=()=>{store.set('myFolder','');$('folderIn').value='';syncDriveLinks();$('folderMsg').textContent='Removed. The folder button is hidden until you add a link.'};$('driveFolder').addEventListener('change',e=>store.set('driveFolderLink',e.target.value.trim()||DEFAULT_FOLDER));
 async function withBusy(btn,fn){const all=[...document.querySelectorAll('.sheetactions .btn')];all.forEach(b=>b.disabled=true);try{await fn()}finally{all.forEach(b=>b.disabled=false)}}
 $('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
  shStatus('Making the PDF…');let blob;try{blob=await makePdf()}catch(e){shStatus('Couldn’t make the PDF. Check your internet connection (the PDF maker loads once) and try again.');return}
@@ -2717,7 +2725,7 @@ function pickJoke(){const last=store.get('lastJoke',-1);let i;do{i=Math.floor(Ma
 function renderWelcome(){
  const n=welcomeName(),w=$('welcome');
  if(!n){w.querySelector('.wbody').innerHTML=`<h2>Welcome to Guitaring</h2><p>What should we call you?</p><form id="wName" class="wnameform"><input id="wNameIn" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" placeholder="Your first name" required><button class="btn cta">Let's go</button></form>`;
-  $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);renderWelcome()};return}
+  $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);try{syncDriveLinks()}catch(err){}renderWelcome()};return}
  const j=JOKES[pickJoke()].replace(/\{n\}/g,esc(n));
  w.querySelector('.wbody').innerHTML=`<p class="whey">Hey, <button type="button" class="wname" id="wRename" title="Change name">${esc(n)}</button>.</p><p class="wjoke" id="wJoke">${j}</p><button type="button" class="wmore" id="wMore">Another one ↻</button>
  <div class="wgo"><button class="btn" data-go="tune">Tune up</button><button class="btn" data-go="song">Learn a song</button><button class="btn" data-go="write">Write a song</button><button class="btn" data-go="gear">My gear</button></div>`;
