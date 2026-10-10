@@ -374,6 +374,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
 .shotbig{position:fixed;inset:0;z-index:80;background:#000;display:flex;flex-direction:column}.shotbar{display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:#111;color:#fff;font:600 15px var(--body)}.shotbar span{flex:1}.shotbar button{border:0;border-radius:999px;width:44px;height:44px;font-size:20px;background:#2a2a2a;color:#fff;cursor:pointer}.shotbar button:disabled{opacity:.3}.shotbar .shotx{background:#fff;color:#000;font-size:22px;font-weight:700}.shotscroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}.shotscroll img{display:block;width:100%;height:auto}
 .shotcol{display:flex;flex-direction:column;gap:4px;flex:0 0 auto;max-height:260px;overflow:auto}.shotcol img{width:64px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 4px var(--accent)}}.pulse{animation:pulse .8s ease 2}
 .shotlist{display:flex;flex-direction:column;gap:6px}.shotrow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:6px}.shotrow img{width:56px;height:72px;object-fit:cover;border-radius:6px;cursor:zoom-in}.shotinfo{flex:1;display:flex;flex-direction:column}.shotinfo b{font-size:16px}.shotinfo small{color:var(--muted)}.shotbtns{display:flex;gap:4px}.shotbtns .btn{padding:6px 10px}
 #shotCard .editrow{flex-wrap:wrap}
 .shotthumbs{display:flex;gap:6px;flex-wrap:wrap}.shotthumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px}
@@ -2968,7 +2969,7 @@ function renderWelcome(){
  $('wMore').onclick=()=>{$('wJoke').innerHTML=JOKES[pickJoke()].replace(/\{n\}/g,esc(n))};
  $('wRename').onclick=()=>{store.set('userName','');renderWelcome()};
 }
-function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'){setTab('song');$('writeNew').click()}else if(go)setTab(go)}
+function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'||go==='song'){setTab('song');songsHome();if(go==='write'){const t=$('shotNew');if(t&&!t.hidden){setTimeout(()=>{t.scrollIntoView({behavior:'smooth',block:'center'});['shotNew','writeNew','draftCard'].forEach(k=>{const e=$(k);if(e&&!e.hidden){e.classList.add('pulse');setTimeout(()=>e.classList.remove('pulse'),1600)}})},80)}}}else if(go)setTab(go)}
 $('welcome').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)closeWelcome(b.dataset.go)});
 $('wSkip').onclick=()=>closeWelcome('');
 document.body.classList.add('wopen');renderWelcome();
