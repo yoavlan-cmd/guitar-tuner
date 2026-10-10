@@ -372,6 +372,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wt{display:flex;flex-direction:column;gap:3px;padding:6px 0;border-bottom:1px solid var(--line)}.wt .wtch{font:700 12.5px var(--mono);color:var(--accent)}.wt .wtch small{font:400 11px var(--body);color:var(--muted)}
 .wtin{width:100%;font:400 16px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px}.wt.sec .wtin{font-weight:700;color:var(--muted)}.wt.blank .wtin{background:transparent;border-style:dashed}
 .wtbtns{display:flex;gap:14px;justify-content:flex-end}.wtbtns .linkbtn{font-size:12.5px}.linkbtn.danger{color:#E5533D}
+.instform .filled{border-color:var(--accent)!important;box-shadow:0 0 0 1px var(--accent) inset}.instform [data-spec].filled{border-radius:12px;padding:4px}
+.specbox{border:1px solid var(--line);border-radius:12px;padding:8px 10px}.specbox>summary{cursor:pointer;display:flex;gap:8px;align-items:baseline;font-size:14px}.specbox>summary span{color:var(--muted);font-size:13px}.specbox[open]>summary{margin-bottom:8px}
 .wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
 .wl.slots.allslots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl .ww .t.slot{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
@@ -3346,46 +3348,59 @@ function dataUrlBlob(u){const [h,b]=u.split(','),m=h.match(/:(.*?);/)[1],s=atob(
 // shrink a photo so it fits on the phone (about 40–70 KB)
 function shrinkPhoto(file,max=560){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.78))};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
 function wirePhoto(it,sync){
- $('iPhotoIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;sync();try{it.photo=await shrinkPhoto(f);it._pmsg=claudeReads()?'Nice. Tap “Let Claude look at the photo” to fill in the details from it.':'Photo added.';it.photoNotes=null}catch(err){it._pmsg='That image couldn’t be opened. Try a JPG or PNG photo.'}renderInstForm()};
+ $('iPhotoIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;sync();try{it.photo=await shrinkPhoto(f);it._pmsg=claudeReads()?'Claude is reading the photo and filling in the details…':'Photo added.';it.photoNotes=null;it._auto=claudeReads()}catch(err){it._pmsg='That image couldn’t be opened. Try a JPG or PNG photo.'}renderInstForm();if(it._auto&&$('iPhotoAsk')){it._auto=false;$('iPhotoAsk').click()}};
  if($('iPhotoDel'))$('iPhotoDel').onclick=()=>{sync();it.photo='';it.photoNotes=null;it._pmsg='';renderInstForm()};
  if($('iPhotoAsk'))$('iPhotoAsk').onclick=async()=>{sync();const b=$('iPhotoAsk');b.disabled=true;b.textContent='Claude is looking…';
   const opts=k=>SPEC_Q[k].opts.map(o=>o[0]).filter(v=>v!=='unknown').join('|');
-  const prompt=`This is a photo of a guitarist's own guitar. Report only what you can see or what is strongly indicated (for example a readable logo or a distinctive design). Use null when unsure; never guess a model you can't support.
-Reply with only JSON: {"type": "acoustic"|"classical"|"electroacoustic"|"electric"|"acamp" (acoustic amplifier)|"elamp" (electric guitar amplifier)|null, "brand": string|null, "model": string|null, "confidence": "high"|"medium"|"low", "specs": {"top": "${opts('top')}"|null, "board": "${opts('board')}"|null, "finish": "${opts('finish')}"|null, "elec": "${opts('elec')}"|null, "bridge": "${opts('bridge')}"|null, "pickups": "${opts('pickups')}"|null, "body": "${opts('body')}"|null}, "observations": [short sentences about notable visible features, e.g. cutaway, preamp on the side, pickup layout], "check": [short sentences on visible things worth checking, e.g. rusty strings, worn frets, a crack, a lifting bridge; empty if none]}
-Notes: a classical guitar has nylon strings tied at the bridge and a wide slotted headstock; an electro-acoustic has a preamp panel or an output jack; "top" solid vs laminate is usually not visible, so give null unless obvious.`;
-  try{const r=await sampleFn.json(prompt,{images:[dataUrlBlob(it.photo)]});
-   const filled=[];
-   if(r&&r.type&&GEAR[r.type]&&r.type!==it.type){it.type=r.type;filled.push('type')}
-   if(r&&r.brand&&!it.brand){it.brand=String(r.brand);filled.push('brand')}
-   if(r&&r.model&&!it.model&&r.confidence!=='low'){it.model=String(r.model);filled.push('model')}
-   if(r&&r.specs)for(const [k,v] of Object.entries(r.specs)){if(v&&SPEC_Q[k]&&SPEC_Q[k].for.includes(it.type)&&SPEC_Q[k].opts.some(o=>o[0]===v)&&(!it.specs[k]||it.specs[k]==='unknown')){it.specs[k]=v;filled.push(SPEC_Q[k].label.toLowerCase())}}
-   it.photoNotes={observations:(r&&r.observations)||[],check:(r&&r.check)||[],at:Date.now()};
-   it._pmsg=(r&&r.brand?`Looks like ${[r.brand,r.model].filter(Boolean).join(' ')}${r.confidence?` (${r.confidence} confidence)`:''}. `:'Claude couldn’t tell the brand from this photo. ')+(filled.length?`Filled in: ${filled.join(', ')}. Check them before saving.`:'Nothing new to fill in.');
+  const prompt=`This is a photo of a guitarist's own gear: a guitar or a guitar amplifier. Identify it and fill in its details. Report what you can see or what is strongly indicated (a readable logo, a distinctive shape or design, a model name on the panel). Use null when unsure; never invent a model.
+Reply with only JSON: {"type": "acoustic"|"classical"|"electroacoustic"|"electric"|"acamp" (acoustic-guitar amplifier)|"elamp" (electric-guitar amplifier)|null, "brand": string|null, "model": string|null, "year": "YYYY" only if printed or clearly identifiable, else null, "serial": the serial number only if it is clearly printed in the photo, else null, "confidence": "high"|"medium"|"low", "name": a short friendly nickname based on what it looks like (e.g. "Blue Les Paul", "Black Cube"), "color": short colour/finish look (e.g. "sunburst", "metallic blue", "black")|null, "watts": number for amps if printed or known for that model, else null, "strings": for guitars, the string type and gauge this model usually ships with or that suits it (e.g. "Elixir phosphor bronze 12-53", "D'Addario 10-46", "nylon, normal tension"), else null,
+"specs": {"top": "${opts('top')}"|null, "board": "${opts('board')}"|null, "finish": "${opts('finish')}"|null, "elec": "${opts('elec')}"|null, "bridge": "${opts('bridge')}"|null, "pickups": "${opts('pickups')}"|null, "body": "${opts('body')}"|null, "ampkind": "${opts('ampkind')}"|null, "power": "${opts('power')}"|null},
+"observations": [up to 3 short things you notice about its condition or setup], "check": [up to 2 short things worth checking]}
+Notes: a classical guitar has nylon strings tied at the bridge and a wide slotted headstock; an electro-acoustic has a preamp panel or an output jack; a solid vs laminate top is usually not visible, so null unless obvious; for a known model you may fill specs that model is known to have.`;
+  try{const r=await sampleFn.json(prompt,{images:[dataUrlBlob(it.photo)],modelTier:'default'})||{};
+   const filled=[],okConf=r.confidence!=='low';
+   if(r.type&&GEAR[r.type]&&r.type!==it.type){it.type=r.type;filled.push('type')}
+   if(r.brand){it.brand=String(r.brand).trim();filled.push('brand')}
+   if(r.model&&okConf){it.model=String(r.model).trim();filled.push('model')}
+   if(r.year&&/^(19|20)\d\d$/.test(String(r.year))){it.year=String(r.year);filled.push('year')}
+   if(r.serial&&/^[A-Za-z0-9-]{4,20}$/.test(String(r.serial).trim())){it.serial=String(r.serial).trim();filled.push('serial')}
+   if(r.color){it.color=String(r.color).slice(0,30);filled.push('colour')}
+   if(r.watts&&GEAR[it.type].amp&&+r.watts>0){it.watts=String(Math.round(+r.watts));filled.push('watts')}
+   if(r.name&&!it.name){it.name=String(r.name).slice(0,40);filled.push('name')}
+   if(r.strings&&!GEAR[it.type].amp&&!it.stringSet){it.stringSet=String(r.strings).slice(0,40);filled.push('strings')}
+   if(r.specs)for(const [k,v] of Object.entries(r.specs)){if(v&&SPEC_Q[k]&&SPEC_Q[k].for.includes(it.type)&&SPEC_Q[k].opts.some(o=>o[0]===v)){it.specs[k]=v;filled.push(SPEC_Q[k].label.toLowerCase())}}
+   const mm=matchModel(it.brand,it.model,it.type);if(mm&&mm.s)for(const [k,v] of Object.entries(mm.s))if(!it.specs[k])it.specs[k]=v;
+   it.photoNotes={observations:r.observations||[],check:r.check||[],at:Date.now()};it._filled=filled;
+   it._pmsg=(r.brand?`✨ Looks like ${[r.brand,okConf?r.model:''].filter(Boolean).join(' ')}${r.confidence?` (${r.confidence} confidence)`:''}. `:'Claude couldn’t tell the brand from this photo. ')+(filled.length?`Filled in from the photo: ${filled.join(', ')}. Change anything that’s wrong, then save.`:'Nothing new to fill in.');
   }catch(err){it._pmsg=err&&err.code==='rate_limited'?'Too many requests right now. Try again in a little while.':'Claude couldn’t look at the photo this time. Try again.'}
   renderInstForm()};
 }
 function renderInstForm(){
  const it=instEdit,m=matchModel(it.brand,it.model,it.type),isA=!!GEAR[it.type].amp;
  $('gearOut').innerHTML=`<section class="card instform"><h2>${it.id?(GEAR[it.type].amp?'Edit amp':'Edit guitar'):'Add gear'}</h2>
- <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">🎸</div>'}<div class="iphotobtns"><label class="btn ghost">📷 ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn" id="iPhotoAsk">Let Claude look at the photo</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
+ <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">🎸</div>'}<div class="iphotobtns"><label class="btn ghost">📷 ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn ghost" id="iPhotoAsk">✨ Fill in from the photo again</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
  <label class="namefield">Name it <input id="iName" type="text" dir="auto" maxlength="40" placeholder="${isA?'e.g. Home amp, Gig amp':'e.g. Old faithful, The red one'}" value="${esc(it.name||'')}"></label>
  <div class="namefield">Type<div class="chips2" id="iType">${Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${it.type===k}">${esc(g.short)}</button>`).join('')}</div></div>
  <div class="wrow"><label class="namefield">Brand <input id="iBrand" type="text" list="iBrands" autocomplete="off" value="${esc(it.brand||'')}" placeholder="e.g. Yamaha"></label><label class="namefield">Year <input id="iYear" type="text" inputmode="numeric" maxlength="4" value="${esc(it.year||'')}" placeholder="optional"></label></div>
  <datalist id="iBrands">${BRAND_LIST.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
  <label class="namefield">Model <input id="iModel" type="text" autocomplete="off" value="${esc(it.model||'')}" placeholder="${isA?'e.g. Katana 50, Acoustic Singer Pro':'e.g. FG800, Stratocaster, GS Mini-e'}"></label>
- <p class="tip" id="iMatch">${m&&m.n.length?'✓ Recognised. The details below were filled in for this model; change anything that’s different on yours.':(it.brand||it.model)?'Not in the app’s list yet. Fill in what you know below; “Not sure” is fine.':'The model is usually on a label inside the soundhole, or on the back of the headstock.'}</p>
- <div class="specwrap" id="iSpecs">${specFields(it)}</div>
+ <p class="tip" id="iMatch">${(it._filled||[]).length&&!(m&&m.n.length)?'Fields with a green outline came from the photo.':m&&m.n.length?'✓ Recognised. The details below were filled in for this model; change anything that’s different on yours.':(it.brand||it.model)?'Not in the app’s list yet. Fill in what you know below; “Not sure” is fine.':'The model is usually on a label inside the soundhole, or on the back of the headstock.'}</p>
+ ${(()=>{const ks=Object.keys(SPEC_Q).filter(k=>SPEC_Q[k].for.includes(it.type)),set=ks.filter(k=>it.specs[k]&&it.specs[k]!=='unknown'),sum=set.map(k=>(SPEC_Q[k].opts.find(o=>o[0]===it.specs[k])||[,''])[1].replace(/ \(.*\)$/,'')).join(' · ');
+  return `<details class="specbox" ${set.length?'':'open'}><summary><b>Details</b> <span>${set.length?esc(sum):'Tap to fill in what you know'}</span></summary><div class="specwrap" id="iSpecs">${specFields(it)}</div></details>`})()}
+ <div class="wrow"><label class="namefield">Colour <input id="iColor" type="text" dir="auto" maxlength="30" value="${esc(it.color||'')}" placeholder="${isA?'e.g. black':'e.g. sunburst, blue'}"></label>${isA?`<label class="namefield">Output (watts) <input id="iWatts" type="text" inputmode="numeric" maxlength="5" value="${esc(it.watts||'')}" placeholder="e.g. 10"></label>`:`<label class="namefield">Strings used <input id="iSet" type="text" maxlength="40" value="${esc(it.stringSet||'')}" placeholder="e.g. Elixir 12-53"></label>`}</div>
+ <label class="namefield">Serial number (optional)<input id="iSerial" type="text" autocomplete="off" maxlength="30" value="${esc(it.serial||'')}" placeholder="${isA?'On the back panel':'Back of the headstock or inside the soundhole'}"></label>
  <label class="namefield" ${isA?'hidden':''}>Strings last changed <input id="iStrings" type="date" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label>
  <div class="editrow"><button class="btn cta" id="iSave" type="button">${it.id?'Save changes':'Add to my gear'}</button><button class="btn ghost" id="iCancel" type="button">Cancel</button></div></section>`;
- const sync=()=>{it.name=$('iName').value.trim();it.brand=$('iBrand').value.trim();it.model=$('iModel').value.trim();it.year=$('iYear').value.trim();it.strings=$('iStrings').value};
+ const sync=()=>{it.name=$('iName').value.trim();it.brand=$('iBrand').value.trim();it.model=$('iModel').value.trim();it.year=$('iYear').value.trim();it.strings=$('iStrings').value;it.color=$('iColor').value.trim();if($('iWatts'))it.watts=$('iWatts').value.trim();if($('iSet'))it.stringSet=$('iSet').value.trim();it.serial=$('iSerial').value.trim()};
  const recheck=()=>{sync();const mm=matchModel(it.brand,it.model,it.type);if(mm&&mm.n.length&&mm!==it._m){it._m=mm;if(mm.type&&mm.type!==it.type)it.type=mm.type;it.specs={...it.specs,...mm.s};renderInstForm();const f=$('iModel');f.focus();f.setSelectionRange(f.value.length,f.value.length)}else if(!mm&&it._m){it._m=null;$('iMatch').textContent='Not in the app’s list yet. Fill in what you know below; “Not sure” is fine.'}};
  $('iBrand').addEventListener('change',recheck);$('iModel').addEventListener('input',()=>{clearTimeout(it._t);it._t=setTimeout(recheck,500)});
  $('iType').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;sync();it.type=b.dataset.t;renderInstForm()};
  $('iSpecs').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;const q=b.closest('[data-spec]'),k=q.dataset.spec,v=b.dataset.v;if(it.specs[k]===v)delete it.specs[k];else it.specs[k]=v;q.querySelectorAll('.tile').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===it.specs[k]))};
  $('iCancel').onclick=()=>{instEdit=null;renderGear()};
  wirePhoto(it,sync);
+ {const F={brand:'iBrand',model:'iModel',year:'iYear',colour:'iColor',watts:'iWatts',name:'iName',strings:'iSet',serial:'iSerial'};(it._filled||[]).forEach(k=>{const e=$(F[k]);if(e)e.classList.add('filled')});(it._filled||[]).forEach(k=>{const q=Object.keys(SPEC_Q).find(x=>SPEC_Q[x].label.toLowerCase()===k);if(q){const e=document.querySelector(`[data-spec="${q}"]`);if(e)e.classList.add('filled')}})}
  $('iSave').onclick=()=>{sync();if(!it.name)it.name=[it.brand,it.model].filter(Boolean).join(' ')||'My '+GEAR[it.type].short.toLowerCase();if(GEAR[it.type].amp)it.strings='';
-  const l=instAll();const clean={id:it.id||'i'+Date.now().toString(36),name:it.name,type:it.type,brand:it.brand,model:it.model,year:it.year,specs:it.specs,strings:it.strings,added:it.added||Date.now(),ai:it.ai,photo:it.photo||'',photoNotes:it.photoNotes||null};
+  const l=instAll();const clean={id:it.id||'i'+Date.now().toString(36),name:it.name,type:it.type,brand:it.brand,model:it.model,year:it.year,specs:it.specs,strings:it.strings,color:it.color||'',watts:GEAR[it.type].amp?(it.watts||''):'',stringSet:GEAR[it.type].amp?'':(it.stringSet||''),serial:it.serial||'',chat:it.chat,lastTuned:it.lastTuned,tuning:it.tuning,added:it.added||Date.now(),ai:it.ai,photo:it.photo||'',photoNotes:it.photoNotes||null};
   if(it._key&&it._key!==(it.brand+'|'+it.model)){delete clean.ai;delete clean.controls}else{clean.controls=it.controls}
   const i=l.findIndex(x=>x.id===clean.id);if(i>=0)l[i]=clean;else l.push(clean);instSave(l);
   if(clean.photo&&!(instAll().find(x=>x.id===clean.id)||{}).photo){clean.photo='';l[l.findIndex(x=>x.id===clean.id)]=clean;instSave(l);$('iPhotoMsg').textContent='This phone’s storage is full, so the photo couldn’t be saved. The rest was saved.';instEdit=null;instOpen=clean.id;setTimeout(renderGear,2200);return}
@@ -3626,10 +3641,10 @@ let gearVisit=null;// which item's page is showing; a fresh visit starts with ev
 function renderInstDetail(it){
  const keepOpen=gearVisit===it.id?[...$('gearOut').querySelectorAll('details')].map(d=>d.open):null;
  const a=instAdvice(it),g=GEAR[it.type],st=stringsStatus(it),L=x=>`<ul>${x.map(y=>`<li>${esc(y)}</li>`).join('')}</ul>`;
- const specTxt=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean);
+ const specTxt=[it.color?'Colour: '+it.color:'',it.watts?'Output: '+it.watts+' W':'',it.stringSet?'Strings: '+it.stringSet:''].filter(Boolean).concat(Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean));
  const ai=it.ai;
  $('gearOut').innerHTML=`<section class="card gearcard">
- <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">✏️ Edit details</button></div>
+ <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">✏️ Edit details</button></div>${it.photo&&claudeReads()?`<button class="btn ghost wide" id="iFromPhoto" type="button">✨ Update the details from the photo</button>`:''}
  <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
  ${it.photo?`<img class="iphotobig" src="${it.photo}" alt="${esc(it.name)}">`:''}
  ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
@@ -3651,6 +3666,7 @@ function renderInstDetail(it){
  const upd=f=>{const l=instAll(),x=l.find(y=>y.id===it.id);if(x){f(x);instSave(l)}renderGear()};
  $('iBack').onclick=()=>{instOpen=null;renderGear()};
  $('iEdit').onclick=()=>{instEdit={...it,specs:{...it.specs},_key:it.brand+'|'+it.model};renderGear()};
+ if($('iFromPhoto'))$('iFromPhoto').onclick=()=>{instEdit={...it,specs:{...it.specs},_key:it.brand+'|'+it.model};renderGear();window.scrollTo({top:0});if($('iPhotoAsk'))$('iPhotoAsk').click()};
  $('iStr').onchange=e=>upd(x=>x.strings=e.target.value);
  $('iStrToday').onclick=()=>upd(x=>x.strings=new Date().toISOString().slice(0,10));
  $('iDel').onclick=()=>{$('iDelC').hidden=false};$('iDelN').onclick=()=>{$('iDelC').hidden=true};
