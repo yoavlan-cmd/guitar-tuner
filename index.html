@@ -3200,10 +3200,16 @@ function guitarSVG(key,c){
  return `<svg viewBox="0 0 400 180" class="ctlsvg">${s}</svg>`;
 }
 function panelSVG(c,amp){
- const per=amp?6:5,rows=Math.ceil(c.length/per),W=300,H=rows*64+(amp?24:16);
- let s=`<rect x="2" y="2" width="${W-4}" height="${H-4}" rx="10" fill="${amp?'#232323':'#2E3532'}" stroke="${amp?'#C9A227':'#6B7570'}" stroke-width="2"/>`;
- if(amp)s+=`<rect x="10" y="${H-14}" width="${W-20}" height="6" rx="3" fill="#C9A227" opacity=".35"/>`;
- c.forEach((x,i)=>{const r=Math.floor(i/per),col=i%per,n=Math.min(per,c.length-r*per),X=W/(n+1)*(col+1),Y=36+r*64;s+=(CT[x.k]||CT.knob)(X,Y);s+=`<text x="${X}" y="${Y+26}" font-size="8" text-anchor="middle" fill="#E8E8E8">${esc(x.n.length>14?x.n.slice(0,13)+'…':x.n)}</text>`+badge(X-14,Y-14,i)});
+ // a roomy grid: 4 controls per row, labels wrapped onto two lines so nothing overlaps
+ const per=c.length<=6?3:4,rows=Math.ceil(c.length/per),W=320,CW=W/per,RH=86,H=rows*RH+(amp?30:18);
+ const wrap=t=>{const w=String(t).split(/\s+/),L=[''];const max=per===3?16:13;w.forEach(x=>{const cur=L[L.length-1];if(!cur)L[L.length-1]=x;else if((cur+' '+x).length<=max)L[L.length-1]=cur+' '+x;else L.push(x)});
+  if(L.length>3){L.length=3;L[2]=L[2].length>max-1?L[2].slice(0,max-1)+"…":L[2]+"…"}return L.map(x=>x.length>max?x.slice(0,max-1)+'…':x)};
+ let s=`<rect x="2" y="2" width="${W-4}" height="${H-4}" rx="12" fill="${amp?'#232323':'#2E3532'}" stroke="${amp?'#C9A227':'#6B7570'}" stroke-width="2"/>`;
+ if(amp)s+=`<rect x="14" y="${H-16}" width="${W-28}" height="5" rx="2.5" fill="#C9A227" opacity=".35"/>`;
+ c.forEach((x,i)=>{const r=Math.floor(i/per),col=i%per,n=Math.min(per,c.length-r*per),X=(W-n*CW)/2+CW*(col+.5),Y=34+r*RH;
+  s+=(CT[x.k]||CT.knob)(X,Y);
+  wrap(x.n).forEach((ln,j)=>{s+=`<text x="${X}" y="${Y+27+j*11}" font-size="9.5" text-anchor="middle" fill="#E8E8E8">${esc(ln)}</text>`});
+  s+=badge(X-21,Y-12,i,8)});
  return `<svg viewBox="0 0 ${W} ${H}" class="ctlsvg">${s}</svg>`;
 }
 function controlsHTML(it){
