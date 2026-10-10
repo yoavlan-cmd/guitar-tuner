@@ -1428,7 +1428,7 @@ let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=nul
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
+function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
@@ -2912,6 +2912,7 @@ function renderGear(){
  const l=instAll();
  if(instEdit){renderInstForm();return}
  if(instOpen){const it=l.find(x=>x.id===instOpen);if(it){renderInstDetail(it);return}instOpen=null}
+ gearVisit=null;
  $('gearOut').innerHTML=`<section class="card"><div class="cardhead"><h2>My gear</h2><button class="btn" id="instAdd" type="button">+ Add gear</button></div>
  ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">${GEAR[it.type].amp?'🔊':'🎸'}</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
  :'<p class="tip">Add the guitars and amps you own: give each one a name, its brand and model, and get advice for that exact piece of gear. They stay here until you remove them.</p>'}</section>`;
@@ -3251,7 +3252,9 @@ Reply with only JSON: {"note": string or null, "controls": [{"name": string, "ki
    if(!list.length)throw new Error('none');const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.controls=list;x.controlsNote=r.note||'';store.set('instruments',l)}it.controls=list;renderGear()}
   catch(e){ask.disabled=false;$('ctlMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get the controls this time. Try again.'}};
 }
+let gearVisit=null;// which item's page is showing; a fresh visit starts with every section closed
 function renderInstDetail(it){
+ const keepOpen=gearVisit===it.id?[...$('gearOut').querySelectorAll('details')].map(d=>d.open):null;
  const a=instAdvice(it),g=GEAR[it.type],st=stringsStatus(it),L=x=>`<ul>${x.map(y=>`<li>${esc(y)}</li>`).join('')}</ul>`;
  const specTxt=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean);
  const ai=it.ai;
@@ -3284,6 +3287,7 @@ function renderInstDetail(it){
  $('iDelY').onclick=()=>{instSave(instAll().filter(x=>x.id!==it.id));instOpen=null;renderGear()};
  if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
  renderGearChat(it);wireControls(it);
+ const ds=[...$('gearOut').querySelectorAll('details')];ds.forEach((d,i)=>{d.open=!!(keepOpen&&keepOpen.length===ds.length&&keepOpen[i])});gearVisit=it.id;
 }
 
 /* ---- song ideas: scan the songs folder, then ask Claude for songs that fit the style, bands and level ---- */
