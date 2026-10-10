@@ -1,5 +1,5 @@
 // Offline support for the tuner. Bump VERSION whenever index.html changes.
-const VERSION = 'tuner-v49';
+const VERSION = 'tuner-v50';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -30,6 +30,9 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
+
+  // The daily song ideas always come straight from the server.
+  if (url.origin === self.location.origin && url.pathname.endsWith('/ideas.json')) return;
 
   // Fonts and app files: serve the saved copy, refresh it in the background.
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'cdn.jsdelivr.net';

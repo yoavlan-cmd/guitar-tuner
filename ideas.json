@@ -1,0 +1,331 @@
+{
+ "v": 1,
+ "at": "2026-10-10T19:44:27Z",
+ "date": "2026-10-10",
+ "index": {
+  "artists": [
+   "Amir dadon",
+   "Rockfour",
+   "Ivri lider",
+   "RHCP",
+   "jack johnson",
+   "nirvana",
+   "Foo"
+  ],
+  "songs": [
+   {
+    "a": "Amir dadon",
+    "t": "גלים",
+    "ch": [
+     "Eb",
+     "Eb/F",
+     "Ab",
+     "C/D"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "אור גדול",
+    "ch": [
+     "Eb",
+     "Ab",
+     "Cm",
+     "Bb4",
+     "Gm",
+     "Fm7",
+     "F4"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "חלל",
+    "ch": [
+     "Bmaj7",
+     "E",
+     "Abm",
+     "Emaj7",
+     "F#m",
+     "Ebm"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "צבעים",
+    "ch": [
+     "Em",
+     "Cmaj7",
+     "C",
+     "Bm",
+     "D"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "מחוספס",
+    "ch": [
+     "Bb",
+     "Fm",
+     "C#m",
+     "Eb",
+     "F#m",
+     "Ab",
+     "Bbm",
+     "Ebm"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "שאריות של החיים",
+    "ch": []
+   },
+   {
+    "a": "Rockfour",
+    "t": "הכעס",
+    "ch": [
+     "Dm",
+     "Bb",
+     "Am",
+     "Eb",
+     "G",
+     "C",
+     "F#m",
+     "D",
+     "A"
+    ]
+   },
+   {
+    "a": "Rockfour",
+    "t": "שוב לא שקט",
+    "ch": [
+     "E",
+     "F",
+     "D",
+     "G",
+     "C",
+     "Em"
+    ]
+   },
+   {
+    "a": "Ivri lider",
+    "t": "ביום שמש יפה",
+    "ch": [
+     "G/B",
+     "Am",
+     "F",
+     "C",
+     "Dm7",
+     "Dm",
+     "Eb",
+     "Bb",
+     "Cm",
+     "Ddim"
+    ],
+    "capo": 1
+   },
+   {
+    "a": "RHCP",
+    "t": "My friends",
+    "ch": [
+     "Dsus2",
+     "Dm7",
+     "Dm7/F",
+     "G/B",
+     "G",
+     "G/F",
+     "C",
+     "D",
+     "Asus2",
+     "F#add9",
+     "A",
+     "A/B",
+     "D/F#"
+    ],
+    "tuning": "Drop D"
+   },
+   {
+    "a": "Foo",
+    "t": "My Hero - acoustic",
+    "ch": []
+   }
+  ]
+ },
+ "level": "Solid intermediate: you already play barre chords in flat keys (Eb, Ab, Bbm), maj7 colours and Drop D, mostly Israeli rock plus 90s alternative.",
+ "suggestions": [
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 4,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Drop D",
+   "why": "Same Drop D tuning as My Friends, and a step up from My Hero: fast picking with ringing open strings."
+  },
+  {
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 3,
+   "chords": [
+    "D5",
+    "F#5",
+    "B5",
+    "G5",
+    "A#5",
+    "C5",
+    "A5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fills your empty Nirvana folder; all power chords, so it’s about moving shapes fast and clean."
+  },
+  {
+   "title": "Come As You Are",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "D",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A famous riff you can learn in one evening, with simple chords for the chorus."
+  },
+  {
+   "title": "Scar Tissue",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Funk rock",
+   "difficulty": 3,
+   "chords": [
+    "F",
+    "C",
+    "Dm",
+    "Am",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More RHCP after My Friends; the new skill is the slide riff played with two-note shapes."
+  },
+  {
+   "title": "Otherside",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Funk rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Easy chords you already know, plus a catchy picked intro riff."
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "style": "Acoustic",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A first song for your empty Jack Johnson folder: relaxed strumming with a muted groove."
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Classic Israeli rock with a driving rhythm, in the spirit of Rockfour."
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An emotional ballad like Ivri Lider’s songs, great for singing and strumming."
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A rock classic with strong riffs, a natural next step after Amir Dadon’s rockier songs."
+  },
+  {
+   "title": "אני ואתה",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 1,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy singalong for relaxed evenings, a break from the harder flat-key songs."
+  }
+ ],
+ "history": [
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "Come As You Are",
+   "artist": "Nirvana",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "Scar Tissue",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "Otherside",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "date": "2026-10-10"
+  },
+  {
+   "title": "אני ואתה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-10"
+  }
+ ]
+}
