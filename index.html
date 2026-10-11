@@ -1320,7 +1320,7 @@ function loop(){
  if(autoStopCheck(now,rms,gate,r,clear))return;
  if(window.__tlog)window.__tlog.push([now|0,+rms.toFixed(4),+gate.toFixed(4),r&&+r.f.toFixed(2),r&&+r.clarity.toFixed(3)]);
  // the pick attack is briefly sharp and harmonic-heavy: skip the first moments of a new pluck
- envS=envS==null?rms:envS*.94+rms*.06;if(rms>=gate&&rms>envS*2.2){onsetAt=now;notePeak=rms}notePeak=Math.max(notePeak*.9995,rms);
+ envS=envS==null?rms:envS*.94+rms*.06;if(rms>=gate&&rms>envS*2.2){onsetAt=now;notePeak=rms}notePeak=Math.max(notePeak*.993,rms);
  if(clear&&now-onsetAt>=110)hist.push({f:octaveFix(r.f,now),t:now,q:r.clarity});
  hist=hist.filter(h=>now-h.t<300).slice(-6);
  let med=0,agree=0;
@@ -1336,7 +1336,7 @@ function loop(){
   // smooth small wobbles, follow real peg turns quickly
   // steady reading: median of the last ~0.45 s, then a slow glide for tiny wobbles; real peg turns still follow fast
   // a fading or noisy note (low clarity) scatters by ±10¢: keep showing the last good reading instead of chasing it
-  const good=(hist[hist.length-1]||{}).q>=.93&&rms>notePeak*.12;
+  const good=(hist[hist.length-1]||{}).q>=.93&&rms>notePeak*.04&&rms>gate*2.5;
   if(!good&&lastCents!=null&&cStr===i)cents=lastCents;
   else{
    if(cStr!==i)cHist=[];cStr=i;cHist.push({t:now,c:cents});cHist=cHist.filter(x=>now-x.t<280);
