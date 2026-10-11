@@ -2641,6 +2641,32 @@ function metaFromLines(r){
   if(!meta)keep.push(L)}
  r.lines=keep;return found;
 }
+// song name + artist when the sheet doesn't spell them out as "אקורדים לשיר X של Y": the PDF's own title/file name, then the big heading at the top, then (if available) Claude on those few heading lines only
+function knownArtistNames(){const ix=store.get('songIndex',null);return [...new Set([...(ix&&ix.artists||[]),...(ix&&ix.songs||[]).map(x=>x.a),...knownArtists()].filter(Boolean))]}
+function splitTitle(str){let t=String(str||'').replace(/[‎‏‪-‮]/g,'').replace(/\.(pdf|png|jpe?g)$/i,'').replace(/\s*[|·]\s*(tab4u|ultimate[- ]guitar|nagenu|guitarist).*$/i,'').replace(/\b(tab4u|chords|tabs?)\b/gi,'').replace(/אקורדים(?:\s+ל?שיר)?|מילים\s+ואקורדים|טאבים/g,'').replace(/\s+/g,' ').trim();
+ if(!t||/^screenshot|^img[_-]|^\d+$/i.test(t))return null;
+ let m=t.match(/^(.+?)\s+(?:של|מאת|by)\s+(.+)$/i);if(m)return {title:m[1].trim(),artist:m[2].trim()};
+ const parts=t.split(/\s+[-–—]\s+|\s*[-–—]\s*(?=\S)/).map(x=>x.trim()).filter(Boolean);
+ if(parts.length>=2){const known=knownArtistNames().map(normArt),isA=x=>known.some(k=>k&&(normArt(x)===k||normArt(x).includes(k)||k.includes(normArt(x))));
+  if(isA(parts[0])&&!isA(parts[1]))return {title:parts[1],artist:parts[0]};return {title:parts[0],artist:parts[1]}}
+ return {title:t,artist:''}}
+async function guessTitle(r){
+ if(r.title&&r.artist)return '';
+ // 1) the big heading above the first chords
+ const head=[];for(const L of r.lines){if(L.type==='chords'||L.ch||(L.type==='lyrics'&&/\[/.test(L.text)))break;if(L.type==='lyrics')head.push(L);if(head.length>=6)break}
+ const lyrH=r.lines.filter(L=>L.ch&&L.h).map(L=>L.h).sort((a,b)=>a-b),med=lyrH[Math.floor(lyrH.length/2)]||0;
+ const big=head.filter(L=>med&&(L.h||0)>=med*1.15).sort((a,b)=>(b.h||0)-(a.h||0));let used=[];
+ if(!r.title&&big[0]){const g=splitTitle(big[0].text);if(g){r.title=g.title;if(!r.artist&&g.artist)r.artist=g.artist;used.push(big[0])}}
+ if(r.title&&!r.artist){const c=head.find(L=>!used.includes(L)&&/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i.test(L.text))||big.find(L=>!used.includes(L));if(c){r.artist=c.text.replace(/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i,'').trim();used.push(c)}}
+ // 2) the PDF's own title / file name (Chrome's "Save as PDF" uses the page title)
+ for(const n of (r._names||[])){if(r.title&&r.artist)break;if(!n||/\.(html?|php|aspx?)\b|https?:|\/|^document$|^untitled/i.test(n))continue;const g=splitTitle(n);if(g&&g.title){if(!r.title)r.title=g.title;if(!r.artist&&g.artist&&normArt(g.artist)!==normArt(r.title))r.artist=g.artist}}
+ // 3) Claude, shown only those few heading lines
+ if((!r.title||!r.artist)&&sampleFn&&(head.length||(r._names||[]).some(Boolean))){try{const q=head.map(L=>L.text).concat(r._names||[]).filter(Boolean).slice(0,10).join('\n').slice(0,600);
+   const j=await sampleFn.json(`These are the heading lines at the top of a song's chord sheet (no lyrics). Which is the song's name and which is the artist? Lines:\n${q}\nReply with JSON: {"title": string or "", "artist": string or "", "lines": [the exact heading lines that are only the title/artist/site name, to remove]}`,{maxTokens:300});
+   if(j){if(!r.title&&j.title)r.title=String(j.title).trim();if(!r.artist&&j.artist)r.artist=String(j.artist).trim();const rm=new Set((j.lines||[]).map(String));head.forEach(L=>{if(rm.has(L.text))used.push(L)})}}catch(e){}}
+ if(used.length)r.lines=r.lines.filter(L=>!used.includes(L));
+ return r.title&&r.artist?'song name and artist':r.title?'song name':'';
+}
 function sheetFromShot(r){
  r.lines=mergeChordRows(r.lines||[]);
  const a=newWritten();a.title=String(r.title||'').trim();a.artist=String(r.artist||'').trim();a.play.tun=tunFromName(r.tuning);a.play.capo=Math.max(0,Math.min(12,parseInt(r.capo)||0));
@@ -2711,7 +2737,7 @@ async function ocrImageWords(src){
 // PDF text with positions (no reading errors: the text is in the file)
 async function pdfWords(file,onP){
  try{await loadScript(PDF_JS)}catch(e){throw {code:'pdf_load'}}const lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc=PDF_WORKER;
- const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise,pages=[];
+ const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise,pages=[];try{const md=await doc.getMetadata();pages.docTitle=String(md&&md.info&&md.info.Title||'')}catch(e){}
  for(let n=1;n<=Math.min(doc.numPages,8);n++){onP&&onP(`Reading page ${n} of ${doc.numPages}…`);const pg=await doc.getPage(n),vp=pg.getViewport({scale:1}),tc=await pg.getTextContent(),out=[];
   for(const it of tc.items){const str=String(it.str||'');if(!str.trim())continue;const [a,,,dd,e,f]=it.transform,h=Math.abs(dd)||Math.abs(a)||10,w=it.width||str.length*h*.5,y=vp.height-f-h/2;
    const rtl=it.dir==='rtl'||hasHeb(str),total=str.length||1;let pos=0;
@@ -2759,9 +2785,9 @@ function wordsToLines(input,img){
      if(beyondEnd){tail.push(ch.c);continue}if(beforeStart)j=0;else{let best=1e9;L.forEach((w,k)=>{const d=Math.min(Math.abs(ch.cx-w.x0),Math.abs(ch.cx-w.x1));if(d<best){best=d;j=k}})}}
     marks[j].push(ch.c)}
    const text=L.map((w,k)=>marks[k].map(c=>`[${c}]`).join('')+w.s).join(' ')+(tail.length?' '+tail.map(c=>`[${c}]`).join(' '):'');
-   out.push({type:'lyrics',text,img,yr:input.H?r.y/input.H:null});prevY=nx.y;i++;continue}
+   out.push({type:'lyrics',text,img,yr:input.H?r.y/input.H:null,h:L.reduce((a,x)=>a+x.h,0)/L.length,ch:1});prevY=nx.y;i++;continue}
   if(r.chord){const cs=r.cs.slice().sort((a,b)=>a.cx-b.cx).map(x=>x.c);out.push({type:'chords',chords:cs,img});continue}
-  out.push({type:'lyrics',text:r.w.map(x=>x.s).join(' '),img,yr:input.H?r.y/input.H:null})}
+  out.push({type:'lyrics',text:r.w.map(x=>x.s).join(' '),img,yr:input.H?r.y/input.H:null,h:r.w.reduce((a,x)=>a+x.h,0)/r.w.length})}
  return out;
 }
 // overlap check that tolerates small reading differences
@@ -2824,7 +2850,7 @@ async function shotRead(){
  const card=$('shotCard'),stage=shotStage.slice(),n=stage.length;if(!n)return;
   const say=t=>{card.innerHTML=`<div class="shotthumbs">${stage.map(x=>x.pdf?`<span class="badge">PDF · ${esc(x.name||'')}</span>`:`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">📖 ${t}</p>`};
  try{const r={title:'',artist:'',capo:0,tuning:'Standard',note:'',lines:[]};
-  if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)))}
+  if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)));r._names=[pages.docTitle,String(stage[0].name||'').replace(/\.pdf$/i,'')]}
   else{say('Getting the reader ready…');await ocrSheetReady(say);
    for(let k=0;k<stage.length;k++){say(`Reading screenshot ${k+1} of ${stage.length} on your phone…`);const w=await ocrImageWords(stage[k].big);r.lines.push(...wordsToLines(w,k+1))}}
   if(stage.length>1){const key=L=>String(L.text||'').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();const seen={};
@@ -2833,8 +2859,8 @@ async function shotRead(){
     const ys=list.map(x=>x.yr);if(Math.max(...ys)-Math.min(...ys)<.035)list.forEach(x=>sticky.add(x))});
    r.lines=r.lines.filter(L=>!sticky.has(L))}
   if(!r.lines.some(L=>L.type==='lyrics'||L.type==='chords'))throw {code:'empty'};
-  const lowConf=!stage[0].pdf;const meta=metaFromLines(r);
-  r.note=(meta.length?`Filled in from the sheet: ${meta.join(', ')}. `:'No capo or tuning was written on the sheet, so fill those in if needed. ')+(lowConf?'Read from the picture, so a few letters or chords may be misread; compare with the screenshot.':'');
+  const lowConf=!stage[0].pdf;const meta=metaFromLines(r);if(!r.title||!r.artist){say('Finding the song name and artist…');const g=await guessTitle(r);if(g&&!meta.includes('song name and artist'))meta.unshift(g)}
+  r.note=(meta.length?`Filled in from the sheet: ${meta.join(', ')}. `:'')+(r._capo||r._tun?'':'No capo or tuning was written on the sheet, so fill those in if needed. ')+(r.title&&r.artist?'':'Add the song name and artist at the top. ')+(lowConf?'Read from the picture, so a few letters or chords may be misread; compare with the screenshot.':'');
   r.lines=dropOverlaps(r.lines.filter(Boolean));
   const a=sheetFromShot(r);if(!a.lc.some(L=>L.t.trim()))throw {code:'empty'};
   a.fromImport=true;a.shots=stage.filter(x=>!x.pdf).map(x=>x.small);shotBigMem=stage.filter(x=>!x.pdf).map(x=>x.big);shotStage=[];shotManual=false;card.hidden=true;card.innerHTML='';
