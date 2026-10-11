@@ -1267,9 +1267,12 @@ let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=n
 function octaveFix(f,now){
  if(locked!=null)return f;
  const off=x=>Math.min(...tuning.n.map(m=>Math.abs(1200*Math.log2(x/fq(m)))));
- const d=off(f);if(d<=25)return f;
- if(lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<60)return f/k}
- if(d>45)for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
+ // a string that's merely out of tune (up to a semitone either way) is never re-read as another string's overtone:
+ // the high E is exactly 2 octaves above the low E, so a flat high E used to be shown as the low E
+ const d=off(f);if(d<=100)return f;
+ // only for readings far from every string: a high string that's merely out of tune (E4 = 4 × low E) must stay itself
+ if(d>60&&lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<40)return f/k}
+ for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
  return f}
 function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
 /* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off.
@@ -1314,7 +1317,9 @@ function loop(){
  // look for a pitch whenever there is any sound at all
  let r=null;if(rms>=.0015){const [lo,hi]=searchRange();r=detect(data,ctx.sampleRate,lo,hi)}
  // learn the room's background level only from moments with no clear note, so a ringing string never raises it
- if(!r||r.clarity<.6){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+rms*.015)}
+ // …and never while a plucked string is still ringing (re-plucking, other strings ringing along), and only slowly upwards,
+ // or steady tuning would teach it that the guitar is the background and it would stop hearing the strings
+ if((!r||r.clarity<.6)&&(floor==null||now-onsetAt>1800)){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+Math.min(rms,floor*1.5)*.015)}
  const gate=Math.max(.002,(floor??0)*cfg.gate);meter(rms,gate);
  const clear=r&&r.clarity>=cfg.clar&&rms>=gate;
  if(autoStopCheck(now,rms,gate,r,clear))return;
