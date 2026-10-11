@@ -1260,7 +1260,7 @@ function idle(now){
  hist=[];needleGoal=0;$('screen').classList.remove('ok','locked');setFine(null);$('hz').textContent='—';$('cents').textContent='—';okSince=0;
  const st=$('status');st.className='status';st.textContent=locked!=null?`Play string ${6-locked} (${nm(tuning.n[locked])})`:'Play any string';showTarget();
 }
-let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
+let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,rawC=[],lastGoodAt=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
 // phone mics barely pick up a low string's fundamental, so the tuner can lock onto its 2nd/3rd harmonic
 // (an in-tune A2 read as A3 = "way too high"). In automatic mode, if a reading is far from every string but
 // half/a third of it lands on a string, or it's an exact multiple of the string just played, use that instead.
@@ -1321,7 +1321,8 @@ function loop(){
  // or steady tuning would teach it that the guitar is the background and it would stop hearing the strings
  if((!r||r.clarity<.6)&&(floor==null||now-onsetAt>1800)){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+Math.min(rms,floor*1.5)*.015)}
  const gate=Math.max(.002,(floor??0)*cfg.gate);meter(rms,gate);
- const clear=r&&r.clarity>=cfg.clar&&rms>=gate;
+ // a very clean pitch counts even when it's quieter than the noise gate: a thin high E is soft on a phone mic, room noise is never this clean
+ const clear=r&&r.clarity>=cfg.clar&&(rms>=gate||(r.clarity>=.95&&rms>=Math.max(.0012,gate*.35)));
  if(autoStopCheck(now,rms,gate,r,clear))return;
  if(window.__tlog)window.__tlog.push([now|0,+rms.toFixed(4),+gate.toFixed(4),r&&+r.f.toFixed(2),r&&+r.clarity.toFixed(3)]);
  // the pick attack is briefly sharp and harmonic-heavy: skip the first moments of a new pluck
@@ -1341,7 +1342,12 @@ function loop(){
   // smooth small wobbles, follow real peg turns quickly
   // steady reading: median of the last ~0.45 s, then a slow glide for tiny wobbles; real peg turns still follow fast
   // a fading or noisy note (low clarity) scatters by ±10¢: keep showing the last good reading instead of chasing it
-  const good=(hist[hist.length-1]||{}).q>=.93&&rms>notePeak*.04&&rms>gate*2.5;
+  // hold the last steady reading only while the note is noisy (low clarity), and never for long: the moment
+  // three readings in a row agree, they win. A quiet string (thin high E on a phone mic) must still move the needle.
+  rawC.push({t:now,c:cents});rawC=rawC.filter(x=>now-x.t<400);
+  const q=(hist[hist.length-1]||{}).q||0,agree=rawC.length>=3&&Math.max(...rawC.map(x=>x.c))-Math.min(...rawC.map(x=>x.c))<3;
+  const good=(q>=.93&&rms>gate*2.5)||(agree&&rms>gate*1.5);
+  if(good)lastGoodAt=now;
   if(!good&&lastCents!=null&&cStr===i)cents=lastCents;
   else{
    if(cStr!==i)cHist=[];cStr=i;cHist.push({t:now,c:cents});cHist=cHist.filter(x=>now-x.t<280);
@@ -1367,12 +1373,12 @@ function loop(){
   else{okSince=0;zoneStr=null;scr.classList.remove('ok','locked');setHeadState(cents<0?'flat':'sharp');
    const c=Math.abs(shownC??Math.round(ac)),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
    let hint='';if(!far&&trend.length>4&&now-trend[0].t>450){const d=trend[0].c-ac;if(d>1.5)hint=' · closer';else if(d<-1.5)hint=' · wrong way'}
-   st.textContent=cents<0?(far?'Way too low · tune up ↑':`Tune up ↑ · ${c}¢${hint}`):(far?'Way too high · tune down ↓':`Tune down ↓ · ${c}¢${hint}`)}
+   st.textContent=cents<0?(far?`Too low · tune up ↑ · ${c}¢ (${nm(heard)} → ${nm(m)})`:`Tune up ↑ · ${c}¢${hint}`):(far?`Too high · tune down ↓ · ${c}¢ (${nm(heard)} → ${nm(m)})`:`Tune down ↓ · ${c}¢${hint}`)}
  }else if(now<holdUntil){
   // keep the last reading on screen briefly after the note fades, like a clip-on tuner
   $('screen').classList.add('hold');
  }else{
-  lastCents=null;trend=[];cHist=[];shownC=null;$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
+  lastCents=null;trend=[];cHist=[];rawC=[];shownC=null;$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
   if(rms>=gate&&r){st.className='status';st.textContent='Pluck one string'}
   else idle(now);
  }
