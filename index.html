@@ -1193,22 +1193,40 @@ function octaveFix(f,now){
  if(d>45)for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
  return f}
 function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
-/* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off */
-let playLog=[],lastLoud=0,listenStart=0,lastPlayCheck=0,quietLvl=null;
+/* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off.
+   Only guitar-like sound counts: plucked attacks + a spectrum made of clear note peaks. Wind, traffic and people
+   talking are loud and pitch-less too, but they don't have that shape. */
+let playLog=[],lastLoud=0,listenStart=0,lastPlayCheck=0,quietLvl=null,envF=0,envSl=0,lastOn=0,playHits=0,spec=null;
+function tonalPeaks(f0){
+ if(!spec||spec.length!==analyser.frequencyBinCount)spec=new Float32Array(analyser.frequencyBinCount);
+ analyser.getFloatFrequencyData(spec);const bw=ctx.sampleRate/analyser.fftSize,k0=Math.ceil(70/bw),k1=Math.floor(1100/bw);
+ const band=Array.from(spec.subarray(k0,k1+1)).filter(isFinite);if(band.length<10)return {n:0,frac:0};
+ const med=band.slice().sort((x,y)=>x-y)[band.length>>1];let n=0,pk=0,tot=0,off=0;
+ for(let k=k0;k<=k1;k++){const p=Math.pow(10,spec[k]/10);tot+=p;
+  if(spec[k]>=med+12&&spec[k]>=spec[k-1]&&spec[k]>=spec[k+1]&&spec[k]>=spec[k-2]&&spec[k]>=spec[k+2]){n++;for(let j=-1;j<=1;j++)pk+=Math.pow(10,spec[k+j]/10);
+   // a peak that isn't a harmonic of the note we hear = a second note sounding = a chord
+   if(f0){const h=k*bw/f0,dh=Math.abs(h-Math.round(h));if(h>.8&&dh*f0>Math.max(bw*1.2,f0*.04))off++}}}
+ return {n,frac:tot?pk/tot:0,off}}
 function autoStopCheck(now,rms,gate,r,clear){
  // the room's quiet level: follows dips at once, creeps up slowly (constant strumming must not become "the room")
  quietLvl=quietLvl==null||rms<quietLvl?Math.max(rms,.0004):quietLvl*1.0004;
  const loud=rms>=Math.max(.003,quietLvl*4);if(loud)lastLoud=now;
- playLog.push({t:now,loud,chord:loud&&(!r||r.clarity<.72),semi:clear?Math.round(12*Math.log2(r.f/a4)):null});
+ envF=envF*.55+rms*.45;envSl=envSl*.97+rms*.03;
+ const onset=loud&&envF>envSl*1.9&&now-lastOn>140;if(onset)lastOn=now;
+ let chord=false;if(loud&&(playLog.length&1)){const unclear=!r||r.clarity<.75,t=tonalPeaks(unclear?0:r.f);chord=unclear?t.n>=5&&t.frac>=.65:t.off>=2&&t.frac>=.65;if(window.__alog)window.__alog.push([now|0,t.n,t.off,+t.frac.toFixed(2)])}
+ playLog.push({t:now,loud,chord,onset,semi:clear?Math.round(12*Math.log2(r.f/a4)):null});
  while(playLog.length&&playLog[0].t<now-5000)playLog.shift();
  if(now-lastPlayCheck<250)return false;lastPlayCheck=now;
- if(now-lastLoud>10000){stopListening('quiet');return true}
- if(now-listenStart<5000)return false;
- const n=playLog.length,loudN=playLog.filter(x=>x.loud).length,chordN=playLog.filter(x=>x.chord).length;
- // notes that last at least ~3 frames, with repeats merged
- const seq=[];let run=null,len=0;for(const x of playLog){if(x.semi==null)continue;if(x.semi===run)len++;else{run=x.semi;len=1}if(len===3&&seq[seq.length-1]!==run)seq.push(run)}
- const distinct=new Set(seq).size;
- if((loudN/n>=.6&&chordN/n>=.45)||(distinct>=4&&seq.length>=11)){stopListening('playing');return true}
+ // nothing guitar-like (no clear string note) for 12 s: background noise alone doesn't keep it on
+ if(now-Math.max(lastHeard,listenStart)>12000){stopListening('quiet');return true}
+ if(now-listenStart<4000)return false;
+ const n=playLog.length,loudN=playLog.filter(x=>x.loud).length,chordN=playLog.filter(x=>x.chord).length,ons=playLog.filter(x=>x.onset).length;
+ // notes held steady for ~130 ms (a voice glides, a fretted note doesn't), repeats merged
+ const seq=[];let run=null,len=0;for(const x of playLog){if(x.semi==null){run=null;continue}if(x.semi===run)len++;else{run=x.semi;len=1}if(len===8&&seq[seq.length-1]!==run)seq.push(run)}
+ const strum=loudN/n>=.5&&chordN/n>=.2&&ons>=7,tune=new Set(seq).size>=4&&seq.length>=9;
+ if(window.__plog)window.__plog.push([(now-listenStart)/1000|0,+(loudN/n).toFixed(2),+(chordN/n).toFixed(2),ons,seq.length,new Set(seq).size]);
+ playHits=strum||tune?playHits+1:0;
+ if(playHits>=6&&!window.__nostop){stopListening('playing');return true}
  return false}
 function loop(){
  raf=requestAnimationFrame(loop);analyser.getFloatTimeDomainData(data);
@@ -1284,7 +1302,7 @@ async function startListening(){
   const src=ctx.createMediaStreamSource(stream);let node=src;
   [['highpass',55],['highpass',55],['lowpass',1100],['lowpass',1100]].forEach(([type,f])=>{const bq=ctx.createBiquadFilter();bq.type=type;bq.frequency.value=f;bq.Q.value=0.707;node.connect(bq);node=bq});
   analyser=ctx.createAnalyser();analyser.fftSize=4096;data=new Float32Array(analyser.fftSize);node.connect(analyser);
-  floor=null;hist=[];playLog=[];quietLvl=null;lastLoud=listenStart=performance.now();
+  floor=null;hist=[];playLog=[];quietLvl=null;playHits=0;envF=envSl=0;lastLoud=listenStart=performance.now();
   listening=true;$('live').hidden=false;$('listen').classList.add('on');$('listenTxt').textContent='Stop';$('status').textContent=`Play string ${6-target}`;
   try{wake=await navigator.wakeLock.request('screen')}catch(e){}
   loop();
@@ -1293,7 +1311,7 @@ async function startListening(){
  }
 }
 function stopListening(why){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
- $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent=why==='playing'?'Sounds like you’re playing · Listen off':why==='quiet'?'Quiet for a while · Listen off':'Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
+ $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent=why==='playing'?'Sounds like you’re playing · Listen off':why==='quiet'?'No string heard for a while · Listen off':'Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
 $('listen').onclick=()=>listening?stopListening():startListening();
 
 /* ================= Learn a song ================= */
@@ -3371,18 +3389,45 @@ const JOKES=[
  "The strings are fresh, the coffee is hot and the excuses are out of stock, {n}.",
  "The neighbour's dog has started howling in key. That's progress, {n}.",
  "Keith Richards is still touring. What's your excuse, {n}?",
- "Legend says if you play “Wonderwall” perfectly, a man in a bucket hat appears. Try it, {n}."
+ "Legend says if you play “Wonderwall” perfectly, a man in a bucket hat appears. Try it, {n}.",
+ "Your guitar just filed a missing-person report, {n}. Last seen: you, three days ago.",
+ "Fun fact, {n}: the G string is not a fashion statement. Tune it.",
+ "Studies show 100% of songs sound better in tune. The study was me, {n}. Tap Listen.",
+ "Your F barre chord has been buzzing since 2019, {n}. Today's the day.",
+ "Your amp misses you, {n}. It's been humming to itself just to stay busy.",
+ "Spotify Wrapped will never know you played “Knockin' on Heaven's Door” 400 times. I will, {n}.",
+ "Breaking: local guitarist {n} discovers there are more than four chords. Markets react calmly.",
+ "The metronome isn't judging you, {n}. Okay, it is. Practise anyway.",
+ "Berry Sakharof makes it look effortless. That's because he practised while you were scrolling, {n}.",
+ "Your picks have a group chat, {n}. They're planning an escape under the couch.",
+ "Somewhere in Tel Aviv a busker is getting better while you read this, {n}.",
+ "The capo is not a cheat code, {n}. Okay, it kind of is. Use it.",
+ "Your calluses are filing for unemployment, {n}. Give them some work.",
+ "B minor called. It knows you've been avoiding it, {n}.",
+ "Strings are like milk, {n}: they expire. When did you last change yours?",
+ "Mark Knopfler plays without a pick. You play without practising. Only one of those is a style, {n}.",
+ "The neighbours stopped complaining, {n}. Either it's respect or they moved.",
+ "One more “Wonderwall” and Oasis reunite just to stop you. Learn something new today, {n}.",
+ "Shalom Hanoch has been rocking for 50 years. You can manage 15 minutes, {n}.",
+ "Your strumming hand has rhythm, {n}. Your fretting hand is still negotiating.",
+ "Ehud Banai has a song for every mood. Pick one and learn it, {n}.",
+ "Your guitar is the only thing in the house that gets better when used, {n}. Unlike the couch."
 ];
 function welcomeName(){return store.get('userName','')}
-function pickJoke(){const last=store.get('lastJoke',-1);let i;do{i=Math.floor(Math.random()*JOKES.length)}while(JOKES.length>1&&i===last);store.set('lastJoke',i);return i}
+// new jokes arrive every couple of days with the daily ideas file; a fresh one is shown first, once
+function allJokes(){const ex=(store.get('jokesExtra',[])||[]).map(x=>x&&x.text).filter(t=>t&&/\{n\}/.test(t));return [...new Set([...JOKES,...ex])]}
+function pickJoke(){const pool=allJokes(),seen=new Set(store.get('jokesSeen',[])),last=store.get('lastJokeTxt','');
+ const fresh=(store.get('jokesExtra',[])||[]).slice().reverse().map(x=>x&&x.text).find(t=>t&&/\{n\}/.test(t)&&!seen.has(t));
+ let j=fresh;if(!j){do{j=pool[Math.floor(Math.random()*pool.length)]}while(pool.length>1&&j===last)}
+ seen.add(j);store.set('jokesSeen',[...seen].slice(-200));store.set('lastJokeTxt',j);return j}
 function renderWelcome(){
  const n=welcomeName(),w=$('welcome');
  if(!n){w.querySelector('.wbody').innerHTML=`<h2>Welcome to Guitaring</h2><p>What should we call you?</p><form id="wName" class="wnameform"><input id="wNameIn" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" placeholder="Your first name" required><button class="btn cta">Let's go</button></form>`;
   $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);try{syncDriveLinks()}catch(err){}renderWelcome()};return}
- const j=JOKES[pickJoke()].replace(/\{n\}/g,esc(n));
+ const j=esc(pickJoke()).replace(/\{n\}/g,esc(n));
  w.querySelector('.wbody').innerHTML=`<p class="whey">Hey, <button type="button" class="wname" id="wRename" title="Change name">${esc(n)}</button>.</p><p class="wjoke" id="wJoke">${j}</p><button type="button" class="wmore" id="wMore">Another one ↻</button>
  <div class="wgo"><button class="btn" data-go="tune">Tune up</button><button class="btn" data-go="song">Learn a song</button><button class="btn" data-go="write">Write a song</button><button class="btn" data-go="gear">My gear</button></div>`;
- $('wMore').onclick=()=>{$('wJoke').innerHTML=JOKES[pickJoke()].replace(/\{n\}/g,esc(n))};
+ $('wMore').onclick=()=>{$('wJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(n))};
  $('wRename').onclick=()=>{store.set('userName','');renderWelcome()};
 }
 function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'||go==='song'){setTab('song');songsHome();if(go==='write'){const t=$('shotNew');if(t&&!t.hidden){setTimeout(()=>{t.scrollIntoView({behavior:'smooth',block:'center'});['shotNew','writeNew','draftCard'].forEach(k=>{const e=$(k);if(e&&!e.hidden){e.classList.add('pulse');setTimeout(()=>e.classList.remove('pulse'),1600)}})},80)}}}else if(go)setTab(go)}
@@ -4024,6 +4069,7 @@ async function loadDailyIdeas(force){
  if(window.claude||location.protocol==='file:'&&!force)return;if(!force&&Date.now()-dailyAt<3*3600e3)return;dailyAt=Date.now();
  try{const r=await fetch('ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
   if(Array.isArray(d.sheets)){store.set('sheetIndex',d.sheets);try{renderCatalog()}catch(e){}}
+  if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
   store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
   const cur=store.get('ideas',null),at=Date.parse(d.at)||0,no=new Set(store.get('ideaNo',[]));
   if(!cur||(cur.src==='daily'&&cur.date!==d.date)||(cur.src!=='daily'&&at>cur.at))store.set('ideas',{at,src:'daily',date:d.date,level:d.level||'',list:(d.suggestions||[]).filter(s=>!no.has(s.artist+' – '+s.title)&&!onItList().some(x=>onItKey(x)===onItKey(s)))});

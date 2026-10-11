@@ -4,6 +4,7 @@
   python3 ideas_build.py context            -> prints the current songs + recent suggestions (to avoid repeats)
   python3 ideas_build.py write INDEX SUGG [SHEETS] -> cleans, checks and writes ideas.json
   python3 ideas_build.py sheets SHEETS      -> only refreshes the list of Guitaring sheets in ideas.json
+  python3 ideas_build.py jokes JOKES        -> adds new welcome-screen jokes (JSON list of strings, each with {n} for his name)
 
 SHEETS: the Drive search results for  mimeType = 'application/pdf' and (fullText contains 'Guitaring' or fullText contains 'LYRICS & CHORDS' or fullText contains 'PROGRESSION')  (snippetVerbosity BRIEF),
         as a JSON list of {"title","viewUrl","createdTime","contentSnippet","folder" (artist folder name, optional)}
@@ -95,6 +96,13 @@ def context():
     for s in (cur.get('index') or {}).get('songs', []): print(f"  {s.get('a')} - {s.get('t')}")
     print('Suggested before (do not repeat):')
     for h in cur.get('history', [])[-150:]: print(f"  {h.get('artist')} - {h.get('title')}")
+    jk = cur.get('jokes', [])
+    last = cur.get('jokesDate') or ''
+    today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)).date()
+    due = not last or (today - datetime.date.fromisoformat(last)).days >= 2
+    print(f"Welcome jokes due today: {'YES' if due else 'no'} (last added {last or 'never'})")
+    print('Welcome jokes already in the app (do not repeat or rephrase):')
+    for j in BUILTIN_JOKES + [x.get('text', '') for x in jk]: print('  ' + j)
 
 def write(ip, sp, shp=None):
     raw = load(ip); sug = load(sp)
@@ -143,7 +151,8 @@ def write(ip, sp, shp=None):
     data = {'v': 1, 'at': now.isoformat(timespec='seconds').replace('+00:00', 'Z'), 'date': il,
             'index': {'artists': artists, 'songs': songs}, 'level': str(sug.get('level', ''))[:300],
             'suggestions': out[:12], 'history': hist,
-            'sheets': build_sheets(load(shp, [])) if shp else cur.get('sheets', [])}
+            'sheets': build_sheets(load(shp, [])) if shp else cur.get('sheets', []),
+            'jokes': cur.get('jokes', []), 'jokesDate': cur.get('jokesDate', '')}
     with open(OUT, 'w', encoding='utf-8') as f: json.dump(data, f, ensure_ascii=False, indent=1)
     print(f'Wrote ideas.json: {len(artists)} artists, {len(songs)} songs, {len(out[:12])} suggestions.')
 
@@ -153,8 +162,75 @@ def sheets_only(shp):
     with open(OUT, 'w', encoding='utf-8') as f: json.dump(cur, f, ensure_ascii=False, indent=1)
     print(f"Updated ideas.json: {len(cur['sheets'])} Guitaring sheets.")
 
+# the jokes built into the app, so new ones are never repeats
+BUILTIN_JOKES = '''Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.
+Metallica paused their world tour when they heard {n} started practising. They might be available soon.
+Breaking: guitar shops report a sudden shortage of picks. Sources point to {n}.
+Your neighbours asked for a set list, {n}. Mostly so they know when to leave.
+Slash heard about you, {n}. He's considering a second hat.
+Eric Clapton wrote “Tears in Heaven”. Your F chord wrote “Tears in the Living Room”. Let's fix that, {n}.
+The guitar has been waiting all day, {n}. It's not angry. Just out of tune.
+Rumour has it Mashina are looking for a stand-in. Warm up, {n}.
+Today's forecast: 90% chance of barre chords, light showers of G/B. Dress warmly, {n}.
+Jimi Hendrix set his guitar on fire. Please just tune yours, {n}.
+Fun fact: 10 minutes a day beats 2 hours on Saturday. Not-so-fun fact: you knew that, {n}.
+Your fingertips called, {n}. They want calluses, and they want them now.
+Pearl Jam's roadie asked if you're free next summer, {n}. Mostly to carry amps. But it's a start.
+Somewhere, a capo is lying in a drawer wondering what it did wrong, {n}.
+Aviv Gefen just sent a sad face emoji. He heard you skipped practice yesterday, {n}.
+Good news, {n}: every great guitarist once played like you. Bad news: they practised.
+Your guitar picked you, {n}. Return the favour.
+Radiohead wrote “Creep” in four chords. You know at least three. Let's go, {n}.
+Oasis broke up over less than a missed chord change. Stay together with your guitar, {n}.
+Statistically, 7 out of 10 cats leave the room when you play, {n}. The other 3 are fans.
+The strings are fresh, the coffee is hot and the excuses are out of stock, {n}.
+The neighbour's dog has started howling in key. That's progress, {n}.
+Keith Richards is still touring. What's your excuse, {n}?
+Legend says if you play “Wonderwall” perfectly, a man in a bucket hat appears. Try it, {n}.
+Your guitar just filed a missing-person report, {n}. Last seen: you, three days ago.
+Fun fact, {n}: the G string is not a fashion statement. Tune it.
+Studies show 100% of songs sound better in tune. The study was me, {n}. Tap Listen.
+Your F barre chord has been buzzing since 2019, {n}. Today's the day.
+Your amp misses you, {n}. It's been humming to itself just to stay busy.
+Spotify Wrapped will never know you played “Knockin' on Heaven's Door” 400 times. I will, {n}.
+Breaking: local guitarist {n} discovers there are more than four chords. Markets react calmly.
+The metronome isn't judging you, {n}. Okay, it is. Practise anyway.
+Berry Sakharof makes it look effortless. That's because he practised while you were scrolling, {n}.
+Your picks have a group chat, {n}. They're planning an escape under the couch.
+Somewhere in Tel Aviv a busker is getting better while you read this, {n}.
+The capo is not a cheat code, {n}. Okay, it kind of is. Use it.
+Your calluses are filing for unemployment, {n}. Give them some work.
+B minor called. It knows you've been avoiding it, {n}.
+Strings are like milk, {n}: they expire. When did you last change yours?
+Mark Knopfler plays without a pick. You play without practising. Only one of those is a style, {n}.
+The neighbours stopped complaining, {n}. Either it's respect or they moved.
+One more “Wonderwall” and Oasis reunite just to stop you. Learn something new today, {n}.
+Shalom Hanoch has been rocking for 50 years. You can manage 15 minutes, {n}.
+Your strumming hand has rhythm, {n}. Your fretting hand is still negotiating.
+Ehud Banai has a song for every mood. Pick one and learn it, {n}.
+Your guitar is the only thing in the house that gets better when used, {n}. Unlike the couch.'''.strip().split('\n')
+
+def jokes_add(jp):
+    new = load(jp)
+    if isinstance(new, dict): new = new.get('jokes')
+    if not isinstance(new, list) or not new: sys.exit('Could not read the jokes JSON (a list of strings).')
+    cur = load(OUT, {}) or {}
+    have = cur.get('jokes', [])
+    seen = {norm(j) for j in BUILTIN_JOKES} | {norm(x.get('text', '')) for x in have}
+    il = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)).date().isoformat()
+    added = []
+    for j in new:
+        j = re.sub(r'\s+', ' ', str(j)).strip()
+        if not (20 <= len(j) <= 220) or '{n}' not in j or norm(j) in seen: continue
+        seen.add(norm(j)); added.append({'text': j, 'date': il})
+    if not added: sys.exit('No usable new jokes (each needs {n}, 20-220 characters, and must be new).')
+    cur['jokes'] = (have + added)[-80:]; cur['jokesDate'] = il
+    with open(OUT, 'w', encoding='utf-8') as f: json.dump(cur, f, ensure_ascii=False, indent=1)
+    print(f'Added {len(added)} welcome jokes ({len(cur["jokes"])} extra jokes in total).')
+
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == 'context': context()
     elif len(sys.argv) in (4, 5) and sys.argv[1] == 'write': write(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) == 5 else None)
     elif len(sys.argv) == 3 and sys.argv[1] == 'sheets': sheets_only(sys.argv[2])
+    elif len(sys.argv) == 3 and sys.argv[1] == 'jokes': jokes_add(sys.argv[2])
     else: print(__doc__)
