@@ -715,6 +715,15 @@ body.wopen{overflow:hidden}
 .shvid{display:flex;align-items:center;gap:10px;border:1px solid var(--accent);border-radius:12px;padding:8px 10px;background:var(--surface);margin:8px 0;text-decoration:none;color:var(--ink)}
 .shvid i{font-style:normal;font-size:20px}.shvid b{font-size:14px}.shvid small{display:block;color:var(--muted);font-size:12.5px}
 .catvid{font-size:15px;margin-left:2px;text-decoration:none}
+
+.rechelpbtn{border:0;background:none;color:var(--accent);font:600 13.5px var(--body);text-align:left;padding:2px 4px;cursor:pointer;margin-top:-4px}
+#drop[hidden]~#recHelpBtn,#drop[hidden]~#recCard{display:none!important}
+.reccard ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.45}
+.reccard li b{color:var(--ink)}.reccard .tip{margin:0}
+.recvid{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--bg)}
+.recvid .vidthumb{width:84px;flex:0 0 84px}.recvid div{min-width:0;display:flex;flex-direction:column;gap:2px}.recvid small{color:var(--muted)}
+.recpick{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto}
+.recpick button{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px 10px;font:500 14px var(--body);cursor:pointer}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -853,6 +862,8 @@ body.wopen{overflow:hidden}
       <b>Choose a song video</b>
       <span>MP4 works best. The sound is analysed on this device and nothing is uploaded.</span>
     </label>
+    <button type="button" class="rechelpbtn" id="recHelpBtn">🎬 Learning from a YouTube video? Record it to a video file first ›</button>
+    <section class="card reccard" id="recCard" hidden></section>
     <button class="drop write" id="shotNew" type="button">
       <b>Chord sheet from screenshots or a PDF</b>
       <span>Screenshots of a song, or a PDF from the site’s Print › Save as PDF (most accurate). Read on your phone; you check and edit before anything is saved.</span>
@@ -1732,6 +1743,8 @@ function loadSong(k){try{const v=JSON.parse(localStorage.getItem('tuner.song.'+k
 
 $('vidIn').addEventListener('change',async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
+ // a recording made from one of your video lessons takes that lesson's song name and artist
+ recFile=(recFor&&!$('recCard').hidden&&vlAll().find(x=>x.id===recFor))||null;$('recCard').hidden=true;
  songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(file);curFile=file;
  fileKey=(file.name+'|'+file.size).replace(/[^\w|.-]/g,'_');
  if(pendingLib){const ent=libGet(pendingLib);pendingLib=null;if(ent){A=expand(ent.data);A.libId=ent.id;saveSong();showSong(false);songMsg('Editing “'+ent.name+'”. Changes save to My songs automatically.');return}}
@@ -1770,7 +1783,7 @@ async function runAnalysis(file){
   const r=await analyse(x,(p,t)=>prog(listen?.4+.55*p:p,t),notes);
   let tuning=guessTuning(r.hist,r.segs),src='detected from the sound';
   if(pre!=='auto'){tuning={id:pre,conf:'yours',why:'You chose this tuning before analysing.'};src='your choice'}
-  A={title:titleFrom(file.name),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now()};
+  A={title:recFile?(recFile.song||recFile.title):titleFrom(file.name),...(recFile&&recFile.artist?{artist:recFile.artist}:{}),dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now()};
   if(pre==='auto'){let b=null;for(let c=0;c<=7;c++){const sc=ease(A.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}A.play.capo=b.c}
   saveSong();showSong(false);$('doneBanner').hidden=true;
   let chordSrc='detected from the sound',readNote='';
@@ -3203,6 +3216,29 @@ function drawCatalog(all){const q=normArt(catF.q),f=all.filter(e=>(!q||normArt(e
   :`<p class="tip">${all.length?'No sheet matches. Try fewer filters.':'No sheets yet. When you send a sheet to Drive it’s added here; sheets already in your folder appear after the morning scan.'}</p>`;
 }
 
+
+/* From a video lesson: record it with Android's screen recorder, then analyse the recording */
+let recFor=null,recFile=null;
+function renderRec(){const c=$('recCard'),v=recFor&&vlAll().find(x=>x.id===recFor),l=vlAll();
+ const th=v&&(v.thumb||(v.yt?`https://i.ytimg.com/vi/${v.yt}/mqdefault.jpg`:''));
+ c.innerHTML=`<div class="cardhead"><h2>Record a video lesson</h2><button type="button" class="pickx" id="recClose" aria-label="Close">✕</button></div>
+ <p class="tip">Your phone can save any video it plays as an MP4 with its built-in screen recorder. Then pick that file here and the chords are worked out as usual.</p>
+ ${v?`<div class="recvid"><a class="vidthumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="${th?`background-image:url('${esc(th)}')`:''}"><span>▶</span></a><div><b dir="auto">${esc(v.song||v.title)}</b><small dir="auto">${esc(v.artist||'')}${v.artist?' · ':''}${esc(v.src||vlSource(v.url))}</small></div></div>`
+  :(l.length?`<p class="tip"><b>Which video?</b> Pick one of your video lessons, or open any video yourself.</p><div class="recpick">${l.slice(0,30).map(x=>`<button type="button" data-recpick="${esc(x.id)}">🎬 <span dir="auto">${esc(x.song||x.title)}${x.artist?' · '+esc(x.artist):''}</span></button>`).join('')}</div>`:'')}
+ <ol>
+  <li><b>Get the recorder ready.</b> Swipe down twice from the top of the screen and find <b>Screen recorder</b> (you may need to add it with the ✎ pencil). Set the sound to <b>Media sounds</b> (Samsung) or <b>Device audio</b> (Pixel), so it records the song and not the room.</li>
+  <li><b>Open the video${v?'':' in YouTube'}${v?` — <a href="${esc(v.url)}" target="_blank" rel="noopener">▶ open “${esc(v.song||v.title)}”</a>`:''}.</b> Let any ad finish or skip it first, then pause at the start of the part you want. Turning on Do Not Disturb keeps notifications out of the recording.</li>
+  <li><b>Record.</b> Start the screen recorder, press play, and stop when the part you need is done. The video is saved in your Gallery (Screen recordings).</li>
+  <li><b>Come back here and pick it.</b><br><button type="button" class="btn" id="recPick" style="margin-top:6px">Choose the recording</button></li>
+ </ol>
+ <p class="tip">Recording is for your own practice. It works with Instagram, TikTok and other apps too.</p>`;
+ c.hidden=false;
+ $('recClose').onclick=()=>{c.hidden=true;recFor=null};
+ $('recPick').onclick=()=>$('vidIn').click();
+ c.querySelectorAll('[data-recpick]').forEach(b=>b.onclick=()=>{recFor=b.dataset.recpick;renderRec()});
+}
+function openRec(id){recFor=id||null;try{songsHome()}catch(e){}renderRec();setTimeout(()=>$('recCard').scrollIntoView({behavior:'smooth',block:'start'}),60)}
+$('recHelpBtn').onclick=()=>{if(!$('recCard').hidden){$('recCard').hidden=true;return}openRec(null)};
 /* ================= My video lessons: links you learn songs from, matched to your chord sheets ================= */
 const VLK='vlinks';
 const vlAll=()=>store.get(VLK,[])||[];
@@ -3264,7 +3300,7 @@ function vlRowHTML(v){const sh=vlFindSheet(v.song||v.title,v.artist),th=v.thumb|
  const name=v.song||v.title||v.url;
  return `<div class="vidrow" data-id="${esc(v.id)}"><a class="vidthumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="${th?`background-image:url('${esc(th)}')`:''}" aria-label="Watch ${esc(name)}"><span>▶</span></a>
  <div class="vidtx"><span class="vidsrc">${esc(v.src||vlSource(v.url))}</span><b dir="auto">${esc(name)}</b>${v.artist?`<small dir="auto">${esc(v.artist)}</small>`:''}${v.note?`<small dir="auto">📝 ${esc(v.note)}</small>`:''}
- <div class="vidacts"><a class="play" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Watch</a>${sh?(sh.lib?`<button type="button" class="sheet" data-lib="${esc(sh.lib)}">📄 Chord sheet</button>`:`<a class="sheet" href="${esc(sh.url)}" target="_blank" rel="noopener" title="${esc(sh.kind)}">📄 Chord sheet ↗</a>`):'<span class="nosheet vidacts-no" style="font:600 12px var(--body);color:var(--muted);padding:5px 4px">No chord sheet yet</span>'}<button type="button" data-edit="${esc(v.id)}">Edit</button></div></div></div>`}
+ <div class="vidacts"><a class="play" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Watch</a>${sh?(sh.lib?`<button type="button" class="sheet" data-lib="${esc(sh.lib)}">📄 Chord sheet</button>`:`<a class="sheet" href="${esc(sh.url)}" target="_blank" rel="noopener" title="${esc(sh.kind)}">📄 Chord sheet ↗</a>`):'<span class="nosheet vidacts-no" style="font:600 12px var(--body);color:var(--muted);padding:5px 4px">No chord sheet yet</span>'}<button type="button" data-rec="${esc(v.id)}">🎙️ Record to analyse</button><button type="button" data-edit="${esc(v.id)}">Edit</button></div></div></div>`}
 function drawVids(){const box=$('vlList');if(!box)return;const q=vlKey(vlQ);
  const l=vlAll().filter(v=>!q||vlKey([v.song,v.artist,v.title,v.note].join(' ')).includes(q));
  box.innerHTML=l.length?l.map(vlRowHTML).join(''):(vlAll().length?'<p class="tip">No video matches.</p>':'')}
@@ -3294,7 +3330,7 @@ async function vlStart(raw){
  if(m){vlDraft.title=m.title;vlDraft.thumb=m.thumbnail_url||'';const p=vlParse(m.title,m.author_name);vlDraft.song=p.song;vlDraft.artist=p.artist}
  drawVidForm();
 }
-$('vidBox')&&$('vidBox').addEventListener('click',e=>{const ed=e.target.closest('[data-edit]');if(ed){const v=vlAll().find(x=>x.id===ed.dataset.edit);if(v){vlDraft={...v};vlMsg='';drawVidMsg();drawVidForm();$('vlForm').scrollIntoView({behavior:'smooth',block:'center'})}return}
+$('vidBox')&&$('vidBox').addEventListener('click',e=>{const rc=e.target.closest('[data-rec]');if(rc){openRec(rc.dataset.rec);return}const ed=e.target.closest('[data-edit]');if(ed){const v=vlAll().find(x=>x.id===ed.dataset.edit);if(v){vlDraft={...v};vlMsg='';drawVidMsg();drawVidForm();$('vlForm').scrollIntoView({behavior:'smooth',block:'center'})}return}
  const lb=e.target.closest('[data-lib]');if(lb){const ent=libGet(lb.dataset.lib);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()}});
 // a chord sheet you open shows its video lessons
 function renderSheetVid(){const box=$('shVid');if(!box)return;if(!A){box.hidden=true;return}const t=($('shName').value||A.title||'').trim();const vs=t?vlFindVideos(t,A.artist||''):[];
