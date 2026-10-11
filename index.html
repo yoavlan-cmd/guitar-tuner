@@ -2643,23 +2643,29 @@ function metaFromLines(r){
 }
 // song name + artist when the sheet doesn't spell them out as "אקורדים לשיר X של Y": the PDF's own title/file name, then the big heading at the top, then (if available) Claude on those few heading lines only
 function knownArtistNames(){const ix=store.get('songIndex',null);return [...new Set([...(ix&&ix.artists||[]),...(ix&&ix.songs||[]).map(x=>x.a),...knownArtists()].filter(Boolean))]}
-function splitTitle(str){let t=String(str||'').replace(/[‎‏‪-‮]/g,'').replace(/\.(pdf|png|jpe?g)$/i,'').replace(/\s*[|·]\s*(tab4u|ultimate[- ]guitar|nagenu|guitarist).*$/i,'').replace(/\b(tab4u|chords|tabs?)\b/gi,'').replace(/אקורדים(?:\s+ל?שיר)?|מילים\s+ואקורדים|טאבים/g,'').replace(/\s+/g,' ').trim();
- if(!t||/^screenshot|^img[_-]|^\d+$/i.test(t))return null;
- let m=t.match(/^(.+?)\s+(?:של|מאת|by)\s+(.+)$/i);if(m)return {title:m[1].trim(),artist:m[2].trim()};
- const parts=t.split(/\s+[-–—]\s+|\s*[-–—]\s*(?=\S)/).map(x=>x.trim()).filter(Boolean);
- if(parts.length>=2){const known=knownArtistNames().map(normArt),isA=x=>known.some(k=>k&&(normArt(x)===k||normArt(x).includes(k)||k.includes(normArt(x))));
-  if(isA(parts[0])&&!isA(parts[1]))return {title:parts[1],artist:parts[0]};return {title:parts[0],artist:parts[1]}}
- return {title:t,artist:''}}
+const SITE_RE=/(?:https?:\/\/)?(?:www\.)?[\w-]*(?:tab4u|ultimate-?guitar|nagenu|guitarist|chordify|songsterr)[\w.-]*|\b[\w-]+\.(?:com|co\.il|net|org|il)\b|^\s*\.?(?:com|co\.il)\s*$/gi;
+const realText=t=>(String(t||'').match(/\p{L}/gu)||[]).length>=2;
+function splitTitle(str){let t=String(str||'').replace(/[‎‏‪-‮]/g,'').replace(/\.(pdf|png|jpe?g)$/i,'').replace(SITE_RE,' ').replace(/\b(chords|tabs?|lyrics)\b/gi,' ').replace(/אקורדים(?:\s+(?:ל|של\s+ה)?שיר)?|מילים\s+ואקורדים|טאבים|אקורדים|מילים/g,' ').replace(/\s+/g,' ').trim();
+ if(!realText(t)||/^screenshot|^img[_-]|^\d+$/i.test(t))return null;
+ let m=t.match(/^(.+?)\s+(?:של|מאת|by)\s+(.+)$/i);if(m&&realText(m[1])&&realText(m[2]))return {title:m[1].trim(),artist:m[2].trim()};
+ const parts=t.split(/\s*[-–—|·:]\s*/).map(x=>x.trim()).filter(realText);
+ if(parts.length>=2){const known=knownArtistNames().map(normArt).filter(Boolean),isA=x=>known.some(k=>normArt(x)===k||normArt(x).includes(k)||k.includes(normArt(x)));
+  const ai=parts.findIndex(isA);if(ai>=0){const ti=parts.findIndex((x,i)=>i!==ai);return {title:parts[ti],artist:parts[ai],sure:true}}
+  return {title:parts[0],artist:parts[1],sure:false}}
+ return parts.length?{title:parts[0],artist:''}:null}
+// when the order "song - artist" vs "artist - song" isn't certain, let Claude say which is which (only these two names are sent)
+async function orderCheck(g){if(!g||g.sure||!g.artist||!sampleFn)return g;try{const j=await sampleFn.json(`A chord sheet heading has two names: "${g.title}" and "${g.artist}". Which is the song title and which is the performing artist? Reply with JSON: {"title": string, "artist": string}`,{maxTokens:120});
+ if(j&&j.title&&j.artist&&[g.title,g.artist].includes(j.title)&&[g.title,g.artist].includes(j.artist))return {title:j.title,artist:j.artist,sure:true}}catch(e){}return g}
 async function guessTitle(r){
  if(r.title&&r.artist)return '';
  // 1) the big heading above the first chords
  const head=[];for(const L of r.lines){if(L.type==='chords'||L.ch||(L.type==='lyrics'&&/\[/.test(L.text)))break;if(L.type==='lyrics')head.push(L);if(head.length>=6)break}
  const lyrH=r.lines.filter(L=>L.ch&&L.h).map(L=>L.h).sort((a,b)=>a-b),med=lyrH[Math.floor(lyrH.length/2)]||0;
  const big=head.filter(L=>med&&(L.h||0)>=med*1.15).sort((a,b)=>(b.h||0)-(a.h||0));let used=[];
- if(!r.title&&big[0]){const g=splitTitle(big[0].text);if(g){r.title=g.title;if(!r.artist&&g.artist)r.artist=g.artist;used.push(big[0])}}
- if(r.title&&!r.artist){const c=head.find(L=>!used.includes(L)&&/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i.test(L.text))||big.find(L=>!used.includes(L));if(c){r.artist=c.text.replace(/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i,'').trim();used.push(c)}}
+ for(const L of big){if(r.title)break;let g=splitTitle(L.text);if(!g){if(SITE_RE.test(L.text)||!realText(L.text))used.push(L);SITE_RE.lastIndex=0;continue}g=await orderCheck(g);r.title=g.title;if(!r.artist&&g.artist)r.artist=g.artist;used.push(L)}
+ if(r.title&&!r.artist){const c=head.find(L=>!used.includes(L)&&/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i.test(L.text))||big.find(L=>!used.includes(L)&&realText(L.text.replace(SITE_RE,'')));if(c){r.artist=c.text.replace(/^(?:ביצוע|מבצע|זמר|artist|by)\s*[:：]?\s*/i,'').trim();used.push(c)}}
  // 2) the PDF's own title / file name (Chrome's "Save as PDF" uses the page title)
- for(const n of (r._names||[])){if(r.title&&r.artist)break;if(!n||/\.(html?|php|aspx?)\b|https?:|\/|^document$|^untitled/i.test(n))continue;const g=splitTitle(n);if(g&&g.title){if(!r.title)r.title=g.title;if(!r.artist&&g.artist&&normArt(g.artist)!==normArt(r.title))r.artist=g.artist}}
+ for(const n of (r._names||[])){if(r.title&&r.artist)break;if(!n||/\.(html?|php|aspx?)\b|https?:|\/|^document$|^untitled/i.test(n))continue;let g=splitTitle(n);if(g&&g.title){g=await orderCheck(g);if(!r.title)r.title=g.title;if(!r.artist&&g.artist&&normArt(g.artist)!==normArt(r.title))r.artist=g.artist}}
  // 3) Claude, shown only those few heading lines
  if((!r.title||!r.artist)&&sampleFn&&(head.length||(r._names||[]).some(Boolean))){try{const q=head.map(L=>L.text).concat(r._names||[]).filter(Boolean).slice(0,10).join('\n').slice(0,600);
    const j=await sampleFn.json(`These are the heading lines at the top of a song's chord sheet (no lyrics). Which is the song's name and which is the artist? Lines:\n${q}\nReply with JSON: {"title": string or "", "artist": string or "", "lines": [the exact heading lines that are only the title/artist/site name, to remove]}`,{maxTokens:300});
