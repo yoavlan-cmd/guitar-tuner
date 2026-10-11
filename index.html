@@ -4072,7 +4072,7 @@ async function loadDailyIdeas(force){
   if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
   store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
   const cur=store.get('ideas',null),at=Date.parse(d.at)||0,no=new Set(store.get('ideaNo',[]));
-  if(!cur||(cur.src==='daily'&&cur.date!==d.date)||(cur.src!=='daily'&&at>cur.at))store.set('ideas',{at,src:'daily',date:d.date,level:d.level||'',list:(d.suggestions||[]).filter(s=>!no.has(s.artist+' – '+s.title)&&!onItList().some(x=>onItKey(x)===onItKey(s)))});
+  if(!cur||(cur.src==='daily'&&(cur.date!==d.date||at>cur.at))||(cur.src!=='daily'&&at>cur.at))store.set('ideas',{at,src:'daily',date:d.date,level:d.level||'',list:(d.suggestions||[]).filter(s=>!no.has(s.artist+' – '+s.title)&&!onItList().some(x=>onItKey(x)===onItKey(s)))});
   renderIdeas()}catch(e){dailyTried=true}
 }
 // Claude version (no daily file): scan and pick by itself once a day
@@ -4086,7 +4086,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadDailyI
 setTimeout(()=>loadDailyIdeas(),0);
 const isHeb=s=>/[֐-׿]/.test((s.title||'')+(s.artist||''));
 // Tab4u first: Google's “I'm feeling lucky” jumps straight to the song's Tab4u page when it has one
-const chordsLink=s=>'https://www.google.com/search?btnI=1&q='+encodeURIComponent(`site:tab4u.com ${s.title} ${s.artist}`);
+const chordsLink=s=>'https://www.google.com/search?btnI=1&q='+encodeURIComponent(`site:tab4u.com "${s.title}" ${s.artist}`);
 const listenLink=s=>'https://www.youtube.com/results?search_query='+encodeURIComponent(s.artist+' '+s.title);
 function ideaCardHTML(s,i,kc){const d=Math.max(1,Math.min(5,+s.difficulty||3)),known=new Set(kc),ch=(s.chords||[]).slice(0,10);
  return `<div class="idcard" data-i="${i}"><div class="idtop"><div><b dir="auto">${esc(s.title)}</b><span dir="auto">${esc(s.artist)}</span></div><span class="iddiff" title="Difficulty ${d} of 5">${'●'.repeat(d)}<i>${'●'.repeat(5-d)}</i><small>${['','Easy','Easy+','Medium','Harder','Hard'][d]}</small></span></div>
