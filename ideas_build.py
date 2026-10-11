@@ -2,7 +2,11 @@
 """Builds ideas.json for Guitaring's daily song ideas.
 
   python3 ideas_build.py context            -> prints the current songs + recent suggestions (to avoid repeats)
-  python3 ideas_build.py write INDEX SUGG   -> cleans, checks and writes ideas.json
+  python3 ideas_build.py write INDEX SUGG [SHEETS] -> cleans, checks and writes ideas.json
+  python3 ideas_build.py sheets SHEETS      -> only refreshes the list of Guitaring sheets in ideas.json
+
+SHEETS: the Drive search results for  mimeType = 'application/pdf' and (fullText contains 'Guitaring' or fullText contains 'LYRICS & CHORDS' or fullText contains 'PROGRESSION')  (snippetVerbosity BRIEF),
+        as a JSON list of {"title","viewUrl","createdTime","contentSnippet","folder" (artist folder name, optional)}
 
 INDEX: {"artists":[folder names], "songs":[{"a": artist folder, "t": file title, "ch": [chords], "capo": n, "tuning": "..."}]}
 SUGG:  {"level": "...", "suggestions":[{"title","artist","style","difficulty":1-5,"chords":[...],"capo":0,"tuning":"Standard","why"}]}
@@ -34,6 +38,52 @@ def split_name(title, folder):
                 a = a or left; t = right
     return a, t
 
+OPEN_CH = set('C D E G A Am Em Dm E7 A7 D7 G7 C7 B7 Am7 Em7 Dm7 Cmaj7 Fmaj7 Gmaj7 Dmaj7 Amaj7 Emaj7 Dsus2 Dsus4 Asus2 Asus4 Esus4 Esus2 Cadd9 Gadd9 Dadd9 Em9 A5 D5 E5 G5 C5 G6 C6 D6 E6 A6 Am6 Em6 Dm6'.split())
+def chord_level(chs):
+    ch = list(dict.fromkeys([c for c in chs if c]))
+    if not ch: return 0
+    barre = sum(1 for c in ch if c.split('/')[0] not in OPEN_CH)
+    ext = sum(1 for c in ch if c.split('/')[0] not in OPEN_CH and re.search(r'(maj9|m7b5|dim|aug|13|11|9|6)', c.split('/')[0]))
+    sc = len(ch) * .45 + barre * 1.5 + ext * .6
+    return 1 if sc < 3.2 else 2 if sc < 5 else 3 if sc < 7.5 else 4 if sc < 10.5 else 5
+
+def parse_sheet(f):
+    sn = str(f.get('contentSnippet') or '').replace('\\#', '#')
+    sn = MARKS.sub('', sn)
+    head = re.split(r'LYRICS\s*&\s*CHORDS|PROGRESSION', sn, flags=re.I)[0]
+    m = re.search(r'([\u0590-\u05FF][\u0590-\u05FF ."\'׳״-]*?)[ \t]+Artist', head) or re.search(r'Artist[ \t]+([^\n]+?)[ \t]+(?:Tuning|Capo|CHORDS)', head) or re.search(r'Artist[ \t]+([^\n]+)$', head, re.M)
+    artist = (m.group(1) if m else '')
+    if f.get('folder') or len(re.findall(r'[^\W\d_]', artist)) < 2 or re.search(r'\d', artist): artist = f.get('folder') or artist  # the artist folder name wins, so filters stay consistent
+    tm = re.search(r'Tuning\s+([A-Za-z][A-Za-z ]*?)\s*\(', head)
+    cm = re.search(r'Capo\s+(?:fret\s+)?(\d+|none)', head, re.I)
+    part = re.split(r'\bCHORDS\b', head)
+    toks = re.findall(r'\S+', part[1]) if len(part) > 1 else []
+    chs = []
+    for t in toks:
+        c = clean_chord(t)
+        if c and c not in chs: chs.append(c)
+    for line in sn.split('\n'):  # chord-only lines further down the sheet
+        w = line.split()
+        if w and all(clean_chord(x) for x in w):
+            for x in w:
+                c = clean_chord(x)
+                if c not in chs: chs.append(c)
+    title = re.sub(r'\.pdf$', '', str(f.get('title') or ''), flags=re.I).strip()
+    if artist and norm(title).startswith(norm(artist) + ' '): title = re.sub(r'^\s*[-–—]\s*', '', title[len(artist):]).strip()
+    return {'title': title, 'artist': artist.strip(), 'capo': int(cm.group(1)) if cm and cm.group(1).isdigit() else 0,
+            'tuning': (tm.group(1).strip() if tm else 'Standard'), 'chords': chs[:24], 'level': chord_level(chs),
+            'url': f.get('viewUrl') or '', 'at': f.get('createdTime') or ''}
+
+def build_sheets(raw):
+    out, seen = [], set()
+    for f in raw or []:
+        if not isinstance(f, dict) or not f.get('title'): continue
+        e = parse_sheet(f) if 'contentSnippet' in f else {**f, 'level': f.get('level') or chord_level(f.get('chords') or [])}
+        k = norm(e['title'])
+        if k in seen: continue
+        seen.add(k); out.append(e)
+    return out
+
 def load(p, d=None):
     try:
         with open(p, encoding='utf-8') as f: return json.load(f)
@@ -46,7 +96,7 @@ def context():
     print('Suggested before (do not repeat):')
     for h in cur.get('history', [])[-150:]: print(f"  {h.get('artist')} - {h.get('title')}")
 
-def write(ip, sp):
+def write(ip, sp, shp=None):
     raw = load(ip); sug = load(sp)
     if not raw or not sug: sys.exit('Could not read the index or the suggestions JSON.')
     songs, seen = [], {}
@@ -92,11 +142,19 @@ def write(ip, sp):
     hist = (hist + [{'title': s['title'], 'artist': s['artist'], 'date': il} for s in out])[-200:]
     data = {'v': 1, 'at': now.isoformat(timespec='seconds').replace('+00:00', 'Z'), 'date': il,
             'index': {'artists': artists, 'songs': songs}, 'level': str(sug.get('level', ''))[:300],
-            'suggestions': out[:12], 'history': hist}
+            'suggestions': out[:12], 'history': hist,
+            'sheets': build_sheets(load(shp, [])) if shp else cur.get('sheets', [])}
     with open(OUT, 'w', encoding='utf-8') as f: json.dump(data, f, ensure_ascii=False, indent=1)
     print(f'Wrote ideas.json: {len(artists)} artists, {len(songs)} songs, {len(out[:12])} suggestions.')
 
+def sheets_only(shp):
+    cur = load(OUT, {}) or {}
+    cur['sheets'] = build_sheets(load(shp, []))
+    with open(OUT, 'w', encoding='utf-8') as f: json.dump(cur, f, ensure_ascii=False, indent=1)
+    print(f"Updated ideas.json: {len(cur['sheets'])} Guitaring sheets.")
+
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == 'context': context()
-    elif len(sys.argv) == 4 and sys.argv[1] == 'write': write(sys.argv[2], sys.argv[3])
+    elif len(sys.argv) in (4, 5) and sys.argv[1] == 'write': write(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) == 5 else None)
+    elif len(sys.argv) == 3 and sys.argv[1] == 'sheets': sheets_only(sys.argv[2])
     else: print(__doc__)
