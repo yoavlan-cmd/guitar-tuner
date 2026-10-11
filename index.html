@@ -1026,7 +1026,7 @@ const shortName=t=>t.n.map(nm).map(s=>s.replace('♯','#').replace('♭','b')).j
 
 /* gauge */
 /* ±15¢ fills most of the arc (fine tuning); 15–50¢ is squeezed into the ends so far-off strings still show */
-const CX=160,CY=172,R=132,SPAN=62,FINE=.78;
+const CX=160,CY=172,R=132,SPAN=62,FINE=.6;
 const pt=(deg,r)=>{const a=(deg-90)*Math.PI/180;return [CX+r*Math.cos(a),CY+r*Math.sin(a)]};
 const centsAng=c=>{const a=Math.min(50,Math.abs(c)),f=a<=15?a/15*FINE:FINE+(a-15)/35*(1-FINE);return Math.sign(c)*f*SPAN};
 const arcD=(c1,c2,r)=>{const [a,b]=pt(centsAng(c1),r),[x,y]=pt(centsAng(c2),r);return `M${a.toFixed(1)} ${b.toFixed(1)} A${r} ${r} 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}`};
@@ -1042,12 +1042,12 @@ const needleCalm=matchMedia('(prefers-reduced-motion: reduce)');
 function needleStep(ts){
  const goal=centsAng(needleGoal);let dt=needleT?(ts-needleT)/1000:1/60;needleT=ts;dt=Math.min(dt,1/30);
  if(needleCalm.matches){needleNow=goal;needleVel=0}
- else for(let k=0;k<2;k++){const h=dt/2,acc=170*(goal-needleNow)-17*needleVel;needleVel+=acc*h;needleNow+=needleVel*h}
+ else for(let k=0;k<2;k++){const h=dt/2,acc=140*(goal-needleNow)-24*needleVel;needleVel+=acc*h;needleNow+=needleVel*h}
  $('needle').setAttribute('transform',`rotate(${needleNow.toFixed(2)} ${CX} ${CY})`);
  if(Math.abs(goal-needleNow)<.02&&Math.abs(needleVel)<.05){needleNow=goal;needleVel=0;needleRaf=0;needleT=0;$('needle').setAttribute('transform',`rotate(${needleNow.toFixed(2)} ${CX} ${CY})`);return}
  needleRaf=requestAnimationFrame(needleStep)}
 function drawNeedle(){if(!needleRaf){needleT=0;needleRaf=requestAnimationFrame(needleStep)}}
-window.__tunerTest={needle(c){needleGoal=c;drawNeedle()},angle:c=>centsAng(c),head:st=>setHeadState(st),done(i){done.add(i);renderStrings()}};
+window.__tunerTest={state:()=>({goal:needleGoal,ang:needleNow,cents:$('cents').textContent,st:$('status').textContent}),needle(c){needleGoal=c;drawNeedle()},angle:c=>centsAng(c),head:st=>setHeadState(st),done(i){done.add(i);renderStrings()}};
 
 /* UI build */
 function renderTunings(){
@@ -1181,8 +1181,35 @@ function idle(now){
  hist=[];needleGoal=0;$('screen').classList.remove('ok','locked');setFine(null);$('hz').textContent='—';$('cents').textContent='—';okSince=0;
  const st=$('status');st.className='status';st.textContent=locked!=null?`Play string ${6-locked} (${nm(tuning.n[locked])})`:'Play any string';showTarget();
 }
-let holdUntil=0,lastCents=null,trend=[],zoneStr=null;
+let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
+// phone mics barely pick up a low string's fundamental, so the tuner can lock onto its 2nd/3rd harmonic
+// (an in-tune A2 read as A3 = "way too high"). In automatic mode, if a reading is far from every string but
+// half/a third of it lands on a string, or it's an exact multiple of the string just played, use that instead.
+function octaveFix(f,now){
+ if(locked!=null)return f;
+ const off=x=>Math.min(...tuning.n.map(m=>Math.abs(1200*Math.log2(x/fq(m)))));
+ const d=off(f);if(d<=25)return f;
+ if(lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<60)return f/k}
+ if(d>45)for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
+ return f}
 function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
+/* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off */
+let playLog=[],lastLoud=0,listenStart=0,lastPlayCheck=0,quietLvl=null;
+function autoStopCheck(now,rms,gate,r,clear){
+ // the room's quiet level: follows dips at once, creeps up slowly (constant strumming must not become "the room")
+ quietLvl=quietLvl==null||rms<quietLvl?Math.max(rms,.0004):quietLvl*1.0004;
+ const loud=rms>=Math.max(.003,quietLvl*4);if(loud)lastLoud=now;
+ playLog.push({t:now,loud,chord:loud&&(!r||r.clarity<.72),semi:clear?Math.round(12*Math.log2(r.f/a4)):null});
+ while(playLog.length&&playLog[0].t<now-5000)playLog.shift();
+ if(now-lastPlayCheck<250)return false;lastPlayCheck=now;
+ if(now-lastLoud>10000){stopListening('quiet');return true}
+ if(now-listenStart<5000)return false;
+ const n=playLog.length,loudN=playLog.filter(x=>x.loud).length,chordN=playLog.filter(x=>x.chord).length;
+ // notes that last at least ~3 frames, with repeats merged
+ const seq=[];let run=null,len=0;for(const x of playLog){if(x.semi==null)continue;if(x.semi===run)len++;else{run=x.semi;len=1}if(len===3&&seq[seq.length-1]!==run)seq.push(run)}
+ const distinct=new Set(seq).size;
+ if((loudN/n>=.6&&chordN/n>=.45)||(distinct>=4&&seq.length>=11)){stopListening('playing');return true}
+ return false}
 function loop(){
  raf=requestAnimationFrame(loop);analyser.getFloatTimeDomainData(data);
  const now=performance.now(),cfg=NF[nfMode];
@@ -1193,7 +1220,11 @@ function loop(){
  if(!r||r.clarity<.6){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+rms*.015)}
  const gate=Math.max(.002,(floor??0)*cfg.gate);meter(rms,gate);
  const clear=r&&r.clarity>=cfg.clar&&rms>=gate;
- if(clear)hist.push({f:r.f,t:now});
+ if(autoStopCheck(now,rms,gate,r,clear))return;
+ if(window.__tlog)window.__tlog.push([now|0,+rms.toFixed(4),+gate.toFixed(4),r&&+r.f.toFixed(2),r&&+r.clarity.toFixed(3)]);
+ // the pick attack is briefly sharp and harmonic-heavy: skip the first moments of a new pluck
+ envS=envS==null?rms:envS*.94+rms*.06;if(rms>=gate&&rms>envS*2.2){onsetAt=now;notePeak=rms}notePeak=Math.max(notePeak*.9995,rms);
+ if(clear&&now-onsetAt>=110)hist.push({f:octaveFix(r.f,now),t:now,q:r.clarity});
  hist=hist.filter(h=>now-h.t<300).slice(-6);
  let med=0,agree=0;
  if(hist.length){const s2=hist.map(h=>h.f).sort((a,b)=>a-b);med=s2[s2.length>>1];agree=s2.filter(f=>Math.abs(1200*Math.log2(f/med))<30).length}
@@ -1203,13 +1234,26 @@ function loop(){
   med=close.reduce((a,b)=>a+b,0)/close.length;lastHeard=now;holdUntil=now+1200;
   let i=locked;if(i==null){let best=1e9;tuning.n.forEach((m,k)=>{const cc=Math.abs(1200*Math.log2(med/fq(m)));if(cc<best){best=cc;i=k}})}
   if(i!==target){target=i;renderStrings()}
+  lastStr=i;lastStrAt=now;
   const m=tuning.n[i];let cents=1200*Math.log2(med/fq(m));
   // smooth small wobbles, follow real peg turns quickly
-  if(lastCents==null||Math.abs(lastCents-cents)>15)lastCents=cents;else{const d=Math.abs(lastCents-cents),a=d<1.5?.18:d<4?.35:.6;lastCents=lastCents*(1-a)+cents*a}cents=lastCents;
+  // steady reading: median of the last ~0.45 s, then a slow glide for tiny wobbles; real peg turns still follow fast
+  // a fading or noisy note (low clarity) scatters by ±10¢: keep showing the last good reading instead of chasing it
+  const good=(hist[hist.length-1]||{}).q>=.93&&rms>notePeak*.12;
+  if(!good&&lastCents!=null&&cStr===i)cents=lastCents;
+  else{
+   if(cStr!==i)cHist=[];cStr=i;cHist.push({t:now,c:cents});cHist=cHist.filter(x=>now-x.t<280);
+   {const ss=cHist.map(x=>x.c).sort((a,b)=>a-b);if(ss.length>=3&&Math.abs(cents-ss[ss.length>>1])<8)cents=ss[ss.length>>1]}
+   const dt=Math.min(.1,(now-(lastCT||now))/1000||1/60);
+   if(lastCents==null||Math.abs(lastCents-cents)>15)lastCents=cents;else{const d=Math.abs(lastCents-cents),tau=d<1.5?.4:d<4?.14:.07,a=1-Math.exp(-dt/tau);lastCents=lastCents*(1-a)+cents*a}
+   cents=lastCents}
+  lastCT=now;
   trend.push({t:now,c:Math.abs(cents)});trend=trend.filter(x=>now-x.t<700);
   const heard=Math.round(69+12*Math.log2(med/a4));
   $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
-  $('cents').textContent=(cents>0?'+':'')+cents.toFixed(0);needleGoal=Math.max(-50,Math.min(50,cents));
+  // the needle ignores the last ±1¢ (nobody can hear it, and it stops the centre flicker); the number only moves on a whole-cent change
+  if(shownC==null||Math.abs(cents-shownC)>=.8)shownC=Math.round(cents);
+  $('cents').textContent=shownC?(shownC>0?'+':'')+shownC:'0';const nc=Math.sign(cents)*Math.max(0,Math.abs(cents)-1);needleGoal=Math.max(-50,Math.min(50,nc));
   // in the zone: enter at ±3¢, stay until ±5¢ (no flicker at the edge); hold it for half a second to lock in
   const ac=Math.abs(cents),inZone=zoneStr===i&&okSince?ac<=5:ac<=3;
   const scr=$('screen');scr.classList.remove('hold');setFine(cents,inZone);
@@ -1219,14 +1263,14 @@ function loop(){
     st.className='status ok';st.textContent=`${nm(m)} in tune ✓`;if(!done.has(i)){done.add(i);renderStrings();noteAllTuned()}}
    else{scr.classList.remove('locked');st.className='status ok';st.textContent='Right there · hold it…'}}
   else{okSince=0;zoneStr=null;scr.classList.remove('ok','locked');setHeadState(cents<0?'flat':'sharp');
-   const c=Math.round(ac),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
+   const c=Math.abs(shownC??Math.round(ac)),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
    let hint='';if(!far&&trend.length>4&&now-trend[0].t>450){const d=trend[0].c-ac;if(d>1.5)hint=' · closer';else if(d<-1.5)hint=' · wrong way'}
    st.textContent=cents<0?(far?'Way too low · tune up ↑':`Tune up ↑ · ${c}¢${hint}`):(far?'Way too high · tune down ↓':`Tune down ↓ · ${c}¢${hint}`)}
  }else if(now<holdUntil){
   // keep the last reading on screen briefly after the note fades, like a clip-on tuner
   $('screen').classList.add('hold');
  }else{
-  lastCents=null;trend=[];$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
+  lastCents=null;trend=[];cHist=[];shownC=null;$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
   if(rms>=gate&&r){st.className='status';st.textContent='Pluck one string'}
   else idle(now);
  }
@@ -1240,7 +1284,7 @@ async function startListening(){
   const src=ctx.createMediaStreamSource(stream);let node=src;
   [['highpass',55],['highpass',55],['lowpass',1100],['lowpass',1100]].forEach(([type,f])=>{const bq=ctx.createBiquadFilter();bq.type=type;bq.frequency.value=f;bq.Q.value=0.707;node.connect(bq);node=bq});
   analyser=ctx.createAnalyser();analyser.fftSize=4096;data=new Float32Array(analyser.fftSize);node.connect(analyser);
-  floor=null;hist=[];
+  floor=null;hist=[];playLog=[];quietLvl=null;lastLoud=listenStart=performance.now();
   listening=true;$('live').hidden=false;$('listen').classList.add('on');$('listenTxt').textContent='Stop';$('status').textContent=`Play string ${6-target}`;
   try{wake=await navigator.wakeLock.request('screen')}catch(e){}
   loop();
@@ -1248,8 +1292,8 @@ async function startListening(){
   msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open the tuner link in Chrome to tune with the mic.';
  }
 }
-function stopListening(){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
- $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent='Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
+function stopListening(why){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
+ $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent=why==='playing'?'Sounds like you’re playing · Listen off':why==='quiet'?'Quiet for a while · Listen off':'Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
 $('listen').onclick=()=>listening?stopListening():startListening();
 
 /* ================= Learn a song ================= */
