@@ -396,6 +396,30 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pickhead{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--muted)}
 .pickhead b{color:var(--ink)}
 .pickx{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px}
+.cfwrap{z-index:56}.cfbox{max-height:92vh;overflow-y:auto;gap:8px}
+.cfset{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.cftun{display:flex;align-items:center;gap:6px;font:600 13px var(--body);color:var(--muted)}.cftun select{padding:6px 8px;font-size:14px;width:auto}
+.cfstep{display:flex;align-items:center;gap:6px;font:600 13px var(--body);color:var(--muted)}
+.cfstep button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:700 17px var(--body);cursor:pointer}
+.cfstep b{min-width:18px;text-align:center;color:var(--ink);font:700 16px var(--mono)}
+.cfhelp{margin:0;font-size:12.5px}
+.cfboard svg{width:100%;max-width:300px;display:block;margin:0 auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.cfboard .wood{fill:#3A2A1E}.cfboard .fw{stroke:#B9B2A3;stroke-width:2}.cfboard .nut{fill:#EFE8D8}.cfboard .capo{fill:#2B2B30;stroke:#888;stroke-width:1}
+.cfboard .capot{fill:#ddd;font:700 10px var(--body);letter-spacing:.1em}
+.cfboard .st{stroke:#D8D2C4;stroke-linecap:round}.cfboard .st.mute{stroke:#8a8478;stroke-dasharray:3 4}
+.cfboard .inl{fill:#E8E0CC;opacity:.35}
+.cfboard .fn{fill:var(--muted);font:600 12px var(--mono)}
+.cfboard .dot{fill:var(--accent);stroke:#fff;stroke-width:1.5}.cfboard .dott{fill:var(--bg);font:800 12px var(--mono)}
+.cfboard .top{fill:none;stroke:var(--ink);stroke-width:2}.cfboard .topx{stroke:#C8372D;stroke-width:2.6;stroke-linecap:round}
+.cfboard .on{fill:var(--ink);font:700 12px var(--mono)}
+.cfboard .hit{fill:transparent;cursor:pointer}@media (hover:hover){.cfboard .hit:hover{fill:rgba(255,255,255,.05)}}
+.cfout{display:flex;flex-direction:column;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.cfout .cfname{font:800 30px/1.1 var(--display)}.cfout .cfsub{font-size:13.5px;color:var(--muted)}
+.cfout .cfalt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.cfout .cfalt button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 10px;font:700 13px var(--mono);cursor:pointer}
+.cfout .cfalt button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cffind{width:100%}
+.voice.mine small{color:var(--accent);font-weight:700}
 .picklist{overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:120px}
 .picklist .lbl{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .picklist .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
@@ -668,6 +692,20 @@ body.wopen{overflow:hidden}
   <div class="lsBanner" id="lsBanner"></div>
   <div class="lsTab" id="lsTab"></div>
 </div>
+<div class="picker cfwrap" id="cfWrap" hidden>
+  <div class="pickbox cfbox" role="dialog" aria-label="Name a chord from your fingering">
+    <div class="pickhead"><span><b>What chord am I playing?</b></span><button type="button" class="pickx" id="cfClose" aria-label="Close">✕</button></div>
+    <div class="cfset">
+      <label class="cftun"><span>Tuning</span><select id="cfTun" class="textin"></select></label>
+      <div class="cfstep"><span>Capo</span><button type="button" data-cs="capo" data-d="-1" aria-label="Capo down">−</button><b id="cfCapo">0</b><button type="button" data-cs="capo" data-d="1" aria-label="Capo up">+</button></div>
+      <div class="cfstep"><span>From fret</span><button type="button" data-cs="pos" data-d="-1" aria-label="Show lower frets">−</button><b id="cfPos">1</b><button type="button" data-cs="pos" data-d="1" aria-label="Show higher frets">+</button></div>
+    </div>
+    <p class="tip cfhelp">Tap where your fingers press (tap again to lift). Tap above a string: open ○ / not played ✕.</p>
+    <div id="cfBoard" class="cfboard"></div>
+    <div id="cfOut" class="cfout" aria-live="polite"></div>
+    <div class="editrow cfbtns"><button type="button" class="btn" id="cfUse"></button><button type="button" class="btn ghost" id="cfClear">Clear</button></div>
+  </div>
+</div>
 <div class="welcome" id="welcome" role="dialog" aria-label="Welcome">
   <div class="wcard">
     <svg class="wlogo" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg>
@@ -765,6 +803,7 @@ body.wopen{overflow:hidden}
       <button data-t="std" aria-pressed="true">Standard</button>
       <button data-t="dropd" aria-pressed="false">Drop D</button>
     </div>
+    <button type="button" class="btn ghost cffind" id="chFind">🎸 What chord am I playing? Show it on the fretboard</button>
     <p class="tip" id="chCount"></p>
     <div class="chordbook" id="chGrid"></div>
     <div id="chDetail" class="chdetail" hidden></div>
@@ -959,6 +998,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
           <div class="pickhead"><span>Chord above <b id="wPickWord" dir="auto"></b></span><button type="button" class="pickx" id="wPickClose" aria-label="Close">✕</button></div>
           <input id="wPickQ" class="textin" type="search" placeholder="Search chords: Am, G/B, Cadd9…" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
           <div class="picklist" id="wPickList"></div>
+          <button type="button" class="btn ghost cffind" id="wPickFind">🎸 Don’t know its name? Show it on the fretboard</button>
           <div class="editrow" id="wPickMove" hidden><button type="button" class="btn ghost" id="wPickPrev">◀ Previous word</button><button type="button" class="btn ghost" id="wPickNext">Next word ▶</button></div>
           <button type="button" class="btn ghost" id="wPickDel" hidden>Remove chord</button>
         </div>
@@ -2725,6 +2765,104 @@ $('wPickQ').addEventListener('input',e=>{$('wPickList').innerHTML=pickerHTML(e.t
 $('wPickQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=$('wPickList').querySelector('button[data-c]');if(b)setWordChord(b.dataset.c)}else if(e.key==='Escape')closePicker()});
 $('wPickList').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(b)setWordChord(b.dataset.c)});
 $('wPickDel').onclick=()=>setWordChord('');
+
+/* name a chord from the notes being played: every played note must belong to the chord; the 5th may be left out */
+const IDQ={'':0,m:0,'5':.3,'7':.45,m7:.45,maj7:.55,sus2:.55,sus4:.55,add9:.65,madd9:.75,'6':.8,m6:.85,'9':1,m9:1.05,maj9:1.15,'7sus4':.85,dim:.9,dim7:1,aug:1,m7b5:1,'11':1.4,add11:1.2,'13':1.5};
+function identifyChord(pcs,bass){
+ const S=[...new Set(pcs)];if(!S.length)return [];
+ if(S.length===1)return [{name:CH[S[0]],score:0,single:true}];
+ const out=[];
+ for(let r=0;r<12;r++)for(const q in IDQ){const iv=QUAL[q],T=new Set(iv.map(i=>(r+i)%12));
+  if(!S.every(p=>T.has(p)))continue;
+  let pen=IDQ[q];
+  for(const i of iv){if(S.includes((r+i)%12))continue;
+   if(i===7&&!['dim','aug','m7b5','5'].includes(q))pen+=.35;else if(i===0)pen+=2.2;else if((i===2||i===5)&&['11','13'].includes(q))pen+=.8;else if(i===10&&q==='13')pen+=1;else pen+=2.5}
+  if(q==='5'&&S.length>2)continue;
+  const slash=bass!=null&&bass!==r;if(slash)pen+=.9+(bass===(r+7)%12||bass===(r+4)%12||bass===(r+3)%12?0:.5);
+  out.push({name:CH[r]+q+(slash?'/'+CH[bass]:''),score:pen})}
+ out.sort((a,b)=>a.score-b.score);const seen=new Set();return out.filter(x=>!seen.has(x.name)&&seen.add(x.name)).slice(0,5);
+}
+
+const transName=(n,d)=>{const p=parseChord(n);if(!p||!d)return n;const r=(p.root+d+120)%12;return CH[r]+p.q+(p.bass!=null?'/'+CH[(p.bass+d+120)%12]:'')};
+// a fingering (real frets, 0 = open / at the capo) → a diagram shape counted from the capo, like chord charts do
+function shapeFromFrets(f,capo){const rel=f.map(x=>x<0?-1:x===0?0:Math.max(1,x-capo));const fg=fingerize(rel)||{fi:rel.map(()=>0),barre:0,bFrom:0};return {f:rel,fi:fg.fi,barre:fg.barre,bFrom:fg.bFrom}}
+let CF=null;
+function cfOpen(mode){
+ const tun=mode==='writer'&&A&&A.play?A.play.tun:(store.get('cfTun',null)||bookTun||'std'),capo=mode==='writer'&&A&&A.play?A.play.capo:store.get('cfCapo',0);
+ CF={mode,tun,capo,pos:capo+1,f:[0,0,0,0,0,0],sel:0};
+ $('cfTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}"${t.id===tun?' selected':''}>${esc(t.name)} (${shortName(t)})</option>`).join('');
+ cfRender();$('cfWrap').hidden=false;
+}
+function cfClose(){$('cfWrap').hidden=true;CF=null}
+const cfOpenNotes=()=>(TUNINGS.find(t=>t.id===CF.tun)||TUNINGS[0]).n;
+function cfNotes(){
+ // real pitch of every played string; chord names are counted from the capo / tuning shift, as chord sheets write them
+ const open=cfOpenNotes(),sh=(TSHIFT[CF.tun]??0)+CF.capo;
+ const snd=CF.f.map((x,i)=>x<0?null:open[i]+(x===0?CF.capo:x));const played=snd.filter(x=>x!=null);
+ const shape=played.map(m=>((m-sh)%12+12)%12),bass=played.length?((Math.min(...played)-sh)%12+12)%12:null;
+ return {snd,played,shape,bass,sh};
+}
+function cfRender(){
+ if(!CF)return;CF.pos=Math.max(CF.capo+1,Math.min(20,CF.pos));
+ $('cfCapo').textContent=CF.capo;$('cfPos').textContent=CF.pos;
+ const open=cfOpenNotes(),N=5,X=i=>48+i*44,TOP=50,RH=40,Y=k=>TOP+k*RH,W=X(5)+28;
+ const {sh}=cfNotes(),nn=m=>CH[((m-sh)%12+12)%12];
+ let g=`<rect class="wood" x="${X(0)-22}" y="${TOP}" width="${X(5)-X(0)+44}" height="${N*RH}" rx="4"/>`;
+ // inlay dots like a real neck
+ for(let k=0;k<N;k++){const fr=CF.pos+k,yc=Y(k)+RH/2,cx=(X(2)+X(3))/2;if([3,5,7,9,15,17,19].includes(fr))g+=`<circle class="inl" cx="${cx}" cy="${yc}" r="6"/>`;if(fr===12)g+=`<circle class="inl" cx="${X(1)+22}" cy="${yc}" r="6"/><circle class="inl" cx="${X(3)+22}" cy="${yc}" r="6"/>`}
+ for(let k=1;k<=N;k++)g+=`<line class="fw" x1="${X(0)-22}" y1="${Y(k)}" x2="${X(5)+22}" y2="${Y(k)}"/>`;
+ if(CF.pos===1)g+=`<rect class="nut" x="${X(0)-22}" y="${TOP-6}" width="${X(5)-X(0)+44}" height="7" rx="2"/>`;
+ else if(CF.capo&&CF.pos===CF.capo+1)g+=`<rect class="capo" x="${X(0)-26}" y="${TOP-12}" width="${X(5)-X(0)+52}" height="14" rx="6"/><text class="capot" x="${(X(0)+X(5))/2}" y="${TOP-2}" text-anchor="middle">CAPO ${CF.capo}</text>`;
+ else g+=`<line class="fw" x1="${X(0)-22}" y1="${TOP}" x2="${X(5)+22}" y2="${TOP}"/>`;
+ for(let k=0;k<N;k++)g+=`<text class="fn" x="14" y="${Y(k)+RH/2+4}" text-anchor="middle">${CF.pos+k}</text>`;
+ for(let i=0;i<6;i++){const f=CF.f[i];g+=`<line class="st${f<0?' mute':''}" x1="${X(i)}" y1="${TOP}" x2="${X(i)}" y2="${Y(N)}" stroke-width="${(3.2-i*.4).toFixed(1)}"/>`;
+  if(f<0)g+=`<line class="topx" x1="${X(i)-7}" y1="22" x2="${X(i)+7}" y2="36"/><line class="topx" x1="${X(i)+7}" y1="22" x2="${X(i)-7}" y2="36"/>`;
+  else if(f===0)g+=`<circle class="top" cx="${X(i)}" cy="29" r="8"/>`;
+  else if(f<CF.pos||f>=CF.pos+N)g+=`<text class="on" x="${X(i)}" y="34" text-anchor="middle">${f}</text>`;
+  g+=`<text class="on" x="${X(i)}" y="${Y(N)+20}" text-anchor="middle">${esc(nn(open[i]+CF.capo))}</text>`;
+  if(f>0&&f>=CF.pos&&f<CF.pos+N){const yc=Y(f-CF.pos)+RH/2;g+=`<circle class="dot" cx="${X(i)}" cy="${yc}" r="13.5"/><text class="dott" x="${X(i)}" y="${yc+4}" text-anchor="middle">${esc(nn(open[i]+f))}</text>`}
+  g+=`<rect class="hit" data-top="${i}" x="${X(i)-22}" y="8" width="44" height="${TOP-10}"/>`;
+  for(let k=0;k<N;k++)g+=`<rect class="hit" data-s="${i}" data-fr="${CF.pos+k}" x="${X(i)-22}" y="${Y(k)}" width="44" height="${RH}"/>`}
+ $('cfBoard').innerHTML=`<svg viewBox="0 0 ${W} ${Y(N)+30}" role="group" aria-label="Fretboard: tap where your fingers press">${g}</svg>`;
+ cfResult();
+}
+function cfResult(){
+ const n=cfNotes(),out=$('cfOut'),use=$('cfUse');
+ if(!n.played.length){out.innerHTML='<div class="cfsub">Every string is ✕. Tap the strings you play.</div>';use.disabled=true;use.textContent='Use this chord';CF.cands=[];return}
+ let c=identifyChord(n.shape,n.bass);if(c.length>1&&!c[0].single)c=c.filter((x,k)=>!k||x.score<=Math.min(2.6,c[0].score+1.6));CF.cands=c;if(CF.sel>=c.length)CF.sel=0;
+ const notes=[...new Set(n.shape)].map(x=>CH[x]).join(' ');
+ if(!c.length||c[0].single){out.innerHTML=`<div class="cfname">${c.length?esc(c[0].name):'?'}</div><div class="cfsub">${c.length?'Just one note. Add more strings to make a chord.':'Notes '+esc(notes)+': not a common chord. Try lifting or adding a string, or type a name in the chord search.'}</div>`;use.disabled=true;use.textContent='Use this chord';return}
+ const pick=c[CF.sel].name,snd=transName(pick,n.sh);
+ let sub=`Notes: ${esc(notes)}`;if(n.sh)sub+=`<br>${CF.capo?`With capo ${CF.capo}`:'In this tuning'} it sounds as <b>${esc(snd)}</b>; chord sheets write the shape name.`;
+ out.innerHTML=`<div class="cfname">${esc(pick)}</div><div class="cfsub">${sub}</div>${c.length>1?`<div class="cfalt"><span>Could also be called:</span>${c.slice(0,4).map((x,k)=>`<button type="button" data-k="${k}" class="${k===CF.sel?'on':''}">${esc(x.name)}</button>`).join('')}</div>`:''}`;
+ use.disabled=false;
+ if(CF.mode==='writer'){const d=A&&A.play?(n.sh-tshift(A.play.tun,A.play.capo)):0;CF.useName=transName(pick,d);use.textContent=`Use “${CF.useName}” above the word`;
+  if(d)out.insertAdjacentHTML('beforeend',`<div class="cfsub">Your sheet is set to ${esc(tName(A.play.tun))}${A.play.capo?', capo '+A.play.capo:', no capo'}, so it goes in as <b>${esc(CF.useName)}</b>. To write it as ${esc(pick)}, set the sheet’s tuning and capo to match first.</div>`)}
+ else{CF.useName=pick;use.textContent=`Add “${pick}” to my chord book`}
+}
+function bookMine(name,f,tun,capo){const k=canon(name);if(!k)return;bookAdd([k],'');const b=bookGet(),e=b[k];e.mine=(e.mine||[]).filter(m=>!(m.f.join()===f.join()&&m.tun===tun&&m.capo===capo));e.mine.unshift({f:f.slice(),tun,capo});e.mine=e.mine.slice(0,4);store.set(BOOKK,b)}
+$('cfBoard').addEventListener('click',e=>{if(!CF)return;const h=e.target.closest('.hit');if(!h)return;
+ if(h.dataset.top!=null){const i=+h.dataset.top;CF.f[i]=CF.f[i]<0?0:-1}
+ else{const i=+h.dataset.s,fr=+h.dataset.fr;CF.f[i]=CF.f[i]===fr?0:fr}
+ CF.sel=0;cfRender()});
+$('cfOut').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b||!CF)return;CF.sel=+b.dataset.k;cfResult()});
+document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{if(!CF)return;const k=b.dataset.cs,d=+b.dataset.d;
+ if(k==='capo'){const old=CF.capo;CF.capo=Math.max(0,Math.min(12,CF.capo+d));if(CF.capo!==old){CF.f=CF.f.map(x=>x>0?(x<=CF.capo?0:x):x);if(CF.pos===old+1||CF.pos<=CF.capo)CF.pos=CF.capo+1}}
+ else CF.pos+=d;cfRender()});
+$('cfTun').onchange=e=>{if(!CF)return;CF.tun=e.target.value;cfRender()};
+$('cfClear').onclick=()=>{if(!CF)return;CF.f=[0,0,0,0,0,0];CF.sel=0;cfRender()};
+$('cfClose').onclick=cfClose;
+$('cfWrap').addEventListener('click',e=>{if(e.target.id==='cfWrap')cfClose()});
+$('cfUse').onclick=()=>{if(!CF||!CF.useName)return;const name=CF.useName,f=CF.f.slice(),tun=CF.tun,capo=CF.capo,mode=CF.mode;
+ store.set('cfTun',tun);store.set('cfCapo',capo);bookMine(CF.cands[CF.sel].name,f,tun,capo);
+ if(mode==='writer'){
+  // the sheet's chord box shows your own fingering when it was made in the sheet's tuning and capo
+  if(A&&A.play&&A.play.tun===tun&&A.play.capo===capo){A.fing=A.fing||{};A.fing[canon(name)]={f,capo}}
+  cfClose();setWordChord(name)}
+ else{cfClose();bookOpen=canon(name);renderBook();window.scrollTo({top:0})}
+};
+$('wPickFind').onclick=()=>cfOpen('writer');
+$('chFind').onclick=()=>cfOpen('book');
 // move a chord to the word before/after it (in reading order); swaps if that word already has one
 function moveChord(d){if(!wSel)return;const L=A.lc[wSel.i],n=wordsOf(L.t).length,to=wSel.j+d;if(to<0||to>=n)return;wPush('moved chord');const a=L.ch[wSel.j],b=L.ch[to];if(b)L.ch[wSel.j]=b;else delete L.ch[wSel.j];L.ch[to]=a;const i=wSel.i;closePicker();saveDraft();openPicker(i,to)}
 $('wPickPrev').onclick=()=>moveChord(-1);$('wPickNext').onclick=()=>moveChord(1);
@@ -3084,7 +3222,7 @@ function writtenSheetHTML(print){
  const meta=[`Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})`,`Capo <b>${A.play.capo?'fret '+A.play.capo:'none'}</b>`];
  if(A.artist)meta.unshift(`Artist <b dir="auto">${esc(A.artist)}</b>`);
  const used=lyricChords(A);
- const dg=n=>{const g=segFromName(n,A.play.tun,A.play.capo);let svg=diagram(g&&shapeForSeg(g,A.play.tun,A.play.capo),n);return print?printify(svg):svg};
+ const dg=n=>{const mf=A.fing&&A.fing[canon(n)];const g=segFromName(n,A.play.tun,A.play.capo);let svg=diagram(mf?shapeFromFrets(mf.f,mf.capo):g&&shapeForSeg(g,A.play.tun,A.play.capo),n);return print?printify(svg):svg};
  let h=`<h1 dir="auto">${esc(name)}</h1><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
  if(used.length)h+=`<h3>Chords</h3><div class="pgrid">${used.map(dg).join('')}</div>`;
  h+=`<h3>Lyrics &amp; chords</h3><div class="lyr">${(A.lc||[]).map(L=>{
@@ -3186,15 +3324,16 @@ function renderBook(){
  h+=names.map(n=>{const v=voicings(n,bookTun)[0];return `<button class="bookcard" data-n="${esc(n)}">${v?diagram(v,n):diagram(null,n)}<small>${b[n].songs.length?b[n].songs.length+' song'+(b[n].songs.length>1?'s':''):'added by you'}</small></button>`}).join('');
  $('chGrid').innerHTML=h||(total?'<p class="tip">No chords match. Try a root like “A” or a type like “sus2”.</p>':'<p class="tip">Chords from every song you analyse land here automatically. You can also search for any chord, like Am7 or G/B.</p>');
  $('chCount').textContent=total?`${total} chord${total>1?'s':''} in your book · most used first${q?` · ${names.length} shown`:''}`:'';
- $('chGrid').hidden=false;$('chDetail').hidden=true;$('chSearchRow').hidden=false;
+ $('chGrid').hidden=false;$('chDetail').hidden=true;$('chSearchRow').hidden=false;$('chFind').hidden=false;
 }
 function renderChordDetail(n){
  const b=bookGet(),e=b[n],vs=voicings(n,bookTun);
  let h=`<div class="editrow"><button class="btn ghost" id="chBack">← All chords</button></div><h2 class="chname">${esc(n)}</h2><p class="tunenotes">Notes: ${esc(chordNotes(n))} · ${esc(tName(bookTun))}</p>`;
  if(e&&e.songs.length)h+=`<p class="tip">In: ${e.songs.map(s=>`<b dir="auto">${esc(s)}</b>`).join(', ')}</p>`;
- h+=vs.length?`<div class="voices">${vs.map(v=>`<div class="voice">${diagram(v,n)}<small>${esc(v.label)}</small></div>`).join('')}</div>`:'<p class="tip">No comfortable shape found in this tuning.</p>';
+ const mine=(e&&e.mine||[]).map(m=>`<div class="voice mine">${diagram(shapeFromFrets(m.f,m.capo),n)}<small>Your fingering${m.tun!=='std'?' · '+esc(tName(m.tun)):''}${m.capo?' · capo '+m.capo:''}</small></div>`).join('');
+ h+=vs.length||mine?`<div class="voices">${mine}${vs.map(v=>`<div class="voice">${diagram(v,n)}<small>${esc(v.label)}</small></div>`).join('')}</div>`:'<p class="tip">No comfortable shape found in this tuning.</p>';
  h+=`<div class="editrow">${e?'<button class="btn ghost danger" id="chDel">Remove from my book</button>':'<button class="btn" id="chAdd">Add to my book</button>'}</div><div class="confirm" id="chDelOk" hidden><span>Remove ${esc(n)} from your chord book?</span><button class="btn danger" id="chDelYes">Remove</button><button class="btn ghost" id="chDelNo">Keep</button></div>`;
- $('chDetail').innerHTML=h;$('chDetail').hidden=false;$('chGrid').hidden=true;$('chSearchRow').hidden=true;$('chCount').textContent='';
+ $('chDetail').innerHTML=h;$('chDetail').hidden=false;$('chGrid').hidden=true;$('chSearchRow').hidden=true;$('chFind').hidden=true;$('chCount').textContent='';
  $('chBack').onclick=()=>{bookOpen=null;renderBook()};
  const add=$('chAdd');if(add)add.onclick=()=>{bookAdd([n],'');renderChordDetail(n)};
  const del=$('chDel');if(del){del.onclick=()=>{$('chDelOk').hidden=false};$('chDelNo').onclick=()=>{$('chDelOk').hidden=true};$('chDelYes').onclick=()=>{const bb=bookGet();delete bb[n];store.set(BOOKK,bb);bookOpen=null;renderBook()}}
