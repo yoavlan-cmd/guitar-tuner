@@ -396,28 +396,47 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pickhead{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--muted)}
 .pickhead b{color:var(--ink)}
 .pickx{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px}
-.cfwrap{z-index:56}.cfbox{max-height:92vh;overflow-y:auto;gap:8px}
-.cfset{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-.cftun{display:flex;align-items:center;gap:6px;font:600 13px var(--body);color:var(--muted)}.cftun select{padding:6px 8px;font-size:14px;width:auto}
-.cfstep{display:flex;align-items:center;gap:6px;font:600 13px var(--body);color:var(--muted)}
-.cfstep button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:700 17px var(--body);cursor:pointer}
-.cfstep b{min-width:18px;text-align:center;color:var(--ink);font:700 16px var(--mono)}
-.cfhelp{margin:0;font-size:12.5px}
-.cfboard svg{width:100%;max-width:300px;display:block;margin:0 auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.cfboard .wood{fill:#3A2A1E}.cfboard .fw{stroke:#B9B2A3;stroke-width:2}.cfboard .nut{fill:#EFE8D8}.cfboard .capo{fill:#2B2B30;stroke:#888;stroke-width:1}
-.cfboard .capot{fill:#ddd;font:700 10px var(--body);letter-spacing:.1em}
-.cfboard .st{stroke:#D8D2C4;stroke-linecap:round}.cfboard .st.mute{stroke:#8a8478;stroke-dasharray:3 4}
-.cfboard .inl{fill:#E8E0CC;opacity:.35}
-.cfboard .fn{fill:var(--muted);font:600 12px var(--mono)}
-.cfboard .dot{fill:var(--accent);stroke:#fff;stroke-width:1.5}.cfboard .dott{fill:var(--bg);font:800 12px var(--mono)}
-.cfboard .top{fill:none;stroke:var(--ink);stroke-width:2}.cfboard .topx{stroke:#C8372D;stroke-width:2.6;stroke-linecap:round}
-.cfboard .on{fill:var(--ink);font:700 12px var(--mono)}
+.cfwrap{z-index:56;align-items:flex-start;background:rgba(0,0,0,.6)}
+.cfbox{--m1:#2a2b31;--m2:#1b1c20;--mint:#5FD3B3;max-height:100vh;max-height:100dvh;overflow-y:auto;gap:12px;color:#ECEDEF;
+ border-radius:0 0 24px 24px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.016) 0 1px,rgba(0,0,0,.02) 1px 3px),radial-gradient(130% 90% at 50% 0%,#1d1d22 0%,#16161A 45%,#111115 100%);
+ box-shadow:0 18px 40px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.05)}
+.cfbox .pickhead{color:#ECEDEF}.cfbox .pickhead b{font:700 18px var(--body);color:#F2F3F5;letter-spacing:.01em}
+.cfbox .pickx{width:36px;height:36px;border-radius:50%;color:#C9CBD1;background:linear-gradient(#2c2d33,#1a1b1f);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 6px rgba(0,0,0,.4);display:grid;place-items:center;padding:0}
+.cfout{min-height:118px}
+.cfset{display:flex;flex-wrap:wrap;gap:10px 12px;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));border:1px solid #26272c;border-radius:24px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 -8px 18px rgba(0,0,0,.25)}
+.cftun{display:flex;align-items:center;gap:8px;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#8A8D96;flex:1 1 100%}
+.cftun select{flex:1;appearance:none;-webkit-appearance:none;padding:9px 34px 9px 14px;border-radius:999px;border:1px solid #3a3c43;color:#ECEDEF;font:600 14px var(--body);text-transform:none;letter-spacing:0;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23C9CBD1' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center,linear-gradient(#2e2f35,#1c1d21);box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 2px 6px rgba(0,0,0,.35)}
+.cfstep{display:flex;align-items:center;gap:6px;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#8A8D96}
+.cfstep button{width:32px;height:32px;border-radius:50%;border:1px solid #3a3c43;color:#ECEDEF;font:700 18px var(--body);cursor:pointer;
+ background:radial-gradient(120% 100% at 35% 25%,#4a4d55 0%,#2b2d33 50%,#1c1d21 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -2px 3px rgba(0,0,0,.4),0 3px 8px rgba(0,0,0,.45)}
+.cfstep button:active{transform:scale(.94)}
+.cfstep b{min-width:22px;text-align:center;color:#F2F3F5;font:700 18px var(--mono)}
+.cfhelp{margin:0;font-size:13px;line-height:1.5;color:#A3A6AE}.cfhelp b{color:var(--mint)}
+.cfboard{background:radial-gradient(120% 80% at 50% 0%,#1c1c21,#121215);border:1px solid #26272c;border-radius:24px;padding:4px 6px 2px;box-shadow:inset 0 2px 14px rgba(0,0,0,.55)}
+.cfboard svg{width:100%;max-width:320px;display:block;margin:0 auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.cfboard .fwire{fill:url(#cfWire)}.cfboard .capo{fill:url(#cfCapoG);stroke:#555;stroke-width:1}
+.cfboard .capot{fill:#E6E6E6;font:700 10px var(--body);letter-spacing:.12em}
+.cfboard .st.mute{opacity:.45;stroke-dasharray:4 4}
+.cfboard .fnb{fill:url(#cfKnob);stroke:#3a3c43;stroke-width:1}.cfboard .fnb.bon{fill:url(#cfDotG);stroke:#bff3e3}
+.cfboard .fn{fill:#C9CBD1;font:700 12px var(--mono)}.cfboard .fn.bon{fill:#0B2A22}
+.cfboard .dott{fill:#0B2A22;font:800 12.5px var(--mono)}
+.cfboard .top{fill:none;stroke:#D9DCE2;stroke-width:2.2}.cfboard .topx{stroke:#E0645A;stroke-width:2.8;stroke-linecap:round}
+.cfboard .on{fill:#C9CBD1;font:700 12px var(--mono)}
 .cfboard .hit{fill:transparent;cursor:pointer}@media (hover:hover){.cfboard .hit:hover{fill:rgba(255,255,255,.05)}}
-.cfout{display:flex;flex-direction:column;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.cfout .cfname{font:800 30px/1.1 var(--display)}.cfout .cfsub{font-size:13.5px;color:var(--muted)}
-.cfout .cfalt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
-.cfout .cfalt button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 10px;font:700 13px var(--mono);cursor:pointer}
-.cfout .cfalt button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cfout{display:flex;flex-direction:column;gap:6px;border-radius:24px;padding:14px 16px;border:1px solid #2a2b31;
+ background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 50%),#1A1A1E;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 6px 16px rgba(0,0,0,.35)}
+.cfout .cfname{font:800 40px/1.05 var(--display);color:#F4F5F7;text-shadow:0 2px 10px rgba(0,0,0,.5)}.cfout .cfsub{font-size:13.5px;line-height:1.45;color:#A3A6AE}.cfout .cfsub b{color:#ECEDEF}
+.cfout .cfalt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:#8A8D96}
+.cfout .cfalt button{border:1px solid #3a3c43;background:linear-gradient(#2c2d33,#1c1d21);color:#ECEDEF;border-radius:999px;padding:6px 12px;font:700 13px var(--mono);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.cfout .cfalt button.on{border-color:var(--mint);color:var(--mint);background:#1d2d28}
+.cfbtns{gap:10px}
+.cfbox #cfUse{flex:1;border:0;border-radius:16px;padding:14px 16px;font:700 15px var(--body);color:#141519;cursor:pointer;
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 1px,rgba(0,0,0,.035) 1px 3px),linear-gradient(180deg,#F1F2F4 0%,#C9CCD2 55%,#A9ADB5 100%);
+ box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.25),0 6px 14px rgba(0,0,0,.45)}
+.cfbox #cfUse:disabled{opacity:.45}
+.cfbox #cfClear{border-radius:16px;padding:14px 18px;font:700 15px var(--body);color:#ECEDEF;border:1px solid #3a3c43;background:linear-gradient(#2c2d33,#1a1b1f);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 10px rgba(0,0,0,.35)}
 .cffind{width:100%}
 .voice.mine small{color:var(--accent);font-weight:700}
 .picklist{overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:120px}
@@ -700,7 +719,7 @@ body.wopen{overflow:hidden}
       <div class="cfstep"><span>Capo</span><button type="button" data-cs="capo" data-d="-1" aria-label="Capo down">−</button><b id="cfCapo">0</b><button type="button" data-cs="capo" data-d="1" aria-label="Capo up">+</button></div>
       <div class="cfstep"><span>From fret</span><button type="button" data-cs="pos" data-d="-1" aria-label="Show lower frets">−</button><b id="cfPos">1</b><button type="button" data-cs="pos" data-d="1" aria-label="Show higher frets">+</button></div>
     </div>
-    <p class="tip cfhelp">Tap where your fingers press (tap again to lift). Tap above a string: open ○ / not played ✕.</p>
+    <p class="tip cfhelp">Tap where each finger presses, as many as you use (tap again to lift). <b>Barre:</b> tap a fret number on the left. Above a string: open ○ or not played ✕.</p>
     <div id="cfBoard" class="cfboard"></div>
     <div id="cfOut" class="cfout" aria-live="polite"></div>
     <div class="editrow cfbtns"><button type="button" class="btn" id="cfUse"></button><button type="button" class="btn ghost" id="cfClear">Clear</button></div>
@@ -2788,41 +2807,67 @@ const transName=(n,d)=>{const p=parseChord(n);if(!p||!d)return n;const r=(p.root
 function shapeFromFrets(f,capo){const rel=f.map(x=>x<0?-1:x===0?0:Math.max(1,x-capo));const fg=fingerize(rel)||{fi:rel.map(()=>0),barre:0,bFrom:0};return {f:rel,fi:fg.fi,barre:fg.barre,bFrom:fg.bFrom}}
 let CF=null;
 function cfOpen(mode){
+ try{document.activeElement&&document.activeElement.blur()}catch(e){}
  const tun=mode==='writer'&&A&&A.play?A.play.tun:(store.get('cfTun',null)||bookTun||'std'),capo=mode==='writer'&&A&&A.play?A.play.capo:store.get('cfCapo',0);
- CF={mode,tun,capo,pos:capo+1,f:[0,0,0,0,0,0],sel:0};
+ CF={mode,tun,capo,pos:capo+1,f:[0,0,0,0,0,0],barre:0,sel:0};
  $('cfTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}"${t.id===tun?' selected':''}>${esc(t.name)} (${shortName(t)})</option>`).join('');
  cfRender();$('cfWrap').hidden=false;
 }
 function cfClose(){$('cfWrap').hidden=true;CF=null}
+// what each string really plays: a barre covers every open string that isn't muted or fretted higher
+const cfEff=()=>CF.f.map(x=>x<0?-1:x===0?(CF.barre||0):Math.max(x,CF.barre||0));
 const cfOpenNotes=()=>(TUNINGS.find(t=>t.id===CF.tun)||TUNINGS[0]).n;
 function cfNotes(){
  // real pitch of every played string; chord names are counted from the capo / tuning shift, as chord sheets write them
  const open=cfOpenNotes(),sh=(TSHIFT[CF.tun]??0)+CF.capo;
- const snd=CF.f.map((x,i)=>x<0?null:open[i]+(x===0?CF.capo:x));const played=snd.filter(x=>x!=null);
+ const snd=cfEff().map((x,i)=>x<0?null:open[i]+(x===0?CF.capo:x));const played=snd.filter(x=>x!=null);
  const shape=played.map(m=>((m-sh)%12+12)%12),bass=played.length?((Math.min(...played)-sh)%12+12)%12:null;
  return {snd,played,shape,bass,sh};
 }
 function cfRender(){
  if(!CF)return;CF.pos=Math.max(CF.capo+1,Math.min(20,CF.pos));
  $('cfCapo').textContent=CF.capo;$('cfPos').textContent=CF.pos;
- const open=cfOpenNotes(),N=5,X=i=>48+i*44,TOP=50,RH=40,Y=k=>TOP+k*RH,W=X(5)+28;
+ const open=cfOpenNotes(),N=5,X=i=>58+i*44,TOP=48,RH=44,Y=k=>TOP+k*RH,W=X(5)+30;
  const {sh}=cfNotes(),nn=m=>CH[((m-sh)%12+12)%12];
- let g=`<rect class="wood" x="${X(0)-22}" y="${TOP}" width="${X(5)-X(0)+44}" height="${N*RH}" rx="4"/>`;
- // inlay dots like a real neck
- for(let k=0;k<N;k++){const fr=CF.pos+k,yc=Y(k)+RH/2,cx=(X(2)+X(3))/2;if([3,5,7,9,15,17,19].includes(fr))g+=`<circle class="inl" cx="${cx}" cy="${yc}" r="6"/>`;if(fr===12)g+=`<circle class="inl" cx="${X(1)+22}" cy="${yc}" r="6"/><circle class="inl" cx="${X(3)+22}" cy="${yc}" r="6"/>`}
- for(let k=1;k<=N;k++)g+=`<line class="fw" x1="${X(0)-22}" y1="${Y(k)}" x2="${X(5)+22}" y2="${Y(k)}"/>`;
- if(CF.pos===1)g+=`<rect class="nut" x="${X(0)-22}" y="${TOP-6}" width="${X(5)-X(0)+44}" height="7" rx="2"/>`;
- else if(CF.capo&&CF.pos===CF.capo+1)g+=`<rect class="capo" x="${X(0)-26}" y="${TOP-12}" width="${X(5)-X(0)+52}" height="14" rx="6"/><text class="capot" x="${(X(0)+X(5))/2}" y="${TOP-2}" text-anchor="middle">CAPO ${CF.capo}</text>`;
- else g+=`<line class="fw" x1="${X(0)-22}" y1="${TOP}" x2="${X(5)+22}" y2="${TOP}"/>`;
- for(let k=0;k<N;k++)g+=`<text class="fn" x="14" y="${Y(k)+RH/2+4}" text-anchor="middle">${CF.pos+k}</text>`;
- for(let i=0;i<6;i++){const f=CF.f[i];g+=`<line class="st${f<0?' mute':''}" x1="${X(i)}" y1="${TOP}" x2="${X(i)}" y2="${Y(N)}" stroke-width="${(3.2-i*.4).toFixed(1)}"/>`;
-  if(f<0)g+=`<line class="topx" x1="${X(i)-7}" y1="22" x2="${X(i)+7}" y2="36"/><line class="topx" x1="${X(i)+7}" y1="22" x2="${X(i)-7}" y2="36"/>`;
-  else if(f===0)g+=`<circle class="top" cx="${X(i)}" cy="29" r="8"/>`;
-  else if(f<CF.pos||f>=CF.pos+N)g+=`<text class="on" x="${X(i)}" y="34" text-anchor="middle">${f}</text>`;
-  g+=`<text class="on" x="${X(i)}" y="${Y(N)+20}" text-anchor="middle">${esc(nn(open[i]+CF.capo))}</text>`;
-  if(f>0&&f>=CF.pos&&f<CF.pos+N){const yc=Y(f-CF.pos)+RH/2;g+=`<circle class="dot" cx="${X(i)}" cy="${yc}" r="13.5"/><text class="dott" x="${X(i)}" y="${yc+4}" text-anchor="middle">${esc(nn(open[i]+f))}</text>`}
-  g+=`<rect class="hit" data-top="${i}" x="${X(i)-22}" y="8" width="44" height="${TOP-10}"/>`;
+ const L=X(0)-24,R=X(5)+24,BW=R-L,BOT=Y(N);
+ const defs=`<defs>
+  <filter id="cfGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9 0.025" numOctaves="3" seed="7"/><feColorMatrix values="0 0 0 0 0.12  0 0 0 0 0.07  0 0 0 0 0.03  0 0 0 .55 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+  <linearGradient id="cfWood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b2416"/><stop offset=".18" stop-color="#5a3a24"/><stop offset=".5" stop-color="#4c301d"/><stop offset=".82" stop-color="#5d3c25"/><stop offset="1" stop-color="#352013"/></linearGradient>
+  <linearGradient id="cfWire" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5f6f8"/><stop offset=".45" stop-color="#b9bcc3"/><stop offset="1" stop-color="#6c7078"/></linearGradient>
+  <linearGradient id="cfNut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".35" stop-color="#e2b65a"/><stop offset=".7" stop-color="#b8862f"/><stop offset="1" stop-color="#7a5418"/></linearGradient>
+  <linearGradient id="cfCapoG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4c53"/><stop offset=".5" stop-color="#25262b"/><stop offset="1" stop-color="#121316"/></linearGradient>
+  <linearGradient id="cfStr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d9098"/><stop offset=".45" stop-color="#f4f5f7"/><stop offset="1" stop-color="#7d8088"/></linearGradient>
+  <linearGradient id="cfWound" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a7350"/><stop offset=".45" stop-color="#f1dfb8"/><stop offset="1" stop-color="#7a6444"/></linearGradient>
+  <radialGradient id="cfDotG" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="#e9fff8"/><stop offset=".25" stop-color="#9ff0d7"/><stop offset=".65" stop-color="#4fc3a2"/><stop offset="1" stop-color="#22735e"/></radialGradient>
+  <linearGradient id="cfBarG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9f6e4"/><stop offset=".45" stop-color="#5fd3b3"/><stop offset="1" stop-color="#2a8a70"/></linearGradient>
+  <radialGradient id="cfPearl" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#d9d4c8"/><stop offset="1" stop-color="#9c968a"/></radialGradient>
+  <radialGradient id="cfKnob" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#4f525a"/><stop offset=".6" stop-color="#2a2c32"/><stop offset="1" stop-color="#18191d"/></radialGradient>
+  <filter id="cfShadow" x="-40%" y="-40%" width="180%" height="190%"><feDropShadow dx="0" dy="2.2" stdDeviation="1.8" flood-color="#000" flood-opacity=".6"/></filter>
+ </defs>`;
+ let g=defs+`<rect x="${L}" y="${TOP}" width="${BW}" height="${N*RH}" rx="5" fill="url(#cfWood)"/><rect x="${L}" y="${TOP}" width="${BW}" height="${N*RH}" rx="5" fill="#000" filter="url(#cfGrain)"/>
+  <rect x="${L}" y="${TOP}" width="${BW}" height="${N*RH}" rx="5" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/>`;
+ // pearl inlays like a real neck
+ for(let k=0;k<N;k++){const fr=CF.pos+k,yc=Y(k)+RH/2,cx=(X(2)+X(3))/2;if([3,5,7,9,15,17,19].includes(fr))g+=`<circle cx="${cx}" cy="${yc}" r="6.5" fill="url(#cfPearl)" opacity=".85"/>`;if(fr===12)g+=`<circle cx="${X(1)+22}" cy="${yc}" r="6.5" fill="url(#cfPearl)" opacity=".85"/><circle cx="${X(3)+22}" cy="${yc}" r="6.5" fill="url(#cfPearl)" opacity=".85"/>`}
+ for(let k=1;k<=N;k++)g+=`<rect class="fwire" x="${L}" y="${Y(k)-1.8}" width="${BW}" height="3.6" rx="1.2"/>`;
+ if(CF.pos===1)g+=`<rect x="${L-2}" y="${TOP-9}" width="${BW+4}" height="10" rx="2.5" fill="url(#cfNut)" filter="url(#cfShadow)"/>`;
+ else if(CF.capo&&CF.pos===CF.capo+1)g+=`<rect class="capo" x="${L-6}" y="${TOP-14}" width="${BW+12}" height="16" rx="7" filter="url(#cfShadow)"/><text class="capot" x="${(L+R)/2}" y="${TOP-3}" text-anchor="middle">CAPO ${CF.capo}</text>`;
+ else g+=`<rect class="fwire" x="${L}" y="${TOP-1.8}" width="${BW}" height="3.6" rx="1.2"/>`;
+ // fret numbers are round metal buttons: tap one for a barre
+ for(let k=0;k<N;k++){const on=CF.barre===CF.pos+k,yc=Y(k)+RH/2;g+=`<circle class="fnb${on?' bon':''}" cx="15" cy="${yc}" r="12" filter="url(#cfShadow)"/><text class="fn${on?' bon':''}" x="15" y="${yc+4}" text-anchor="middle">${CF.pos+k}</text>`}
+ // strings: low three wound (bronze), top three plain steel
+ for(let i=0;i<6;i++){const f=CF.f[i],w=(3.6-i*.5).toFixed(1);g+=`<rect class="st${f<0?' mute':''}" x="${X(i)-w/2}" y="${TOP-2}" width="${w}" height="${BOT-TOP+4}" fill="url(#${i<3?'cfWound':'cfStr'})" filter="url(#cfShadow)"/>`}
+ const ef=cfEff();
+ if(CF.barre&&CF.barre>=CF.pos&&CF.barre<CF.pos+N){const on=ef.map((x,i)=>x===CF.barre&&CF.f[i]===0?i:-1).filter(i=>i>=0);if(on.length){const yc=Y(CF.barre-CF.pos)+RH/2;g+=`<rect x="${X(on[0])-15}" y="${yc-14}" width="${X(on[on.length-1])-X(on[0])+30}" height="28" rx="14" fill="url(#cfBarG)" stroke="#d6fff2" stroke-opacity=".6" stroke-width="1" filter="url(#cfShadow)"/><rect x="${X(on[0])-9}" y="${yc-11}" width="${X(on[on.length-1])-X(on[0])+18}" height="7" rx="3.5" fill="#fff" opacity=".28"/><text class="dott" x="${X(on[0])}" y="${yc+4.5}" text-anchor="middle">1</text>`}}
+ for(let i=0;i<6;i++){const f=CF.f[i];
+  if(f<0)g+=`<line class="topx" x1="${X(i)-7}" y1="20" x2="${X(i)+7}" y2="34"/><line class="topx" x1="${X(i)+7}" y1="20" x2="${X(i)-7}" y2="34"/>`;
+  else if(f===0&&!CF.barre)g+=`<circle class="top" cx="${X(i)}" cy="27" r="8"/>`;
+  else if(f>0&&(f<CF.pos||f>=CF.pos+N))g+=`<text class="on" x="${X(i)}" y="32" text-anchor="middle">${f}</text>`;
+  if(f===0&&CF.barre&&(CF.barre<CF.pos||CF.barre>=CF.pos+N))g+=`<text class="on" x="${X(i)}" y="32" text-anchor="middle">${CF.barre}</text>`;
+  g+=`<text class="on" x="${X(i)}" y="${BOT+21}" text-anchor="middle">${esc(nn(open[i]+CF.capo))}</text>`;
+  if(f>0&&f>=CF.pos&&f<CF.pos+N){const yc=Y(f-CF.pos)+RH/2;g+=`<circle cx="${X(i)}" cy="${yc}" r="14" fill="url(#cfDotG)" stroke="#d6fff2" stroke-opacity=".7" stroke-width="1" filter="url(#cfShadow)"/><ellipse cx="${X(i)-3}" cy="${yc-6}" rx="7" ry="3.5" fill="#fff" opacity=".35"/><text class="dott" x="${X(i)}" y="${yc+4.5}" text-anchor="middle">${esc(nn(open[i]+f))}</text>`}}
+ for(let i=0;i<6;i++){g+=`<rect class="hit" data-top="${i}" x="${X(i)-22}" y="6" width="44" height="${TOP-10}"/>`;
   for(let k=0;k<N;k++)g+=`<rect class="hit" data-s="${i}" data-fr="${CF.pos+k}" x="${X(i)-22}" y="${Y(k)}" width="44" height="${RH}"/>`}
+ for(let k=0;k<N;k++)g+=`<rect class="hit" data-barre="${CF.pos+k}" x="0" y="${Y(k)}" width="${L}" height="${RH}"/>`;
  $('cfBoard').innerHTML=`<svg viewBox="0 0 ${W} ${Y(N)+30}" role="group" aria-label="Fretboard: tap where your fingers press">${g}</svg>`;
  cfResult();
 }
@@ -2833,28 +2878,37 @@ function cfResult(){
  const notes=[...new Set(n.shape)].map(x=>CH[x]).join(' ');
  if(!c.length||c[0].single){out.innerHTML=`<div class="cfname">${c.length?esc(c[0].name):'?'}</div><div class="cfsub">${c.length?'Just one note. Add more strings to make a chord.':'Notes '+esc(notes)+': not a common chord. Try lifting or adding a string, or type a name in the chord search.'}</div>`;use.disabled=true;use.textContent='Use this chord';return}
  const pick=c[CF.sel].name,snd=transName(pick,n.sh);
- let sub=`Notes: ${esc(notes)}`;if(n.sh)sub+=`<br>${CF.capo?`With capo ${CF.capo}`:'In this tuning'} it sounds as <b>${esc(snd)}</b>; chord sheets write the shape name.`;
+ const fg=fingerize(cfEff().map(x=>x<0?-1:x===0?0:Math.max(1,x-CF.capo)));
+ let sub=`Notes: ${esc(notes)}`+(fg?` · ${(k=>fg.barre?(k?`barre + ${k} finger${k===1?'':'s'}`:'barre only'):`${k} finger${k===1?'':'s'}`)(fg.n-(fg.barre?1:0))}`:'');if(n.sh)sub+=`<br>${CF.capo?`With capo ${CF.capo}`:'In this tuning'} it sounds as <b>${esc(snd)}</b>; chord sheets write the shape name.`;
  out.innerHTML=`<div class="cfname">${esc(pick)}</div><div class="cfsub">${sub}</div>${c.length>1?`<div class="cfalt"><span>Could also be called:</span>${c.slice(0,4).map((x,k)=>`<button type="button" data-k="${k}" class="${k===CF.sel?'on':''}">${esc(x.name)}</button>`).join('')}</div>`:''}`;
  use.disabled=false;
  if(CF.mode==='writer'){const d=A&&A.play?(n.sh-tshift(A.play.tun,A.play.capo)):0;CF.useName=transName(pick,d);use.textContent=`Use “${CF.useName}” above the word`;
   if(d)out.insertAdjacentHTML('beforeend',`<div class="cfsub">Your sheet is set to ${esc(tName(A.play.tun))}${A.play.capo?', capo '+A.play.capo:', no capo'}, so it goes in as <b>${esc(CF.useName)}</b>. To write it as ${esc(pick)}, set the sheet’s tuning and capo to match first.</div>`)}
- else{CF.useName=pick;use.textContent=`Add “${pick}” to my chord book`}
+ else{CF.useName=pick;const k=canon(pick),e=k&&bookGet()[k];CF.bookState='add';
+  if(e){
+   // already in the book: never add it twice. A new way to play it can still be kept as "your fingering".
+   const ef=cfEff(),same=v=>v.f.join()===ef.join(),known=(e.mine||[]).some(m=>m.f.join()===ef.join()&&m.tun===CF.tun&&m.capo===CF.capo)||(!CF.capo&&voicings(k,CF.tun).some(same));
+   CF.bookState=known?'open':'fing';
+   use.textContent=known?`Open “${k}” in my chord book`:`Save this fingering to “${k}”`;
+   out.insertAdjacentHTML('beforeend',`<div class="cfsub">✓ <b>${esc(k)}</b> is already in your chord book${known?', with this fingering.':'. This way of playing it isn’t, so you can keep it as your fingering.'}</div>`)}
+  else use.textContent=`Add “${pick}” to my chord book`}
 }
 function bookMine(name,f,tun,capo){const k=canon(name);if(!k)return;bookAdd([k],'');const b=bookGet(),e=b[k];e.mine=(e.mine||[]).filter(m=>!(m.f.join()===f.join()&&m.tun===tun&&m.capo===capo));e.mine.unshift({f:f.slice(),tun,capo});e.mine=e.mine.slice(0,4);store.set(BOOKK,b)}
 $('cfBoard').addEventListener('click',e=>{if(!CF)return;const h=e.target.closest('.hit');if(!h)return;
- if(h.dataset.top!=null){const i=+h.dataset.top;CF.f[i]=CF.f[i]<0?0:-1}
+ if(h.dataset.barre!=null){const fr=+h.dataset.barre;CF.barre=CF.barre===fr?0:fr;CF.f=CF.f.map(x=>x>0&&x<=CF.barre?0:x)}
+ else if(h.dataset.top!=null){const i=+h.dataset.top;CF.f[i]=CF.f[i]<0?0:-1}
  else{const i=+h.dataset.s,fr=+h.dataset.fr;CF.f[i]=CF.f[i]===fr?0:fr}
  CF.sel=0;cfRender()});
 $('cfOut').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b||!CF)return;CF.sel=+b.dataset.k;cfResult()});
 document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{if(!CF)return;const k=b.dataset.cs,d=+b.dataset.d;
- if(k==='capo'){const old=CF.capo;CF.capo=Math.max(0,Math.min(12,CF.capo+d));if(CF.capo!==old){CF.f=CF.f.map(x=>x>0?(x<=CF.capo?0:x):x);if(CF.pos===old+1||CF.pos<=CF.capo)CF.pos=CF.capo+1}}
+ if(k==='capo'){const old=CF.capo;CF.capo=Math.max(0,Math.min(12,CF.capo+d));if(CF.capo!==old){CF.f=CF.f.map(x=>x>0?(x<=CF.capo?0:x):x);if(CF.barre&&CF.barre<=CF.capo)CF.barre=0;if(CF.pos===old+1||CF.pos<=CF.capo)CF.pos=CF.capo+1}}
  else CF.pos+=d;cfRender()});
 $('cfTun').onchange=e=>{if(!CF)return;CF.tun=e.target.value;cfRender()};
-$('cfClear').onclick=()=>{if(!CF)return;CF.f=[0,0,0,0,0,0];CF.sel=0;cfRender()};
+$('cfClear').onclick=()=>{if(!CF)return;CF.f=[0,0,0,0,0,0];CF.barre=0;CF.sel=0;cfRender()};
 $('cfClose').onclick=cfClose;
 $('cfWrap').addEventListener('click',e=>{if(e.target.id==='cfWrap')cfClose()});
-$('cfUse').onclick=()=>{if(!CF||!CF.useName)return;const name=CF.useName,f=CF.f.slice(),tun=CF.tun,capo=CF.capo,mode=CF.mode;
- store.set('cfTun',tun);store.set('cfCapo',capo);bookMine(CF.cands[CF.sel].name,f,tun,capo);
+$('cfUse').onclick=()=>{if(!CF||!CF.useName)return;const name=CF.useName,f=cfEff(),tun=CF.tun,capo=CF.capo,mode=CF.mode;
+ store.set('cfTun',tun);store.set('cfCapo',capo);if(!(mode==='book'&&CF.bookState==='open'))bookMine(CF.cands[CF.sel].name,f,tun,capo);
  if(mode==='writer'){
   // the sheet's chord box shows your own fingering when it was made in the sheet's tuning and capo
   if(A&&A.play&&A.play.tun===tun&&A.play.capo===capo){A.fing=A.fing||{};A.fing[canon(name)]={f,capo}}
