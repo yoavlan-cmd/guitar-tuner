@@ -374,6 +374,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wtbtns{display:flex;gap:14px;justify-content:flex-end}.wtbtns .linkbtn{font-size:12.5px}.linkbtn.danger{color:#E5533D}
 .instform .filled{border-color:var(--accent)!important;box-shadow:0 0 0 1px var(--accent) inset}.instform [data-spec].filled{border-radius:12px;padding:4px}
 .specbox{border:1px solid var(--line);border-radius:12px;padding:8px 10px}.specbox>summary{cursor:pointer;display:flex;gap:8px;align-items:baseline;font-size:14px}.specbox>summary span{color:var(--muted);font-size:13px}.specbox[open]>summary{margin-bottom:8px}
+.wundo{position:sticky;bottom:10px;z-index:20;display:flex;gap:8px;align-items:center;justify-content:center;margin-top:10px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:0 4px 18px #0006}.wundo .btn{padding:7px 16px}.wundo .btn:disabled{opacity:.35}#wUndoMsg{font-size:12.5px;color:var(--muted);max-width:40%}
 .wslot{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.wins{display:block;width:100%;border:1px dashed var(--accent);background:none;color:var(--accent);border-radius:8px;padding:4px;font:600 12.5px var(--body);margin:3px 0;cursor:pointer}
 .wl.slots.allslots{background:var(--surface);border-radius:8px;padding:4px 6px}.wl .ww .t.slot{color:var(--muted)}.wl .wadd{border:1px solid var(--line);background:none;color:var(--muted);border-radius:6px;padding:0 8px;font:600 14px var(--body);cursor:pointer;align-self:center}
 .shotnote{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:10px;font-size:13.5px}.shotnote img{width:84px;max-height:120px;object-fit:cover;border-radius:8px;cursor:zoom-in}.shotnote .editrow{margin-top:6px;flex-wrap:wrap}
@@ -874,6 +875,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
         <div class="wlines" id="wLines"></div>
         <button class="btn cta wide" id="wDone">Make the chord sheet</button>
       </section>
+      <div class="wundo" id="wUndoBar"><button type="button" class="btn" id="wUndo" disabled>↶ Undo</button><button type="button" class="btn ghost" id="wRedo" disabled>↷ Redo</button><span id="wUndoMsg"></span></div>
       <div class="picker" id="wPick" hidden>
         <div class="pickbox" role="dialog" aria-label="Choose a chord">
           <div class="pickhead"><span>Chord above <b id="wPickWord" dir="auto"></b></span><button type="button" class="pickx" id="wPickClose" aria-label="Close">✕</button></div>
@@ -2470,7 +2472,7 @@ function remapLines(text,old){
 $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
 function openWriter(a,step){
- vid.pause();A=a;A.made=false;wFromWriter=false;
+ vid.pause();A=a;A.made=false;wFromWriter=false;try{wResetHist()}catch(e){}
  ['drop','writeNew','draftCard','resumeCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
  $('wArtists').innerHTML=knownArtists().map(t=>`<option value="${esc(t)}">`).join('');
@@ -2531,24 +2533,34 @@ function openPicker(i,j){
  setTimeout(()=>{try{$('wPickQ').focus({preventScroll:true})}catch(e){}},60);
 }
 function closePicker(){$('wPick').hidden=true;wSel=null;renderWLines()}
-function setWordChord(name){if(!wSel)return;const L=A.lc[wSel.i];if(name)L.ch[wSel.j]=name;else delete L.ch[wSel.j];
+// undo / redo for the song writer: every change to the words or chords can be taken back
+let wHist=[],wFut=[];
+const wSnap=()=>JSON.stringify({lc:A.lc||[],lyrics:A.lyrics||'',title:A.title||'',artist:A.artist||''});
+function wPush(what,snap){if(!A)return;const s=snap||wSnap();if(wHist.length&&wHist[wHist.length-1].s===s)return;wHist.push({s,what:what||'change'});if(wHist.length>60)wHist.shift();wFut=[];wUndoUI()}
+function wRestore(s){const o=JSON.parse(s);A.lc=o.lc;A.lyrics=o.lyrics;A.title=o.title;A.artist=o.artist;$('wLyrics').value=A.lyrics;$('wTitle').value=A.title;$('wArtist').value=A.artist;wSel=null;$('wPick').hidden=true;renderWLines();saveDraft()}
+function wUndoUI(m){$('wUndo').disabled=!wHist.length;$('wRedo').disabled=!wFut.length;$('wUndoMsg').textContent=m||''}
+$('wUndo').onclick=()=>{const h=wHist.pop();if(!h)return;wFut.push({s:wSnap(),what:h.what});wRestore(h.s);wUndoUI('Undid: '+h.what)};
+$('wRedo').onclick=()=>{const h=wFut.pop();if(!h)return;wHist.push({s:wSnap(),what:h.what});wRestore(h.s);wUndoUI('Redid: '+h.what)};
+function wResetHist(){wHist=[];wFut=[];wUndoUI()}
+function setWordChord(name){if(!wSel)return;wPush(name?'chord '+name:'removed chord');const L=A.lc[wSel.i];if(name)L.ch[wSel.j]=name;else delete L.ch[wSel.j];
  const n=wSel;closePicker();saveDraft();const b=$('wLines').querySelector(`.ww[data-i="${n.i}"][data-j="${n.j}"]`);if(b)b.focus({preventScroll:true})}
 $('wLines').addEventListener('click',e=>{if(wMode==='tx')return;
- const ins=e.target.closest('[data-ins]');if(ins){const k=+ins.dataset.ins;A.lc.splice(k,0,{t:SLOTS(4),ch:{}});wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';syncLyricsFromLines();renderWLines();saveDraft();return}
- const add=e.target.closest('[data-add]');if(add){const L=A.lc[+add.dataset.add];L.t=L.t.trim()+' ♪';syncLyricsFromLines();renderWLines();saveDraft();return}
+ const ins=e.target.closest('[data-ins]');if(ins){wPush('added chords-only line');const k=+ins.dataset.ins;A.lc.splice(k,0,{t:SLOTS(4),ch:{}});wInsMode=false;$('wIns').textContent='＋ Add a chords-only line';syncLyricsFromLines();renderWLines();saveDraft();return}
+ const add=e.target.closest('[data-add]');if(add){wPush('added a chord spot');const L=A.lc[+add.dataset.add];L.t=L.t.trim()+' ♪';syncLyricsFromLines();renderWLines();saveDraft();return}
  const b=e.target.closest('.ww');if(b)openPicker(+b.dataset.i,+b.dataset.j)});
+['wLyrics','wTitle','wArtist'].forEach(id=>{const el=$(id);el.addEventListener('focus',()=>{if(A){el._snap=wSnap();el._was=el.value}});el.addEventListener('blur',()=>{if(A&&el._snap&&el.value!==el._was){wPush(id==='wLyrics'?'edited the lyrics':id==='wTitle'?'changed the song name':'changed the artist',el._snap)}})});
 function syncLyricsFromLines(){A.lyrics=(A.lc||[]).map(L=>L.t).join('\n');$('wLyrics').value=A.lyrics}
-$('wLines').addEventListener('focusin',e=>{const t=e.target.closest('.wtin');if(t){const L=A.lc[+t.dataset.ti];t._base=L?{...L.ch}:{}}});
+$('wLines').addEventListener('focusin',e=>{const t=e.target.closest('.wtin');if(t){const L=A.lc[+t.dataset.ti];t._base=L?{...L.ch}:{};t._snap=wSnap();t._was=t.value}});
 $('wLines').addEventListener('input',e=>{const t=e.target.closest('.wtin');if(!t)return;setLineText(+t.dataset.ti,t.value,t._base)});
-$('wLines').addEventListener('change',e=>{const t=e.target.closest('.wtin');if(t)renderWText()});
-$('wLines').addEventListener('keydown',e=>{const t=e.target.closest('.wtin');if(!t||e.key!=='Enter')return;e.preventDefault();const i=+t.dataset.ti;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus()});
+$('wLines').addEventListener('change',e=>{const t=e.target.closest('.wtin');if(t){if(t._snap&&t.value!==t._was)wPush('edited a line',t._snap);renderWText()}});
+$('wLines').addEventListener('keydown',e=>{const t=e.target.closest('.wtin');if(!t||e.key!=='Enter')return;e.preventDefault();if(t._snap&&t.value!==t._was){wPush('edited a line',t._snap);t._snap=wSnap();t._was=t.value}wPush('added a line');const i=+t.dataset.ti;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus()});
 $('wLines').addEventListener('click',e=>{if(wMode!=='tx')return;
- const ad=e.target.closest('[data-tadd]');if(ad){const i=+ad.dataset.tadd;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus();return}
- const dl=e.target.closest('[data-tdel]');if(dl){const i=+dl.dataset.tdel,row=dl.closest('.wt');A.lc.splice(i,1);syncLyricsFromLines();saveDraft();renderWText();return}});
+ const ad=e.target.closest('[data-tadd]');if(ad){wPush('added a line');const i=+ad.dataset.tadd;A.lc.splice(i+1,0,{t:'',ch:{}});syncLyricsFromLines();saveDraft();renderWText();const n=$('wLines').querySelector(`.wtin[data-ti="${i+1}"]`);if(n)n.focus();return}
+ const dl=e.target.closest('[data-tdel]');if(dl){const i=+dl.dataset.tdel,row=dl.closest('.wt');const was=(A.lc[i]&&A.lc[i].t||'').trim();wPush(was?'deleted “'+(was.length>24?was.slice(0,24)+'…':was)+'”':'deleted an empty line');A.lc.splice(i,1);syncLyricsFromLines();saveDraft();renderWText();return}});
 document.querySelectorAll('#wMode [data-m]').forEach(b=>b.onclick=()=>{wMode=b.dataset.m;document.querySelectorAll('#wMode [data-m]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===wMode));
  $('wModeTip').textContent=wMode==='tx'?'Fix or delete any line, add new lines, or type [Chorus] / [פזמון] on a line for a label. Chords stay on their words.':'Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.';$('wIns').hidden=wMode==='tx';wInsMode=false;renderWLines()});
 $('wIns').onclick=()=>{wInsMode=!wInsMode;$('wIns').textContent=wInsMode?'Cancel':'＋ Add a chords-only line';renderWLines();if(wInsMode){const f=$('wLines').querySelector('.wins');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})}};
-document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>{const ta=$('wLyrics'),v=ta.value,pos=ta.selectionStart==null?v.length:ta.selectionStart;
+document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>{wPush('added a chords-only part');const ta=$('wLyrics'),v=ta.value,pos=ta.selectionStart==null?v.length:ta.selectionStart;
  const before=v.slice(0,pos),after=v.slice(pos),lab=b.dataset.part,ins=(before&&!before.endsWith('\n')?'\n':'')+(lab?`[${lab}]\n`:'')+SLOTS(4)+(after&&!after.startsWith('\n')?'\n':'');
  ta.value=before+ins+after;const c=(before+ins).length;ta.focus();try{ta.setSelectionRange(c,c)}catch(e){}if(A){A.lyrics=ta.value;saveDraft()}});
 $('wPickQ').addEventListener('input',e=>{$('wPickList').innerHTML=pickerHTML(e.target.value)});
@@ -2556,7 +2568,7 @@ $('wPickQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(
 $('wPickList').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(b)setWordChord(b.dataset.c)});
 $('wPickDel').onclick=()=>setWordChord('');
 // move a chord to the word before/after it (in reading order); swaps if that word already has one
-function moveChord(d){if(!wSel)return;const L=A.lc[wSel.i],n=wordsOf(L.t).length,to=wSel.j+d;if(to<0||to>=n)return;const a=L.ch[wSel.j],b=L.ch[to];if(b)L.ch[wSel.j]=b;else delete L.ch[wSel.j];L.ch[to]=a;const i=wSel.i;closePicker();saveDraft();openPicker(i,to)}
+function moveChord(d){if(!wSel)return;const L=A.lc[wSel.i],n=wordsOf(L.t).length,to=wSel.j+d;if(to<0||to>=n)return;wPush('moved chord');const a=L.ch[wSel.j],b=L.ch[to];if(b)L.ch[wSel.j]=b;else delete L.ch[wSel.j];L.ch[to]=a;const i=wSel.i;closePicker();saveDraft();openPicker(i,to)}
 $('wPickPrev').onclick=()=>moveChord(-1);$('wPickNext').onclick=()=>moveChord(1);
 $('wPickClose').onclick=closePicker;
 $('wPick').addEventListener('click',e=>{if(e.target===$('wPick'))closePicker()});
