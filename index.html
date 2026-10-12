@@ -3749,14 +3749,44 @@ async function mxModelBytes(url,onp){
  const blob=new Blob(parts);try{if(c)await c.put(url,new Response(blob))}catch(e){}
  return new Uint8Array(await blob.arrayBuffer());
 }
+// The model runs in a background worker, so the screen stays responsive and a stuck graphics chip can be stopped and replaced.
+const MX_WORKER=`let O=null,s=null;
+onmessage=async e=>{const m=e.data;try{
+ if(m.t==='init'){if(!O){if(!self.ort)importScripts(m.ort);O=self.ort;O.env.wasm.wasmPaths=m.dir;O.env.wasm.numThreads=1}
+  s=await O.InferenceSession.create(m.bytes,{executionProviders:[m.ep],graphOptimizationLevel:'basic'});postMessage({t:'ready'})}
+ else if(m.t==='run'){if(m.hang)return;const o=await s.run({[s.inputNames[0]]:new O.Tensor('float32',m.inp,[1,2,m.S])});
+  const y=new Float32Array(o[s.outputNames[0]].data);postMessage({t:'out',y},[y.buffer])}
+}catch(err){postMessage({t:'err',msg:String(err&&err.message||err)})}};`;
+let mxW=null,mxWUrl=null,mxOrtText=null;
+function mxWKill(){try{mxW&&mxW.terminate()}catch(e){}mxW=null;mxSess=null}
+// send one job to the worker; rejects on error, on cancel, or with {stall:true} after ms milliseconds
+function mxCall(msg,transfer,ms){return new Promise((res,rej)=>{const w=mxW;let to=0;
+ const done=()=>{clearTimeout(to);clearInterval(ci);w.onmessage=null;w.onerror=null};
+ const ci=setInterval(()=>{if(mxCancel){done();rej({cancel:true})}},250);
+ if(ms)to=setTimeout(()=>{done();rej({stall:true})},ms);
+ w.onmessage=e=>{done();e.data.t==='err'?rej(new Error(e.data.msg)):res(e.data)};
+ w.onerror=e=>{done();rej(new Error((e&&e.message)||'worker'))};
+ w.postMessage(msg,transfer||[])})}
+async function mxCached(url){try{const c=await caches.open('guitaring-models');return !!(await c.match(url))}catch(e){return false}}
+async function mxBoot(ep,url,onp){
+ mxWKill();
+ // the ONNX Runtime library is fetched once and built into the worker itself (one file, no cross-site script loading inside the worker)
+ if(!mxWUrl){if(!mxOrtText){const r=await fetch(MX.ORT);if(!r.ok)throw new Error('fetch ort '+r.status);mxOrtText=await r.text()}
+  mxWUrl=URL.createObjectURL(new Blob([mxOrtText,'\n;',MX_WORKER],{type:'text/javascript'}))}
+ mxW=new Worker(mxWUrl);
+ const bytes=await mxModelBytes(window.__mxModelUrl||url,onp);
+ await mxCall({t:'init',ort:MX.ORT,dir:MX.ORT_DIR,ep:window.__mxFakeGpu?'wasm':ep,bytes},[bytes.buffer],ep==='webgpu'?240000:0);
+ mxSess=true;mxSessKind=ep==='webgpu'?'graphics chip':'processor'}
+// processor route: reuse the big model if it is already on the phone (no new download), else get the smaller one
+async function mxCpu(onp){
+ if(await mxCached(window.__mxModelUrl||MX.MODEL_GPU)){try{await mxBoot('wasm',MX.MODEL_GPU,onp);return}catch(e){if(e&&e.cancel)throw e}}
+ await mxBoot('wasm',MX.MODEL_CPU,onp)}
 async function mxSession(onp){
- if(mxSess)return mxSess;
- await loadScript(MX.ORT);const ort=window.ort;ort.env.wasm.wasmPaths=MX.ORT_DIR;ort.env.wasm.numThreads=self.crossOriginIsolated?Math.min(4,navigator.hardwareConcurrency||2):1;
- let gpu=false;try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
- const url=gpu?MX.MODEL_GPU:MX.MODEL_CPU,bytes=await mxModelBytes(window.__mxModelUrl||url,onp);
- if(gpu){try{mxSess=await ort.InferenceSession.create(bytes,{executionProviders:['webgpu'],graphOptimizationLevel:'basic'});mxSessKind='graphics chip';return mxSess}catch(e){}}
- mxSess=await ort.InferenceSession.create(bytes,{executionProviders:['wasm'],graphOptimizationLevel:'basic'});mxSessKind='processor';return mxSess;
-}
+ if(mxW&&mxSess)return;
+ let gpu=false,noGpu=false;try{noGpu=localStorage.getItem('guitaring.mxNoGpu')==='1'}catch(e){}
+ if(window.__mxFakeGpu)gpu=true;else try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
+ if(gpu&&!noGpu){try{await mxBoot('webgpu',MX.MODEL_GPU,onp);return}catch(e){if(e&&e.cancel)throw e}}
+ await mxCpu(onp)}
 // ---- 2× downsampler (31-tap half-band low-pass) that streams chunk by chunk ----
 const MX_H=(()=>{const N=31,h=new Float32Array(N);let s=0;for(let k=0;k<N;k++){const n=k-15,x=n===0?.5:Math.sin(Math.PI*n/2)/(Math.PI*n),w=.5-.5*Math.cos(2*Math.PI*k/(N-1));h[k]=x*w;s+=h[k]}for(let k=0;k<N;k++)h[k]/=s;return h})();
 function mxDec(){return {hist:new Float32Array(30),phase:0}}
@@ -3767,21 +3797,46 @@ function mxDecWrite(st,x,out,ch,oi){
  st.phase=i-buf.length;st.hist=buf.slice(buf.length-30);return oi;
 }
 // ---- the separation itself: 7.8 s windows with 25% overlap, cross-faded ----
-async function mxSeparate(L,R,onp){
- const ort=window.ort,S=MX.SEG,ovl=Math.round(S*.25),hop=S-ovl,N=L.length,nOut=Math.ceil(N/2);
+async function mxSeparate(L,R,onp,onSwitch){
+ const S=MX.SEG,ovl=Math.round(S*.25),hop=S-ovl,N=L.length,nOut=Math.ceil(N/2);
  const tracks=MX.STEMS.map(()=>new Int16Array(nOut*2)),dec=MX.STEMS.map(()=>[mxDec(),mxDec()]),oi=MX.STEMS.map(()=>[0,0]);
- let tail=null;const nSeg=Math.max(1,Math.ceil(Math.max(1,N-ovl)/hop));const t0=performance.now();
- for(let k=0;k<nSeg;k++){
+ let tail=null;const nSeg=Math.max(1,Math.ceil(Math.max(1,N-ovl)/hop));
+ let times=[],k=0,t1=0,switching=false;
+ // live status every second, so it's clear the phone is still working
+ const status=()=>{const now=performance.now(),cur=(now-t1)/1000,frac=k/nSeg;
+  if(!times.length){onp(frac,`Part ${k+1} of ${nSeg} · ${Math.round(cur)} s on this part (the first part takes longest) · phone’s ${mxSessKind}`);return}
+  if(switching){onp(frac,`${Math.round(frac*100)}% · moving the work to the phone’s processor…`);return}
+  const ts=times.length>1?times.slice(1):times,avg=ts.reduce((a,b)=>a+b,0)/ts.length,left=avg*(nSeg-k)-cur;
+  if(cur>avg*2+5)onp(frac,`${Math.round(frac*100)}% · part ${k+1} of ${nSeg} is taking longer than usual (${Math.round(cur)} s) · phone’s ${mxSessKind}`);
+  else onp(frac,`${Math.round(frac*100)}% · part ${k+1} of ${nSeg} · about ${mxMin(Math.max(1,left))} left (phone’s ${mxSessKind})`)};
+ const ti=setInterval(status,1000);
+ try{
+ for(k=0;k<nSeg;k++){
   if(mxCancel)throw {cancel:true};
-  const s0=k*hop,inp=new Float32Array(2*S),len=Math.min(S,N-s0);inp.set(L.subarray(s0,s0+len),0);inp.set(R.subarray(s0,s0+len),S);
-  const out=await mxSess.run({[mxSess.inputNames[0]]:new ort.Tensor('float32',inp,[1,2,S])});const y=out[mxSess.outputNames[0]].data;// [1,6,2,S]
+  const s0=k*hop,len=Math.min(S,N-s0);let y=null;
+  for(;;){
+   const inp=new Float32Array(2*S);inp.set(L.subarray(s0,s0+len),0);inp.set(R.subarray(s0,s0+len),S);
+   const gpu=mxSessKind==='graphics chip',worst=times.length?Math.max(...times):0;
+   const ms=gpu?(window.__mxStallMs||(times.length?Math.max(60000,worst*1000*6):240000)):0;
+   t1=performance.now();status();
+   try{y=(await mxCall({t:'run',inp,S,hang:!!(window.__mxFakeGpu&&gpu&&k>=1)},[inp.buffer],ms)).y;break}
+   catch(e){
+    if(e&&e.cancel)throw e;if(!gpu)throw e;
+    // the graphics chip got stuck or failed: stop it and carry on from this part on the processor
+    try{console.error('mixer gpu',e&&e.stall?'stall':(e&&e.message||e))}catch(_){}
+    try{localStorage.setItem('guitaring.mxNoGpu','1')}catch(_){}
+    switching=true;status();onSwitch&&onSwitch();try{await mxCpu(()=>{})}finally{switching=false}times=[]}
+  }
+  times.push((performance.now()-t1)/1000);
   const last=k===nSeg-1,fin=last?len:Math.min(hop,len);
   for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S,seg=new Float32Array(fin);
    for(let i=0;i<fin;i++){let v=y[base+i];if(tail&&i<ovl){const r=(i+1)/(ovl+1);v=tail[st*2+ch][i]*(1-r)+v*r}seg[i]=v}
    oi[st][ch]=mxDecWrite(dec[st][ch],seg,tracks[st],ch,oi[st][ch])}
   if(!last){tail=[];for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S;tail.push(y.slice(base+hop,base+S))}}
-  const el=(performance.now()-t0)/1000,left=el/(k+1)*(nSeg-k-1);onp((k+1)/nSeg,left);await tick();
+  await tick();
  }
+ }finally{clearInterval(ti)}
+ onp(1,'Done');
  const o={};MX.STEMS.forEach((id,i)=>o[id]=tracks[i]);return o;
 }
 // ---- split the guitar part by stereo position (left / centre / right) ----
@@ -3822,7 +3877,9 @@ async function mxStart(file){
   mxProgress('Getting the separation model…',0,'One time only: it’s saved on this phone for next time.');
   await mxSession((got,tot,cached)=>{if(cached)return;const v=$('mixView').querySelector('.pbar i');if(v&&tot)v.style.width=Math.round(got/tot*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(got/1048576)} of ${tot?Math.round(tot/1048576):'?'} MB · one time only, it’s saved on this phone for next time`});
   mxProgress('Splitting the song into parts…',0,`Using the phone’s ${mxSessKind}. Working out how long it will take…`);
-  const raw=await mxSeparate(L,R,(f,left)=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.round(f*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(f*100)}% · about ${mxMin(left)} left (phone’s ${mxSessKind})`});
+  const setP=(f,t)=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.max(1,Math.round(f*100))+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=t};
+  const raw=await mxSeparate(L,R,setP,()=>{const t=$('mixView').querySelector('.tip');if(t)t.textContent='The graphics chip got stuck, so Guitaring switched to the phone’s processor and carried on from the same spot. It’s slower but steadier. Keep the app open and the screen on.'});
+  mxWKill();// free the model's memory; it reloads from the phone next time
   mxProgress('Finding the separate guitars…',0,'Checking left, centre and right.');
   const split=await mxPanSplit(raw.guitar,f=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.round(f*100)+'%'});
   const eG=mxEnergy(raw.guitar)+1,eL=mxEnergy(split.gL),eR=mxEnergy(split.gR),eC=mxEnergy(split.gC),eAll=MX.STEMS.reduce((a,id)=>a+mxEnergy(raw[id]),0)+1;
@@ -3836,7 +3893,7 @@ async function mxStart(file){
   try{await mxPut('lastMix',{name:mxSong.name,len:mxSong.len,at:mxSong.at,tracks:tracks.map(t=>({id:t.id,name:t.name,data:t.data}))})}catch(e){}
   mxPos=0;mxMixer();
  }catch(e){
-  try{console.error('mixer',e&&e.message||e)}catch(err){}
+  mxWKill();try{console.error('mixer',e&&e.message||e)}catch(err){}
   if(e&&e.cancel){mxSong=null;mxView(false);try{renderMixNew()}catch(err){}}
   else{const m=e&&e.msg||(/memory|alloc|OrtRun|RangeError/i.test(String(e&&e.message||e))?'This phone ran out of memory while splitting the song. Try a shorter song or close other apps.':/model|fetch|network|Failed to fetch/i.test(String(e&&e.message||e))?'Couldn’t download the separation model. Check the internet connection (it’s about 140–290 MB, Wi-Fi is best).':'Couldn’t split this song. Try an MP3, M4A or MP4 file.');
    $('mixView').innerHTML=`<div class="mixhead"><b>Practice mixer</b><button type="button" class="pickx" id="mxX" aria-label="Close">✕</button></div><p class="msg">${esc(m)}</p><button class="btn" type="button" id="mxAgain">Choose another song</button>`;
