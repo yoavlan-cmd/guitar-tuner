@@ -4226,12 +4226,12 @@ async function mxCloudSubmit(file){
  mxIdx.unshift(it);await mxIdxSave();mxBar();mxSheetUI();renderMixNew();
  // the song stays on the phone until its parts are back, so a failed split can be retried with one tap
  try{await mxPut('mixsrc:'+id,file)}catch(e){}
- await mxSend(it,file)}
+ await mxUpload(it,file)}
 async function mxRetry(id){const it=mxIdx.find(x=>x.id===id);if(!it)return;let f=null;try{f=await mxGet('mixsrc:'+id)}catch(e){}
  if(!f){toast('The song file isn’t on the phone any more. Delete this one and pick the song again.');return}
  if(mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
- it.state='up';it.err='';it.run='';await mxIdxSave();mxBar();mxSheetUI();await mxSend(it,f)}
-async function mxSend(it,file){mxBarOff=false;
+ it.state='up';it.err='';it.run='';await mxIdxSave();mxBar();mxSheetUI();await mxUpload(it,f)}
+async function mxUpload(it,file){mxBarOff=false;
  const cfg=mxGh(),id=it.id,ext=((file.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp3'])[1].toLowerCase();
  try{
   if(file.size>95*1048576)throw {big:true};
@@ -4313,7 +4313,7 @@ $('mixNew').onclick=()=>{
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
 $('mixIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(mxPickLocal)mxStart(f);else{mxView(true);mxCloudSubmit(f)}};
 mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll()});
-window.__mx={render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
+window.__mx={gains:()=>mxSong&&mxSong.tracks?mxGains():null,node:()=>!!mxNode,level:()=>{if(!mxNode)return -1;if(!mxNode._an){mxNode._an=mxCtx.createAnalyser();mxNode._an.fftSize=2048;mxNode.connect(mxNode._an)}const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);let e=0;for(const x of a)e+=x*x;return Math.sqrt(e/a.length)},render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
 
 
 /* ================= Welcome screen ================= */
