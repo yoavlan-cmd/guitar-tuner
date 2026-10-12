@@ -715,6 +715,29 @@ body.wopen{overflow:hidden}
 .shvid{display:flex;align-items:center;gap:10px;border:1px solid var(--accent);border-radius:12px;padding:8px 10px;background:var(--surface);margin:8px 0;text-decoration:none;color:var(--ink)}
 .shvid i{font-style:normal;font-size:20px}.shvid b{font-size:14px}.shvid small{display:block;color:var(--muted);font-size:12.5px}
 .catvid{font-size:15px;margin-left:2px;text-decoration:none}
+
+/* practice mixer */
+#drop[hidden]~#mixNew{display:none!important}
+#paneSong.mixing>*:not(#mixView){display:none!important}
+.mixview{display:flex;flex-direction:column;gap:12px}
+.mixhead{display:flex;align-items:center;justify-content:space-between;gap:10px}.mixhead b{font:700 17px var(--body);overflow-wrap:anywhere}
+.mixprog{display:flex;flex-direction:column;gap:6px}.mixprog .pbar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}.mixprog .pbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.mixprog small{color:var(--muted);font-size:13px}
+.mixtrans{display:flex;align-items:center;gap:10px}
+.mixplay{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:var(--bg);font-size:22px;cursor:pointer;flex:0 0 auto}
+.mixback{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 12px var(--body);cursor:pointer;flex:0 0 auto}
+.mixtime{display:flex;flex-direction:column;flex:1;gap:4px;min-width:0}.mixtime input{width:100%}.mixtime small{font:500 12px var(--mono);color:var(--muted)}
+.mixpre{display:flex;flex-wrap:wrap;gap:6px}
+.mixrows{display:flex;flex-direction:column;gap:6px}
+.mixrow{display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto;gap:4px 8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.mixrow.gtr{border-color:var(--accent)}
+.mixrow b{font:600 14px var(--body)}.mixrow b small{font-weight:500;color:var(--muted);margin-left:4px}
+.mixrow input[type=range],.mixtime input{accent-color:var(--accent)}.mixrow input[type=range]{grid-column:1/3;width:100%}.mixrow output{grid-column:3;font:600 12px var(--mono);color:var(--muted);min-width:40px;text-align:right}
+.mixrow .ms{display:flex;gap:6px;grid-column:2/4;justify-content:flex-end}
+.mixrow .ms button{min-width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:700 12px var(--body);cursor:pointer}
+.mixrow .ms button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.mixrow.off{opacity:.5}
+.mixacts{display:flex;flex-direction:column;gap:8px}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -864,6 +887,12 @@ body.wopen{overflow:hidden}
       <span>Type the lyrics, then tap words to put chords above them.</span>
     </button>
     <section class="card draftcard" id="draftCard" hidden></section>
+    <button class="drop write" id="mixNew" type="button">
+      <b>Practice mixer</b>
+      <span>Turn the guitars, vocals, drums or bass up or down while the song plays. The song is split into parts on this phone.</span>
+    </button>
+    <input id="mixIn" type="file" accept="audio/*,video/*" hidden>
+    <section class="card mixview" id="mixView" hidden></section>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
@@ -1710,12 +1739,13 @@ let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=nul
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
+function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t!=='song'){try{if(mxPlaying&&mxNode){mxPlaying=false;mxNode.port.postMessage({play:false});mxPlayUI()}}catch(e){}}if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setTab(b.dataset.tab);if(b.dataset.tab==='song')songsHome()});
 // the Songs tab always opens on the Songs home page; whatever you were in the middle of is kept (draft card or a "back to" button)
 let songsResume=null;
 function songsHome(){
  try{
+  try{mixLeave()}catch(e){}
   // song ideas stay closed until you open them
   try{const ib=$('ideaBox');if(ib){ib.open=false;ib._mine=false}}catch(e){}
   if(!$('prog').hidden){window.scrollTo({top:0});return}// an analysis is running: stay with it
@@ -3690,6 +3720,198 @@ $('lsSpeed').addEventListener('click',e=>{const b=e.target.closest('button');if(
 $('lsLoop').onclick=()=>{LS.loop=!LS.loop;$('lsLoop').setAttribute('aria-pressed',LS.loop)};
 $('lsTab').addEventListener('click',e=>{const svg=e.target.closest('svg');if(!svg)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*LS.per*BW,bi=+svg.dataset.row*LS.per+Math.floor(x/BW),bar=LS.m.bars[bi];if(bar)vid.currentTime=bar.t0+.01});
 addEventListener('keydown',e=>{if(!LS)return;if(e.key==='Escape')closeLesson();else if(e.key===' '){e.preventDefault();$('lsPlay').click()}});
+
+/* ================= Practice mixer: split a song into parts on the phone (HT-Demucs 6 stems), then mix them live ================= */
+// The model (Meta's HT-Demucs 6-stem, MIT licence, ONNX export) runs in the browser with ONNX Runtime Web.
+// Parts: drums, bass, other, vocals, guitar, piano. The guitar part is then split by where it sits in the stereo
+// picture (left / centre / right), which often separates two guitars recorded on opposite sides.
+const MX={
+ ORT:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0/dist/ort.all.min.js',
+ ORT_DIR:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0/dist/',
+ MODEL_GPU:'https://huggingface.co/kramp/htdemucs-6s-webgpu-onnx/resolve/main/htdemucs_6s.onnx',      // 285 MB, runs on the graphics chip
+ MODEL_CPU:'https://huggingface.co/Acapellas/htdemucs-6s-onnx/resolve/main/htdemucs_6s_fp16weights.onnx', // 136 MB, processor only
+ SEG:343980,SR:44100,OUT_SR:22050,STEMS:['drums','bass','other','vocals','guitar','piano']
+};
+const MX_NAMES={drums:'Drums',bass:'Bass',other:'Other',vocals:'Vocals',guitar:'Guitars',piano:'Piano / keys',gL:'Guitar · left',gC:'Guitar · centre',gR:'Guitar · right'};
+const MX_ICON={drums:'🥁',bass:'🎵',other:'🎛️',vocals:'🎤',guitar:'🎸',piano:'🎹',gL:'🎸',gC:'🎸',gR:'🎸'};
+let mxSess=null,mxSessKind='',mxBusy=false,mxCancel=false,mxSong=null,mxCtx=null,mxNode=null,mxPos=0,mxPlaying=false,mxSolo=null,mxWake=null;
+const mxIsGtr=id=>id==='guitar'||id==='gL'||id==='gC'||id==='gR';
+// ---- small IndexedDB store: the last separated song stays on the phone, so reopening it is instant ----
+function mxDB(){return new Promise((res,rej)=>{const r=indexedDB.open('guitaring',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function mxGet(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readonly'),q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}
+// ---- model: downloaded once, then kept in the browser's cache ----
+async function mxModelBytes(url,onp){
+ let c=null;try{c=await caches.open('guitaring-models');const hit=await c.match(url);if(hit){onp(1,1,true);return new Uint8Array(await hit.arrayBuffer())}}catch(e){c=null}
+ const res=await fetch(url);if(!res.ok)throw new Error('model '+res.status);
+ const total=+res.headers.get('content-length')||0,rd=res.body.getReader(),parts=[];let got=0;
+ for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onp(got,total,false);if(mxCancel)throw {cancel:true}}
+ const blob=new Blob(parts);try{if(c)await c.put(url,new Response(blob))}catch(e){}
+ return new Uint8Array(await blob.arrayBuffer());
+}
+async function mxSession(onp){
+ if(mxSess)return mxSess;
+ await loadScript(MX.ORT);const ort=window.ort;ort.env.wasm.wasmPaths=MX.ORT_DIR;ort.env.wasm.numThreads=self.crossOriginIsolated?Math.min(4,navigator.hardwareConcurrency||2):1;
+ let gpu=false;try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
+ const url=gpu?MX.MODEL_GPU:MX.MODEL_CPU,bytes=await mxModelBytes(window.__mxModelUrl||url,onp);
+ if(gpu){try{mxSess=await ort.InferenceSession.create(bytes,{executionProviders:['webgpu'],graphOptimizationLevel:'basic'});mxSessKind='graphics chip';return mxSess}catch(e){}}
+ mxSess=await ort.InferenceSession.create(bytes,{executionProviders:['wasm'],graphOptimizationLevel:'basic'});mxSessKind='processor';return mxSess;
+}
+// ---- 2× downsampler (31-tap half-band low-pass) that streams chunk by chunk ----
+const MX_H=(()=>{const N=31,h=new Float32Array(N);let s=0;for(let k=0;k<N;k++){const n=k-15,x=n===0?.5:Math.sin(Math.PI*n/2)/(Math.PI*n),w=.5-.5*Math.cos(2*Math.PI*k/(N-1));h[k]=x*w;s+=h[k]}for(let k=0;k<N;k++)h[k]/=s;return h})();
+function mxDec(){return {hist:new Float32Array(30),phase:0}}
+// x: float chunk at 44.1 kHz → int16 samples at 22.05 kHz written into out (interleaved, channel ch of 2) from index oi; returns new oi
+function mxDecWrite(st,x,out,ch,oi){
+ const buf=new Float32Array(30+x.length);buf.set(st.hist,0);buf.set(x,30);
+ let i=30+st.phase;for(;i<buf.length;i+=2){let a=0;for(let k=0;k<31;k++)a+=MX_H[k]*buf[i-k];if(a>1)a=1;else if(a<-1)a=-1;if(oi<out.length/2)out[2*oi+ch]=a*32767;oi++}
+ st.phase=i-buf.length;st.hist=buf.slice(buf.length-30);return oi;
+}
+// ---- the separation itself: 7.8 s windows with 25% overlap, cross-faded ----
+async function mxSeparate(L,R,onp){
+ const ort=window.ort,S=MX.SEG,ovl=Math.round(S*.25),hop=S-ovl,N=L.length,nOut=Math.ceil(N/2);
+ const tracks=MX.STEMS.map(()=>new Int16Array(nOut*2)),dec=MX.STEMS.map(()=>[mxDec(),mxDec()]),oi=MX.STEMS.map(()=>[0,0]);
+ let tail=null;const nSeg=Math.max(1,Math.ceil(Math.max(1,N-ovl)/hop));const t0=performance.now();
+ for(let k=0;k<nSeg;k++){
+  if(mxCancel)throw {cancel:true};
+  const s0=k*hop,inp=new Float32Array(2*S),len=Math.min(S,N-s0);inp.set(L.subarray(s0,s0+len),0);inp.set(R.subarray(s0,s0+len),S);
+  const out=await mxSess.run({[mxSess.inputNames[0]]:new ort.Tensor('float32',inp,[1,2,S])});const y=out[mxSess.outputNames[0]].data;// [1,6,2,S]
+  const last=k===nSeg-1,fin=last?len:Math.min(hop,len);
+  for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S,seg=new Float32Array(fin);
+   for(let i=0;i<fin;i++){let v=y[base+i];if(tail&&i<ovl){const r=(i+1)/(ovl+1);v=tail[st*2+ch][i]*(1-r)+v*r}seg[i]=v}
+   oi[st][ch]=mxDecWrite(dec[st][ch],seg,tracks[st],ch,oi[st][ch])}
+  if(!last){tail=[];for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S;tail.push(y.slice(base+hop,base+S))}}
+  const el=(performance.now()-t0)/1000,left=el/(k+1)*(nSeg-k-1);onp((k+1)/nSeg,left);await tick();
+ }
+ const o={};MX.STEMS.forEach((id,i)=>o[id]=tracks[i]);return o;
+}
+// ---- split the guitar part by stereo position (left / centre / right) ----
+async function mxPanSplit(g,onp){
+ const n=g.length/2,W=1024,H=256,fft=makeFFT(W),win=new Float32Array(W);for(let i=0;i<W;i++)win[i]=.5-.5*Math.cos(2*Math.PI*i/W);
+ const outs=[0,1,2].map(()=>[new Float32Array(n+W),new Float32Array(n+W)]);
+ const reL=new Float64Array(W),imL=new Float64Array(W),reR=new Float64Array(W),imR=new Float64Array(W),tr=new Float64Array(W),ti=new Float64Array(W);
+ const sm=(x,a,b)=>x<=a?0:x>=b?1:(t=>t*t*(3-2*t))((x-a)/(b-a));const mL=new Float32Array(W),mR=new Float32Array(W);
+ for(let f=0,c=0;f+W<=n+W;f+=H,c++){
+  for(let i=0;i<W;i++){const p=f+i,w=win[i];reL[i]=p<n?g[2*p]/32768*w:0;reR[i]=p<n?g[2*p+1]/32768*w:0;imL[i]=0;imR[i]=0}
+  fft(reL,imL);fft(reR,imR);
+  for(let b=0;b<W;b++){const pl=reL[b]*reL[b]+imL[b]*imL[b],pr=reR[b]*reR[b]+imR[b]*imR[b],pan=(pl-pr)/(pl+pr+1e-12);mL[b]=sm(pan,.25,.6);mR[b]=sm(-pan,.25,.6)}
+  for(let part=0;part<3;part++)for(let ch=0;ch<2;ch++){const re=ch?reR:reL,im=ch?imR:imL;
+   for(let b=0;b<W;b++){const m=part===0?mL[b]:part===2?mR[b]:Math.max(0,1-mL[b]-mR[b]);tr[b]=re[b]*m;ti[b]=-im[b]*m}
+   fft(tr,ti);const o=outs[part][ch];for(let i=0;i<W;i++){const p=f+i;if(p<o.length)o[p]+=tr[i]/W*win[i]/1.5}}
+  if(c%400===0){onp(f/n);await tick();if(mxCancel)throw {cancel:true}}
+ }
+ const res=outs.map(([a,b])=>{const t=new Int16Array(n*2);for(let i=0;i<n;i++){t[2*i]=Math.max(-1,Math.min(1,a[i]))*32767;t[2*i+1]=Math.max(-1,Math.min(1,b[i]))*32767}return t});
+ return {gL:res[0],gC:res[1],gR:res[2]};
+}
+const mxEnergy=t=>{let e=0;for(let i=0;i+1<t.length;i+=8)e+=t[i]*t[i]+t[i+1]*t[i+1];return e};// both channels: a guitar panned hard right lives only in the right one
+function mxView(on){$('paneSong').classList.toggle('mixing',on);$('mixView').hidden=!on;if(on)window.scrollTo({top:0})}
+function mxProgress(title,frac,note){const v=$('mixView');
+ v.innerHTML=`<div class="mixhead"><b dir="auto">${esc(mxSong&&mxSong.name||'Practice mixer')}</b><button type="button" class="pickx" id="mxStop" aria-label="Cancel">✕</button></div>
+ <div class="mixprog"><b>${esc(title)}</b><div class="pbar"><i style="width:${Math.round((frac||0)*100)}%"></i></div><small>${note||''}</small></div>
+ <p class="tip">Keep Guitaring open and the screen on until it’s done. The song never leaves your phone.</p>`;
+ $('mxStop').onclick=()=>{mxCancel=true}}
+const mxMin=s=>s<90?Math.round(s)+' s':Math.round(s/60)+' min';
+async function mxStart(file){
+ if(mxBusy)return;mxBusy=true;mxCancel=false;mxStopAudio();mxSong={name:(file.name||'Song').replace(/\.[a-z0-9]+$/i,''),tracks:null};mxView(true);
+ try{mxWake=await navigator.wakeLock.request('screen')}catch(e){}
+ try{
+  mxProgress('Reading the song…',0,'');
+  const ab=await file.arrayBuffer(),c=getCtx(),au=await new Promise((res,rej)=>{const p=c.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)});
+  const off=new OfflineAudioContext(2,Math.max(1,Math.ceil(au.duration*MX.SR)),MX.SR);const src=off.createBufferSource();src.buffer=au;src.connect(off.destination);src.start();
+  const r=await off.startRendering(),L=r.getChannelData(0),R=r.numberOfChannels>1?r.getChannelData(1):L;
+  if(au.duration>600)throw {msg:'This song is over 10 minutes. Trim it first or pick a shorter part.'};
+  mxProgress('Getting the separation model…',0,'One time only: it’s saved on this phone for next time.');
+  await mxSession((got,tot,cached)=>{if(cached)return;const v=$('mixView').querySelector('.pbar i');if(v&&tot)v.style.width=Math.round(got/tot*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(got/1048576)} of ${tot?Math.round(tot/1048576):'?'} MB · one time only, it’s saved on this phone for next time`});
+  mxProgress('Splitting the song into parts…',0,`Using the phone’s ${mxSessKind}. Working out how long it will take…`);
+  const raw=await mxSeparate(L,R,(f,left)=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.round(f*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(f*100)}% · about ${mxMin(left)} left (phone’s ${mxSessKind})`});
+  mxProgress('Finding the separate guitars…',0,'Checking left, centre and right.');
+  const split=await mxPanSplit(raw.guitar,f=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.round(f*100)+'%'});
+  const eG=mxEnergy(raw.guitar)+1,eL=mxEnergy(split.gL),eR=mxEnergy(split.gR),eC=mxEnergy(split.gC),eAll=MX.STEMS.reduce((a,id)=>a+mxEnergy(raw[id]),0)+1;
+  const tracks=[];const add=(id,data)=>tracks.push({id,name:MX_NAMES[id],data,gain:1,mute:false});
+  // two (or more) guitars sitting on different sides get their own sliders; otherwise one "Guitars" slider
+  if((eL/eG>.12||eR/eG>.12)&&[eL,eC,eR].filter(x=>x/eG>.04).length>=2){if(eL/eG>.04)add('gL',split.gL);if(eC/eG>.04)add('gC',split.gC);if(eR/eG>.04)add('gR',split.gR)}else add('guitar',raw.guitar);
+  ['vocals','drums','bass'].forEach(id=>add(id,raw[id]));
+  if(mxEnergy(raw.piano)/eAll>.015)add('piano',raw.piano);else{const o=raw.other,p=raw.piano;for(let i=0;i<o.length;i++)o[i]=Math.max(-32768,Math.min(32767,o[i]+p[i]))}
+  add('other',raw.other);
+  mxSong.tracks=tracks;mxSong.len=raw.drums.length/2;mxSong.at=Date.now();
+  try{await mxPut('lastMix',{name:mxSong.name,len:mxSong.len,at:mxSong.at,tracks:tracks.map(t=>({id:t.id,name:t.name,data:t.data}))})}catch(e){}
+  mxPos=0;mxMixer();
+ }catch(e){
+  try{console.error('mixer',e&&e.message||e)}catch(err){}
+  if(e&&e.cancel){mxSong=null;mxView(false);try{renderMixNew()}catch(err){}}
+  else{const m=e&&e.msg||(/memory|alloc|OrtRun|RangeError/i.test(String(e&&e.message||e))?'This phone ran out of memory while splitting the song. Try a shorter song or close other apps.':/model|fetch|network|Failed to fetch/i.test(String(e&&e.message||e))?'Couldn’t download the separation model. Check the internet connection (it’s about 140–290 MB, Wi-Fi is best).':'Couldn’t split this song. Try an MP3, M4A or MP4 file.');
+   $('mixView').innerHTML=`<div class="mixhead"><b>Practice mixer</b><button type="button" class="pickx" id="mxX" aria-label="Close">✕</button></div><p class="msg">${esc(m)}</p><button class="btn" type="button" id="mxAgain">Choose another song</button>`;
+   $('mxX').onclick=()=>{mxView(false)};$('mxAgain').onclick=()=>$('mixIn').click()}
+ }finally{mxBusy=false;try{mxWake&&mxWake.release()}catch(e){}mxWake=null}
+}
+// ---- live mixing: an audio worklet mixes all parts with the slider volumes ----
+const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;
+this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice()}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;
+if(m.render){const g=m.render,o=new Int16Array(this.n*2);for(let i=0;i<this.n*2;i++){let a=0;for(let k=0;k<this.t.length;k++)if(g[k])a+=this.t[k][i]*g[k];o[i]=a>32767?32767:a<-32768?-32768:a}this.port.postMessage({rendered:o},[o.buffer])}}}
+process(_,outs){const o=outs[0],L=o[0],R=o[1]||o[0],n=L.length;L.fill(0);if(R!==L)R.fill(0);if(!this.on||!this.t.length)return true;
+for(let k=0;k<this.t.length;k++){let g=this.g[k];const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;L[i]+=a[2*q]*g/32768;R[i]+=a[2*q+1]*g/32768}this.g[k]=tg}
+this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n)this.port.postMessage({pos:this.p});return true}}
+registerProcessor('gmix',M);`;
+const mxGains=()=>{const t=mxSong.tracks;return t.map(x=>{const on=mxSolo?mxSolo===x.id:!x.mute;return on?x.gain:0})};
+async function mxAudio(){
+ if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:MX.OUT_SR});
+ const url=URL.createObjectURL(new Blob([MX_WORKLET],{type:'text/javascript'}));await mxCtx.audioWorklet.addModule(url);
+ mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
+ mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}if(m.rendered&&mxRenderCb){const cb=mxRenderCb;mxRenderCb=null;cb(m.rendered)}};
+ // the worklet keeps its own copy of the parts; the phone keeps the saved copy for next time
+ const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));
+}
+let mxRenderCb=null;
+function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
+const mxFmt=n=>mmss(n/MX.OUT_SR);
+function mxTimeUI(){const s=$('mxSeek');if(!s||!mxSong)return;if(!s._drag)s.value=mxPos;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)}
+function mxPlayUI(){const b=$('mxPlay');if(b){b.textContent=mxPlaying?'⏸':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}}
+const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars only'],['novox','No vocals']];
+function mxPreset(k){mxSolo=null;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':false;t.gain=1});mxRows();mxSend()}
+function mxSend(){if(mxNode)mxNode.port.postMessage({gains:mxGains()})}
+function mxRows(){const box=$('mxRows');if(!box)return;
+ box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute;return `<div class="mixrow${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}"><b>${MX_ICON[t.id]||'🎵'} ${esc(t.name)}</b>
+ <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo">S</button></div>
+ <input type="range" min="0" max="150" step="5" value="${Math.round(t.gain*100)}" data-vol="${k}" aria-label="${esc(t.name)} volume"><output>${Math.round(t.gain*100)}%</output></div>`}).join('')}
+function mxMixer(){const v=$('mixView'),s=mxSong;mxView(true);
+ const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length;
+ v.innerHTML=`<div class="mixhead"><b dir="auto">🎚️ ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Close">✕</button></div>
+ <div class="mixtrans"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button>
+ <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${MX.OUT_SR/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
+ <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
+ <div class="mixrows" id="mxRows"></div>
+ <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
+ <div class="mixacts"><button type="button" class="btn ghost" id="mxChords">🎸 Find the chords from the guitars only</button><button type="button" class="btn ghost" id="mxSave">Save this mix as an audio file</button><button type="button" class="btn ghost" id="mxNewSong">Split another song</button></div>`;
+ mxRows();mxTimeUI();mxPlayUI();
+ $('mxClose').onclick=()=>mxLeave(true);
+ $('mxPlay').onclick=async()=>{await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=s.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI()};
+ $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*MX.OUT_SR);if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
+ const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(s.len)});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos})});
+ v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
+ $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.nextElementSibling.textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
+ $('mxRows').addEventListener('click',e=>{const m=e.target.closest('[data-mute]'),so=e.target.closest('[data-solo]');if(m){const t=s.tracks[+m.dataset.mute];t.mute=!t.mute;if(mxSolo===t.id)mxSolo=null}else if(so){const t=s.tracks[+so.dataset.solo];mxSolo=mxSolo===t.id?null:t.id}else return;mxRows();mxSend()});
+ $('mxSave').onclick=()=>mxRender(mxGains(),'mix',b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=s.name+' (my mix).wav';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)});
+ $('mxChords').onclick=()=>mxRender(s.tracks.map(t=>mxIsGtr(t.id)?1:0),'guitars',b=>{const f=new File([b],s.name+' (guitars).wav',{type:'audio/wav'});mxLeave(true);
+  songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(f);curFile=f;fileKey=(f.name+'|'+f.size).replace(/[^\w|.-]/g,'_');showReady(f)});
+ $('mxNewSong').onclick=()=>$('mixIn').click();
+}
+// a whole-song render of the chosen parts as a WAV file (16-bit, 22 kHz stereo)
+async function mxRender(gains,what,done){await mxAudio();const btns=$('mixView').querySelectorAll('.mixacts button');btns.forEach(b=>b.disabled=true);
+ mxRenderCb=pcm=>{btns.forEach(b=>b.disabled=false);const n=pcm.length,h=new DataView(new ArrayBuffer(44)),w=(o,str)=>{for(let i=0;i<str.length;i++)h.setUint8(o+i,str.charCodeAt(i))};
+  w(0,'RIFF');h.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,MX.OUT_SR,true);h.setUint32(28,MX.OUT_SR*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*2,true);
+  done(new Blob([h.buffer,pcm.buffer],{type:'audio/wav'}))};
+ mxNode.port.postMessage({render:gains})}
+function mxLeave(force){if(mxBusy)return;if(!force&&$('mixView').hidden)return;mxStopAudio();mxView(false);renderMixNew()}
+// the landing button offers to reopen the last song (kept on the phone) before choosing a new one
+let mxLastMeta=null;
+async function renderMixNew(){try{const m=await mxGet('lastMix');mxLastMeta=m?{name:m.name,at:m.at}:null}catch(e){mxLastMeta=null}
+ const b=$('mixNew');if(!b)return;b.querySelector('span').textContent=mxLastMeta?`Last song: “${mxLastMeta.name}”. Tap to reopen it, or pick a new song inside.`:'Turn the guitars, vocals, drums or bass up or down while the song plays. The song is split into parts on this phone.'}
+$('mixNew').onclick=async()=>{if(mxSong&&mxSong.tracks){mxMixer();return}
+ let m=null;try{m=await mxGet('lastMix')}catch(e){}
+ if(m&&m.tracks){mxSong={name:m.name,len:m.len,at:m.at,tracks:m.tracks.map(t=>({...t,gain:1,mute:false}))};mxPos=0;mxSolo=null;mxMixer();return}
+ $('mixIn').click()};
+$('mixIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)mxStart(f)};
+setTimeout(renderMixNew,0);
+window.__mx={render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,isG:mxIsGtr};
 
 /* ================= Welcome screen ================= */
 const JOKES=[
