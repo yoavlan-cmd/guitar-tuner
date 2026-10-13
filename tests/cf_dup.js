@@ -1,0 +1,16 @@
+const APP=process.env.APP||('file://'+require('path').resolve(__dirname,'../index.html'));
+const {chromium,devices}=require('playwright');
+(async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});const p=await (await b.newContext({...devices['Pixel 7'],colorScheme:'dark'})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/^https:\/\//,r=>r.abort());
+ await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('tuner.chordbook',JSON.stringify({'F#m':{added:1,songs:['Song A']},'G':{added:1,songs:[]}}))});
+ await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.tap('[data-tab=chords]');await p.tap('#chFind');
+ const T=async sel=>{const el=await p.$('#cfBoard '+sel);const bb=await el.boundingBox();await p.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await p.waitForTimeout(60)};
+ const st=async()=>(await p.$eval('#cfOut',e=>e.innerText.replace(/\n/g,' | ')))+' || BTN: '+await p.$eval('#cfUse',e=>e.textContent);
+ await T('.hit[data-barre="2"]');await T('.hit[data-s="1"][data-fr="4"]');await T('.hit[data-s="2"][data-fr="4"]');console.log('F#m barre (known shape):',await st());
+ await p.tap('#cfClear');await T('.hit[data-s="0"][data-fr="2"]');await T('.hit[data-s="1"][data-fr="4"]');await T('.hit[data-s="2"][data-fr="4"]');await T('.hit[data-s="3"][data-fr="2"]');await T('.hit[data-s="4"][data-fr="2"]');await T('.hit[data-s="5"][data-fr="2"]');console.log('F#m as screenshot:',await st());
+ await p.tap('#cfClear');await T('.hit[data-top="0"]');await T('.hit[data-top="1"]');await T('.hit[data-s="2"][data-fr="4"]');await T('.hit[data-s="3"][data-fr="2"]');await T('.hit[data-s="4"][data-fr="2"]');await T('.hit[data-s="5"][data-fr="2"]');console.log('F#m small new shape:',await st());
+ await p.tap('#cfUse');await p.waitForTimeout(200);const bk=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.chordbook')));console.log('book keys',Object.keys(bk),'F#m mine',JSON.stringify(bk['F#m'].mine));
+ await p.tap('#chBack');await p.tap('#chFind');await T('.hit[data-top="0"]');await T('.hit[data-top="1"]');await T('.hit[data-s="2"][data-fr="4"]');await T('.hit[data-s="3"][data-fr="2"]');await T('.hit[data-s="4"][data-fr="2"]');await T('.hit[data-s="5"][data-fr="2"]');console.log('same again:',await st());
+ await p.tap('#cfUse');await p.waitForTimeout(200);const bk2=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.chordbook')));console.log('after open: keys',Object.keys(bk2).length,'mine',bk2['F#m'].mine.length);
+ await p.tap('#chBack');await p.tap('#chFind');await T('.hit[data-s="1"][data-fr="2"]');await T('.hit[data-s="2"][data-fr="2"]');console.log('new chord Em:',await st());
+ console.log(errs);await b.close()})();

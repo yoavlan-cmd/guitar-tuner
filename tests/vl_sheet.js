@@ -1,0 +1,11 @@
+const APP=process.env.APP||('file://'+require('path').resolve(__dirname,'../index.html'));
+const {chromium,devices}=require('playwright');
+(async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});const p=await (await b.newContext({...devices['Pixel 7']})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/^https:\/\//,r=>r.abort());
+ await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');
+  localStorage.setItem('tuner.lib',JSON.stringify([{id:'L1',name:'עד מתי',saved:Date.now(),data:{kind:'lyrics',title:'עד מתי',artist:'אביתר בנאי',lyrics:'שורה אחת',lc:[{t:'שורה אחת',ch:{0:'Am'}}],segs:[],dur:0,offset:0,tuning:{id:'std'},play:{tun:'std',capo:0},v:2}}]));
+  localStorage.setItem('tuner.vlinks',JSON.stringify([{id:'v1',url:'https://youtu.be/aaaaaaaaaaa',yt:'aaaaaaaaaaa',src:'YouTube',song:'עד מתי',artist:'אביתר בנאי',at:1}]))});
+ await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.tap('[data-tab=song]');await p.tap('#vidBox summary');await p.waitForTimeout(100);
+ console.log('row:',await p.$eval('.vidrow',e=>e.innerText.replace(/\n/g,' ')));
+ await p.tap('.vidrow [data-lib]');await p.waitForTimeout(200);console.log('sheet shown',await p.$eval('#sheetView',e=>!e.hidden),'| banner:',await p.$eval('#shVid',e=>e.hidden?'(hidden)':e.innerText.replace(/\n/g,' ')));
+ console.log('errors',errs);await b.close()})();
