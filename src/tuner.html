@@ -701,10 +701,24 @@ body.wopen{overflow:hidden}
 .gstatline.due{box-shadow:inset 3px 0 0 #FF6A1A}
 .ctlsvg{width:100%;max-width:420px;height:auto}
 .cbadge{cursor:pointer}.cbadge.on circle{fill:#FF6A1A;stroke:#fff;stroke-width:2}
+/* controls on the player's own photo: numbered markers placed by Claude or by hand (it.ctlPos, fractions of the photo) */
+.ctlview{margin:2px 0}
+.ctlphoto{position:relative;border-radius:16px;overflow:hidden;background:#000;line-height:0;touch-action:manipulation}
+.ctlphoto img{width:100%;height:auto;display:block;user-select:none;-webkit-user-drag:none}
+.ctlphoto.placing{outline:2px dashed #FFB74D;outline-offset:-2px;cursor:crosshair}
+/* a mark = a thin ring around the control (so it stays visible) + its number in a bubble up and to the left */
+.pb{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid #66BB6A;background:transparent;box-shadow:0 0 0 1px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.35);padding:0;cursor:pointer;color:#0E1A12;font:700 12px/1 var(--mono)}
+.pb::before{content:attr(data-n);position:absolute;right:calc(100% - 6px);bottom:calc(100% - 6px);min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:#66BB6A;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.pb.on{border-color:#FF6A1A;z-index:2}.pb.on::before{background:#FF6A1A;color:#fff}
+.ctltools{display:flex;flex-wrap:wrap;gap:6px}
+.ctltools .btn{padding:8px 11px;font-size:13px}
+.ctllist li.unplaced b::after{content:" · not on the photo yet";font-weight:500;color:var(--muted);font-size:12px}
+.ctllist li.sel{box-shadow:inset 3px 0 0 #FFB74D;background:color-mix(in srgb,#FFB74D 12%,transparent)}
 .ctlnote{margin:6px 0 0;font-size:12.5px}
 .ctllist{margin:6px 0 4px;padding-left:22px;display:flex;flex-direction:column;gap:6px}
 .ctllist li{cursor:pointer;border-radius:8px;padding:6px 8px;margin-left:-6px}
 .ctllist li b{display:block;font-size:14.5px}.ctllist li span{display:block;font-size:13.5px;line-height:1.4}.ctllist li em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);margin-top:2px}
+.ctllist li em{display:flex;gap:7px;align-items:flex-start}.ctllist li em .pd{display:inline-grid;--s:18px;margin:1px 0 0}
 .ctllist li.on{background:color-mix(in srgb,#FF6A1A 14%,transparent);box-shadow:inset 3px 0 0 #FF6A1A}
 .ctllist li::marker{font-weight:700;color:var(--accent)}
 
@@ -4932,15 +4946,23 @@ function panelSVG(c,amp){
   s+=badge(X-21,Y-12,i,8)});
  return `<svg viewBox="0 0 ${W} ${H}" class="ctlsvg">${s}</svg>`;
 }
+let ctlView={},ctlPlace=null;// per item: 'photo' or 'draw'; placing markers by hand: {id, sel}
 function controlsHTML(it){
  const key=ctlKey(it);if(!key)return '';
  const c=ctlList(it,key),guitar=it.type==='electric',exact=!!(it.controls&&it.controls.length);
- const pic=guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
+ const photo=it.ctlPhoto||it.photo,pos=it.ctlPos||{},view=photo?(ctlView[it.id]||'photo'):'draw',placing=!!(ctlPlace&&ctlPlace.id===it.id&&view==='photo');
+ const placed=c.filter(x=>pos[x.n]).length;
+ const pic=view==='photo'?`<div class="ctlphoto${placing?' placing':''}" id="ctlPhoto"><img src="${photo}" alt="Your ${esc(it.name)}" draggable="false">${c.map((x,i)=>pos[x.n]?`<button type="button" class="cbadge pb${placing&&ctlPlace.sel===i?' on':''}" data-c="${i}" style="left:${(pos[x.n][0]*100).toFixed(2)}%;top:${(pos[x.n][1]*100).toFixed(2)}%" data-n="${i+1}" aria-label="${i+1}. ${esc(x.n)}"></button>`:'').join('')}</div>`
+  :guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
+ const canSee=!!(sampleFn&&imgLimit>0);
+ const tools=view!=='photo'?'':`<p class="tip ctlnote">${placing?`Tap a number in the list, then tap where it is on the photo. ${ctlPlace.sel!=null&&c[ctlPlace.sel]?`Now placing <b>${ctlPlace.sel+1}. ${esc(c[ctlPlace.sel].n)}</b>.`:''}`:placed?`${placed} of ${c.length} marked on your photo.${placed<c.length?' The rest aren’t marked yet: they may be out of the picture.':''}`:'Your own photo. Mark where each control is'+(canSee?': Claude can find them, or place them yourself.':' by placing the numbers yourself.')}</p>
+ <div class="ctltools">${canSee&&!placing?`<button type="button" class="btn" id="ctlFind">${SK('ASK')} ${placed?'Find them again':'Find them on my photo'}</button>`:''}<button type="button" class="btn ${placing?'':'ghost'}" id="ctlHand">${placing?'Done':placed?'Move or add marks':'Place them myself'}</button>${placing&&ctlPlace.sel!=null&&c[ctlPlace.sel]&&pos[c[ctlPlace.sel].n]?`<button type="button" class="btn ghost" id="ctlUnmark">Remove mark ${ctlPlace.sel+1}</button>`:''}${!placing?`<label class="btn ghost">${SK('PHOTO')} ${it.ctlPhoto?'New close-up':'Close-up of the controls'}<input type="file" accept="image/*" id="ctlPhotoIn" hidden></label>`:''}</div>`;
  const label=it.type==='electroacoustic'?'The built-in preamp: what each control does':/amp$/.test(it.type)?'What each knob, button and socket does':'What each knob and switch does';
  return `<div class="ctlbox"><div class="gsech"><span class="sic">${SK('CTRL')}</span><span class="stx"><b>Controls and switches</b><small>${label}. Tap a number.</small></span></div>
- <div class="ctlpic">${pic}</div>
- <p class="tip ctlnote">${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>
- <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>${SK('TIP')} ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
+ ${photo?`<div class="seg ctlview" role="group" aria-label="Show the controls on"><button type="button" data-cv="photo" aria-pressed="${view==='photo'}">Your photo</button><button type="button" data-cv="draw" aria-pressed="${view==='draw'}">Drawing</button></div>`:''}
+ ${view==='photo'?pic+tools:`<div class="ctlpic">${pic}</div>`}
+ ${view==='photo'?'':`<p class="tip ctlnote">${!photo?'Add a photo of your guitar (Edit details) to see these numbers on it. ':''}${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>`}
+ <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}" class="${view==='photo'&&!pos[x.n]?'unplaced':''}${placing&&ctlPlace.sel===i?' sel':''}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>${SK('TIP')} ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
  ${sampleFn&&(it.brand||it.model)?`<button class="btn ghost wide" id="ctlAsk" type="button">${SK('ASK')} ${exact?'Refresh':'Get'} the exact controls of my ${esc(it.model||it.brand)} from Claude</button>`:''}
  <p class="tip" id="ctlMsg" role="status"></p></div>`;
 }
@@ -4948,7 +4970,8 @@ function wireControls(it){
  const box=document.querySelector('.ctlbox');if(!box)return;
  const pick=i=>{box.querySelectorAll('.cbadge').forEach(b=>b.classList.toggle('on',+b.dataset.c===i));box.querySelectorAll('.ctllist li').forEach(l=>l.classList.toggle('on',+l.dataset.c===i));const li=box.querySelector(`.ctllist li[data-c="${i}"]`);if(li)li.scrollIntoView({behavior:'smooth',block:'nearest'})};
  box.querySelectorAll('.cbadge').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.c)));
- box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>pick(+l.dataset.c)));
+ box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>{if(ctlPlace&&ctlPlace.id===it.id){ctlPlace.sel=+l.dataset.c;renderGear();const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}pick(+l.dataset.c)}));
+ wireCtlPhoto(it);
  const ask=$('ctlAsk');if(ask)ask.onclick=async()=>{ask.disabled=true;$('ctlMsg').textContent='Claude is looking up your exact model…';
   const prompt=`List the physical controls of this ${GEAR[it.type].name}: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}${it.type==='electroacoustic'?' (the built-in preamp and pickup system)':''}.
 Include every knob, switch, button, selector, slider, socket/jack and battery compartment a player uses, in the order they appear (front panel first, then back or side). Only include controls you are confident this model has. If you don't know this exact model, say so in "note" and list the controls of the closest model you know.
@@ -4957,6 +4980,31 @@ Reply with only JSON: {"note": string or null, "controls": [{"name": string, "ki
   try{const opt={};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];const r=await sampleFn.json(prompt,opt);const list=Array.isArray(r&&r.controls)?r.controls.filter(x=>x&&x.name).slice(0,24):[];
    if(!list.length)throw new Error('none');const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.controls=list;x.controlsNote=r.note||'';store.set('instruments',l)}it.controls=list;renderGear()}
   catch(e){ask.disabled=false;$('ctlMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get the controls this time. Try again.'}};
+}
+// ---- controls on the player's own photo ----
+function ctlUpd(it,f){const l=instAll(),x=l.find(y=>y.id===it.id);if(!x)return;f(x);instSave(l);Object.assign(it,x)}
+function wireCtlPhoto(it){
+ const key=ctlKey(it);if(!key)return;const c=ctlList(it,key);
+ document.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{ctlView[it.id]=b.dataset.cv;if(b.dataset.cv!=='photo'&&ctlPlace&&ctlPlace.id===it.id)ctlPlace=null;renderGear()});
+ const hand=$('ctlHand');if(hand)hand.onclick=()=>{if(ctlPlace&&ctlPlace.id===it.id){ctlPlace=null}else{const pos=it.ctlPos||{};const first=c.findIndex(x=>!pos[x.n]);ctlPlace={id:it.id,sel:first<0?0:first}}renderGear()};
+ const un=$('ctlUnmark');if(un)un.onclick=()=>{const n=c[ctlPlace.sel]&&c[ctlPlace.sel].n;ctlUpd(it,x=>{x.ctlPos={...(x.ctlPos||{})};delete x.ctlPos[n]});renderGear()};
+ const ph=$('ctlPhoto');
+ if(ph&&ctlPlace&&ctlPlace.id===it.id)ph.addEventListener('click',e=>{if(ctlPlace.sel==null||!c[ctlPlace.sel])return;const b=e.target.closest('.pb');if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;renderGear();return}
+  const r=ph.getBoundingClientRect(),x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height)),n=c[ctlPlace.sel].n;
+  ctlUpd(it,o=>{o.ctlPos={...(o.ctlPos||{}),[n]:[+x.toFixed(4),+y.toFixed(4)]}});
+  // move on to the next control that has no mark yet
+  const pos=it.ctlPos||{},next=c.findIndex((q,i)=>i>ctlPlace.sel&&!pos[q.n]),any=c.findIndex(q=>!pos[q.n]);ctlPlace.sel=next>=0?next:any>=0?any:ctlPlace.sel;renderGear()});
+ const inp=$('ctlPhotoIn');if(inp)inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const u=await shrinkPhoto(f,1000);ctlUpd(it,x=>{x.ctlPhoto=u;x.ctlPos={}});ctlView[it.id]='photo';renderGear()}catch(err){const m=$('ctlMsg');if(m)m.textContent='That image couldn’t be opened. Try a JPG or PNG photo.'}};
+ const find=$('ctlFind');if(find)find.onclick=async()=>{find.disabled=true;const m=$('ctlMsg');m.textContent='Claude is looking at your photo…';
+  const prompt=`This is a photo of a guitarist's own ${GEAR[it.type].name}${it.brand||it.model?` (${[it.brand,it.model].filter(Boolean).join(' ')})`:''}. Find each of these controls in the photo:
+${c.map((x,i)=>`${i+1}. ${x.n} (${x.k})`).join('\n')}
+For each one you can actually see, give the centre of that control as fractions of the image: x from 0 (left edge) to 1 (right edge), y from 0 (top edge) to 1 (bottom edge). If a control is not visible in this photo (out of frame, hidden, or you are not sure which one it is), use null. Don't guess.
+Reply with only JSON: {"positions": [{"n": number from the list, "x": number, "y": number} or null, ...]}`;
+  try{const r=await sampleFn.json(prompt,{images:[dataUrlBlob(it.ctlPhoto||it.photo)]})||{};const got={};
+   (Array.isArray(r.positions)?r.positions:[]).forEach((p,i)=>{if(!p)return;const k=(+p.n||i+1)-1,x=+p.x,y=+p.y;if(c[k]&&x>=0&&x<=1&&y>=0&&y<=1)got[c[k].n]=[+x.toFixed(4),+y.toFixed(4)]});
+   const n=Object.keys(got).length;if(!n)throw Object.assign(new Error('none'),{none:true});
+   ctlUpd(it,x=>{x.ctlPos=got});renderGear();const m2=$('ctlMsg');if(m2)m2.textContent=`Claude marked ${n} of ${c.length}. If one is off, tap “Move or add marks”, tap its number, then tap the right spot.`}
+  catch(e){find.disabled=false;m.textContent=e&&e.none?'Claude couldn’t see the controls in this photo. Try a close-up of the controls, or place them yourself.':e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude this time. Try again, or place them yourself.'}};
 }
 let gearVisit=null,gearTab='overview';// which item's page is showing, and which of its tabs
 const GTABS=[['overview','Overview'],['controls','Controls'],['tips','Tips'],['care','Care'],['ask','Ask Claude']];
