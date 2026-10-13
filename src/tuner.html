@@ -531,10 +531,10 @@ body.wopen{overflow:hidden}
 .instrow{flex-direction:row;align-items:center;gap:12px}
 .itxt{display:flex;flex-direction:column;gap:2px;min-width:0}
 .ithumb{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:0 0 auto;background:var(--surface)}
-.ithumb.none{display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid var(--line)}
+.ithumb.none{display:flex;align-items:center;justify-content:center;font-size:12px;border:1px solid var(--line)}
 .iphoto{display:flex;flex-direction:column;align-items:center;gap:8px}
 .iphoto img,.iphoto0{width:150px;height:150px;border-radius:18px;object-fit:cover;border:1px solid var(--line)}
-.iphoto0{display:flex;align-items:center;justify-content:center;font-size:52px;background:var(--bg)}
+.iphoto0{display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--bg)}
 .iphotobtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .iphoto .tip{text-align:center;margin:0}
 .iphotobig{width:100%;max-height:300px;object-fit:cover;border-radius:12px}
@@ -633,7 +633,7 @@ body.wopen{overflow:hidden}
 #paneTune .peg.target sup{color:#A5D6A7}
 #paneTune .strings[data-state=flat] .peg.target{border-color:var(--tm-flat);box-shadow:0 0 0 1px var(--tm-flat),0 0 16px rgba(255,183,77,.5)}
 #paneTune .strings[data-state=sharp] .peg.target{border-color:var(--tm-sharp);box-shadow:0 0 0 1px var(--tm-sharp),0 0 16px rgba(79,195,247,.5)}
-#paneTune .peg.locked::before{content:"🔒";position:absolute;top:3px;left:5px;font-size:9px;opacity:.85}
+#paneTune .peg.locked::before{content:"LOCK";position:absolute;top:3px;left:5px;font:600 7px/1 var(--mono);letter-spacing:.1em;border:1px solid currentColor;border-radius:2px;padding:1px 2px;opacity:.85}
 #paneTune .peg .ok{display:none;position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--tm-ok);color:#0E1A10;font:900 11px/18px var(--body);font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--tm-card)}
 #paneTune .peg.tuned .ok{display:block}
 #paneTune .peg .turn{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;font:700 10.5px var(--body);color:var(--tm-ink);pointer-events:none;text-shadow:0 1px 3px #000}
@@ -663,7 +663,10 @@ body.wopen{overflow:hidden}
 .gearcard summary::-webkit-details-marker{display:none}
 .gearcard summary::after{content:"▾";margin-left:auto;color:var(--muted);font-size:13px;transition:transform .2s}
 .gearcard details[open]>summary::after{transform:rotate(180deg)}
-.sic{flex:0 0 34px;height:34px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px}
+.sic{flex:0 0 68px;display:flex;align-items:center;justify-content:flex-start}
+/* panel labels (the app's icons): silkscreened like an amp's front panel */
+.silk{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;border:1.25px solid currentColor;border-radius:4px;padding:4px 5px 3px;white-space:nowrap;vertical-align:middle;opacity:.88}
+.btn .silk,.wb .silk{margin-right:2px}
 .stx{display:flex;flex-direction:column;min-width:0}.stx b{font:600 15px var(--body)}.stx small{font:400 12.5px var(--body);color:var(--muted)}
 .bhint{display:block;font-size:12px;color:var(--muted);margin-top:-2px}
 .gchat{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
@@ -718,7 +721,7 @@ body.wopen{overflow:hidden}
 .vidacts .play{background:#C4302B;border-color:#C4302B;color:#fff}.vidacts .sheet{border-color:var(--ok);color:var(--ok)}
 .vidsrc{font:700 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .shvid{display:flex;align-items:center;gap:10px;border:1px solid var(--accent);border-radius:12px;padding:8px 10px;background:var(--surface);margin:8px 0;text-decoration:none;color:var(--ink)}
-.shvid i{font-style:normal;font-size:20px}.shvid b{font-size:14px}.shvid small{display:block;color:var(--muted);font-size:12.5px}
+.shvid i{font-style:normal}.shvid b{font-size:14px}.shvid small{display:block;color:var(--muted);font-size:12.5px}
 .catvid{font-size:15px;margin-left:2px;text-decoration:none}
 
 /* practice mixer */
@@ -731,9 +734,9 @@ body.wopen{overflow:hidden}
 .addgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .addgrid:has(#drop[hidden]){display:none}
 .addgrid .drop.addtile{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:14px 12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);min-height:112px;width:auto;font:inherit;color:inherit;box-shadow:0 1px 0 rgba(0,0,0,.04)}
-.addgrid .addtile i{font-style:normal;font-size:26px;line-height:1;margin-bottom:6px}
+.addgrid .addtile i{font-style:normal;line-height:1;margin-bottom:8px}
 .addgrid .addtile b{font:700 15px var(--body);text-transform:none;letter-spacing:0}
-.addgrid .addtile span{font-size:12.5px;color:var(--muted);max-width:none;line-height:1.3}
+.addgrid .addtile .sub{font-size:12.5px;color:var(--muted);max-width:none;line-height:1.3}
 .addgrid .addtile:active{transform:scale(.98)}
 .addgrid .addnote{grid-column:1/-1;margin:0;text-align:center}
 #paneSong[data-seg="lib"] #addGrid,#paneSong[data-seg="lib"] #shotCard{display:none!important}
@@ -748,7 +751,7 @@ body.wopen{overflow:hidden}
 .mxbar{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:60;max-width:620px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 6px 22px rgba(0,0,0,.28);overflow:hidden}
 .mxbar[hidden]{display:none}
 .mxbar-main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:2px 0;color:var(--ink);text-align:left;cursor:pointer}
-.mxbar-ic{font-size:20px;flex:0 0 auto}
+.mxbar-ic{flex:0 0 auto}
 .mxbar-tx{display:flex;flex-direction:column;min-width:0;gap:1px}
 .mxbar-tx b{font:600 14px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mxbar-tx small{font:500 12px var(--body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -924,7 +927,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
       <button data-t="std" aria-pressed="true">Standard</button>
       <button data-t="dropd" aria-pressed="false">Drop D</button>
     </div>
-    <button type="button" class="btn ghost cffind" id="chFind">🎸 What chord am I playing? Show it on the fretboard</button>
+    <button type="button" class="btn ghost cffind" id="chFind"><span class="silk" aria-hidden="true">FINDER</span> What chord am I playing? Show it on the fretboard</button>
     <p class="tip" id="chCount"></p>
     <div class="chordbook" id="chGrid"></div>
     <div id="chDetail" class="chdetail" hidden></div>
@@ -932,28 +935,28 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 
   <div class="pane" id="paneSong" hidden>
     <div class="seg songseg" id="songSeg" role="tablist">
-      <button data-s="lib" aria-pressed="true">📚 My library</button>
-      <button data-s="add" aria-pressed="false">＋ Add a song</button>
+      <button data-s="lib" aria-pressed="true"><span class="silk" aria-hidden="true">LIB</span> My library</button>
+      <button data-s="add" aria-pressed="false"><span class="silk" aria-hidden="true">ADD</span> Add a song</button>
     </div>
     <section class="card" id="driveIntro" hidden></section>
     <div id="resumeCard" hidden></div>
     <section class="card draftcard" id="draftCard" hidden></section>
     <div class="addgrid" id="addGrid">
       <label class="drop addtile" for="vidIn" id="drop">
-        <i aria-hidden="true">🎬</i><b>Song video</b>
-        <span>Get the chords from a video</span>
+        <i aria-hidden="true"><span class="silk" aria-hidden="true">VIDEO</span></i><b>Song video</b>
+        <span class="sub">Get the chords from a video</span>
       </label>
       <button class="drop write addtile" id="shotNew" type="button">
-        <i aria-hidden="true">📄</i><b>Screenshots or PDF</b>
-        <span>Turn them into a chord sheet</span>
+        <i aria-hidden="true"><span class="silk" aria-hidden="true">SCAN</span></i><b>Screenshots or PDF</b>
+        <span class="sub">Turn them into a chord sheet</span>
       </button>
       <button class="drop write addtile" id="writeNew" type="button">
-        <i aria-hidden="true">✍️</i><b>Write a sheet</b>
-        <span>Type lyrics, tap to add chords</span>
+        <i aria-hidden="true"><span class="silk" aria-hidden="true">WRITE</span></i><b>Write a sheet</b>
+        <span class="sub">Type lyrics, tap to add chords</span>
       </button>
       <button class="drop write addtile" id="mixNew" type="button">
-        <i aria-hidden="true">🎚️</i><b>Practice mixer</b>
-        <span>Turn parts of a song up or down</span>
+        <i aria-hidden="true"><span class="silk" aria-hidden="true">MIX</span></i><b>Practice mixer</b>
+        <span class="sub">Turn parts of a song up or down</span>
       </button>
       <p class="tip addnote">Everything is read on this phone. Nothing is uploaded, and you check it before it’s saved.</p>
     </div>
@@ -963,7 +966,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
       <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
-      <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span>📁</span> My songs folder in Google Drive <span>↗</span></a>
+      <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span class="silk" aria-hidden="true">DRIVE</span> My songs folder in Google Drive <span>↗</span></a>
       <details class="ideabox catbox" id="catBox" hidden></details>
       <details class="ideabox vidbox" id="vidBox"></details>
       <details class="ideabox" id="ideaBox"></details>
@@ -1120,7 +1123,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
       </section>
       <section class="card" id="wStep2" hidden>
         <div class="shotnote" id="wShotNote" hidden></div>
-        <div class="seg" id="wMode"><button type="button" data-m="ch" aria-pressed="true">🎸 Chords</button><button type="button" data-m="tx" aria-pressed="false">✏️ Text &amp; lines</button></div>
+        <div class="seg" id="wMode"><button type="button" data-m="ch" aria-pressed="true">Chords</button><button type="button" data-m="tx" aria-pressed="false">Text &amp; lines</button></div>
         <p class="tip" id="wModeTip">Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.</p>
         <button type="button" class="btn ghost" id="wIns">＋ Add a chords-only line</button>
         <div class="wlines" id="wLines"></div>
@@ -1132,7 +1135,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
           <div class="pickhead"><span>Chord above <b id="wPickWord" dir="auto"></b></span><button type="button" class="pickx" id="wPickClose" aria-label="Close">✕</button></div>
           <input id="wPickQ" class="textin" type="search" placeholder="Search chords: Am, G/B, Cadd9…" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
           <div class="picklist" id="wPickList"></div>
-          <button type="button" class="btn ghost cffind" id="wPickFind">🎸 Don’t know its name? Show it on the fretboard</button>
+          <button type="button" class="btn ghost cffind" id="wPickFind"><span class="silk" aria-hidden="true">FINDER</span> Don’t know its name? Show it on the fretboard</button>
           <div class="editrow" id="wPickMove" hidden><button type="button" class="btn ghost" id="wPickPrev">◀ Previous word</button><button type="button" class="btn ghost" id="wPickNext">Next word ▶</button></div>
           <button type="button" class="btn ghost" id="wPickDel" hidden>Remove chord</button>
         </div>
@@ -1169,7 +1172,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
   </div>
 </div>
 
-<div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true">🎚️</span><span class="mxbar-tx"><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
+<div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span class="silk" aria-hidden="true">MIX</span></span><span class="mxbar-tx"><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
@@ -1257,6 +1260,8 @@ jobs:
 
 <script>
 (()=>{
+// panel labels: short silkscreened words used instead of emoji icons
+const SK=t=>`<span class="silk" aria-hidden="true">${t}</span>`;
 const NAMES=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 const TUNINGS=[
  {id:'std',name:'Standard',n:[40,45,50,55,59,64]},
@@ -2706,7 +2711,7 @@ $('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
  else{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);shStatus('PDF saved to your downloads.')}
 });
 $('shShare').onclick=()=>withBusy($('shShare'),async()=>{
- shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});clearAfterDrive('✅ Shared.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
+ shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});clearAfterDrive(SK('OK')+' Shared.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
 });
 const blobToB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
 const pickId=p=>p&&(p.id||(p.file&&p.file.id)||(p.files&&p.files[0]&&p.files[0].id))||'';
@@ -2771,7 +2776,7 @@ async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(
   const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
   if(e2){e2.drive={id,url,at:Date.now(),folder:artist||''};libWrite(l)}
   const toTrash=[...new Set([...existing,old].filter(x=>x&&x!==id))];for(const t of toTrash){try{await mcpCap.callTool(DRIVE,'trash_file',{fileId:t})}catch(e){}}
-  clearAfterDrive(`✅ Saved to Drive in Guitar sheets${artist?' › '+esc(artist):''}${toTrash.length?' (replaced the earlier copy)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`,url);
+  clearAfterDrive(`${SK('OK')} Saved to Drive in Guitar sheets${artist?' › '+esc(artist):''}${toTrash.length?' (replaced the earlier copy)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`,url);
  }catch(e){shStatus(driveErr(e))}
 })}
 /* ---- Phone app: each person saves to their own Google Drive ---- */
@@ -2860,7 +2865,7 @@ async function doOwnDriveSave(artist){await withBusy($('shDrive'),async()=>{
   const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
   if(old&&old!==r.id){try{await gdFetch(`${GD_API}/${old}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}
   if(e2){e2.drive={id:r.id,url:r.url,at:Date.now(),folder:artist||''};libWrite(l)}
-  clearAfterDrive(`✅ Saved to your Drive in Guitar sheets${artist?' › '+esc(artist):''}${r.replaced||(old&&old!==r.id)?' (replaced the earlier copy)':''}. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open it ↗</a>`,r.url);
+  clearAfterDrive(`${SK('OK')} Saved to your Drive in Guitar sheets${artist?' › '+esc(artist):''}${r.replaced||(old&&old!==r.id)?' (replaced the earlier copy)':''}. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open it ↗</a>`,r.url);
  }catch(e){shStatus(gdErr(e))}
 })}
 renderLib();
@@ -2882,15 +2887,15 @@ function saveDraft(){if(A&&A.kind==='lyrics'){A.edited=Date.now();if(A.libId)lib
 function draftNow(){const d=store.get('writeDraft',null);return d&&d.kind==='lyrics'&&((d.lyrics||'').trim()||(d.title||'').trim())?d:null}
 function renderDraft(){
  const card=$('draftCard');if(!card)return;const d=draftNow(),landing=!$('drop').hidden;
- {const ws=$('writeNew').querySelector('span');if(ws)ws.textContent=d&&!d.made?'Continue your unfinished sheet':'Type lyrics, tap to add chords'}
+ {const ws=$('writeNew').querySelector('.sub');if(ws)ws.textContent=d&&!d.made?'Continue your unfinished sheet':'Type lyrics, tap to add chords'}
  if(!d||!landing){card.hidden=true;if(landing)$('writeNew').hidden=false;return}
  $('writeNew').hidden=false;card.hidden=false;
  const nCh=(d.lc||[]).reduce((n,L)=>n+Object.values(L.ch||{}).filter(Boolean).length,0),first=(d.lc&&d.lc.find(L=>L.t.trim()&&!isSecLine(L.t))||{t:(d.lyrics||'').split('\n').find(x=>x.trim())||''}).t;
  const name=(d.title||'').trim()||wordsOf(first).slice(0,5).join(' ')||'Untitled song',when=d.edited||d.at;
- card.innerHTML=`<div class="drafthead"><span class="sic">📝</span><span class="stx"><b>${d.made?'Chord sheet not in Drive yet':'Unfinished song sheet'}</b><small>${d.made?'You made the sheet but haven’t sent it to Drive':'You haven’t made the chord sheet yet'}</small></span></div>
+ card.innerHTML=`<div class="drafthead"><span class="sic">${SK('DRAFT')}</span><span class="stx"><b>${d.made?'Chord sheet not in Drive yet':'Unfinished song sheet'}</b><small>${d.made?'You made the sheet but haven’t sent it to Drive':'You haven’t made the chord sheet yet'}</small></span></div>
  <p class="draftname" dir="auto"><b>${esc(name)}</b>${d.artist?` · ${esc(d.artist)}`:''}</p>
  <p class="tip">${nCh?`${nCh} chord${nCh===1?'':'s'} placed`:'No chords yet'}${when?` · last edited ${new Date(when).toLocaleString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'})}`:''}</p>
- <div class="editrow"><button class="btn" id="dCont" type="button">${d.made?'Open the sheet':'✏️ Continue editing'}</button><button class="btn ghost" id="dNew" type="button">Start a new one</button><button class="btn ghost danger" id="dDel" type="button">Discard</button></div>
+ <div class="editrow"><button class="btn" id="dCont" type="button">${d.made?'Open the sheet':'Continue editing'}</button><button class="btn ghost" id="dNew" type="button">Start a new one</button><button class="btn ghost danger" id="dDel" type="button">Discard</button></div>
  <div class="confirm" id="dConf" hidden><span id="dConfTxt"></span><button class="btn danger" id="dYes" type="button">Discard it</button><button class="btn ghost" id="dNo" type="button">Keep it</button></div>`;
  let after=null;const ask=(t,f)=>{$('dConfTxt').textContent=t;after=f;$('dConf').hidden=false};
  $('dCont').onclick=()=>{const x=draftNow();if(!x)return renderDraft();if(x.made){vid.pause();A=x;fileKey='';showSheet();wFromWriter=true}else openWriter(x)};
@@ -2923,7 +2928,7 @@ function setWStep(n){
 function renderWText(){
  const lc=A.lc||[];
  $('wLines').innerHTML=lc.map((L,i)=>{const sl=slotLine(L.t),sec=isSecLine(L.t),chs=Object.keys(L.ch||{}).sort((a,b)=>a-b).map(k=>L.ch[k]).filter(Boolean);
-  const tools=`<div class="wtbtns"><button type="button" class="linkbtn" data-tadd="${i}">＋ Line below</button><button type="button" class="linkbtn danger" data-tdel="${i}" aria-label="Delete this line">🗑 Delete</button></div>`;
+  const tools=`<div class="wtbtns"><button type="button" class="linkbtn" data-tadd="${i}">＋ Line below</button><button type="button" class="linkbtn danger" data-tdel="${i}" aria-label="Delete this line">${SK('DEL')} Delete</button></div>`;
   if(sl)return `<div class="wt slot"><div class="wtch">Chords only: <b dir="ltr">${esc(chs.join('  ')||'(empty)')}</b> <small>(edit in Chords)</small></div>${tools}</div>`;
   return `<div class="wt${sec?' sec':''}${L.t.trim()?'':' blank'}">${chs.length?`<div class="wtch" dir="ltr" style="text-align:${hasHeb(L.t)?'right':'left'}">${esc((hasHeb(L.t)?chs.slice().reverse():chs).join('  '))}</div>`:''}<input class="wtin" data-ti="${i}" dir="auto" value="${esc(L.t)}" placeholder="${L.t.trim()?'':'Empty line (gap between parts)'}">${tools}</div>`}).join('')+
   `<button type="button" class="wins" data-tadd="${lc.length-1}">＋ Add a line at the end</button>`;
@@ -3154,7 +3159,7 @@ $('wCapo').addEventListener('change',e=>{A.play.capo=+e.target.value;saveDraft()
 /* ---- chord sheet from a screenshot: Claude reads it, you check and edit it in the writer ---- */
 function renderShotNote(){const n=$('wShotNote');if(!n)return;const sh=A&&A.shots,hasSh=!!(sh&&sh.length);
  if(!hasSh&&!(A&&A.fromImport)){n.hidden=true;n.innerHTML='';return}n.hidden=false;
- n.innerHTML=`${hasSh?`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div>`:''}<div><b>${hasSh?`📷 Made from your screenshot${sh.length>1?'s':''}.`:'📄 Made from your PDF.'}</b> ${hasSh?'Compare it with the picture (tap to enlarge) and fix anything that’s off':'Check it and fix anything that’s off'}: tap a word to change its chord, or use “Text &amp; lines” to fix words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
+ n.innerHTML=`${hasSh?`<div class="shotcol">${sh.map((u,i)=>`<img src="${u}" alt="Your screenshot ${i+1}" data-big="${i}">`).join('')}</div>`:''}<div><b>${hasSh?`${SK('PHOTO')} Made from your screenshot${sh.length>1?'s':''}.`:SK('SCAN')+' Made from your PDF.'}</b> ${hasSh?'Compare it with the picture (tap to enlarge) and fix anything that’s off':'Check it and fix anything that’s off'}: tap a word to change its chord, or use “Text &amp; lines” to fix words. Nothing is saved until you tap <b>Make the chord sheet</b>.${A.shotNote?`<br><i dir="auto">${esc(A.shotNote)}</i>`:''}<div class="editrow"><button type="button" class="btn ghost danger" id="wShotDrop">Discard this one</button></div></div>`;
  if(hasSh)n.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotBigMem&&shotBigMem.length===sh.length?shotBigMem:sh,+im.dataset.big));
  $('wShotDrop').onclick=()=>{store.set('writeDraft',null);$('writeView').hidden=true;A=null;showLanding()};
 }
@@ -3390,7 +3395,7 @@ function renderCatalog(){const box=$('catBox');if(!box)return;const all=catalogA
  const arts=[...new Set(all.map(e=>e.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'he')),tuns=[...new Set(all.map(e=>e.tuning).filter(Boolean))];
  const sel=(id,lab,opts,v)=>`<label class="catsel"><span>${lab}</span><select id="${id}"><option value="">All</option>${opts.map(([k,t])=>`<option value="${esc(k)}" ${v===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
  const wasOpen=box.open;
- box.innerHTML=`<summary><span class="sic">🔎</span><span class="stx"><b>My chord sheets</b><small>${all.length?`${all.length} sheet${all.length===1?'':'s'} made in Guitaring · search and filter`:'Sheets you make in Guitaring show up here'}</small></span></summary>
+ box.innerHTML=`<summary><span class="sic">${SK('SHEETS')}</span><span class="stx"><b>My chord sheets</b><small>${all.length?`${all.length} sheet${all.length===1?'':'s'} made in Guitaring · search and filter`:'Sheets you make in Guitaring show up here'}</small></span></summary>
  <input id="catQ" class="textin" type="search" dir="auto" placeholder="Search a song or artist…" value="${esc(catF.q)}" autocomplete="off">
  <div class="catfilters">${sel('catA','Artist',arts.map(a=>[a,a]),catF.artist)}${sel('catC','Capo',[['0','No capo'],['1','With capo']],catF.capo)}${sel('catT','Tuning',tuns.map(t=>[t,t]),catF.tuning)}${sel('catL','Level',[['easy','Easy'],['medium','Medium'],['hard','Hard']],catF.level)}</div>
  <div id="catRes" class="catres"></div>`;
@@ -3400,7 +3405,7 @@ function renderCatalog(){const box=$('catBox');if(!box)return;const all=catalogA
 }
 function drawCatalog(all){const q=normArt(catF.q),f=all.filter(e=>(!q||normArt(e.title+' '+(e.artist||'')).includes(q))&&(!catF.artist||e.artist===catF.artist)&&(!catF.capo||(catF.capo==='0'?!e.capo:e.capo>0))&&(!catF.tuning||e.tuning===catF.tuning)&&(!catF.level||(catF.level==='easy'?e.level&&e.level<=2:catF.level==='medium'?e.level===3:e.level>=4)));
  const link=e=>e.url||('https://drive.google.com/drive/search?q='+encodeURIComponent(e.title));
- $('catRes').innerHTML=f.length?f.map(e=>`<a class="catrow" href="${esc(link(e))}" target="_blank" rel="noopener"><span class="cattxt"><b dir="auto">${esc(e.title)}</b>${e.artist?`<small dir="auto">${esc(e.artist)}</small>`:''}</span><span class="catbad">${e.capo?`<span class="badge">Capo ${e.capo}</span>`:''}${e.tuning&&!/^standard/i.test(e.tuning)?`<span class="badge">${esc(e.tuning)}</span>`:''}${e.level?`<span class="catlv lv${e.level}" title="${LEVEL_NAME[e.level]}">${LEVEL_NAME[e.level]}</span>`:''}</span><span class="catgo">${vlFindVideos(e.title,e.artist).length?'🎬 ':''}↗</span></a>`).join('')
+ $('catRes').innerHTML=f.length?f.map(e=>`<a class="catrow" href="${esc(link(e))}" target="_blank" rel="noopener"><span class="cattxt"><b dir="auto">${esc(e.title)}</b>${e.artist?`<small dir="auto">${esc(e.artist)}</small>`:''}</span><span class="catbad">${e.capo?`<span class="badge">Capo ${e.capo}</span>`:''}${e.tuning&&!/^standard/i.test(e.tuning)?`<span class="badge">${esc(e.tuning)}</span>`:''}${e.level?`<span class="catlv lv${e.level}" title="${LEVEL_NAME[e.level]}">${LEVEL_NAME[e.level]}</span>`:''}</span><span class="catgo">${vlFindVideos(e.title,e.artist).length?SK('LESSON')+' ':''}↗</span></a>`).join('')
   :`<p class="tip">${all.length?'No sheet matches. Try fewer filters.':'No sheets yet. When you send a sheet to Drive it’s added here; sheets already in your folder appear after the morning scan.'}</p>`;
 }
 
@@ -3447,7 +3452,7 @@ async function vlMeta(url){
 let vlDraft=null,vlQ='',vlMsg='';
 function renderVids(){const box=$('vidBox');if(!box)return;const l=vlAll(),wasOpen=box.open;
  const withSheet=l.filter(v=>vlFindSheet(v.song||v.title,v.artist)).length;
- box.innerHTML=`<summary><span class="sic">🎬</span><span class="stx"><b>My video lessons</b><small>${l.length?`${l.length} saved link${l.length===1?'':'s'} · ${withSheet} with a chord sheet`:'Save the video links you learn songs from'}</small></span></summary>
+ box.innerHTML=`<summary><span class="sic">${SK('LESSON')}</span><span class="stx"><b>My video lessons</b><small>${l.length?`${l.length} saved link${l.length===1?'':'s'} · ${withSheet} with a chord sheet`:'Save the video links you learn songs from'}</small></span></summary>
  <div class="vidadd"><input id="vlUrl" class="textin" type="url" inputmode="url" placeholder="Paste a YouTube or other video link" autocomplete="off" dir="ltr"><button class="btn" type="button" id="vlAdd">Add</button></div>
  <p class="tip" style="margin:0">Tip: in the YouTube app tap <b>Share › Guitaring</b> to add a video straight here.</p>
  <div id="vlMsg"></div><div id="vlForm"></div>
@@ -3464,8 +3469,8 @@ function drawVidMsg(){const m=$('vlMsg');if(m)m.innerHTML=vlMsg||''}
 function vlRowHTML(v){const sh=vlFindSheet(v.song||v.title,v.artist),th=v.thumb||(v.yt?`https://i.ytimg.com/vi/${v.yt}/mqdefault.jpg`:'');
  const name=v.song||v.title||v.url;
  return `<div class="vidrow" data-id="${esc(v.id)}"><a class="vidthumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="${th?`background-image:url('${esc(th)}')`:''}" aria-label="Watch ${esc(name)}"><span>▶</span></a>
- <div class="vidtx"><span class="vidsrc">${esc(v.src||vlSource(v.url))}</span><b dir="auto">${esc(name)}</b>${v.artist?`<small dir="auto">${esc(v.artist)}</small>`:''}${v.note?`<small dir="auto">📝 ${esc(v.note)}</small>`:''}
- <div class="vidacts"><a class="play" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Watch</a>${sh?(sh.lib?`<button type="button" class="sheet" data-lib="${esc(sh.lib)}">📄 Chord sheet</button>`:`<a class="sheet" href="${esc(sh.url)}" target="_blank" rel="noopener" title="${esc(sh.kind)}">📄 Chord sheet ↗</a>`):'<span class="nosheet vidacts-no" style="font:600 12px var(--body);color:var(--muted);padding:5px 4px">No chord sheet yet</span>'}<button type="button" data-edit="${esc(v.id)}">Edit</button></div></div></div>`}
+ <div class="vidtx"><span class="vidsrc">${esc(v.src||vlSource(v.url))}</span><b dir="auto">${esc(name)}</b>${v.artist?`<small dir="auto">${esc(v.artist)}</small>`:''}${v.note?`<small dir="auto">${SK('NOTE')} ${esc(v.note)}</small>`:''}
+ <div class="vidacts"><a class="play" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Watch</a>${sh?(sh.lib?`<button type="button" class="sheet" data-lib="${esc(sh.lib)}">${SK('SHEET')} Chord sheet</button>`:`<a class="sheet" href="${esc(sh.url)}" target="_blank" rel="noopener" title="${esc(sh.kind)}">${SK('SHEET')} Chord sheet ↗</a>`):'<span class="nosheet vidacts-no" style="font:600 12px var(--body);color:var(--muted);padding:5px 4px">No chord sheet yet</span>'}<button type="button" data-edit="${esc(v.id)}">Edit</button></div></div></div>`}
 function drawVids(){const box=$('vlList');if(!box)return;const q=vlKey(vlQ);
  const l=vlAll().filter(v=>!q||vlKey([v.song,v.artist,v.title,v.note].join(' ')).includes(q));
  box.innerHTML=l.length?l.map(vlRowHTML).join(''):(vlAll().length?'<p class="tip">No video matches.</p>':'')}
@@ -3475,13 +3480,13 @@ function drawVidForm(){const f=$('vlForm');if(!f)return;if(!vlDraft){f.innerHTML
  ${d.title?`<small class="tip" dir="auto" style="margin:0">“${esc(d.title)}”</small>`:''}
  <div class="two"><label>Song<input id="vlSong" class="textin" dir="auto" value="${esc(d.song||'')}" placeholder="Song name"></label><label>Artist<input id="vlArt" class="textin" dir="auto" value="${esc(d.artist||'')}" placeholder="Artist"></label></div>
  <label>Note (optional)<input id="vlNote" class="textin" dir="auto" value="${esc(d.note||'')}" placeholder="e.g. intro riff at 2:10"></label>
- <div class="vidmsg ${sh?'ok':''}" id="vlSheetHint">${sh?`📄 You have a chord sheet for this: <b dir="auto">${esc(sh.title)}</b>${sh.artist?' · '+esc(sh.artist):''} <small>(${esc(sh.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'}</div>
+ <div class="vidmsg ${sh?'ok':''}" id="vlSheetHint">${sh?`${SK('SHEET')} You have a chord sheet for this: <b dir="auto">${esc(sh.title)}</b>${sh.artist?' · '+esc(sh.artist):''} <small>(${esc(sh.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'}</div>
  <div class="editrow"><button class="btn" type="button" id="vlSave">${d.id?'Save changes':'Save video'}</button><button class="btn ghost" type="button" id="vlCancel">Cancel</button>${d.id?'<button class="btn ghost danger" type="button" id="vlDel">Delete</button>':''}</div></div>`;
- const upd=()=>{d.song=$('vlSong').value.trim();d.artist=$('vlArt').value.trim();d.note=$('vlNote').value.trim();const s2=vlFindSheet(d.song,d.artist),h=$('vlSheetHint');h.className='vidmsg'+(s2?' ok':'');h.innerHTML=s2?`📄 You have a chord sheet for this: <b dir="auto">${esc(s2.title)}</b>${s2.artist?' · '+esc(s2.artist):''} <small>(${esc(s2.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'};
+ const upd=()=>{d.song=$('vlSong').value.trim();d.artist=$('vlArt').value.trim();d.note=$('vlNote').value.trim();const s2=vlFindSheet(d.song,d.artist),h=$('vlSheetHint');h.className='vidmsg'+(s2?' ok':'');h.innerHTML=s2?`${SK('SHEET')} You have a chord sheet for this: <b dir="auto">${esc(s2.title)}</b>${s2.artist?' · '+esc(s2.artist):''} <small>(${esc(s2.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'};
  ['vlSong','vlArt','vlNote'].forEach(id=>$(id).addEventListener('input',upd));
  $('vlSave').onclick=()=>{upd();const l=vlAll(),e={id:d.id||('v'+Date.now().toString(36)),url:d.url,key:d.key,yt:d.yt||'',src:d.src,title:d.title||'',thumb:d.thumb||'',song:d.song||d.title||'',artist:d.artist||'',note:d.note||'',at:d.at||Date.now()};
   const i=l.findIndex(x=>x.id===e.id);if(i>=0)l[i]=e;else l.unshift(e);store.set(VLK,l);
-  const sh=vlFindSheet(e.song,e.artist);vlMsg=`<div class="vidmsg ok">✓ Saved “${esc(e.song)}”.${sh?' 📄 It’s linked to your chord sheet.':''}</div>`;vlDraft=null;renderVids();try{renderCatalog()}catch(err){}};
+  const sh=vlFindSheet(e.song,e.artist);vlMsg=`<div class="vidmsg ok">✓ Saved “${esc(e.song)}”.${sh?' '+SK('SHEET')+' It’s linked to your chord sheet.':''}</div>`;vlDraft=null;renderVids();try{renderCatalog()}catch(err){}};
  $('vlCancel').onclick=()=>{vlDraft=null;vlMsg='';renderVids()};
  if($('vlDel'))$('vlDel').onclick=()=>{store.set(VLK,vlAll().filter(x=>x.id!==d.id));vlDraft=null;vlMsg='<div class="vidmsg">Deleted.</div>';renderVids();try{renderCatalog()}catch(err){}};
 }
@@ -3499,7 +3504,7 @@ $('vidBox')&&$('vidBox').addEventListener('click',e=>{const ed=e.target.closest(
  const lb=e.target.closest('[data-lib]');if(lb){const ent=libGet(lb.dataset.lib);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()}});
 // a chord sheet you open shows its video lessons
 function renderSheetVid(){const box=$('shVid');if(!box)return;if(!A){box.hidden=true;return}const t=($('shName').value||A.title||'').trim();const vs=t?vlFindVideos(t,A.artist||''):[];
- box.hidden=!vs.length;box.innerHTML=vs.map(v=>`<a class="shvid" href="${esc(v.url)}" target="_blank" rel="noopener"><i>🎬</i><span><b>Your video lesson for this song</b><small dir="auto">${esc(v.song||v.title)}${v.artist?' · '+esc(v.artist):''} · ${esc(v.src||vlSource(v.url))} ↗</small></span></a>`).join('')}
+ box.hidden=!vs.length;box.innerHTML=vs.map(v=>`<a class="shvid" href="${esc(v.url)}" target="_blank" rel="noopener"><i>${SK('LESSON')}</i><span><b>Your video lesson for this song</b><small dir="auto">${esc(v.song||v.title)}${v.artist?' · '+esc(v.artist):''} · ${esc(v.src||vlSource(v.url))} ↗</small></span></a>`).join('')}
 // shared from YouTube (Share › Guitaring) or opened with ?url=…
 (function vlShared(){try{const q=new URLSearchParams(location.search),u=firstUrl([q.get('url'),q.get('text'),q.get('title')].join(' '));if(!u)return;
  history.replaceState(null,'',location.pathname);setTimeout(()=>{try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e){}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
@@ -3531,10 +3536,10 @@ const shotWhen=t=>{if(!t)return '';const d=new Date(t),today=new Date().toDateSt
 function renderShotStage(msg){
  const card=$('shotCard'),n=shotStage.length;if(!n){card.hidden=true;card.innerHTML='';return}card.hidden=false;
  const lab=i=>n===1?'':i===0?'Beginning':i===n-1?'End':'Middle';
- card.innerHTML=`<div class="drafthead"><span class="sic">📷</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>Sorted by the time each was taken, so the first one you took is the beginning. Tap a picture to see it full size. Overlaps are fine.</small></span></div>
+ card.innerHTML=`<div class="drafthead"><span class="sic">${SK('SCAN')}</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>Sorted by the time each was taken, so the first one you took is the beginning. Tap a picture to see it full size. Overlaps are fine.</small></span></div>
  <div class="shotlist">${shotStage.map((x,i)=>`<div class="shotrow"><img src="${x.small}" alt="Screenshot ${i+1}" data-big="${i}"><div class="shotinfo"><b>${i+1}</b><small>${lab(i)}</small><small>${shotWhen(x.t)}</small></div><div class="shotbtns"><button type="button" class="btn ghost" data-up="${i}" ${i?'':'disabled'} aria-label="Move up">↑</button><button type="button" class="btn ghost" data-dn="${i}" ${i<n-1?'':'disabled'} aria-label="Move down">↓</button><button type="button" class="btn ghost danger" data-rm="${i}" aria-label="Remove">✕</button></div></div>`).join('')}</div>
  ${msg?`<p class="tip">${esc(msg)}</p>`:''}
- <div class="editrow">${n<SHOT_MAX?`<button type="button" class="btn ghost" id="shotMore">＋ Add the next screenshot</button>`:''}<button type="button" class="btn cta" id="shotGoRead">✨ Make the sheet from ${n===1?'it':'all '+n}</button></div>
+ <div class="editrow">${n<SHOT_MAX?`<button type="button" class="btn ghost" id="shotMore">＋ Add the next screenshot</button>`:''}<button type="button" class="btn cta" id="shotGoRead">Make the sheet from ${n===1?'it':'all '+n}</button></div>
  <button type="button" class="linkbtn" id="shotCancel">Cancel</button>`;
  card.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotStage.map(x=>x.big),+im.dataset.big));
  card.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{shotManual=true;const i=+b.dataset.up;[shotStage[i-1],shotStage[i]]=[shotStage[i],shotStage[i-1]];renderShotStage()});
@@ -3559,7 +3564,7 @@ function dropOverlaps(lines){
 }
 async function shotRead(){
  const card=$('shotCard'),stage=shotStage.slice(),n=stage.length;if(!n)return;
-  const say=t=>{card.innerHTML=`<div class="shotthumbs">${stage.map(x=>x.pdf?`<span class="badge">PDF · ${esc(x.name||'')}</span>`:`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">📖 ${t}</p>`};
+  const say=t=>{card.innerHTML=`<div class="shotthumbs">${stage.map(x=>x.pdf?`<span class="badge">PDF · ${esc(x.name||'')}</span>`:`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">${SK('TIP')} ${t}</p>`};
  try{const r={title:'',artist:'',capo:0,tuning:'Standard',note:'',lines:[]};
   if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)));r._names=[pages.docTitle,String(stage[0].name||'').replace(/\.pdf$/i,'')]}
   else{say('Getting the reader ready…');await ocrSheetReady(say);
@@ -3891,7 +3896,7 @@ const MX={
  SEG:343980,SR:44100,OUT_SR:22050,HQ_MAX:300,OVL:.5,STEMS:['drums','bass','other','vocals','guitar','piano']
 };
 const MX_NAMES={drums:'Drums',bass:'Bass',other:'Other',vocals:'Vocals',guitar:'Guitars',piano:'Piano / keys',gL:'Guitar · left',gC:'Guitar · centre',gR:'Guitar · right'};
-const MX_ICON={drums:'🥁',bass:'🎵',other:'🎛️',vocals:'🎤',guitar:'🎸',piano:'🎹',gL:'🎸',gC:'🎸',gR:'🎸'};
+const MX_ICON={drums:'DRM',bass:'BASS',other:'OTHER',vocals:'VOX',guitar:'GTR',piano:'KEYS',gL:'GTR L',gC:'GTR C',gR:'GTR R'};
 let mxSess=null,mxSessKind='',mxBusy=false,mxCancel=false,mxSong=null,mxCtx=null,mxNode=null,mxPos=0,mxPlaying=false,mxSolo=null,mxWake=null;
 const mxIsGtr=id=>id==='guitar'||id==='gL'||id==='gC'||id==='gR';
 // ---- small IndexedDB store: the last separated song stays on the phone, so reopening it is instant ----
@@ -4103,19 +4108,19 @@ const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars on
 function mxPreset(k){mxSolo=null;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':false;t.gain=1});mxRows();mxSend()}
 function mxSend(){if(mxNode)mxNode.port.postMessage({gains:mxGains()})}
 function mxRows(){const box=$('mxRows');if(!box)return;
- box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute;return `<div class="mixrow${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}"><b>${MX_ICON[t.id]||'🎵'} ${esc(t.name)}</b>
+ box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute;return `<div class="mixrow${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}"><b>${SK(MX_ICON[t.id]||'PART')} ${esc(t.name)}</b>
  <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo">S</button></div>
  <input type="range" min="0" max="150" step="5" value="${Math.round(t.gain*100)}" data-vol="${k}" aria-label="${esc(t.name)} volume"><output>${Math.round(t.gain*100)}%</output></div>`}).join('')}
 // the open song: transport, presets, one slider per part; the list of songs folds away underneath
 function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome();
  const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length,n=mxIdx.length;
- v.innerHTML=`<div class="mixhead"><b dir="auto">🎚️ ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
+ v.innerHTML=`<div class="mixhead"><b dir="auto">${SK('MIX')} ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
  <div class="mixtrans"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button>
  <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
- <div class="mixacts"><button type="button" class="btn ghost" id="mxChords">🎸 Find the chords from the guitars only</button><button type="button" class="btn ghost" id="mxSave">Save this mix as an audio file</button></div>
+ <div class="mixacts"><button type="button" class="btn ghost" id="mxChords">${SK('CHORDS')} Find the chords from the guitars only</button><button type="button" class="btn ghost" id="mxSave">Save this mix as an audio file</button></div>
  <details class="mxmore" id="mxMore"><summary>My mixes${n?` (${n})`:''} · split a new song</summary><div id="mxLib"></div></details>`;
  mxRows();mxTimeUI();mxPlayUI();mxLibUI();
  $('mxClose').onclick=()=>mxView(false);
@@ -4167,7 +4172,7 @@ function mxLibUI(){const box=$('mxLib');if(!box)return;const cfg=mxGh();
  if(cfg)$('mxGhEdit').onclick=()=>mxSetup()}
 // no song open: just the list
 function mxHome(){if(mxBusy)return;const v=$('mixView');
- v.innerHTML=`<div class="mixhead"><b>🎚️ Practice mixer</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
+ v.innerHTML=`<div class="mixhead"><b>${SK('MIX')} Practice mixer</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
  ${mxGh()?'':'<p class="tip" style="margin:0">Songs are split on a free GitHub computer, so you can lock the phone and come back when it’s ready. It takes a one-time setup.</p>'}
  <div id="mxLib" class="mxlibwrap"></div>`;
  mxLibUI();$('mxClose').onclick=()=>mxView(false)}
@@ -4248,7 +4253,7 @@ function mxSetup(){const v=$('mixView'),cfg=mxGh();
  if(cfg)$('mxDisc').onclick=()=>{try{localStorage.removeItem(MX_GH_KEY)}catch(e){}mxSheetUI2()};
  $('mxConn').onclick=async()=>{const b=$('mxConn'),m=$('mxSetMsg');b.disabled=true;b.textContent='Connecting…';m.hidden=true;
   try{const tok=$('mxTok').value.trim()||(cfg&&cfg.repo===$('mxRepo').value.trim()?cfg.token:'');const r=await mxConnect($('mxRepo').value,tok);
-   toast(r.isPrivate?'✅ Connected to GitHub. Pick a song to split.':'✅ Connected, but the repository is <b>public</b>: anyone could see your songs. Make it private in its Settings.');mxSheetUI2()}
+   toast(r.isPrivate?SK('OK')+' Connected to GitHub. Pick a song to split.':SK('OK')+' Connected, but the repository is <b>public</b>: anyone could see your songs. Make it private in its Settings.');mxSheetUI2()}
   catch(e){m.textContent=e&&e.msg||mxGhErr(e,'repo');m.hidden=false;b.disabled=false;b.textContent='Connect'}}}
 function mxSheetUI2(){if(mxSong&&mxSong.tracks)mxMixer();else mxHome()}
 // keep the splitter in the repository up to date (the app carries the current version)
@@ -4284,7 +4289,7 @@ async function mxUpload(it,file){mxBarOff=false;
   catch(e){if(e.status!==422)throw e;await gh('/git/refs/heads/j-'+id,{method:'PATCH',body:JSON.stringify({sha:com.sha,force:true})})}
   await gh('/actions/workflows/split.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs:{id}})});
   it.state='wait';it.sent=Date.now();
-  toast(`🎚️ “${esc(it.name)}” is on its way. It usually takes 15–25 minutes (best-quality split). You can lock the phone; it’ll be here when you come back.`);
+  toast(`${SK('MIX')} “${esc(it.name)}” is on its way. It usually takes 15–25 minutes (best-quality split). You can lock the phone; it’ll be here when you come back.`);
  }catch(e){try{console.error('mixer send',e&&e.message||e)}catch(_){}it.state='failed';it.err=mxGhErr(e,e&&e.wf?'wf':'send')}
  await mxIdxSave();mxBar();mxSheetUI();renderMixNew();mxPollSoon()}
 let mxPollT=0,mxPolling=false;
@@ -4312,7 +4317,7 @@ async function mxCollect(it){mxBarOff=false;
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`);const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
    await mxPut('mixdata:'+it.id,{stems});it.state='ready';it.at=Date.now();mxDel('mixsrc:'+it.id).catch(()=>{});
-   toast(`🎚️ “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`);
+   toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`);
    const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}}
   gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
  }catch(e){try{console.error('mixer collect',e&&e.message||e)}catch(_){}it.state='wait'}// try again on the next check
@@ -4350,7 +4355,7 @@ $('mxDim').onclick=()=>mxView(false);
 
 // ---------- the Songs page entry ----------
 function renderMixNew(){const b=$('mixNew');if(!b)return;const ready=mxIdx.filter(x=>x.state==='ready').length,pend=mxIdx.filter(x=>MX_PEND.includes(x.state)).length;
- b.querySelector('span').textContent='Turn parts of a song up or down'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
+ b.querySelector('.sub').textContent='Turn parts of a song up or down'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
 $('mixNew').onclick=()=>{
  if(!mxIdx.length&&!mxSong&&!mxBusy&&mxGh()){mxPickLocal=false;$('mixIn').click();return}
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
@@ -4421,7 +4426,7 @@ function renderWelcome(){
   $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);try{syncDriveLinks()}catch(err){}renderWelcome()};return}
  const j=esc(pickJoke()).replace(/\{n\}/g,esc(n));
  w.querySelector('.wbody').innerHTML=`<p class="whey">Hey, <button type="button" class="wname" id="wRename" title="Change name">${esc(n)}</button>.</p><p class="wjoke" id="wJoke">${j}</p><button type="button" class="wmore" id="wMore">Another one ↻</button>
- <div class="wgo"><button class="btn wmain" data-go="tune">🎸 Tune up</button><button class="btn wsec" data-go="song">🎵 Learn a song</button><div class="wlinks"><button class="btn wout" data-go="write">✍️ Write a song</button><button class="btn wout" data-go="gear">🎛️ My gear</button></div></div>`;
+ <div class="wgo"><button class="btn wmain" data-go="tune">${SK('TUNE')} Tune up</button><button class="btn wsec" data-go="song">${SK('LEARN')} Learn a song</button><div class="wlinks"><button class="btn wout" data-go="write">${SK('WRITE')} Write a song</button><button class="btn wout" data-go="gear">${SK('GEAR')} My gear</button></div></div>`;
  $('wMore').onclick=()=>{$('wJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(n))};
  $('wRename').onclick=()=>{store.set('userName','');renderWelcome()};
 }
@@ -4558,8 +4563,8 @@ function renderGear(){
  gearVisit=null;
  const lost=(store.get('gearLost',[])||[]).filter(x=>x&&x.id&&!l.some(y=>y.id===x.id));
  $('gearOut').innerHTML=`<section class="card"><div class="cardhead"><h2>My gear</h2><button class="btn" id="instAdd" type="button">+ Add gear</button></div>
- ${lost.length?`<div class="confirm lostbox"><span>↩ Removed without you asking (an app bug). Bring back:</span>${lost.map(x=>`<button class="btn" type="button" data-restore="${esc(x.id)}">${GEAR[x.type]&&GEAR[x.type].amp?'🔊':'🎸'} ${esc(x.name)}</button>`).join('')}<button class="btn ghost" type="button" id="lostNo">Not needed</button></div>`:''}
- ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">${GEAR[it.type].amp?'🔊':'🎸'}</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
+ ${lost.length?`<div class="confirm lostbox"><span>↩ Removed without you asking (an app bug). Bring back:</span>${lost.map(x=>`<button class="btn" type="button" data-restore="${esc(x.id)}">${SK(GEAR[x.type]&&GEAR[x.type].amp?'AMP':'GTR')} ${esc(x.name)}</button>`).join('')}<button class="btn ghost" type="button" id="lostNo">Not needed</button></div>`:''}
+ ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">${SK(GEAR[it.type].amp?'AMP':'GTR')}</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
  :'<p class="tip">Add the guitars and amps you own: give each one a name, its brand and model, and get advice for that exact piece of gear. They stay here until you remove them.</p>'}</section>`;
  document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>{const all=store.get('gearLost',[])||[],x=all.find(y=>y.id===b.dataset.restore);if(x){instSave(instAll().concat(x));store.set('gearLost',all.filter(y=>y.id!==x.id))}renderGear()});
  if($('lostNo'))$('lostNo').onclick=()=>{store.set('gearLost',[]);renderGear()};
@@ -4646,14 +4651,14 @@ Notes: a classical guitar has nylon strings tied at the bridge and a wide slotte
    if(r.specs)for(const [k,v] of Object.entries(r.specs)){if(v&&SPEC_Q[k]&&SPEC_Q[k].for.includes(it.type)&&SPEC_Q[k].opts.some(o=>o[0]===v)){it.specs[k]=v;filled.push(SPEC_Q[k].label.toLowerCase())}}
    const mm=matchModel(it.brand,it.model,it.type);if(mm&&mm.s)for(const [k,v] of Object.entries(mm.s))if(!it.specs[k])it.specs[k]=v;
    it.photoNotes={observations:r.observations||[],check:r.check||[],at:Date.now()};it._filled=filled;
-   it._pmsg=(r.brand?`✨ Looks like ${[r.brand,okConf?r.model:''].filter(Boolean).join(' ')}${r.confidence?` (${r.confidence} confidence)`:''}. `:'Claude couldn’t tell the brand from this photo. ')+(filled.length?`Filled in from the photo: ${filled.join(', ')}. Change anything that’s wrong, then save.`:'Nothing new to fill in.');
+   it._pmsg=(r.brand?`Looks like ${[r.brand,okConf?r.model:''].filter(Boolean).join(' ')}${r.confidence?` (${r.confidence} confidence)`:''}. `:'Claude couldn’t tell the brand from this photo. ')+(filled.length?`Filled in from the photo: ${filled.join(', ')}. Change anything that’s wrong, then save.`:'Nothing new to fill in.');
   }catch(err){it._pmsg=err&&err.code==='rate_limited'?'Too many requests right now. Try again in a little while.':'Claude couldn’t look at the photo this time. Try again.'}
   renderInstForm()};
 }
 function renderInstForm(){
  const it=instEdit,m=matchModel(it.brand,it.model,it.type),isA=!!GEAR[it.type].amp;
  $('gearOut').innerHTML=`<section class="card instform"><h2>${it.id?(GEAR[it.type].amp?'Edit amp':'Edit guitar'):'Add gear'}</h2>
- <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">🎸</div>'}<div class="iphotobtns"><label class="btn ghost">📷 ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn ghost" id="iPhotoAsk">✨ Fill in from the photo again</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
+ <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">'+SK('PHOTO')+'</div>'}<div class="iphotobtns"><label class="btn ghost">${SK('PHOTO')} ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn ghost" id="iPhotoAsk">Fill in from the photo again</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
  <label class="namefield">Name it <input id="iName" type="text" dir="auto" maxlength="40" placeholder="${isA?'e.g. Home amp, Gig amp':'e.g. Old faithful, The red one'}" value="${esc(it.name||'')}"></label>
  <div class="namefield">Type<div class="chips2" id="iType">${Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${it.type===k}">${esc(g.short)}</button>`).join('')}</div></div>
  <div class="wrow"><label class="namefield">Brand <input id="iBrand" type="text" list="iBrands" autocomplete="off" value="${esc(it.brand||'')}" placeholder="e.g. Yamaha"></label><label class="namefield">Year <input id="iYear" type="text" inputmode="numeric" maxlength="4" value="${esc(it.year||'')}" placeholder="optional"></label></div>
@@ -4891,11 +4896,11 @@ function controlsHTML(it){
  const c=ctlList(it,key),guitar=it.type==='electric',exact=!!(it.controls&&it.controls.length);
  const pic=guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
  const label=it.type==='electroacoustic'?'The built-in preamp: what each control does':/amp$/.test(it.type)?'What each knob, button and socket does':'What each knob and switch does';
- return `<div class="ctlbox"><div class="gsech"><span class="sic">🎛️</span><span class="stx"><b>Controls and switches</b><small>${label}. Tap a number.</small></span></div>
+ return `<div class="ctlbox"><div class="gsech"><span class="sic">${SK('CTRL')}</span><span class="stx"><b>Controls and switches</b><small>${label}. Tap a number.</small></span></div>
  <div class="ctlpic">${pic}</div>
  <p class="tip ctlnote">${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>
- <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>💡 ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
- ${sampleFn&&(it.brand||it.model)?`<button class="btn ghost wide" id="ctlAsk" type="button">🤖 ${exact?'Refresh':'Get'} the exact controls of my ${esc(it.model||it.brand)} from Claude</button>`:''}
+ <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>${SK('TIP')} ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
+ ${sampleFn&&(it.brand||it.model)?`<button class="btn ghost wide" id="ctlAsk" type="button">${SK('ASK')} ${exact?'Refresh':'Get'} the exact controls of my ${esc(it.model||it.brand)} from Claude</button>`:''}
  <p class="tip" id="ctlMsg" role="status"></p></div>`;
 }
 function wireControls(it){
@@ -4920,32 +4925,32 @@ function renderInstDetail(it){
  const specTxt=[it.color?'Colour: '+it.color:'',it.watts?'Output: '+it.watts+' W':'',it.stringSet?'Strings: '+it.stringSet:''].filter(Boolean).concat(Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>{const o=SPEC_Q[k].opts.find(o=>o[0]===v);return o?SPEC_Q[k].label+': '+o[1]:''}).filter(Boolean));
  const ai=it.ai,ctl=controlsHTML(it);if(gearTab==='controls'&&!ctl)gearTab='overview';
  $('gearOut').innerHTML=`<section class="card gearcard">
- <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">✏️ Edit details</button></div>${it.photo&&claudeReads()?`<button class="btn ghost wide" id="iFromPhoto" type="button">✨ Update the details from the photo</button>`:''}
+ <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">Edit details</button></div>${it.photo&&claudeReads()?`<button class="btn ghost wide" id="iFromPhoto" type="button">Update the details from the photo</button>`:''}
  <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
  ${it.photo?`<img class="iphotobig" src="${it.photo}" alt="${esc(it.name)}">`:''}
  <div class="gtabs" id="gTabs" role="tablist">${GTABS.filter(([k])=>k!=='controls'||ctl).map(([k,t])=>`<button type="button" role="tab" data-gt="${k}" aria-selected="${k===gearTab}">${t}${k==='care'&&st.due&&!g.amp?'<i class="gdot" aria-label="strings due"></i>':''}</button>`).join('')}</div>
  <div class="gpanel" data-gp="overview">
  ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
  ${it.lastTuned||it.tuning?`<p class="tip gtuned">${it.lastTuned?`Last tuned ${daysSince(it.lastTuned)===0?'today':daysSince(it.lastTuned)===1?'yesterday':daysSince(it.lastTuned)+' days ago'}`:'Usually tuned'}${it.tuning?` · ${esc((TUNINGS.find(t=>t.id===it.tuning)||{}).name||'')}`:''}</p>`:''}
- <button type="button" class="gstatline ${st.due&&!g.amp?'due':''}" data-goto="care">${g.amp?'🧰':'🎸'} ${esc(st.txt)} <span aria-hidden="true">›</span></button>
- ${a.notes.length?`<section class="gsec"><div class="gsech"><span class="sic">✨</span><span class="stx"><b>About your ${esc(it.model||it.brand||'guitar')}</b><small>Notes for this exact model</small></span></div>${L(a.notes)}</section>`:''}
- ${it.photoNotes&&(it.photoNotes.observations||[]).concat(it.photoNotes.check||[]).length?`<section class="gsec aibox"><div class="gsech"><span class="sic">📷</span><span class="stx"><b>From your photo</b><small>What Claude noticed in the picture</small></span></div>${(it.photoNotes.observations||[]).length?`<ul>${it.photoNotes.observations.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}${(it.photoNotes.check||[]).length?`<b>Worth checking</b><ul>${it.photoNotes.check.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}</section>`:''}
- <section class="gsec"><div class="gsech"><span class="sic">⚖️</span><span class="stx"><b>Strengths and limits</b><small>What it’s great at, and what to watch out for</small></span></div><div class="procon"><div><b>Good at</b>${L(a.pros)}</div><div><b>Watch out for</b>${L(a.cons)}</div></div></section>
+ <button type="button" class="gstatline ${st.due&&!g.amp?'due':''}" data-goto="care">${SK(g.amp?'AMP':'STRINGS')} ${esc(st.txt)} <span aria-hidden="true">›</span></button>
+ ${a.notes.length?`<section class="gsec"><div class="gsech"><span class="sic">${SK('MODEL')}</span><span class="stx"><b>About your ${esc(it.model||it.brand||'guitar')}</b><small>Notes for this exact model</small></span></div>${L(a.notes)}</section>`:''}
+ ${it.photoNotes&&(it.photoNotes.observations||[]).concat(it.photoNotes.check||[]).length?`<section class="gsec aibox"><div class="gsech"><span class="sic">${SK('PHOTO')}</span><span class="stx"><b>From your photo</b><small>What Claude noticed in the picture</small></span></div>${(it.photoNotes.observations||[]).length?`<ul>${it.photoNotes.observations.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}${(it.photoNotes.check||[]).length?`<b>Worth checking</b><ul>${it.photoNotes.check.map(x=>`<li>${esc(String(x))}</li>`).join('')}</ul>`:''}</section>`:''}
+ <section class="gsec"><div class="gsech"><span class="sic">${SK('RANGE')}</span><span class="stx"><b>Strengths and limits</b><small>What it’s great at, and what to watch out for</small></span></div><div class="procon"><div><b>Good at</b>${L(a.pros)}</div><div><b>Watch out for</b>${L(a.cons)}</div></div></section>
  </div>
  <div class="gpanel" data-gp="controls">${ctl}</div>
- <div class="gpanel" data-gp="tips"><section class="gsec"><div class="gsech"><span class="sic">${g.amp?'🎛️':'🎸'}</span><span class="stx"><b>${g.amp?'Setup and playing tips':'Playing tips'}</b><small>${g.amp?'Getting a good sound out of it':'Getting the best sound and feel'}</small></span></div>${L(a.use)}</section></div>
+ <div class="gpanel" data-gp="tips"><section class="gsec"><div class="gsech"><span class="sic">${SK('TIP')}</span><span class="stx"><b>${g.amp?'Setup and playing tips':'Playing tips'}</b><small>${g.amp?'Getting a good sound out of it':'Getting the best sound and feel'}</small></span></div>${L(a.use)}</section></div>
  <div class="gpanel" data-gp="care">
- ${g.amp?`<p class="tip gtuned">${esc(st.txt)}</p>`:''}<div class="gstrings" ${g.amp?'hidden':''}><span class="gstat ${st.due?'due':''}">${esc(st.txt)}</span><label class="gdate">Changed on <input type="date" id="iStr" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label><button class="btn ghost" id="iStrToday" type="button">🔄 I changed them today</button><span class="bhint">Tap after fitting new strings. The app reminds you when the next set is due.</span></div>
- <section class="gsec"><div class="gsech"><span class="sic">🧽</span><span class="stx"><b>Cleaning, and when</b><small>After playing, monthly, and at string changes</small></span></div><dl class="gclean">${a.clean.map(([w,t])=>`<dt>${esc(w)}</dt><dd>${esc(t)}</dd>`).join('')}</dl></section>
- <section class="gsec"><div class="gsech"><span class="sic">🌡️</span><span class="stx"><b>Care and storage</b><small>${g.amp?'Heat, cables, transport and batteries':'Humidity, heat and keeping it safe'}</small></span></div>${L(a.care)}</section>
- <section class="gsec"><div class="gsech"><span class="sic">🔧</span><span class="stx"><b>When to take it for repair</b><small>Warning signs that need a technician</small></span></div>${L(a.repair)}</section>
+ ${g.amp?`<p class="tip gtuned">${esc(st.txt)}</p>`:''}<div class="gstrings" ${g.amp?'hidden':''}><span class="gstat ${st.due?'due':''}">${esc(st.txt)}</span><label class="gdate">Changed on <input type="date" id="iStr" value="${esc(it.strings||'')}" max="${new Date().toISOString().slice(0,10)}"></label><button class="btn ghost" id="iStrToday" type="button">${SK('STRINGS')} I changed them today</button><span class="bhint">Tap after fitting new strings. The app reminds you when the next set is due.</span></div>
+ <section class="gsec"><div class="gsech"><span class="sic">${SK('CLEAN')}</span><span class="stx"><b>Cleaning, and when</b><small>After playing, monthly, and at string changes</small></span></div><dl class="gclean">${a.clean.map(([w,t])=>`<dt>${esc(w)}</dt><dd>${esc(t)}</dd>`).join('')}</dl></section>
+ <section class="gsec"><div class="gsech"><span class="sic">${SK('HUMID')}</span><span class="stx"><b>Care and storage</b><small>${g.amp?'Heat, cables, transport and batteries':'Humidity, heat and keeping it safe'}</small></span></div>${L(a.care)}</section>
+ <section class="gsec"><div class="gsech"><span class="sic">${SK('REPAIR')}</span><span class="stx"><b>When to take it for repair</b><small>Warning signs that need a technician</small></span></div>${L(a.repair)}</section>
  </div>
  <div class="gpanel" data-gp="ask">
  <div id="iAi">${ai?aiHTML(it):''}</div>
- ${sampleFn&&!ai&&(it.brand||it.model)?`<button class="btn ghost wide" id="iAsk" type="button">🤖 Get Claude’s profile of this exact model</button><span class="bhint">One tap: typical specs, known issues, care and ${g.amp?'starting settings':'string advice'}, saved here.</span>`:''}
+ ${sampleFn&&!ai&&(it.brand||it.model)?`<button class="btn ghost wide" id="iAsk" type="button">${SK('PROFILE')} Get Claude’s profile of this exact model</button><span class="bhint">One tap: typical specs, known issues, care and ${g.amp?'starting settings':'string advice'}, saved here.</span>`:''}
  <div class="gchat" id="gChat"></div>
  </div>
- <div class="instdel"><button class="btn ghost danger" id="iDel" type="button">🗑 Remove from my gear</button><span class="bhint">For when you sell it or give it away.</span><div class="confirm" id="iDelC" hidden><span>Remove “${esc(it.name)}” from your gear? (Sold it? Congrats.)</span><button class="btn danger" id="iDelY" type="button">Remove</button><button class="btn ghost" id="iDelN" type="button">Keep</button></div></div>
+ <div class="instdel"><button class="btn ghost danger" id="iDel" type="button">${SK('DEL')} Remove from my gear</button><span class="bhint">For when you sell it or give it away.</span><div class="confirm" id="iDelC" hidden><span>Remove “${esc(it.name)}” from your gear? (Sold it? Congrats.)</span><button class="btn danger" id="iDelY" type="button">Remove</button><button class="btn ghost" id="iDelN" type="button">Keep</button></div></div>
  </section>`;
  const upd=f=>{const l=instAll(),x=l.find(y=>y.id===it.id);if(x){f(x);instSave(l)}renderGear()};
  $('iBack').onclick=()=>{instOpen=null;renderGear()};
@@ -5043,20 +5048,20 @@ const onItKey=s=>normArt(s.artist)+'|'+normArt(s.title);
 function renderIdeas(){
  const box=$('ideaBox');if(!box)return;const ix=store.get('songIndex',null),p=ideaPrefs(),res=store.get('ideas',null),want=onItList();
  const daily=ix&&ix.src==='daily',canDrive=!!mcpCap||ownDrive(),auto=daily||!!mcpCap;
- const scanBtns=daily?'':`${canDrive?`<button class="btn ghost" id="idScan" type="button">${ix?'🔄 Scan the folder now':'🔍 Scan my songs folder'}</button>`:''}
-  ${!mcpCap?`<label class="btn ghost idpick">📂 ${canDrive?'Or pick':'Pick'} song files from Drive<input type="file" id="idFiles" multiple hidden></label>${canDrive?'':'<span class="bhint">Open your songs folder in the picker (Google Drive › your folder › an artist), long-press to select all the songs, then tap Select. Repeat for each artist folder.</span>'}`:''}`;
+ const scanBtns=daily?'':`${canDrive?`<button class="btn ghost" id="idScan" type="button">${ix?'Scan the folder now':'Scan my songs folder'}</button>`:''}
+  ${!mcpCap?`<label class="btn ghost idpick">${canDrive?'Or pick':'Pick'} song files from Drive<input type="file" id="idFiles" multiple hidden></label>${canDrive?'':'<span class="bhint">Open your songs folder in the picker (Google Drive › your folder › an artist), long-press to select all the songs, then tap Select. Repeat for each artist folder.</span>'}`:''}`;
  const by=ix?ideaSummary(ix):new Map(),kc=ix?knownChords(ix):[];const nA=[...by.keys()].filter(k=>!k.startsWith('(')).length;
  const chip=(grp,v,l,on)=>`<button type="button" class="chip" data-g="${grp}" data-v="${esc(v)}" aria-pressed="${on}" dir="auto">${esc(l)}</button>`;
  const list=res&&res.list||[],when=t=>new Date(t).toLocaleString(undefined,{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
- box.innerHTML=`<summary><span class="sic">🎯</span><span class="stx"><b>${list.length?(res.src==='daily'?'Today’s song ideas':'Song ideas for you'):'Song ideas for you'}</b><small>${list.length?`${list.length} new song${list.length===1?'':'s'} picked for your taste and level`:'New songs that fit your style, favourite bands and level'}</small></span></summary>
- ${ix?`<p class="tip idsum">${auto?'🔄 Updated automatically every morning from your Drive folder. ':''}Your folder: <b>${nA}</b> artist${nA===1?'':'s'}, <b>${ix.songs.length}</b> song${ix.songs.length===1?'':'s'}${kc.length?`, <b>${kc.length}</b> chords you already play`:''}. Last scan ${when(ix.at)}.</p>`
+ box.innerHTML=`<summary><span class="sic">${SK('IDEAS')}</span><span class="stx"><b>${list.length?(res.src==='daily'?'Today’s song ideas':'Song ideas for you'):'Song ideas for you'}</b><small>${list.length?`${list.length} new song${list.length===1?'':'s'} picked for your taste and level`:'New songs that fit your style, favourite bands and level'}</small></span></summary>
+ ${ix?`<p class="tip idsum">${auto?'Updated automatically every morning from your Drive folder. ':''}Your folder: <b>${nA}</b> artist${nA===1?'':'s'}, <b>${ix.songs.length}</b> song${ix.songs.length===1?'':'s'}${kc.length?`, <b>${kc.length}</b> chords you already play`:''}. Last scan ${when(ix.at)}.</p>`
   :auto?`<p class="tip">Looking at your songs folder…</p>`:`<p class="tip">First, let the app look at your songs folder: the artists, the songs, and the chords in them. That’s how it learns your taste and level.</p>`}
  ${scanBtns.trim()?`<div class="idscan">${scanBtns}</div>`:''}
  <p class="tip" id="idMsg" role="status"></p>
- ${res&&res.level&&list.length?`<p class="tip idlevel">🎚️ <b>Your level:</b> <span dir="auto">${esc(res.level)}</span></p>`:''}
+ ${res&&res.level&&list.length?`<p class="tip idlevel"><b>Your level:</b> <span dir="auto">${esc(res.level)}</span></p>`:''}
  <div class="idres">${list.map((s,i)=>ideaCardHTML(s,i,kc)).join('')}</div>
  ${res&&res.list&&!list.length?`<p class="tip">You’ve gone through all of today’s ideas. New ones arrive tomorrow morning.</p>`:''}
- ${want.length?`<details class="idlist" open><summary>🎸 I’m learning (${want.length})</summary>${want.map((s,i)=>`<div class="idwant"><span dir="auto"><b>${esc(s.title)}</b> · ${esc(s.artist)}</span><a href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><button type="button" class="linkbtn" data-unwant="${i}">Remove</button></div>`).join('')}</details>`:''}
+ ${want.length?`<details class="idlist" open><summary>I’m learning (${want.length})</summary>${want.map((s,i)=>`<div class="idwant"><span dir="auto"><b>${esc(s.title)}</b> · ${esc(s.artist)}</span><a href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><button type="button" class="linkbtn" data-unwant="${i}">Remove</button></div>`).join('')}</details>`:''}
  ${ix?`<details class="idlist"><summary>What’s in your folder</summary>${[...by].map(([a,l])=>`<p dir="auto"><b>${esc(a)}</b> · ${l.map(s=>esc(s.t)).join(', ')}</p>`).join('')}</details>
  <details class="idlist idtune"><summary>Fine-tune the ideas (optional)</summary>
  <div class="idq"><b>Style</b><div class="idchips">${IDEA_STYLES.map(([v,l])=>chip('styles',v,l,p.styles.includes(v))).join('')}</div></div>
@@ -5064,7 +5069,7 @@ function renderIdeas(){
  <div class="idq"><b>Other bands you like</b><input class="textin" id="idOther" dir="auto" placeholder="e.g. Mashina, Coldplay" value="${esc(p.other)}"></div>
  <div class="idq"><b>Difficulty</b><div class="idchips">${IDEA_LEVELS.map(([v,l])=>chip('level',v,l,p.level===v)).join('')}</div></div>
  <div class="idq"><b>Language</b><div class="idchips">${IDEA_LANG.map(([v,l])=>chip('lang',v,l,p.lang===v)).join('')}</div></div>
- ${sampleFn?`<button class="btn wide" id="idGo" type="button">✨ Suggest again with these choices</button>`:`<p class="tip">Turn on Claude features (at the bottom of this card) to re-pick with your own choices.</p>`}
+ ${sampleFn?`<button class="btn wide" id="idGo" type="button">Suggest again with these choices</button>`:`<p class="tip">Turn on Claude features (at the bottom of this card) to re-pick with your own choices.</p>`}
  </details>`:''}`;
  wireIdeas();ideaAuto();
 }
@@ -5099,7 +5104,7 @@ function ideaCardHTML(s,i,kc){const d=Math.max(1,Math.min(5,+s.difficulty||3)),k
  <p class="idwhy" dir="auto">${esc(s.why||'')}</p>
  <div class="idmeta">${s.style?`<span class="badge">${esc(s.style)}</span>`:''}${s.capo?`<span class="badge">Capo ${esc(String(s.capo))}</span>`:''}${s.tuning&&!/^standard/i.test(s.tuning)?`<span class="badge">${esc(s.tuning)}</span>`:''}</div>
  ${ch.length?`<div class="idch">${ch.map(c=>`<span class="${known.size&&!known.has(c)?'new':''}">${esc(c)}</span>`).join('')}${known.size&&ch.some(c=>!known.has(c))?'<small>Orange = a chord that’s new for you</small>':''}</div>`:''}
- <div class="idact"><a class="btn ghost" href="${chordsLink(s)}" target="_blank" rel="noopener">🎼 Chords ↗</a><a class="btn ghost" href="${listenLink(s)}" target="_blank" rel="noopener">▶ Listen ↗</a><button type="button" class="btn ghost" data-want="${i}">🎸 On it</button><button type="button" class="linkbtn" data-no="${i}">Not for me</button></div></div>`}
+ <div class="idact"><a class="btn ghost" href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><a class="btn ghost" href="${listenLink(s)}" target="_blank" rel="noopener">▶ Listen ↗</a><button type="button" class="btn ghost" data-want="${i}">On it</button><button type="button" class="linkbtn" data-no="${i}">Not for me</button></div></div>`}
 function wireIdeas(){
  const box=$('ideaBox');if($('idScan'))$('idScan').onclick=ideaScan;
  if($('idFiles'))$('idFiles').onchange=e=>{if(e.target.files.length)ideaPick(e.target.files);e.target.value=''};
@@ -5111,14 +5116,14 @@ function wireIdeas(){
  box.querySelectorAll('[data-want]').forEach(b=>b.onclick=async()=>{const s=res.list[+b.dataset.want];const w=onItList();if(!w.some(x=>onItKey(x)===onItKey(s)))w.unshift({title:s.title,artist:s.artist,at:Date.now()});store.set('ideaOnIt',w.slice(0,40));
   res.list=res.list.filter(x=>onItKey(x)!==onItKey(s));store.set('ideas',res);renderIdeas();
   // started learning it: pick again, steered by this choice
-  if(sampleFn){const m=$('idMsg');if(m)m.textContent=`🎸 Nice! Finding more songs in the spirit of “${s.title}”…`;await ideaAsk(true,s)}
-  else{const m=$('idMsg');if(m)m.textContent=`🎸 Added “${s.title}” to the songs you’re learning.`}});
+  if(sampleFn){const m=$('idMsg');if(m)m.textContent=`Nice! Finding more songs in the spirit of “${s.title}”…`;await ideaAsk(true,s)}
+  else{const m=$('idMsg');if(m)m.textContent=`Added “${s.title}” to the songs you’re learning.`}});
  box.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{const s=res.list[+b.dataset.no];const no=store.get('ideaNo',[]);no.push(s.artist+' – '+s.title);store.set('ideaNo',no.slice(-80));res.list.splice(+b.dataset.no,1);store.set('ideas',res);renderIdeas()});
  box.querySelectorAll('[data-unwant]').forEach(b=>b.onclick=()=>{const w=onItList();w.splice(+b.dataset.unwant,1);store.set('ideaOnIt',w);renderIdeas()});
 }
 async function ideaAsk(silent,picked){
  const ix=store.get('songIndex',null);if(!ix||!sampleFn)return;const p=ideaPrefs();if($('idOther')){p.other=$('idOther').value.trim();store.set('ideaPrefs',p)}
- const btn=$('idGo')||{},msg=()=>$('idMsg')||{};btn.disabled=true;btn.textContent='Claude is picking songs for you…';msg().textContent=picked?`🎸 Nice! Finding more songs in the spirit of “${picked.title}”…`:silent?'Claude is picking today’s songs for you…':'';
+ const btn=$('idGo')||{},msg=()=>$('idMsg')||{};btn.disabled=true;btn.textContent='Claude is picking songs for you…';msg().textContent=picked?`Nice! Finding more songs in the spirit of “${picked.title}”…`:silent?'Claude is picking today’s songs for you…':'';
  const by=ideaSummary(ix),kc=knownChords(ix);
  const lib=[...by].map(([a,l])=>`${a}: ${l.slice(0,25).map(s=>s.t+(s.ch&&s.ch.length?` [${s.ch.slice(0,12).join(' ')}]`:'')).join('; ')}`).join('\n').slice(0,9000);
  const gear=myGuitars().map(g=>`${g.name} (${GEAR[g.type].short})`).join(', ');
@@ -5137,7 +5142,7 @@ Reply with JSON: {"level": one short sentence describing their current level bas
  try{const r=await sampleFn.json(prompt,{modelTier:'default'});const list=(r&&r.suggestions||[]).filter(s=>s&&s.title&&s.artist).slice(0,12);if(!list.length)throw new Error('empty');
   const have=new Set(ix.songs.map(s=>normArt(s.t))),no=new Set(store.get('ideaNo',[])),on=new Set(onItList().map(onItKey));const fresh=list.filter(s=>!have.has(normArt(s.title))&&!no.has(s.artist+' – '+s.title)&&!on.has(onItKey(s)));
   store.set('ideas',{at:Date.now(),src:silent?'auto':'mine',level:r.level||'',list:fresh});renderIdeas();if(!silent){const f=$('ideaBox').querySelector('.idres');if(f)f.scrollIntoView({behavior:'smooth',block:'start'})}}
- catch(e){btn.disabled=false;btn.textContent='✨ Suggest again with these choices';msg().textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get suggestions. Try again.'}
+ catch(e){btn.disabled=false;btn.textContent='Suggest again with these choices';msg().textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get suggestions. Try again.'}
 }
 setTimeout(()=>{try{renderIdeas()}catch(e){}},0);
 
@@ -5148,11 +5153,11 @@ function fmtAnswer(t){const lines=String(t).trim().split(/\n+/);let h='',ul=fals
 let gcPend={id:null,imgs:[]};
 function renderGearChat(it){
  const box=$('gChat');if(!box)return;const g=GEAR[it.type],hist=it.chat||[],qs=GQ[g.amp?'amp':'guitar'];
- box.innerHTML=`<div class="gchead"><span class="sic">💬</span><span class="stx"><b>Ask Claude about ${esc(it.name)}</b><small>Claude knows this is your ${esc([it.brand,it.model].filter(Boolean).join(' ')||g.short)} and what’s on this page.</small></span></div>
+ box.innerHTML=`<div class="gchead"><span class="sic">${SK('ASK')}</span><span class="stx"><b>Ask Claude about ${esc(it.name)}</b><small>Claude knows this is your ${esc([it.brand,it.model].filter(Boolean).join(' ')||g.short)} and what’s on this page.</small></span></div>
  ${hist.map(h=>`<div class="gcq" dir="auto">${h.imgs&&h.imgs.length?`<div class="gcimgs">${h.imgs.map(u=>`<img src="${u}" alt="Your photo">`).join('')}</div>`:''}${esc(h.q)}</div><div class="gca" dir="auto">${fmtAnswer(h.a)}</div>`).join('')}
  ${sampleFn?`${hist.length?'':`<div class="gcsugg">${qs.map(q=>`<button type="button" class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
  ${gcPend.id===it.id&&gcPend.imgs.length?`<div class="gcimgs" id="gcPend">${gcPend.imgs.map((x,i)=>`<div class="gcth"><img src="${x.big}" alt="Photo to send"><button type="button" data-rm="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>`:''}
- ${imgLimit>0?`<div class="gcadd"><label>📷 Take a photo<input type="file" accept="image/*" capture="environment" id="gcCam"></label><label>🖼️ From gallery<input type="file" accept="image/*" multiple id="gcGal"></label></div>`:''}
+ ${imgLimit>0?`<div class="gcadd"><label>${SK('PHOTO')} Take a photo<input type="file" accept="image/*" capture="environment" id="gcCam"></label><label>${SK('GALLERY')} From gallery<input type="file" accept="image/*" multiple id="gcGal"></label></div>`:''}
  <div class="gcin"><textarea id="gcText" rows="2" dir="auto" placeholder="Ask anything about this ${g.amp?'amp':'guitar'}… (you can add a photo)"></textarea><button class="btn" id="gcSend" type="button">Ask</button></div>
  <p class="tip" id="gcMsg" role="status"></p>${hist.length?'<button type="button" class="linkbtn" id="gcClear">Clear this conversation</button>':''}`
  :'<p class="tip">Turn on Claude features (Songs › Claude features) to ask questions here.</p>'}`;
@@ -5190,7 +5195,7 @@ Answer practically and specifically for this item, in the language they wrote in
  }catch(e){btn.disabled=false;$('gcMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude. Try again.'}
 }
 function aiHTML(it){const a=it.ai,L=x=>Array.isArray(x)&&x.length?`<ul>${x.map(y=>`<li>${esc(String(y))}</li>`).join('')}</ul>`:'';
- return `<div class="aibox"><div class="gsech"><span class="sic">🤖</span><span class="stx"><b>From Claude: your ${esc([it.brand,it.model].filter(Boolean).join(' '))}</b><small>Specs, known issues, care and settings for this model</small></span></div>${a.summary?`<p>${esc(a.summary)}</p>`:''}${a.specs&&a.specs.length?`<b>Typical specs</b>${L(a.specs)}`:''}${a.strengths&&a.strengths.length?`<b>What it does best</b>${L(a.strengths)}`:''}${a.weaknesses&&a.weaknesses.length?`<b>Limits</b>${L(a.weaknesses)}`:''}${a.known_issues&&a.known_issues.length?`<b>Things to watch on this model</b>${L(a.known_issues)}`:''}${a.care&&a.care.length?`<b>Care for this model</b>${L(a.care)}`:''}${a.strings?`<b>${GEAR[it.type]&&GEAR[it.type].amp?'Starting settings':'Strings'}</b><p>${esc(a.strings)}</p>`:''}${a.setup&&a.setup.length?`<b>Setup tips</b>${L(a.setup)}`:''}<p class="tip">Claude’s general knowledge of this model. Details can differ by year and version.</p></div>`}
+ return `<div class="aibox"><div class="gsech"><span class="sic">${SK('PROFILE')}</span><span class="stx"><b>From Claude: your ${esc([it.brand,it.model].filter(Boolean).join(' '))}</b><small>Specs, known issues, care and settings for this model</small></span></div>${a.summary?`<p>${esc(a.summary)}</p>`:''}${a.specs&&a.specs.length?`<b>Typical specs</b>${L(a.specs)}`:''}${a.strengths&&a.strengths.length?`<b>What it does best</b>${L(a.strengths)}`:''}${a.weaknesses&&a.weaknesses.length?`<b>Limits</b>${L(a.weaknesses)}`:''}${a.known_issues&&a.known_issues.length?`<b>Things to watch on this model</b>${L(a.known_issues)}`:''}${a.care&&a.care.length?`<b>Care for this model</b>${L(a.care)}`:''}${a.strings?`<b>${GEAR[it.type]&&GEAR[it.type].amp?'Starting settings':'Strings'}</b><p>${esc(a.strings)}</p>`:''}${a.setup&&a.setup.length?`<b>Setup tips</b>${L(a.setup)}`:''}<p class="tip">Claude’s general knowledge of this model. Details can differ by year and version.</p></div>`}
 async function askClaudeInst(it){
  const b=$('iAsk');b.disabled=true;b.textContent='Claude is looking into your guitar…';
  const sp=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown').map(([k,v])=>`${k}: ${v}`).join(', ');
