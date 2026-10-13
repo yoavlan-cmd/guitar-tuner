@@ -4342,8 +4342,8 @@ async function mxEnsureWf(cfg){
  try{if(localStorage.getItem('guitaring.wfv')===ver)return}catch(e){}
  let cur=null;try{cur=await gh('/contents/.github/workflows/split.yml',{ok404:true},cfg)}catch(e){if(e.status!==404)throw e}
  let have='';try{have=cur&&cur.content?decodeURIComponent(escape(atob(cur.content.replace(/\s/g,'')))):''}catch(e){}
- if(have.trim()!==wf.trim()){try{await gh('/contents/.github/workflows/split.yml',{method:'PUT',body:JSON.stringify({message:'Guitaring: update the song splitter ('+ver+')',content:mxB64(wf),branch:cfg.branch||'main',...(cur&&cur.sha?{sha:cur.sha}:{})})},cfg)}catch(e){e.wf=true;throw e}}
- try{localStorage.setItem('guitaring.wfv',ver)}catch(e){}}
+ let changed=false;if(have.trim()!==wf.trim()){try{await gh('/contents/.github/workflows/split.yml',{method:'PUT',body:JSON.stringify({message:'Guitaring: update the song splitter ('+ver+')',content:mxB64(wf),branch:cfg.branch||'main',...(cur&&cur.sha?{sha:cur.sha}:{})})},cfg);changed=true}catch(e){e.wf=true;throw e}}
+ try{localStorage.setItem('guitaring.wfv',ver)}catch(e){}return changed}
 async function mxCloudSubmit(file){
  const cfg=mxGh();if(!cfg){mxSetup();return}
  const id=Date.now().toString(36);
@@ -4354,23 +4354,33 @@ async function mxCloudSubmit(file){
  await mxUpload(it,file)}
 async function mxRetry(id){const it=mxIdx.find(x=>x.id===id);if(!it)return;let f=null;try{f=await mxGet('mixsrc:'+id)}catch(e){}
  if(!f){toast('The song file isn’t on the phone any more. Delete this one and pick the song again.');return}
- if(mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
+ // clear the old attempt's branches first, so a late delete can't remove the new upload
+ if(mxGh())await Promise.all(['j-','r-'].map(b=>gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{})));
  it.state='up';it.err='';it.run='';await mxIdxSave();mxBar();mxSheetUI();await mxUpload(it,f)}
+const mxWait=ms=>new Promise(r=>setTimeout(r,window.__mxWaitScale!=null?ms*window.__mxWaitScale:ms));
 async function mxUpload(it,file){mxBarOff=false;
- const cfg=mxGh(),id=it.id,ext=((file.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp3'])[1].toLowerCase();
+ const cfg=mxGh(),id=it.id,ext=((file.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp3'])[1].toLowerCase();let step='splitter';
  try{
   if(file.size>95*1048576)throw {big:true};
-  await mxEnsureWf(cfg);
+  const fresh=await mxEnsureWf(cfg);step='upload';
   const b64=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]||'');fr.onerror=()=>rej(fr.error);fr.readAsDataURL(file)});
   const blob=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:b64,encoding:'base64'})});
   const tree=await gh('/git/trees',{method:'POST',body:JSON.stringify({tree:[{path:'song.'+ext,mode:'100644',type:'blob',sha:blob.sha}]})});
   const com=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:'song '+id,tree:tree.sha,parents:[]})});
   try{await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/j-'+id,sha:com.sha})})}
   catch(e){if(e.status!==422)throw e;await gh('/git/refs/heads/j-'+id,{method:'PATCH',body:JSON.stringify({sha:com.sha,force:true})})}
-  await gh('/actions/workflows/split.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs:{id}})});
+  // start the split. Right after the splitter file changes GitHub can refuse to start it for a few seconds, so wait and try again
+  step='start';if(fresh)await mxWait(5000);
+  for(let k=0;;k++){try{await gh('/actions/workflows/split.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs:{id}})});break}
+   catch(e){if(!(e.status===422||e.status===404)||k>=3)throw e;await mxWait([4000,8000,15000][k])}}
   it.state='wait';it.sent=Date.now();
   toast(`${SK('MIX')} “${esc(it.name)}” is on its way. It usually takes 15–25 minutes (best-quality split). You can lock the phone; it’ll be here when you come back.`);
- }catch(e){try{console.error('mixer send',e&&e.message||e)}catch(_){}it.state='failed';it.err=mxGhErr(e,e&&e.wf?'wf':'send')}
+ }catch(e){try{console.error('mixer send',step,e&&e.message||e)}catch(_){}it.state='failed';
+  // say which step failed and what GitHub said, so the reason is never hidden
+  const said=e&&e.ghMsg?` GitHub said: “${String(e.ghMsg).slice(0,140)}”.`:'';
+  it.err=e&&e.status===422&&step==='start'?`GitHub wouldn’t start the splitter.${said} Open GitHub connection and tap Connect to reinstall it, then Try again.`
+   :e&&e.status===422&&step==='upload'?`GitHub refused the song file.${said} Try an MP3 or M4A under 50 MB.`
+   :mxGhErr(e,e&&e.wf?'wf':'send')+(e&&e.status&&e.status!==422?said:'')}
  await mxIdxSave();mxBar();mxSheetUI();renderMixNew();mxPollSoon()}
 let mxPollT=0,mxPolling=false;
 function mxPollSoon(ms){clearTimeout(mxPollT);if(mxIdx.some(x=>x.state==='wait'))mxPollT=setTimeout(mxPoll,ms||(window.__mxPollMs||20000))}
@@ -4403,7 +4413,7 @@ async function mxCollect(it){mxBarOff=false;
  }catch(e){try{console.error('mixer collect',e&&e.message||e)}catch(_){}it.state='wait'}// try again on the next check
 }
 // test hook (no UI): lets tests/mx_t.js drive the mixer and read the result
-window.__mxTest={song:()=>mxSong,start:f=>mxStart(f),open:id=>mxOpen(id),collect:it=>mxCollect(it),put:(k,v)=>mxPut(k,v),add:it=>{mxIdx.unshift(it)},
+window.__mxTest={send:f=>mxCloudSubmit(f),retry:id=>mxRetry(id),idx:()=>mxIdx,song:()=>mxSong,start:f=>mxStart(f),open:id=>mxOpen(id),collect:it=>mxCollect(it),put:(k,v)=>mxPut(k,v),add:it=>{mxIdx.unshift(it)},
  reset(){mxStopAudio();mxSong=null},async rate(){await mxAudio();return mxCtx.sampleRate},render:g=>new Promise((r,j)=>{mxRender(g,'test',r).catch(j)})};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)mxPoll()});
 window.addEventListener('online',()=>mxPoll());
