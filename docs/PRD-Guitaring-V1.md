@@ -166,6 +166,16 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - Autofill title/artist/capo/tuning (`metaFromLines`, `splitTitle`, `SITE_RE`, Claude `orderCheck` only for song/artist order).
 - Output opens in the writer (fully editable, same format as a hand-written sheet) with the screenshots shown full-size (tap ✕ to close). Nothing is saved until the user taps "Make the chord sheet".
 
+### 5.5b I'm learning (`#learnBox`, banner `/* ===== I'm learning … */`, Oct 2026)
+- Songs › My library opens on **I'm learning**: one row per song, merged from every source — Guitaring sheets (Drive list `sheetIndex` + phone `sheetCat`), sheets saved on the phone (`lib`), an unfinished sheet (`writeDraft`), the Drive songs folder (`songIndex`), video lessons (`vlinks`), practice-mixer splits (`mxIdx`, name parsed as "Artist - Song"), saved chord analyses (`songs` / `song.<key>`), and song ideas marked "On it" (`ideaOnIt`).
+- Same song = titles match (`vlMatch`) and artists match, or identical title with the artist written in another script (אביתר בנאי / Eviatar Banai).
+- Each row shows five pedal tiles in fixed order — Chord sheet · Songs folder · Video lesson · Practice mixer · Chord analysis — lit when present, dim when missing. Sorted by most recent activity.
+- Search; filter chips per kind cycle *have it → missing → off*.
+- Tap a row: what it has (Open / Watch) and what's missing with a next step (Write it, Find chords, Find a lesson, Split it, Pick a video); "On it" songs can be dropped.
+- **New songs to learn** (`#suggCard`) holds the daily song ideas (`#ideaBox`), still collapsed until opened; its old "I'm learning" sub-list is gone (the main list replaces it).
+- Below the list, "Sheets, lessons and settings" keeps the catalog, video lessons, saved-on-phone list and settings.
+- Test: `tests/learn_t.js`.
+
 ### 5.6 My chord sheets (catalog) (`#catBox`)
 - Lists every sheet made with Guitaring: from Drive (`sheetIndex`, written daily into `ideas.json.sheets`) + this phone (`sheetCat`). Search by song/artist; filters: artist, capo (none/with), tuning, level (Easy/Medium/Hard from `chordLevel`, an open-vs-barre heuristic). Rows open the Drive file. Rows with a saved video lesson show 🎬.
 
@@ -340,6 +350,7 @@ bash tools/release.sh    # build + bump sw.js tuner-vNN -> tuner-v(NN+1)
 | `vl_t.js`, `vl_sheet.js` | video lessons: parsing, sheet match, duplicates, share target, sheet banner |
 | `clean_t.js` | song ideas closed by default and after revisiting Songs |
 | `joke_t.js` | fresh jokes first, escaping |
+| `learn_t.js` | I'm learning: merged rows across sources, five tiles, filters, search, details/actions, Hebrew/English artist merge, suggestions card |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 
 Not automated (manual on a real phone): real microphone behaviour on Android, Android share-target, Drive share sheet, PDF output.

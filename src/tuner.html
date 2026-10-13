@@ -742,7 +742,37 @@ body.wopen{overflow:hidden}
 .addgrid .addtile:active{transform:scale(.98)}
 .addgrid .addnote{grid-column:1/-1;margin:0;text-align:center}
 #paneSong[data-seg="lib"] #addGrid,#paneSong[data-seg="lib"] #shotCard{display:none!important}
-#paneSong[data-seg="add"] #libCard{display:none!important}
+#paneSong[data-seg="add"] #libCard,#paneSong[data-seg="add"] #suggCard{display:none!important}
+#libCard[hidden]~#suggCard{display:none}
+/* I'm learning: one row per song, five tiles show what you have for it (lit) and what's missing (dim) */
+.learn{display:flex;flex-direction:column;gap:8px}
+.lchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
+.lchips::-webkit-scrollbar{display:none}
+.lchip{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:4px 10px 4px 4px;font:600 12.5px var(--body);cursor:pointer;white-space:nowrap}
+.lchip .pd{--s:22px;margin:0}
+.lchip small{font:500 11.5px var(--body);color:var(--muted)}
+.lchip[data-st="has"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lchip[data-st="miss"]{border-color:#FF6A1A;box-shadow:inset 0 0 0 1px #FF6A1A}
+.lchip[data-st="miss"] .pd{opacity:.35}
+.llist{display:flex;flex-direction:column;gap:6px}
+.lrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 10px;color:var(--ink);font:inherit;cursor:pointer}
+.lrow[aria-expanded="true"]{border-color:var(--accent);border-radius:12px 12px 0 0}
+.ltxt{flex:1;min-width:0;display:flex;flex-direction:column}
+.ltxt b{font:600 14.5px var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltxt small{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lres{display:flex;gap:3px;flex:0 0 auto}
+.lres .pd{--s:21px;margin:0}
+.pd.off{opacity:.22;box-shadow:none}.pd.off::after{display:none}
+.ldet{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:1px solid var(--accent);border-top:0;border-radius:0 0 12px 12px;margin-top:-6px;padding:12px 10px 10px}
+.lit{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.lit .pd{--s:28px;margin:0}
+.lit .ltt{flex:1;min-width:0}
+.lit .ltt b{display:block;font-weight:600}
+.lit .ltt small{color:var(--muted)}
+.lit.miss .ltt b{color:var(--muted);font-weight:500}
+.lit a,.lit button,.lmsg button{flex:0 0 auto;font:600 13px var(--body);color:var(--accent);background:none;border:1px solid var(--line);border-radius:9px;padding:6px 9px;text-decoration:none;cursor:pointer}
+.lmsg{margin:0;color:var(--muted);font-size:13px}
+.libsub{margin:6px 0 0;font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .mxsheet{position:fixed;inset:0;z-index:70}
 .mxsheet[hidden]{display:none}
 .mxdim{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .22s}
@@ -967,14 +997,19 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
     <input id="mixIn" type="file" accept="audio/*,video/*" hidden>
     <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
     <section class="card" id="libCard">
-      <div class="cardhead"><h2>My songs</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
+      <div class="cardhead"><h2>I’m learning</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
       <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span data-pd="DRIVE"></span> My songs folder in Google Drive <span>↗</span></a>
+      <div id="learnBox" class="learn"></div>
+      <p class="libsub">Sheets, lessons and settings</p>
       <details class="ideabox catbox" id="catBox" hidden></details>
       <details class="ideabox vidbox" id="vidBox"></details>
-      <details class="ideabox" id="ideaBox"></details>
       <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
       <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
       <details class="apibox" id="apiCard" hidden></details>
+    </section>
+    <section class="card" id="suggCard">
+      <div class="cardhead"><h2>New songs to learn</h2></div>
+      <details class="ideabox" id="ideaBox"></details>
     </section>
     <section class="card" id="readyCard" hidden>
       <h2>Ready to analyse</h2>
@@ -2596,7 +2631,7 @@ function renderLib(){
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
-function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}try{renderResume()}catch(e){}try{renderCatalog()}catch(e){}try{renderVids()}catch(e){}}
+function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}try{renderResume()}catch(e){}try{renderCatalog()}catch(e){}try{renderVids()}catch(e){}try{renderLearn()}catch(e){}}
 
 /* ---- sheet content ---- */
 function printify(svg){
@@ -4366,7 +4401,7 @@ $('mixNew').onclick=()=>{
  if(!mxIdx.length&&!mxSong&&!mxBusy&&mxGh()){mxPickLocal=false;$('mixIn').click();return}
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
 $('mixIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(mxPickLocal)mxStart(f);else{mxView(true);mxCloudSubmit(f)}};
-mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll()});
+mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll();try{renderLearn()}catch(e){}});
 window.__mx={gains:()=>mxSong&&mxSong.tracks?mxGains():null,node:()=>!!mxNode,level:()=>{if(!mxNode)return -1;if(!mxNode._an){mxNode._an=mxCtx.createAnalyser();mxNode._an.fftSize=2048;mxNode.connect(mxNode._an)}const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);let e=0;for(const x of a)e+=x*x;return Math.sqrt(e/a.length)},render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
 
 
@@ -4974,6 +5009,70 @@ function renderInstDetail(it){
  showTab(gearTab);gearVisit=it.id;
 }
 
+/* ================= I'm learning: every song you have something for, and what kind of material it has ================= */
+// One row per song, gathered from: Guitaring sheets (Drive list + this phone), sheets saved on this phone, the Drive songs folder,
+// video lessons, practice-mixer splits, saved chord analyses, an unfinished sheet, and songs marked "On it" in the song ideas.
+const LKINDS=[['sheet','SHEET','Chord sheet'],['folder','DRIVE','Songs folder'],['lesson','LESSON','Video lesson'],['mix','MIX','Practice mixer'],['analysis','VIDEO','Chord analysis']];
+let learnF={},learnOpen=null,learnQ='';
+const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
+function learnSongs(){
+ const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
+ const add=(t,a,kind,item)=>{t=cleanName(t);a=String(a||'').trim();if(!t)return;
+  // same song: titles match and the artists match, or the title is identical and the artist is just written in another script (עד מתי by אביתר בנאי = Eviatar Banai)
+  const heb=x=>/[\u0590-\u05FF]/.test(x);
+  let g=G.find(x=>vlMatch(x.title,t)&&(!a||!x.artist||vlMatch(x.artist,a)||(vlKey(x.title)===vlKey(t)&&heb(a)!==heb(x.artist))));
+  if(!g){g={title:t,artist:a,r:{sheet:[],folder:[],lesson:[],mix:[],analysis:[]},onit:null,at:0};G.push(g)}
+  if(!g.artist&&a)g.artist=a;if(kind==='onit')g.onit=item;else g.r[kind].push(item);g.at=Math.max(g.at,tm(item&&item.at))};
+ try{catalogAll().forEach(e=>add(e.title,e.artist,'sheet',{label:e.src==='phone'?'Guitaring sheet':'Guitaring sheet in Drive',sub:[e.capo?'Capo '+e.capo:'',e.tuning&&!/^standard/i.test(e.tuning)?e.tuning:''].filter(Boolean).join(' · '),url:e.url||'https://drive.google.com/drive/search?q='+encodeURIComponent(e.title),at:e.at}))}catch(e){}
+ try{libAll().forEach(e=>add(e.name||(e.data&&e.data.title),e.data&&e.data.artist,'sheet',{label:'Saved on this phone',lib:e.id,at:e.saved}))}catch(e){}
+ try{const d=store.get('writeDraft',null);if(d&&d.title)add(d.title,d.artist,'sheet',{label:'Unfinished sheet',draft:true,at:d.edited||d.at})}catch(e){}
+ try{((store.get('songIndex',{})||{}).songs||[]).forEach(x=>add(x.t,x.a,'folder',{label:'In your Drive songs folder',url:'https://drive.google.com/drive/search?q='+encodeURIComponent(x.t)}))}catch(e){}
+ try{vlAll().forEach(v=>add(v.song||v.title,v.artist,'lesson',{label:v.src||vlSource(v.url),sub:v.note||'',url:v.url,at:v.at}))}catch(e){}
+ try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=songFromName(x.name)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
+ try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem('tuner.song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
+ try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
+ return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
+ box.innerHTML=G.length?`<input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${G.length} song${G.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
+ <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
+ <div class="llist" id="learnList"></div>`
+ :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
+ if(!G.length)return;
+ const draw=()=>{const q=vlKey(learnQ),f=G.filter(g=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
+  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
+   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span><span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join('')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
+ draw();
+ $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
+ box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
+ $('learnList').onclick=e=>{const b=e.target.closest('[data-la]');
+  if(!b){const r=e.target.closest('[data-li]');if(r){const k=vlKey(G[+r.dataset.li].title);learnOpen=learnOpen===k?null:k;draw()}return}
+  const g=G[+b.dataset.g],a=b.dataset.la;
+  if(a==='lib'){const ent=libGet(b.dataset.v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
+  else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
+  else if(a==='ana'){const d=loadSong(b.dataset.v);if(!d)return;vid.pause();A=d;fileKey=b.dataset.v;showSheet();window.scrollTo({top:0})}
+  else if(a==='mix'){mxView(true);mxOpen(b.dataset.v)}
+  else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
+  else if(a==='split'){$('mixNew').click()}
+  else if(a==='video'){$('vidIn').click()}
+  else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
+}
+function learnDetail(g,i){
+ const row=(t,title,sub,act)=>`<div class="lit">${SK(t)}<span class="ltt"><b dir="auto">${title}</b>${sub?`<small dir="auto">${sub}</small>`:''}</span>${act}</div>`;
+ const miss=(t,title,act)=>`<div class="lit miss">${SKoff(t)}<span class="ltt"><b>${title}</b></span>${act}</div>`;
+ const go=(a,v,l)=>`<button type="button" data-la="${a}" data-g="${i}" data-v="${esc(v||'')}">${l}</button>`,lnk=(u,l)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${l} ↗</a>`;
+ const s={title:g.title,artist:g.artist};let h='';
+ h+=g.r.sheet.length?g.r.sheet.map(x=>row('SHEET',esc(x.label),esc(x.sub||''),x.lib?go('lib',x.lib,'Open'):x.draft?go('draft','','Continue'):lnk(x.url,'Open'))).join('')
+  :miss('SHEET','No chord sheet yet',go('write','','Write it')+lnk(chordsLink(s),'Find'));
+ h+=g.r.folder.map(x=>row('DRIVE',esc(x.label),'',lnk(x.url,'Open'))).join('');
+ h+=g.r.lesson.length?g.r.lesson.map(x=>row('LESSON',esc(x.label),esc(x.sub||''),lnk(x.url,'Watch'))).join('')
+  :miss('LESSON','No video lesson yet',lnk('https://www.youtube.com/results?search_query='+encodeURIComponent(`${g.artist} ${g.title} guitar lesson`),'Find one'));
+ h+=g.r.mix.length?g.r.mix.map(x=>row('MIX',esc(x.label),'',go('mix',x.mix,'Open'))).join(''):miss('MIX','Not split in the mixer yet',go('split','','Split it'));
+ h+=g.r.analysis.length?g.r.analysis.map(x=>row('VIDEO',esc(x.label),'',go('ana',x.key,'Open'))).join(''):miss('VIDEO','No chords from a video yet',go('video','','Pick a video'));
+ if(!g.r.lesson.length)h+=`<p class="lmsg">Found a lesson on YouTube? Share it to Guitaring and it shows up here.</p>`;
+ if(g.onit)h+=`<p class="lmsg">You picked this from the song ideas. ${go('drop','','Not learning it any more')}</p>`;
+ return `<div class="ldet">${h}</div>`}
+
 /* ---- song ideas: scan the songs folder, then ask Claude for songs that fit the style, bands and level ---- */
 const IDEA_STYLES=[['folder','Like my folder'],['il-rock','Israeli rock'],['il-pop','Hebrew pop and ballads'],['acoustic','Acoustic singer-songwriter'],['funk','Funk rock'],['classic','Classic rock'],['alt','Indie and alternative'],['blues','Blues'],['reggae','Reggae and surf'],['campfire','Campfire singalongs'],['90s','90s and 2000s']];
 const IDEA_LEVELS=[['easier','Easier'],['same','My level'],['step','A step up'],['hard','Challenge me']];
@@ -5052,6 +5151,7 @@ let ideaAutoDone=false;
 function onItList(){let l=store.get('ideaOnIt',null);if(!l){l=(store.get('ideaWant',[])||[]).map(x=>({...x,at:Date.now()}));store.set('ideaOnIt',l)}return l}
 const onItKey=s=>normArt(s.artist)+'|'+normArt(s.title);
 function renderIdeas(){
+ try{renderLearn()}catch(e){}
  const box=$('ideaBox');if(!box)return;const ix=store.get('songIndex',null),p=ideaPrefs(),res=store.get('ideas',null),want=onItList();
  const daily=ix&&ix.src==='daily',canDrive=!!mcpCap||ownDrive(),auto=daily||!!mcpCap;
  const scanBtns=daily?'':`${canDrive?`<button class="btn ghost" id="idScan" type="button">${ix?'Scan the folder now':'Scan my songs folder'}</button>`:''}
@@ -5067,7 +5167,6 @@ function renderIdeas(){
  ${res&&res.level&&list.length?`<p class="tip idlevel"><b>Your level:</b> <span dir="auto">${esc(res.level)}</span></p>`:''}
  <div class="idres">${list.map((s,i)=>ideaCardHTML(s,i,kc)).join('')}</div>
  ${res&&res.list&&!list.length?`<p class="tip">You’ve gone through all of today’s ideas. New ones arrive tomorrow morning.</p>`:''}
- ${want.length?`<details class="idlist" open><summary>I’m learning (${want.length})</summary>${want.map((s,i)=>`<div class="idwant"><span dir="auto"><b>${esc(s.title)}</b> · ${esc(s.artist)}</span><a href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><button type="button" class="linkbtn" data-unwant="${i}">Remove</button></div>`).join('')}</details>`:''}
  ${ix?`<details class="idlist"><summary>What’s in your folder</summary>${[...by].map(([a,l])=>`<p dir="auto"><b>${esc(a)}</b> · ${l.map(s=>esc(s.t)).join(', ')}</p>`).join('')}</details>
  <details class="idlist idtune"><summary>Fine-tune the ideas (optional)</summary>
  <div class="idq"><b>Style</b><div class="idchips">${IDEA_STYLES.map(([v,l])=>chip('styles',v,l,p.styles.includes(v))).join('')}</div></div>
