@@ -4148,8 +4148,7 @@ async function mxStart(file){
 }
 // ---- live mixing: an audio worklet mixes all parts with the slider volumes ----
 const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;
-this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice()}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;
-if(m.render){const g=m.render,o=new Int16Array(this.n*2);for(let i=0;i<this.n*2;i++){let a=0;for(let k=0;k<this.t.length;k++)if(g[k])a+=this.t[k][i]*g[k];o[i]=a>32767?32767:a<-32768?-32768:a}this.port.postMessage({rendered:o},[o.buffer])}}}
+this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice()}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
 process(_,outs){const o=outs[0],L=o[0],R=o[1]||o[0],n=L.length;L.fill(0);if(R!==L)R.fill(0);if(!this.on||!this.t.length)return true;
 for(let k=0;k<this.t.length;k++){let g=this.g[k];const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;L[i]+=a[2*q]*g/32768;R[i]+=a[2*q+1]*g/32768}this.g[k]=tg}
 this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n)this.port.postMessage({pos:this.p});return true}}
@@ -4159,11 +4158,10 @@ async function mxAudio(){
  if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:mxSR()});
  const url=URL.createObjectURL(new Blob([MX_WORKLET],{type:'text/javascript'}));await mxCtx.audioWorklet.addModule(url);
  mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
- mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}if(m.rendered&&mxRenderCb){const cb=mxRenderCb;mxRenderCb=null;cb(m.rendered)}};
+ mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}};
  // the worklet keeps its own copy of the parts; the phone keeps the saved copy for next time
  const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));
 }
-let mxRenderCb=null;
 function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
 const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
 const mxFmt=n=>mmss(n/mxSR());
@@ -4203,11 +4201,19 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
   songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(f);curFile=f;fileKey=(f.name+'|'+f.size).replace(/[^\w|.-]/g,'_');showReady(f)});
 }
 // a whole-song render of the chosen parts as a WAV file (16-bit stereo at the song's rate: 44.1 kHz, or 22 kHz for long songs)
-async function mxRender(gains,what,done){await mxAudio();const btns=$('mixView').querySelectorAll('.mixacts button');btns.forEach(b=>b.disabled=true);
- mxRenderCb=pcm=>{btns.forEach(b=>b.disabled=false);const n=pcm.length,h=new DataView(new ArrayBuffer(44)),w=(o,str)=>{for(let i=0;i<str.length;i++)h.setUint8(o+i,str.charCodeAt(i))};
-  w(0,'RIFF');h.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,mxSR(),true);h.setUint32(28,mxSR()*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*2,true);
-  done(new Blob([h.buffer,pcm.buffer],{type:'audio/wav'}))};
- mxNode.port.postMessage({render:gains})}
+// Built on the main thread from the same parts the mixer plays (not inside the audio worklet), in chunks so the screen stays responsive.
+async function mxRender(gains,what,done){const s=mxSong;if(!s||!s.tracks)return;const btns=$('mixView').querySelectorAll('.mixacts button');btns.forEach(b=>b.disabled=true);
+ try{const n=s.len*2,o=new Int16Array(n),act=s.tracks.map((t,k)=>({d:t.data,g:+gains[k]||0,name:t.name})).filter(x=>x.g>0&&x.d&&x.d.length);
+  for(let i0=0;i0<n;i0+=1<<19){const i1=Math.min(n,i0+(1<<19));
+   for(let i=i0;i<i1;i++){let a=0;for(let k=0;k<act.length;k++){const v=act[k].d[i];if(v)a+=v*act[k].g}o[i]=a>32767?32767:a<-32768?-32768:a}
+   await tick()}
+  // never hand over a silent file without saying why
+  let peak=0;for(let i=0;i<n;i+=7){const v=o[i]<0?-o[i]:o[i];if(v>peak)peak=v}
+  if(peak<8){toast(!act.length?'Every part is muted or at 0%, so the file would be silent. Turn up at least one part, then save again.':`The ${act.map(x=>x.name.toLowerCase()).join(' and ')} ${act.length>1?'are':'is'} silent in this song, so the file would be empty. Try another mix, or split the song again.`);return}
+  const h=new DataView(new ArrayBuffer(44)),w=(off,str)=>{for(let i=0;i<str.length;i++)h.setUint8(off+i,str.charCodeAt(i))},sr=mxSR();
+  w(0,'RIFF');h.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,sr,true);h.setUint32(28,sr*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*2,true);
+  done(new Blob([h.buffer,o.buffer],{type:'audio/wav'}))}
+ finally{btns.forEach(b=>b.disabled=false)}}
 
 // ---------- my mixes: every split song stays on the phone (cloud splits as their FLAC or older MP3 parts) ----------
 let mxIdx=[];
