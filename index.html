@@ -4161,6 +4161,7 @@ async function mxStart(file){
   const off=new OfflineAudioContext(2,Math.max(1,Math.ceil(au.duration*MX.SR)),MX.SR);const src=off.createBufferSource();src.buffer=au;src.connect(off.destination);src.start();
   const r=await off.startRendering(),L=r.getChannelData(0),R=r.numberOfChannels>1?r.getChannelData(1):L;
   if(au.duration>600)throw {msg:'This song is over 10 minutes. Trim it first or pick a shorter part.'};
+  if(mxPeak(au)<.0005)throw {msg:MX_SILENT_MSG};
   mxProgress('Getting the separation model…',0,'One time only: it’s saved on this phone for next time.');
   await mxSession((got,tot,cached)=>{if(cached)return;const v=$('mixView').querySelector('.pbar i');if(v&&tot)v.style.width=Math.round(got/tot*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(got/1048576)} of ${tot?Math.round(tot/1048576):'?'} MB · one time only, it’s saved on this phone for next time`});
   mxProgress('Splitting the song into parts…',0,`Using the phone’s ${mxSessKind}. Working out how long it will take…`);
@@ -4306,6 +4307,8 @@ async function mxOpen(id){
    const first=await dec(d.stems[MX.STEMS[0]],MX.SR),sr=mxSrFor(first.duration),raw={};
    for(const s of MX.STEMS){raw[s]=mxToI16(s===MX.STEMS[0]&&sr===MX.SR?first:await dec(d.stems[s],sr));await tick()}
    const len=Math.min(...MX.STEMS.map(s=>raw[s].length/2));mxSong.tracks=await mxBuild(raw);mxSong.len=len;mxSong.sr=sr}
+  // every part silent: the song that was sent had no sound (say so instead of a mixer that plays nothing)
+  if(mxSong.tracks.every(t=>{const d=t.data;for(let i=0;i<d.length;i+=7)if(d[i]>8||d[i]<-8)return false;return true}))toast('Every part of this song is silent, because the file that was sent had no sound in it. Delete it and send the original song.','err');
   if(mxSong&&mxSong.id===id){mxSong.opening=false;mxMixer()}
  }catch(e){try{console.error('mixer open',e&&e.message||e)}catch(_){}mxSong=null;toast('Couldn’t open this song. Delete it and split it again.','err');mxSheetUI()}
  mxBar()}
@@ -4376,8 +4379,15 @@ async function mxEnsureWf(cfg){
  let have='';try{have=cur&&cur.content?decodeURIComponent(escape(atob(cur.content.replace(/\s/g,'')))):''}catch(e){}
  let changed=false;if(have.trim()!==wf.trim()){try{await gh('/contents/.github/workflows/split.yml',{method:'PUT',body:JSON.stringify({message:'Guitaring: update the song splitter ('+ver+')',content:mxB64(wf),branch:cfg.branch||'main',...(cur&&cur.sha?{sha:cur.sha}:{})})},cfg);changed=true}catch(e){e.wf=true;throw e}}
  try{localStorage.setItem('guitaring.wfv',ver)}catch(e){}return changed}
+// a file with no sound in it (for example a silent mix saved by an older version) is stopped before it is sent: there is nothing to split
+const MX_SILENT_MSG='This file has no sound in it: it’s silent from start to end, so there’s nothing to split. Pick the original song instead.';
+const mxPeak=au=>{let pk=0;for(let c=0;c<au.numberOfChannels;c++){const d=au.getChannelData(c);for(let i=0;i<d.length;i+=3){const v=d[i]<0?-d[i]:d[i];if(v>pk)pk=v}}return pk};
+async function mxSilentFile(file){// true = silent, false = has sound, null = can't tell here (GitHub may still read it)
+ try{const ctx=new OfflineAudioContext(1,1,8000),ab=await file.arrayBuffer(),au=await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)});return au.length>0&&mxPeak(au)<.0005}catch(e){return null}}
 async function mxCloudSubmit(file){
  const cfg=mxGh();if(!cfg){mxSetup();return}
+ toast('Checking the song…');if(await mxSilentFile(file)===true){toast(MX_SILENT_MSG,'err');return}
+ {const t=$('toast');if(t&&t.textContent==='Checking the song…')t.hidden=true}
  const id=Date.now().toString(36);
  const it={id,name:(file.name||'Song').replace(/\.[a-z0-9]+$/i,''),at:Date.now(),src:'cloud',state:'up'};
  mxIdx.unshift(it);await mxIdxSave();mxBar();mxSheetUI();renderMixNew();
