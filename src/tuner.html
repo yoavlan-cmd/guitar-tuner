@@ -1173,7 +1173,8 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v2
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v3
+# Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
 on:
@@ -1189,7 +1190,7 @@ concurrency:
 jobs:
   split:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     env:
       ID: ${{ inputs.id }}
       REPO: ${{ github.repository }}
@@ -1224,10 +1225,10 @@ jobs:
         run: |
           f=$(ls job/song.* | head -1)
           set -o pipefail
-          python -m demucs -n htdemucs_6s --mp3 --mp3-bitrate 128 -o out --filename "{stem}.{ext}" "$f" 2>&1 | tee -a log.txt
-          mkdir res && cp out/htdemucs_6s/*.mp3 res/
+          python -m demucs -n htdemucs_6s --shifts 3 --overlap 0.5 --flac -o out --filename "{stem}.{ext}" "$f" 2>&1 | tee -a log.txt
+          mkdir res && cp out/htdemucs_6s/*.flac res/
           dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" || echo 0)
-          echo "{\"ok\":true,\"stems\":[\"drums\",\"bass\",\"other\",\"vocals\",\"guitar\",\"piano\"],\"duration\":${dur:-0}}" > res/done.json
+          echo "{\"ok\":true,\"format\":\"flac\",\"stems\":[\"drums\",\"bass\",\"other\",\"vocals\",\"guitar\",\"piano\"],\"duration\":${dur:-0}}" > res/done.json
           ls -la res
       - name: Report a failure to the app
         if: failure()
@@ -3887,7 +3888,7 @@ const MX={
  ORT_DIR:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0/dist/',
  MODEL_GPU:'https://huggingface.co/kramp/htdemucs-6s-webgpu-onnx/resolve/main/htdemucs_6s.onnx',      // 285 MB, runs on the graphics chip
  MODEL_CPU:'https://huggingface.co/Acapellas/htdemucs-6s-onnx/resolve/main/htdemucs_6s_fp16weights.onnx', // 136 MB, processor only
- SEG:343980,SR:44100,OUT_SR:22050,STEMS:['drums','bass','other','vocals','guitar','piano']
+ SEG:343980,SR:44100,OUT_SR:22050,HQ_MAX:300,OVL:.5,STEMS:['drums','bass','other','vocals','guitar','piano']
 };
 const MX_NAMES={drums:'Drums',bass:'Bass',other:'Other',vocals:'Vocals',guitar:'Guitars',piano:'Piano / keys',gL:'Guitar · left',gC:'Guitar · centre',gR:'Guitar · right'};
 const MX_ICON={drums:'🥁',bass:'🎵',other:'🎛️',vocals:'🎤',guitar:'🎸',piano:'🎹',gL:'🎸',gC:'🎸',gR:'🎸'};
@@ -3953,9 +3954,11 @@ function mxDecWrite(st,x,out,ch,oi){
  let i=30+st.phase;for(;i<buf.length;i+=2){let a=0;for(let k=0;k<31;k++)a+=MX_H[k]*buf[i-k];if(a>1)a=1;else if(a<-1)a=-1;if(oi<out.length/2)out[2*oi+ch]=a*32767;oi++}
  st.phase=i-buf.length;st.hist=buf.slice(buf.length-30);return oi;
 }
-// ---- the separation itself: 7.8 s windows with 25% overlap, cross-faded ----
-async function mxSeparate(L,R,onp,onSwitch){
- const S=MX.SEG,ovl=Math.round(S*.25),hop=S-ovl,N=L.length,nOut=Math.ceil(N/2);
+// sample rate a split song is kept at: full CD quality (44.1 kHz) up to 5 minutes, half for longer songs so the phone's memory holds
+const mxSrFor=sec=>sec>MX.HQ_MAX?MX.OUT_SR:MX.SR;
+// ---- the separation itself: 7.8 s windows with 50% overlap, cross-faded (more overlap = fewer seams, cleaner parts) ----
+async function mxSeparate(L,R,onp,onSwitch,sr){
+ const S=MX.SEG,ovl=Math.round(S*MX.OVL),hop=S-ovl,N=L.length,full=sr===MX.SR,nOut=full?N:Math.ceil(N/2);
  const tracks=MX.STEMS.map(()=>new Int16Array(nOut*2)),dec=MX.STEMS.map(()=>[mxDec(),mxDec()]),oi=MX.STEMS.map(()=>[0,0]);
  let tail=null;const nSeg=Math.max(1,Math.ceil(Math.max(1,N-ovl)/hop));
  let times=[],k=0,t1=0,switching=false;
@@ -3988,7 +3991,8 @@ async function mxSeparate(L,R,onp,onSwitch){
   const last=k===nSeg-1,fin=last?len:Math.min(hop,len);
   for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S,seg=new Float32Array(fin);
    for(let i=0;i<fin;i++){let v=y[base+i];if(tail&&i<ovl){const r=(i+1)/(ovl+1);v=tail[st*2+ch][i]*(1-r)+v*r}seg[i]=v}
-   oi[st][ch]=mxDecWrite(dec[st][ch],seg,tracks[st],ch,oi[st][ch])}
+   if(full){const t=tracks[st];let o=oi[st][ch];for(let i=0;i<fin;i++,o++){let a=seg[i];if(a>1)a=1;else if(a<-1)a=-1;if(o<nOut)t[2*o+ch]=a*32767}oi[st][ch]=o}
+   else oi[st][ch]=mxDecWrite(dec[st][ch],seg,tracks[st],ch,oi[st][ch])}
   if(!last){tail=[];for(let st=0;st<6;st++)for(let ch=0;ch<2;ch++){const base=(st*2+ch)*S;tail.push(y.slice(base+hop,base+S))}}
   await tick();
  }
@@ -4051,15 +4055,16 @@ async function mxStart(file){
   await mxSession((got,tot,cached)=>{if(cached)return;const v=$('mixView').querySelector('.pbar i');if(v&&tot)v.style.width=Math.round(got/tot*100)+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=`${Math.round(got/1048576)} of ${tot?Math.round(tot/1048576):'?'} MB · one time only, it’s saved on this phone for next time`});
   mxProgress('Splitting the song into parts…',0,`Using the phone’s ${mxSessKind}. Working out how long it will take…`);
   const setP=(f,t)=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.max(1,Math.round(f*100))+'%';const sm=$('mixView').querySelector('small');if(sm)sm.textContent=t;mxPhoneFrac=f;mxPhoneNote=`Splitting on this phone · ${Math.round(f*100)}%`;mxBar()};
-  const raw=await mxSeparate(L,R,setP,()=>{const t=$('mixView').querySelector('.tip');if(t)t.textContent='The graphics chip got stuck, so Guitaring switched to the phone’s processor and carried on from the same spot. It’s slower but steadier. Keep the app open and the screen on.'});
+  const sr=mxSrFor(au.duration);
+  const raw=await mxSeparate(L,R,setP,()=>{const t=$('mixView').querySelector('.tip');if(t)t.textContent='The graphics chip got stuck, so Guitaring switched to the phone’s processor and carried on from the same spot. It’s slower but steadier. Keep the app open and the screen on.'},sr);
   mxWKill();// free the model's memory; it reloads from the phone next time
   mxProgress('Finding the separate guitars…',0,'Checking left, centre and right.');
   const tracks=await mxBuild(raw,f=>{const v=$('mixView').querySelector('.pbar i');if(v)v.style.width=Math.round(f*100)+'%'});
   const id='p'+Date.now().toString(36);
-  mxSong.id=id;mxSong.tracks=tracks;mxSong.len=raw.drums.length/2;mxSong.at=Date.now();
-  // the phone keeps one on-phone split (they are large); cloud splits are kept as small MP3s
+  mxSong.id=id;mxSong.tracks=tracks;mxSong.len=raw.drums.length/2;mxSong.sr=sr;mxSong.at=Date.now();
+  // the phone keeps one on-phone split (they are large); cloud splits are kept as their FLAC (or older MP3) parts
   for(const it of mxIdx.filter(x=>x.src==='phone'))await mxForget(it.id,true);
-  try{await mxPut('mixdata:'+id,{len:mxSong.len,tracks:tracks.map(t=>({id:t.id,name:t.name,data:t.data}))});mxIdx.unshift({id,name:mxSong.name,at:mxSong.at,src:'phone',state:'ready'});await mxIdxSave()}catch(e){}
+  try{await mxPut('mixdata:'+id,{len:mxSong.len,sr,tracks:tracks.map(t=>({id:t.id,name:t.name,data:t.data}))});mxIdx.unshift({id,name:mxSong.name,at:mxSong.at,src:'phone',state:'ready'});await mxIdxSave()}catch(e){}
   mxPos=0;mxMixer();
  }catch(e){
   mxWKill();try{console.error('mixer',e&&e.message||e)}catch(err){}
@@ -4079,7 +4084,7 @@ this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({
 registerProcessor('gmix',M);`;
 const mxGains=()=>{const t=mxSong.tracks;return t.map(x=>{const on=mxSolo?mxSolo===x.id:!x.mute;return on?x.gain:0})};
 async function mxAudio(){
- if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:MX.OUT_SR});
+ if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:mxSR()});
  const url=URL.createObjectURL(new Blob([MX_WORKLET],{type:'text/javascript'}));await mxCtx.audioWorklet.addModule(url);
  mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
  mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}if(m.rendered&&mxRenderCb){const cb=mxRenderCb;mxRenderCb=null;cb(m.rendered)}};
@@ -4088,7 +4093,8 @@ async function mxAudio(){
 }
 let mxRenderCb=null;
 function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
-const mxFmt=n=>mmss(n/MX.OUT_SR);
+const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
+const mxFmt=n=>mmss(n/mxSR());
 function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)}mxBarTime()}
 function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'⏸':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}})}
 async function mxToggle(){if(!mxSong||!mxSong.tracks)return;await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=mxSong.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI();mxBarTime()}
@@ -4105,7 +4111,7 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length,n=mxIdx.length;
  v.innerHTML=`<div class="mixhead"><b dir="auto">🎚️ ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
  <div class="mixtrans"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button>
- <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${MX.OUT_SR/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
+ <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
@@ -4114,7 +4120,7 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  mxRows();mxTimeUI();mxPlayUI();mxLibUI();
  $('mxClose').onclick=()=>mxView(false);
  $('mxPlay').onclick=mxToggle;
- $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*MX.OUT_SR);if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
+ $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
  const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(s.len)});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
  $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.nextElementSibling.textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
@@ -4124,14 +4130,14 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
   try{setTab('song');songsHome()}catch(e){}
   songMsg('');if(vid.src)URL.revokeObjectURL(vid.src);vid.src=URL.createObjectURL(f);curFile=f;fileKey=(f.name+'|'+f.size).replace(/[^\w|.-]/g,'_');showReady(f)});
 }
-// a whole-song render of the chosen parts as a WAV file (16-bit, 22 kHz stereo)
+// a whole-song render of the chosen parts as a WAV file (16-bit stereo at the song's rate: 44.1 kHz, or 22 kHz for long songs)
 async function mxRender(gains,what,done){await mxAudio();const btns=$('mixView').querySelectorAll('.mixacts button');btns.forEach(b=>b.disabled=true);
  mxRenderCb=pcm=>{btns.forEach(b=>b.disabled=false);const n=pcm.length,h=new DataView(new ArrayBuffer(44)),w=(o,str)=>{for(let i=0;i<str.length;i++)h.setUint8(o+i,str.charCodeAt(i))};
-  w(0,'RIFF');h.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,MX.OUT_SR,true);h.setUint32(28,MX.OUT_SR*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*2,true);
+  w(0,'RIFF');h.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,mxSR(),true);h.setUint32(28,mxSR()*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*2,true);
   done(new Blob([h.buffer,pcm.buffer],{type:'audio/wav'}))};
  mxNode.port.postMessage({render:gains})}
 
-// ---------- my mixes: every split song stays on the phone (cloud splits as small MP3 parts) ----------
+// ---------- my mixes: every split song stays on the phone (cloud splits as their FLAC or older MP3 parts) ----------
 let mxIdx=[];
 async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
 async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,sent,run,runAt})=>({id,name,at,src,state,err,sent,run,runAt})))}catch(e){}}
@@ -4177,17 +4183,19 @@ async function mxOpen(id){
  if(mxSong&&mxSong.id===id&&mxSong.tracks){mxMixer();return}
  mxStopAudio();mxSong={id,name:it.name,tracks:null,opening:true};mxPos=0;mxSolo=null;mxBar();mxLibUI();
  try{const d=await mxGet('mixdata:'+id);if(!d)throw new Error('missing');
-  if(d.tracks){mxSong.tracks=d.tracks.map(t=>({...t,gain:1,mute:false}));mxSong.len=d.len}
-  else{const ctx=new OfflineAudioContext(2,1,MX.OUT_SR),raw={};
-   for(const s of MX.STEMS){const ab=await d.stems[s].arrayBuffer();const au=await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)});raw[s]=mxToI16(au);await tick()}
-   const len=Math.min(...MX.STEMS.map(s=>raw[s].length/2));mxSong.tracks=await mxBuild(raw);mxSong.len=len}
+  if(d.tracks){mxSong.tracks=d.tracks.map(t=>({...t,gain:1,mute:false}));mxSong.len=d.len;mxSong.sr=d.sr||MX.OUT_SR}
+  else{// parts from GitHub (lossless FLAC, or MP3 from older splits): decoded at full rate unless the song is long
+   const dec=async(blob,sr)=>{const ctx=new OfflineAudioContext(2,1,sr),ab=await blob.arrayBuffer();return await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)})};
+   const first=await dec(d.stems[MX.STEMS[0]],MX.SR),sr=mxSrFor(first.duration),raw={};
+   for(const s of MX.STEMS){raw[s]=mxToI16(s===MX.STEMS[0]&&sr===MX.SR?first:await dec(d.stems[s],sr));await tick()}
+   const len=Math.min(...MX.STEMS.map(s=>raw[s].length/2));mxSong.tracks=await mxBuild(raw);mxSong.len=len;mxSong.sr=sr}
   if(mxSong&&mxSong.id===id){mxSong.opening=false;mxMixer()}
  }catch(e){try{console.error('mixer open',e&&e.message||e)}catch(_){}mxSong=null;toast('Couldn’t open this song. Delete it and split it again.');mxSheetUI()}
  mxBar()}
 
 // ---------- splitting on GitHub (free, runs while the phone is locked) ----------
 // The app uploads the song to its own branch of the user's private repository, starts the "Split song" workflow,
-// then later picks up the six MP3 parts from a result branch and deletes both branches.
+// then later picks up the six parts (lossless FLAC; MP3 from splitter v2) from a result branch and deletes both branches.
 const MX_GH_KEY='guitaring.gh';let mxPickLocal=false;
 function mxGh(){try{const c=JSON.parse(localStorage.getItem(MX_GH_KEY)||'null');return c&&c.repo&&c.token?c:null}catch(e){return null}}
 async function gh(path,opt={},cfg=mxGh()){
@@ -4234,7 +4242,7 @@ function mxSetup(){const v=$('mixView'),cfg=mxGh();
  <label class="namefield">Access key <input id="mxTok" type="password" autocomplete="off" spellcheck="false" placeholder="${cfg?'Saved · paste a new one to replace it':'github_pat_…'}"></label>
  <button type="button" class="btn" id="mxConn">Connect</button>
  <p class="msg" id="mxSetMsg" hidden></p>
- <p class="tip" style="margin:0">The key stays on this phone and opens only that repository. Free GitHub accounts get 2,000 minutes a month for private repositories, and one song takes about 5–10.${cfg?'':''}</p>
+ <p class="tip" style="margin:0">The key stays on this phone and opens only that repository. Free GitHub accounts get 2,000 minutes a month for private repositories, and one song takes about 15–25 minutes (best-quality split), so roughly 80–130 songs a month.${cfg?'':''}</p>
  ${cfg?'<button type="button" class="mxlink" id="mxDisc">Disconnect GitHub from this phone</button>':''}`;
  $('mxSetX').onclick=()=>mxSheetUI2();
  if(cfg)$('mxDisc').onclick=()=>{try{localStorage.removeItem(MX_GH_KEY)}catch(e){}mxSheetUI2()};
@@ -4276,7 +4284,7 @@ async function mxUpload(it,file){mxBarOff=false;
   catch(e){if(e.status!==422)throw e;await gh('/git/refs/heads/j-'+id,{method:'PATCH',body:JSON.stringify({sha:com.sha,force:true})})}
   await gh('/actions/workflows/split.yml/dispatches',{method:'POST',body:JSON.stringify({ref:cfg.branch||'main',inputs:{id}})});
   it.state='wait';it.sent=Date.now();
-  toast(`🎚️ “${esc(it.name)}” is on its way. It usually takes 5–10 minutes. You can lock the phone; it’ll be here when you come back.`);
+  toast(`🎚️ “${esc(it.name)}” is on its way. It usually takes 15–25 minutes (best-quality split). You can lock the phone; it’ll be here when you come back.`);
  }catch(e){try{console.error('mixer send',e&&e.message||e)}catch(_){}it.state='failed';it.err=mxGhErr(e,e&&e.wf?'wf':'send')}
  await mxIdxSave();mxBar();mxSheetUI();renderMixNew();mxPollSoon()}
 let mxPollT=0,mxPolling=false;
@@ -4302,13 +4310,16 @@ async function mxCollect(it){mxBarOff=false;
  try{
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`);const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
-  else{const stems={};for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.mp3?ref=r-'+it.id,{raw:true});
+  else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
    await mxPut('mixdata:'+it.id,{stems});it.state='ready';it.at=Date.now();mxDel('mixsrc:'+it.id).catch(()=>{});
    toast(`🎚️ “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`);
    const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}}
   gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
  }catch(e){try{console.error('mixer collect',e&&e.message||e)}catch(_){}it.state='wait'}// try again on the next check
 }
+// test hook (no UI): lets tests/mx_t.js drive the mixer and read the result
+window.__mxTest={song:()=>mxSong,start:f=>mxStart(f),open:id=>mxOpen(id),collect:it=>mxCollect(it),put:(k,v)=>mxPut(k,v),add:it=>{mxIdx.unshift(it)},
+ reset(){mxStopAudio();mxSong=null},async rate(){await mxAudio();return mxCtx.sampleRate},render:g=>new Promise((r,j)=>{mxRender(g,'test',r).catch(j)})};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)mxPoll()});
 window.addEventListener('online',()=>mxPoll());
 
