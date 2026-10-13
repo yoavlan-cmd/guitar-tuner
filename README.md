@@ -6,7 +6,7 @@ Phone-first guitar app (PWA): tuner, song analysis → chord sheets, hand-writte
 - Full spec: [`docs/PRD-Guitaring-V1.md`](docs/PRD-Guitaring-V1.md) · Agent rules: [`CLAUDE.md`](CLAUDE.md)
 
 ```bash
-bash tools/build.sh                      # src/tuner.html -> index.html
+bash tools/build.sh                      # src/guitaring.html -> index.html
 python3 -m http.server 8000              # open http://localhost:8000 (mic needs https or localhost)
 cd tests && npm i && npx playwright install chromium && bash ../tools/get_test_samples.sh && node tun_ui.js
 bash tools/release.sh                    # build + bump sw.js cache version, then commit & push to main
