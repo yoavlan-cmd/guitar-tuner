@@ -13,6 +13,7 @@ The repo root **is** the GitHub Pages site (served from `main`): `index.html`, `
 - Release: `bash tools/release.sh` (build + bump `tuner-vNN` in `sw.js` — required on every `index.html` change, or phones keep the old app).
 - Deploy: commit `src/tuner.html`, `index.html`, `sw.js` together and get it onto `main` (Pages serves `main`).
 - Commit `src/tuner.html` and the built `index.html` in the same commit so they never drift.
+- Beta preview: `bash tools/build.sh beta` writes `beta/index.html` (served at …/guitar-tuner/beta/, shares the main app's data, service worker and `ideas.json`; shows a BETA badge). Ship it on its own branch/PR to `main` so the live app is untouched.
 
 ## Rules
 - Find code by section banners (`/* ===== … ===== */`) and element ids; PRD §9 code map (line numbers are approximate). Make small exact edits.
