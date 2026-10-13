@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});const p=await (await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,colorScheme:'dark'})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/^https:\/\//,r=>r.abort());
  await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"')});
  await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
- await p.click('[data-tab=song]');await p.click('#writeNew');await p.fill('#wTitle','My riff');await p.fill('#wLyrics','hello world my song');
+ await p.click('[data-tab=song]');await p.click('#songSeg [data-s=add]');await p.click('#writeNew');await p.fill('#wTitle','My riff');await p.fill('#wLyrics','hello world my song');
  await p.click('#wNext').catch(async()=>{await p.evaluate(()=>{const b=[...document.querySelectorAll('#writeView button')].find(x=>/next|chords/i.test(x.textContent)&&!x.hidden);b&&b.click()})});
  await p.waitForTimeout(300);await p.click('.ww >> nth=0');await p.click('#wPickFind');await p.waitForSelector('#cfWrap:not([hidden])');
  const tap=async(s,fr)=>{await p.click(`#cfBoard .hit[data-s="${s}"][data-fr="${fr}"]`)};const top=async s=>p.click(`#cfBoard .hit[data-top="${s}"]`);

@@ -95,8 +95,8 @@ All user data is in `localStorage` under the prefix `tuner.` through the `store.
 
 Tabs (`#tabs`, `setTab(t)`): **Tuner** (`#paneTune`) · **Songs** (`#paneSong`) · **Chords** (`#paneChords`) · **My gear** (`#paneGear`). Last tab is remembered (`tab`).
 
-- **Welcome overlay** (`#welcome`) on every app open: asks the first name once, then "Hey, {name}." + a joke + quick buttons (Tune / Learn a song / Write a song / Chords / Gear) + Skip. "Write a song" opens Songs home with all creation options visible.
-- **Songs tab always opens on Songs home** (`songsHome()`), not on a sub-view. If a sheet/analysis was open, a "Resume" card (`#resumeCard`) offers to go back.
+- **Welcome overlay** (`#welcome`) on every app open: asks the first name once, then "Hey, {name}." + a joke + quick buttons + Skip. Button hierarchy: **Tune up** (primary, filled cream) › **Learn a song** (filled dark) › Write a song / My gear (outline row). "Write a song" opens Songs home with all creation options visible.
+- **Songs tab always opens on Songs home** (`songsHome()`), not on a sub-view. Since the UI redesign (branch `ui-redesign`) Songs home has a two-part switch `#songSeg`: **My library** (default; `#libCard`) and **＋ Add a song** (`#addGrid`: 2×2 tiles Song video / Screenshots or PDF / Write a sheet / Practice mixer). Welcome › Learn a song / Write a song open Add; the share target opens My library (`setSongSeg`). If a sheet/analysis was open, a "Resume" card (`#resumeCard`) offers to go back.
 - **Chord finder overlay** (`#cfWrap`) opens from the chord picker (writer) and from the Chords tab.
 
 ---
@@ -199,7 +199,7 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - **Controls and switches**: labelled SVG drawing of each electric guitar's / amp's knobs, switches and jacks (`guitarSVG`, `panelSVG`).
 - Gear chat with Claude (attach a photo from camera/gallery).
 - Safety net: removed instruments are kept in `gearLost` with a restore box (an earlier bug deleted amps).
-- All sections collapsed on every visit.
+- Detail page (UI redesign): horizontal chip tabs under the photo — **Overview** (specs, last tuned, strings status line, model notes, photo notes, strengths/limits) · **Controls** (diagram on a dark card) · **Tips** · **Care** (strings date, cleaning, care, repair; orange dot when strings are due) · **Ask Claude** (model profile + gear chat). One panel at a time; every visit opens on Overview (`gearTab`).
 
 ### 5.11 Welcome jokes
 - 46 built-in jokes (`JOKES`, `{n}` = user's name) + extras from `ideas.json.jokes` (`jokesExtra`). Fresh extras are shown first, once each (`jokesSeen`), then random (never the same twice in a row). "Another one ↻".
@@ -366,6 +366,9 @@ Not automated (manual on a real phone): real microphone behaviour on Android, An
 - UI rule: secondary sections stay collapsed until opened.
 
 ---
+
+### UI redesign (Oct 2026)
+The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("original UI / UX"). To roll back: deploy that branch's `index.html` + `src/tuner.html` with a bumped `sw.js`.
 
 ## 14. V2 backlog (suggested, not committed)
 
