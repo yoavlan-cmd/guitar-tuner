@@ -1,5 +1,5 @@
 // Offline support for the tuner. Bump VERSION whenever index.html changes.
-const VERSION = 'tuner-v92';
+const VERSION = 'tuner-v93';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -24,7 +24,8 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       fetch(req, { cache: 'no-cache' }).then(res => {
         const copy = res.clone();
-        caches.open(VERSION).then(c => c.put('./index.html', copy));
+        // only the main app is kept as the offline copy (the /beta/ preview must not replace it)
+        if (!url.pathname.includes('/beta/')) caches.open(VERSION).then(c => c.put('./index.html', copy));
         return res;
       }).catch(() => caches.match('./index.html'))
     );
