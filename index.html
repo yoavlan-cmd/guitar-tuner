@@ -719,10 +719,28 @@ body.wopen{overflow:hidden}
 .ctlphoto{position:relative;border-radius:16px;overflow:hidden;background:#000;line-height:0;touch-action:manipulation}
 .ctlphoto img{width:100%;height:auto;display:block;user-select:none;-webkit-user-drag:none}
 .ctlphoto.placing{outline:2px dashed #FFB74D;outline-offset:-2px;cursor:crosshair}
-/* a mark = a thin ring around the control (so it stays visible) + its number in a bubble up and to the left */
-.pb{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid #66BB6A;background:transparent;box-shadow:0 0 0 1px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.35);padding:0;cursor:pointer;color:#0E1A12;font:700 12px/1 var(--mono)}
-.pb::before{content:attr(data-n);position:absolute;right:calc(100% - 6px);bottom:calc(100% - 6px);min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:#66BB6A;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.6)}
-.pb.on{border-color:#FF6A1A;z-index:2}.pb.on::before{background:#FF6A1A;color:#fff}
+/* a mark = a thin ring around the control (so it stays visible) + its number in a bubble. pbLay sets each ring's size (--r, smaller where marks
+   crowd) and moves each number to a free spot around it (--lx/--ly), with a thin line back to the ring when it had to go further out (.far) */
+.pb{--r:15px;--lx:-19px;--ly:-19px;position:absolute;transform:translate(-50%,-50%);width:calc(var(--r)*2);height:calc(var(--r)*2);border-radius:50%;border:2px solid #66BB6A;background:transparent;box-shadow:0 0 0 1px rgba(0,0,0,.55),inset 0 0 0 1px rgba(0,0,0,.35);padding:0;cursor:pointer;color:#0E1A12;font:700 12px/1 var(--mono)}
+.pb.sm{border-width:1.5px}
+.pb::before{content:attr(data-n);position:absolute;left:50%;top:50%;transform:translate(calc(-50% + var(--lx)),calc(-50% + var(--ly)));min-width:20px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:10px;background:#66BB6A;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.6);z-index:1}
+.pb.far::after{content:"";position:absolute;left:50%;top:50%;width:var(--ll);height:1.5px;background:#66BB6A;box-shadow:0 0 0 .5px rgba(0,0,0,.5);transform-origin:0 50%;transform:rotate(var(--la)) translateX(var(--r));pointer-events:none}
+.pb.nolab::before,.pb.nolab::after{display:none}
+.pb.on{border-color:#FF6A1A;z-index:3}.pb.on::before{background:#FF6A1A;color:#fff}.pb.on::after{background:#FF6A1A}
+.ctlfull{position:absolute;right:8px;top:8px;z-index:4;border:0;border-radius:999px;height:34px;padding:0 12px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.62);color:#fff;font:600 13px var(--body);cursor:pointer;line-height:1}
+.ctlfull svg{width:15px;height:15px}
+/* full-screen controls photo: pinch or double-tap to zoom, drag to move; the numbers keep their size and make room for each other */
+.cfstage{position:relative;flex:1;overflow:hidden;touch-action:none;background:#000;user-select:none}
+.cfstage img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.cfmarks{position:absolute;inset:0;pointer-events:none}.cfmarks .pb{pointer-events:auto}
+.cfmarks.focus .pb:not(.on){opacity:.5}
+.cfsheet{background:#111;color:#fff;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;min-height:64px}
+.cfsheet button{flex:0 0 auto;border:0;border-radius:999px;width:44px;height:44px;font-size:20px;background:#2a2a2a;color:#fff;cursor:pointer}.cfsheet button:disabled{opacity:.3}
+.cfinfo{flex:1;min-width:0;font:14px/1.35 var(--body);max-height:30vh;overflow:auto}
+.cfinfo b{display:block;font-size:15.5px}.cfinfo b i{font-style:normal;color:#FF8A3D;font-family:var(--mono);margin-right:6px}
+.cfinfo span{display:block;color:#ddd}.cfinfo em{display:block;font-style:normal;color:#aaa;font-size:13px;margin-top:2px}
+.cfinfo.hint{color:#bbb}
+.shotbar .cfdone{width:auto;padding:0 14px;font-size:14px;background:#FFB74D;color:#000}
 .ctltools{display:flex;flex-wrap:wrap;gap:6px}
 /* photo strip: every photo of the item, the one showing is outlined; the last tile adds more */
 .gphead{display:flex;flex-direction:column;gap:8px}
@@ -5021,7 +5039,7 @@ function controlsHTML(it){
  const view=P.length?(ctlView[it.id]||'photo'):'draw',placing=!!(ctlPlace&&ctlPlace.id===it.id&&view==='photo');
  let sel=ctlSel[it.id];if(!P.some(p=>p.id===sel))sel=ctlSel[it.id]=P.length?P[0].id:null;
  const cur=P.find(p=>p.id===sel),placed=c.filter(on).length,many=P.length>1;
- const pic=view==='photo'?`<div class="ctlphoto${placing?' placing':''}" id="ctlPhoto">${cur&&cur.src?`<img src="${cur.src}" alt="Your ${esc(it.name)}, photo ${pnum(sel)}" draggable="false">`:'<p class="gpload">Loading the photo…</p>'}${c.map((x,i)=>pos[x.n]&&pidOf(x)===sel?`<button type="button" class="cbadge pb${placing&&ctlPlace.sel===i?' on':''}" data-c="${i}" data-n="${i+1}" style="left:${(pos[x.n][0]*100).toFixed(2)}%;top:${(pos[x.n][1]*100).toFixed(2)}%" aria-label="${i+1}. ${esc(x.n)}"></button>`:'').join('')}</div>`
+ const pic=view==='photo'?`<div class="ctlphoto${placing?' placing':''}" id="ctlPhoto">${cur&&cur.src?`<img src="${cur.src}" alt="Your ${esc(it.name)}, photo ${pnum(sel)}" draggable="false"><button type="button" class="ctlfull" id="ctlFull" aria-label="Show this photo full screen"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg>Full screen</button>`:'<p class="gpload">Loading the photo…</p>'}${c.map((x,i)=>pos[x.n]&&pidOf(x)===sel?`<button type="button" class="cbadge pb${placing&&ctlPlace.sel===i?' on':''}" data-c="${i}" data-n="${i+1}" style="left:${(pos[x.n][0]*100).toFixed(2)}%;top:${(pos[x.n][1]*100).toFixed(2)}%" aria-label="${i+1}. ${esc(x.n)}"></button>`:'').join('')}</div>`
   :guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
  const canSee=!!(sampleFn&&imgLimit>0);
  const tools=view!=='photo'?'':`<p class="tip ctlnote">${placing?`Tap a number in the list, then tap where it is on this photo. ${ctlPlace.sel!=null&&c[ctlPlace.sel]?`Now placing <b>${ctlPlace.sel+1}. ${esc(c[ctlPlace.sel].n)}</b>.`:''}`:placed?`${placed} of ${c.length} marked on your photo${many?'s':''}.${placed<c.length?` The rest aren’t marked yet: they may not be in ${many?'any of the photos':'the picture'}. Add a photo from another angle to show them.`:''}`:`Your own photo${many?'s':''}. Mark where each control is`+(canSee?`: Claude can find them${many?' across all your photos':''}, or place them yourself.`:' by placing the numbers yourself.')}</p>
@@ -5037,11 +5055,11 @@ function controlsHTML(it){
 }
 function wireControls(it){
  const box=document.querySelector('.ctlbox');if(!box)return;
- const pick=i=>{box.querySelectorAll('.cbadge').forEach(b=>b.classList.toggle('on',+b.dataset.c===i));box.querySelectorAll('.ctllist li').forEach(l=>l.classList.toggle('on',+l.dataset.c===i));const li=box.querySelector(`.ctllist li[data-c="${i}"]`);if(li)li.scrollIntoView({behavior:'smooth',block:'nearest'})};
+ const pick=i=>{box.querySelectorAll('.cbadge').forEach(b=>b.classList.toggle('on',+b.dataset.c===i));box.querySelectorAll('.ctllist li').forEach(l=>l.classList.toggle('on',+l.dataset.c===i));const li=box.querySelector(`.ctllist li[data-c="${i}"]`);if(li)li.scrollIntoView({behavior:'smooth',block:'nearest'});const ph=$('ctlPhoto');if(ph&&ph._lay)ph._lay()};
  box.querySelectorAll('.cbadge').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.c)));
  box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>{const i=+l.dataset.c;if(ctlPlace&&ctlPlace.id===it.id){ctlPlace.sel=i;renderGear();const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}
   const k=ctlKey(it),x=k&&ctlList(it,k)[i],pp=x&&it.ctlPos&&it.ctlPos[x.n],pid=pp&&(pp[2]||'main');
-  if(pid&&$('ctlPhoto')&&pid!==(ctlSel[it.id]||'main')){ctlSel[it.id]=pid;renderGear();document.querySelectorAll(`.ctllist li[data-c="${i}"],#ctlPhoto .pb[data-c="${i}"]`).forEach(e=>e.classList.add('on'));const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}
+  if(pid&&$('ctlPhoto')&&pid!==(ctlSel[it.id]||'main')){ctlSel[it.id]=pid;renderGear();document.querySelectorAll(`.ctllist li[data-c="${i}"],#ctlPhoto .pb[data-c="${i}"]`).forEach(e=>e.classList.add('on'));const ph=$('ctlPhoto');if(ph&&ph._lay)ph._lay();if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}
   pick(i)}));
  wireCtlPhoto(it);
  const ask=$('ctlAsk');if(ask)ask.onclick=async()=>{ask.disabled=true;$('ctlMsg').textContent='Claude is looking up your exact model…';
@@ -5055,6 +5073,96 @@ Reply with only JSON: {"note": string or null, "controls": [{"name": string, "ki
 }
 // ---- controls on the player's own photo ----
 function ctlUpd(it,f){const l=instAll(),x=l.find(y=>y.id===it.id);if(!x)return;f(x);instSave(l);Object.assign(it,x)}
+// numbers that make room for each other: each ring is sized by how close its nearest neighbour is, and each number goes to the free spot
+// around its ring (8 directions, 3 distances) that covers no other number and as few rings as possible; the chosen one (.on) goes first.
+// M: [{el, i, x, y, on}] in px inside a W×H box. hide: a number with no free spot is left out (full screen, where zooming in brings it back).
+function pbLay(M,W,H,hide){
+ const ov=(a,b)=>a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3],put=[],DIR=[-135,-90,-45,180,0,135,90,45];
+ M.forEach(a=>{let d=1e9;M.forEach(b=>{if(a!==b)d=Math.min(d,Math.hypot(a.x-b.x,a.y-b.y))});a.r=Math.max(7,Math.min(15,d/2-1));a.el.style.setProperty('--r',a.r.toFixed(1)+'px');a.el.classList.toggle('sm',a.r<11)});
+ const vis=M.filter(m=>m.x>-20&&m.y>-20&&m.x<W+20&&m.y<H+20);
+ [...vis].sort((a,b)=>(b.on-a.on)||(a.i-b.i)).forEach(m=>{const w=String(m.i+1).length>1?26:20,h=20;let best=null;
+  [m.r+12,m.r+27,m.r+45].forEach((dist,ri)=>DIR.forEach((deg,di)=>{const t=deg*Math.PI/180,cx=m.x+Math.cos(t)*dist,cy=m.y+Math.sin(t)*dist,box=[cx-w/2-1,cy-h/2-1,cx+w/2+1,cy+h/2+1];
+   let sc=ri*8+di*.5;if(box[0]<1||box[1]<1||box[2]>W-1||box[3]>H-1)sc+=300;
+   put.forEach(p=>{if(ov(box,p))sc+=1000});vis.forEach(o=>{if(o!==m&&ov(box,[o.x-o.r,o.y-o.r,o.x+o.r,o.y+o.r]))sc+=40});
+   if(!best||sc<best.sc)best={sc,box,deg,dist,ri,dx:cx-m.x,dy:cy-m.y}}));
+  const lost=hide&&!m.on&&best.sc>=1000;m.el.classList.toggle('nolab',lost);if(lost)return;put.push(best.box);
+  m.el.style.setProperty('--lx',best.dx.toFixed(1)+'px');m.el.style.setProperty('--ly',best.dy.toFixed(1)+'px');
+  m.el.classList.toggle('far',best.ri>0);if(best.ri>0){m.el.style.setProperty('--la',best.deg+'deg');m.el.style.setProperty('--ll',Math.max(0,best.dist-m.r-9).toFixed(1)+'px')}});
+ M.forEach(m=>{if(!vis.includes(m))m.el.classList.add('nolab')});
+}
+// full-screen controls photo: pinch, double-tap or wheel to zoom, drag to move; the numbers stay the same size and make room as you zoom in.
+// Tap a number (or step with ‹ ›) to see what it is; stepping zooms to it and moves to the photo it is on. Placing marks works here too.
+function ctlFs(it0,start){
+ const id=it0.id,get=()=>instAll().find(x=>x.id===id)||it0;
+ let it=get(),c=ctlList(it,ctlKey(it)),P=[],pid=ctlSel[id]||'main',sel=start,z=1,tx=0,ty=0,bw=0,bh=0,ox=0,oy=0,SW=0,SH=0,M=[],anim=0;
+ const placing=()=>!!(ctlPlace&&ctlPlace.id===id),pos=()=>it.ctlPos||{},pidOf=i=>{const q=pos()[c[i].n];return q?(q[2]||'main'):null};
+ const d=document.createElement('div');d.className='shotbig ctlfs';d.setAttribute('role','dialog');d.setAttribute('aria-label','Controls photo, full screen');
+ d.innerHTML=`<div class="shotbar"><button type="button" class="shotprev" aria-label="Previous photo">‹</button><span id="cfTitle"></span><button type="button" class="shotnext" aria-label="Next photo">›</button><button type="button" class="cfdone" hidden>Done</button><button type="button" class="shotx" aria-label="Close">✕</button></div>
+ <div class="cfstage"><img alt="" draggable="false"><div class="cfmarks"></div></div>
+ <div class="cfsheet"><button type="button" class="cfprev" aria-label="Previous control">‹</button><div class="cfinfo" dir="auto" role="status"></div><button type="button" class="cfnext" aria-label="Next control">›</button></div>`;
+ const q=s=>d.querySelector(s),stage=q('.cfstage'),img=q('.cfstage img'),lay=q('.cfmarks');
+ const fit=()=>{SW=stage.clientWidth;SH=stage.clientHeight;const nw=img.naturalWidth||1,nh=img.naturalHeight||1,k=Math.min(SW/nw,SH/nh);bw=nw*k;bh=nh*k;ox=(SW-bw)/2;oy=(SH-bh)/2;img.style.width=bw+'px';img.style.height=bh+'px'};
+ const clamp=()=>{z=Math.min(8,Math.max(1,z));const f=(t,b,S,o)=>b*z<=S?(S-b*z)/2-o:Math.min(-o,Math.max(S-b*z-o,t));tx=f(tx,bw,SW,ox);ty=f(ty,bh,SH,oy)};
+ const draw=()=>{img.style.transform=`translate(${ox+tx}px,${oy+ty}px) scale(${z})`;const p=pos();
+  M.forEach(m=>{const v=p[c[m.i].n];m.x=ox+tx+v[0]*bw*z;m.y=oy+ty+v[1]*bh*z;m.el.style.left=m.x+'px';m.el.style.top=m.y+'px';m.on=m.i===sel;m.el.classList.toggle('on',m.on)});
+  lay.classList.toggle('focus',sel!=null&&M.some(m=>m.on));pbLay(M,SW,SH,true);
+  const hid=M.filter(m=>m.el.classList.contains('nolab')).length;d.dataset.hidden=hid;
+  if(sel==null)info()};
+ const marks=()=>{lay.innerHTML='';M=c.map((x,i)=>pidOf(i)===pid?i:-1).filter(i=>i>=0).map(i=>{const el=document.createElement('button');el.type='button';el.className='pb';el.dataset.c=i;el.dataset.n=i+1;el.setAttribute('aria-label',`${i+1}. ${c[i].n}`);lay.appendChild(el);return {el,i}})};
+ // the controls ‹ › step through: every marked one in number order (all of them while placing)
+ const steps=()=>c.map((x,i)=>i).filter(i=>placing()||pidOf(i));
+ const info=()=>{const box=q('.cfinfo'),pl=placing(),st=steps(),k=pl?ctlPlace.sel:sel,x=k!=null&&c[k];
+  q('.cfdone').hidden=!pl;
+  if(pl)box.innerHTML=x?`<b><i>${k+1}</i>${esc(x.n)}</b><span>Zoom in and tap where it is${pos()[x.n]?' to move its mark':''}.</span>`:'Pick a control with ‹ ›, then tap where it is.';
+  else if(x)box.innerHTML=`<b><i>${k+1}</i>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>${esc(x.t)}</em>`:''}`;
+  else{const hid=+d.dataset.hidden||0;box.innerHTML=`<span class="cfhint">${M.length?`Tap a number to see what it is, or go through them with ‹ ›.`:'No marks on this photo.'} Pinch or double-tap to zoom${hid?`: ${hid} number${hid>1?'s are':' is'} hidden where marks are close together`:''}.</span>`}
+  box.classList.toggle('hint',!pl&&!x);const j=st.indexOf(k);q('.cfprev').disabled=!st.length||j===0;q('.cfnext').disabled=!st.length||(j>=0&&j===st.length-1)};
+ const title=()=>{const k=P.findIndex(p=>p.id===pid);q('#cfTitle').textContent=`${it.name||'Controls'}${P.length>1?` · photo ${k+1} of ${P.length}`:''}`;q('.shotprev').hidden=q('.shotnext').hidden=P.length<2;q('.shotprev').disabled=k<=0;q('.shotnext').disabled=k>=P.length-1};
+ // move smoothly to z / tx / ty
+ const go=(z2,tx2,ty2)=>{cancelAnimationFrame(anim);const z0=z,x0=tx,y0=ty,T=performance.now(),D=230;const f=now=>{const k=Math.min(1,(now-T)/D),e=1-Math.pow(1-k,3);z=z0+(z2-z0)*e;tx=x0+(tx2-x0)*e;ty=y0+(ty2-y0)*e;if(k>=1){z=z2;tx=tx2;ty=ty2;clamp()}draw();if(k<1)anim=requestAnimationFrame(f)};anim=requestAnimationFrame(f)};
+ const centreOn=i=>{const v=pos()[c[i].n];if(!v)return;const z2=Math.max(z,2.5);let a=z,b=tx,e=ty;z=z2;tx=SW/2-ox-v[0]*bw*z2;ty=SH/2-oy-v[1]*bh*z2;clamp();const r=[z,tx,ty];z=a;tx=b;ty=e;go(...r)};
+ let after=null;
+ const photo=p2=>{P=gpAll(it).filter(p=>p.src);if(!P.some(p=>p.id===p2))p2=P.length?P[0].id:null;pid=p2;title();const p=P.find(x=>x.id===pid);if(!p){info();return}
+  marks();z=1;tx=ty=0;const done=()=>{fit();clamp();draw();info();if(after){const f=after;after=null;f()}};
+  if(img.getAttribute('src')===p.src&&img.complete)done();else{img.onload=done;img.src=p.src}};
+ const choose=(i,zoom)=>{if(placing()){ctlPlace.sel=i;info();return}sel=i;const p2=pidOf(i);
+  if(p2&&p2!==pid){after=()=>{if(zoom)centreOn(i)};photo(p2)}else{draw();if(zoom)centreOn(i)}info()};
+ const step=k=>{const st=steps();if(!st.length)return;const cur=placing()?ctlPlace.sel:sel;let j=st.indexOf(cur);j=j<0?(k>0?0:st.length-1):Math.min(st.length-1,Math.max(0,j+k));choose(st[j],true)};
+ const zoomAt=(px,py,nz)=>{const fx=(px-ox-tx)/(bw*z),fy=(py-oy-ty)/(bh*z);z=Math.min(8,Math.max(1,nz));tx=px-ox-fx*bw*z;ty=py-oy-fy*bh*z;clamp();draw()};
+ const placeAt=(px,py)=>{const fx=(px-ox-tx)/(bw*z),fy=(py-oy-ty)/(bh*z);if(fx<0||fx>1||fy<0||fy>1||ctlPlace.sel==null||!c[ctlPlace.sel])return;const n=c[ctlPlace.sel].n;
+  ctlUpd(it,o=>{o.ctlPos={...(o.ctlPos||{}),[n]:[+fx.toFixed(4),+fy.toFixed(4),pid]}});it=get();
+  const p=pos(),next=c.findIndex((x,i)=>i>ctlPlace.sel&&!p[x.n]),any=c.findIndex(x=>!p[x.n]);ctlPlace.sel=next>=0?next:any>=0?any:ctlPlace.sel;
+  ctlSel[id]=pid;renderGear();marks();draw();info()};
+ // touch: one finger drags, two pinch; a short tap picks a number (or places one); a double tap zooms in or back out
+ const pts=new Map();let g=null,tap=null,last=0;const at=e=>{const r=stage.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
+ const begin=()=>{const v=[...pts.values()];if(v.length===1)g={pan:1,x:v[0].x,y:v[0].y,tx,ty};else if(v.length>=2){const[a,b]=v;g={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,tx,ty}}else g=null};
+ stage.addEventListener('pointerdown',e=>{cancelAnimationFrame(anim);const p=at(e);pts.set(e.pointerId,p);try{stage.setPointerCapture(e.pointerId)}catch(_){}tap=pts.size===1?{...p,t:Date.now(),el:e.target}:null;begin()});
+ stage.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const p=at(e);pts.set(e.pointerId,p);if(tap&&Math.hypot(p.x-tap.x,p.y-tap.y)>8)tap=null;if(!g)return;
+  if(g.pan){if(z<=1.001&&!tap)return;tx=g.tx+p.x-g.x;ty=g.ty+p.y-g.y;clamp();draw()}
+  else{const[a,b]=[...pts.values()],dd=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2,fx=(g.mx-ox-g.tx)/(bw*g.z),fy=(g.my-oy-g.ty)/(bh*g.z);z=Math.min(8,Math.max(1,g.z*dd/g.d));tx=mx-ox-fx*bw*z;ty=my-oy-fy*bh*z;clamp();draw()}});
+ const end=e=>{if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);const t=tap;tap=null;begin();
+  if(!t||e.type==='pointercancel'||Date.now()-t.t>600)return;const b=t.el&&t.el.closest&&t.el.closest('.pb');
+  if(placing()){if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;info()}else placeAt(t.x,t.y);return}
+  if(b){choose(+b.dataset.c,false);return}
+  const now=Date.now();if(now-last<320){last=0;if(z>1.3)go(1,0,0);else{const fx=(t.x-ox-tx)/(bw*z),fy=(t.y-oy-ty)/(bh*z),z2=2.5;let a=z,bx=tx,by=ty;z=z2;tx=t.x-ox-fx*bw*z2;ty=t.y-oy-fy*bh*z2;clamp();const r=[z,tx,ty];z=a;tx=bx;ty=by;go(...r)}}else last=now};
+ stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+ stage.addEventListener('wheel',e=>{e.preventDefault();const p=at(e);zoomAt(p.x,p.y,z*Math.exp(-e.deltaY*.0015))},{passive:false});
+ q('.cfprev').onclick=()=>step(-1);q('.cfnext').onclick=()=>step(1);
+ q('.shotprev').onclick=()=>{const k=P.findIndex(p=>p.id===pid);if(k>0)photo(P[k-1].id)};q('.shotnext').onclick=()=>{const k=P.findIndex(p=>p.id===pid);if(k<P.length-1)photo(P[k+1].id)};
+ q('.cfdone').onclick=()=>{ctlPlace=null;renderGear();info();draw()};
+ const onKey=e=>{if(e.key==='Escape')close(true);else if(e.key==='ArrowRight')step(1);else if(e.key==='ArrowLeft')step(-1)};
+ const onSize=()=>{if(!img.complete||!P.length)return;const fx=(SW/2-ox-tx)/(bw*z),fy=(SH/2-oy-ty)/(bh*z);fit();tx=SW/2-ox-fx*bw*z;ty=SH/2-oy-fy*bh*z;clamp();draw()};
+ const onPop=()=>close(false);
+ function close(viaBtn){if(!d.isConnected)return;cancelAnimationFrame(anim);d.remove();document.body.style.overflow='';removeEventListener('popstate',onPop);removeEventListener('keydown',onKey);removeEventListener('resize',onSize);
+  if(viaBtn&&history.state&&history.state.cfs)history.back();
+  // back on the page: the same photo, the same control picked
+  if(pid)ctlSel[id]=pid;renderGear();if(sel!=null)document.querySelectorAll(`.ctllist li[data-c="${sel}"],#ctlPhoto .pb[data-c="${sel}"]`).forEach(e=>e.classList.add('on'));const ph=$('ctlPhoto');if(ph&&ph._lay)ph._lay()}
+ q('.shotx').onclick=()=>close(true);
+ document.body.appendChild(d);document.body.style.overflow='hidden';addEventListener('keydown',onKey);addEventListener('resize',onSize);
+ try{history.pushState({cfs:1},'');addEventListener('popstate',onPop)}catch(e){}
+ if(sel!=null&&pidOf(sel))pid=pidOf(sel);photo(pid);
+ window.__ctlFs={d,state:()=>({z,tx,ty,pid,sel,bw,bh,ox,oy})};
+}
 function wireCtlPhoto(it){
  const key=ctlKey(it);if(!key)return;const c=ctlList(it,key),cur=()=>ctlSel[it.id]||'main';
  document.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{ctlView[it.id]=b.dataset.cv;if(b.dataset.cv!=='photo'&&ctlPlace&&ctlPlace.id===it.id)ctlPlace=null;renderGear()});
@@ -5063,7 +5171,13 @@ function wireCtlPhoto(it){
  const hand=$('ctlHand');if(hand)hand.onclick=()=>{if(ctlPlace&&ctlPlace.id===it.id){ctlPlace=null}else{const pos=it.ctlPos||{};const first=c.findIndex(x=>!pos[x.n]);ctlPlace={id:it.id,sel:first<0?0:first}}renderGear()};
  const un=$('ctlUnmark');if(un)un.onclick=()=>{const n=c[ctlPlace.sel]&&c[ctlPlace.sel].n;ctlUpd(it,x=>{x.ctlPos={...(x.ctlPos||{})};delete x.ctlPos[n]});renderGear()};
  const ph=$('ctlPhoto');
- if(ph&&ctlPlace&&ctlPlace.id===it.id)ph.addEventListener('click',e=>{if(ctlPlace.sel==null||!c[ctlPlace.sel]||!ph.querySelector('img'))return;const b=e.target.closest('.pb');if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;renderGear();return}
+ if(ph){const img=ph.querySelector('img'),lay=()=>{if(!ph.isConnected||!ph.clientWidth)return;const W=ph.clientWidth,H=ph.clientHeight;
+   pbLay([...ph.querySelectorAll('.pb')].map(el=>({el,i:+el.dataset.c,x:parseFloat(el.style.left)/100*W,y:parseFloat(el.style.top)/100*H,on:el.classList.contains('on')})),W,H,false)};
+  ph._lay=lay;if(img){if(img.complete)lay();else img.addEventListener('load',lay)}if(window.ResizeObserver)new ResizeObserver(lay).observe(ph);
+  const full=$('ctlFull');if(full)full.onclick=e=>{e.stopPropagation();const on=ph.querySelector('.pb.on');ctlFs(it,on?+on.dataset.c:null)};
+  // tapping the photo itself (not a number) opens it full screen too
+  if(!(ctlPlace&&ctlPlace.id===it.id))ph.addEventListener('click',e=>{if(!e.target.closest('.pb')&&img)ctlFs(it,null)})}
+ if(ph&&ctlPlace&&ctlPlace.id===it.id)ph.addEventListener('click',e=>{if(e.target.closest('.ctlfull'))return;if(ctlPlace.sel==null||!c[ctlPlace.sel]||!ph.querySelector('img'))return;const b=e.target.closest('.pb');if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;renderGear();return}
   const r=ph.getBoundingClientRect(),x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height)),n=c[ctlPlace.sel].n;
   ctlUpd(it,o=>{o.ctlPos={...(o.ctlPos||{}),[n]:[+x.toFixed(4),+y.toFixed(4),cur()]}});
   // move on to the next control that has no mark yet
