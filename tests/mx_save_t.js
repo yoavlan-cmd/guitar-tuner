@@ -20,19 +20,21 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // Save: resolves with the file, or null when the app shows a message instead (whichever comes first)
  const save=async()=>{await p.evaluate(()=>{const t=document.getElementById('toast');if(t)t.hidden=true});
   const dl=p.waitForEvent('download',{timeout:10000}).then(async d=>{const buf=fs.readFileSync(await d.path());const x=[];for(let i=44;i+1<buf.length;i+=2)x.push(buf.readInt16LE(i));return {sr:buf.readUInt32LE(24),x}}).catch(()=>null);
-  const msg=p.waitForFunction(()=>{const t=document.getElementById('toast');return t&&!t.hidden&&t.textContent},null,{timeout:10000}).then(()=>null).catch(()=>null);
+  const msg=p.waitForFunction(()=>{const t=document.getElementById('toast');return t&&!t.hidden&&!t.classList.contains('ok')&&t.textContent},null,{timeout:10000}).then(()=>null).catch(()=>null);
   await p.click('#mxSave');return Promise.race([dl,msg])};
  const peak=x=>x.reduce((m,v)=>Math.max(m,Math.abs(v)),0);
  // 1. Guitars only, after playing for a moment (the way it is used), then Save
  await openSong('s1');await p.click('#mxPlay');await p.waitForTimeout(800);await p.click('[data-pre=gtr]');await p.waitForTimeout(300);await p.click('#mxPlay');
  let f=await save();
  ok(f&&f.sr===44100&&f.x.length===44100*3*2,`a full-length 44.1 kHz file is saved (${f&&f.x.length} samples)`);
+ ok(await p.$eval('#toast',e=>!e.hidden&&e.classList.contains('ok')&&/Saved/.test(e.textContent)),'a saved file is confirmed in green');
  ok(f&&peak(f.x)===6000,`it holds exactly the two guitar parts (peak ${f&&peak(f.x)}, expected 3000+3000)`);
  // 2. the same after switching back to Everything: all parts
  await p.click('[data-pre=all]');f=await save();ok(f&&peak(f.x)===Math.min(32767,6000+5000+9000+4000),`"Everything" holds all parts (peak ${f&&peak(f.x)})`);
  // 3. a song whose guitar parts are silent: a message instead of an empty file
  await openSong('s2');await p.click('[data-pre=gtr]');f=await save();
  const toast=await p.$eval('#toast',e=>e.hidden?'':e.textContent).catch(()=>'');
+ ok(await p.$eval('#toast',e=>e.classList.contains('err')),'the silent-file message is red');
  ok(!f&&/silent/.test(toast),'silent guitars: no empty file, and the app says why ('+toast+')');
  // 4. everything muted
  await openSong('s1');for(let k=0;k<5;k++)await p.click(`[data-mute="${k}"]`);f=await save();
