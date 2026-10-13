@@ -3,3 +3,4 @@ tests/package-lock.json
 tests/samples/
 tests/out/*
 !tests/out/.keep
+tests/*.png
