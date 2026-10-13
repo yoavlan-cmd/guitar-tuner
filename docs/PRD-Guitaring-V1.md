@@ -207,6 +207,7 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - **Fill from a photo** (Claude vision): fills all spec fields it can see plus a few critical extras, without bombarding; the user edits after.
 - Advice per type (`GEAR`: pros, cons, how to use, cleaning schedule, care, when to repair) + model-specific notes (`matchModel`, e.g. Les Paul headstock).
 - **Controls and switches**: labelled SVG drawing of each electric guitar's / amp's knobs, switches and jacks (`guitarSVG`, `panelSVG`).
+- **Controls on your own photo** (Oct 2026): when the item has a photo, the Controls tab opens on it (switch: Your photo / Drawing). Each control gets a mark — a ring around it plus its number — at `it.ctlPos[controlName] = [x, y]` (fractions of the photo). Marks come from **Find them on my photo** (Claude vision, phone key or artifact; controls it can't see are left unmarked, never guessed) or **Place them myself** (tap a number, tap the spot; tap again to move; Remove mark). An optional close-up of the controls area (`it.ctlPhoto`, ≤1000 px) replaces the gear photo for this view and clears the marks. No photo → the drawing, with a hint to add one. Test: `tests/ctl_t.js`.
 - Gear chat with Claude (attach a photo from camera/gallery).
 - Safety net: removed instruments are kept in `gearLost` with a restore box (an earlier bug deleted amps).
 - Detail page (UI redesign): horizontal chip tabs under the photo — **Overview** (specs, last tuned, strings status line, model notes, photo notes, strengths/limits) · **Controls** (diagram on a dark card) · **Tips** · **Care** (strings date, cleaning, care, repair; orange dot when strings are due) · **Ask Claude** (model profile + gear chat). One panel at a time; every visit opens on Overview (`gearTab`).
@@ -351,6 +352,7 @@ bash tools/release.sh    # build + bump sw.js tuner-vNN -> tuner-v(NN+1)
 | `clean_t.js` | song ideas closed by default and after revisiting Songs |
 | `joke_t.js` | fresh jokes first, escaping |
 | `learn_t.js` | I'm learning: merged rows across sources, five tiles, filters, search, details/actions, Hebrew/English artist merge, suggestions card |
+| `ctl_t.js` | controls on your photo: place/move/remove marks by hand, Claude finds them (API mocked, photo sent), drawing toggle, marks persist |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 
 Not automated (manual on a real phone): real microphone behaviour on Android, Android share-target, Drive share sheet, PDF output.
