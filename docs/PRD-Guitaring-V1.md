@@ -136,7 +136,7 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 
 **AC:** standard strings read within ±3¢ on real recordings (incl. phone-like 250 Hz highpass); detuned −30/−60¢ high E is followed to 0 when re-plucked every 0.6–1 s, quiet or noisy; in-tune needle jitter < 1¢; tuning/arpeggio checks never trigger auto-stop; strumming/melody stop in ~6 s; wind/traffic/street/chatter never produce "playing"; Drop D labels show D⁶.
 
-**Known open issue (V1):** the user still reports that on his guitar the **high E sometimes doesn't move the needle** after v84–v86 fixes; not reproduced in simulation. Next step: get a screenshot while plucking (note letter, status, lit peg) and add an on-screen debug overlay (Hz, clarity, rms vs gate) behind a hidden toggle.
+**Resolved (was the known open issue in V1):** high E sometimes didn't move the needle on the user's guitar. After the v84–v92 fixes the user tuned his Muse on 12 Oct 2026 and it worked perfectly. If it comes back: get a screenshot while plucking (note letter, status, lit peg) and add an on-screen debug overlay (Hz, clarity, rms vs gate) behind a hidden toggle.
 
 ### 5.2 Songs — analyse a video ("Choose a song video", `#drop`, `runAnalysis`)
 - Pick a video/audio file from the phone (MP4 best). Everything is decoded and analysed **on the phone**.
@@ -344,7 +344,7 @@ Not automated (manual on a real phone): real microphone behaviour on Android, An
 
 | # | Item | Notes / next step |
 |---|---|---|
-| 1 | **High E sometimes doesn't move the needle on the user's guitar** | Fixes in v84–v86 (hold logic, floor learning, quiet clean pitch, far-off live cents) pass all simulations. Get a screenshot; add hidden debug overlay (Hz, clarity, rms, gate, chosen string). |
+| 1 | ~~High E sometimes doesn't move the needle on the user's guitar~~ | Resolved: the user's Muse tuned perfectly on 12 Oct 2026 (v92). If it comes back, add the hidden debug overlay (Hz, clarity, rms, gate, chosen string). |
 | 2 | ~~Daily job can't push~~ | Resolved: the Claude GitHub App is installed; the job committed `ideas.json` itself on 13 Oct 2026. |
 | 3 | Own Google Drive OAuth unused | `GDRIVE_CLIENT_ID=''`; phone saves via the share sheet. Needs a Google Cloud OAuth client to enable direct per-user Drive saving. |
 | 4 | Song suggestions accuracy | Two made-up Hebrew titles slipped through (פרפרים by ברי סחרוף → חם על הירח; יש בי אהבה → בין קודש לחול). Job now must verify each song on a chord site. |
@@ -369,7 +369,7 @@ Not automated (manual on a real phone): real microphone behaviour on Android, An
 
 ## 14. V2 backlog (suggested, not committed)
 
-1. **Debug overlay + fix for the high E report** (P0).
+1. ~~Debug overlay + fix for the high E report~~ — resolved per user (12 Oct 2026); build the hidden debug overlay only if the issue returns (P3).
 2. **Auto string detection for retunings** (old-tuning-aware ranges) (P1).
 3. **Riff / tab lines in the writer**: tap string+fret per note, printed as tab on the sheet (offered, not built) (P1).
 4. **Song video from a link, done automatically** — revisit the removed feature (§13) once a fully automatic, permitted approach exists. One candidate that needs no file: **listen-while-it-plays**, live chord detection from the mic while the lesson plays on another device → editable sheet (P2).
