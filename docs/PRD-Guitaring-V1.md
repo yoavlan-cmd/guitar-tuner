@@ -279,6 +279,7 @@ Canonical keys: chord names via `canon()` (C, C#, D, Eb, E, F, F#, G, Ab, A, Bb,
 - Fonts/vars: `--display`, `--body`, `--mono`; theme vars `--bg --surface --ink --muted --line --accent --ok --flat --sharp`, light + dark (`prefers-color-scheme`).
 - Tuner and chord finder: fixed dark brushed-metal palette `#111115` / `#1A1A1E` cards, radius 24px, mint `#66BB6A` / `#5FD3B3`, amber `#FFB74D`, blue `#4FC3F7`.
 - Cards `.card`, collapsible boxes `details.ideabox` with icon + title + one-line subtitle, chips `.chip`, buttons `.btn` / `.btn.ghost`, bottom-sheet pickers `.picker/.pickbox`.
+- **Icons: panel labels, no emoji** (user's choice, Oct 2026). Every icon is a short silkscreened word like an amp's front panel (`SK('TUNE')` → `<span class="silk">`; mono font, 1.25px border, uppercase, letter-spaced). Labels in use: TUNE LEARN WRITE GEAR · LIB ADD VIDEO SCAN MIX DRAFT SHEETS SHEET LESSON IDEAS DRIVE NOTE · GTR (L/C/R) VOX DRM BASS KEYS OTHER · AMP MODEL PHOTO RANGE TIP CLEAN HUMID REPAIR STRINGS ASK PROFILE GALLERY CTRL CHORDS · FINDER DEL LOCK OK. Don't add colour emoji to the UI; decorative emoji in messages were removed. Text symbols (♭ ♯ ✕ ↗ ✓ ↻ ⛶ ❚❚) stay.
 - App icon: dark guitar-pick shape with a flaming "Y" on an orange flame gradient (inline SVG `#appLogo`, PNG icons at the repo root).
 
 ---
