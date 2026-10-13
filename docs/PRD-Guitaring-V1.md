@@ -213,6 +213,10 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - UI: `#mixNew` entry on Songs, slide-up sheet `#mxSheet` and a slim bottom bar `#mxBar` on every tab. Last separated song kept in IndexedDB `guitaring` / store `kv`.
 - Optional off-phone path: a GitHub Actions workflow (`#mxWf`, "Split song", `workflow_dispatch`) the app can install and run, uploading the song to a `j-<id>` branch.
 - Code: banner `/* ===== Practice mixer … */` (≈ line 3836), CSS `/* practice mixer */`.
+- **Quality (Oct 2026, `mixer-quality`):** parts are kept and played at **44.1 kHz** (was 22.05 kHz) for songs up to 5 minutes (`MX.HQ_MAX`); longer songs stay at 22.05 kHz so phone memory peaks where it did before. The rate is saved with each song (`mixdata.sr`; older songs without it are 22.05 kHz). Saved mixes and the "guitars → chord analysis" WAV use the song's rate. On-phone windows overlap 50% (`MX.OVL`, was 25%): fewer seams, ~1.5× slower.
+- **GitHub splitter v3** (`guitaring-split v3`, auto-updated in the user's repo on the next send): `--shifts 3 --overlap 0.5 --flac` — three time-shifted passes averaged, lossless FLAC parts (`done.json.format:"flac"`; v2 MP3 results still collected). About 15–25 min per song on the free runner; timeout 120 min.
+- Not yet: a stronger guitar model than HT-Demucs 6-stem (community RoFormer guitar models exist, but no verified public weights/licence found). Measure on real songs before switching.
+- Test: `tests/mx_t.js` (real ONNX Runtime Web from `node_modules`, stand-in model `tests/fixtures/mx_stub.onnx`, GitHub API mocked; hook `window.__mxTest`).
 
 ---
 
@@ -335,6 +339,7 @@ bash tools/release.sh    # build + bump sw.js tuner-vNN -> tuner-v(NN+1)
 | `vl_t.js`, `vl_sheet.js` | video lessons: parsing, sheet match, duplicates, share target, sheet banner |
 | `clean_t.js` | song ideas closed by default and after revisiting Songs |
 | `joke_t.js` | fresh jokes first, escaping |
+| `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 
 Not automated (manual on a real phone): real microphone behaviour on Android, Android share-target, Drive share sheet, PDF output.
 
