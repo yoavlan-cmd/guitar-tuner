@@ -1,0 +1,12 @@
+const APP=process.env.APP||('file://'+require('path').resolve(__dirname,'../index.html'));
+const {chromium,devices}=require('playwright');
+(async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});const p=await (await b.newContext({...devices['Pixel 7']})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/^https:\/\//,r=>r.abort());
+ await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');
+  localStorage.setItem('tuner.ideas',JSON.stringify({at:Date.now(),src:'daily',date:'2026-10-11',level:'',list:[{title:'Wonderwall',artist:'Oasis',style:'Britpop',difficulty:2,chords:[],capo:0,tuning:'Standard',why:'x'}]}));
+  localStorage.setItem('tuner.songIndex',JSON.stringify({at:Date.now(),src:'daily',songs:[{a:'Oasis',t:'Live Forever',ch:[]}],artists:['Oasis']}))});
+ await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.tap('[data-tab=song]');await p.waitForTimeout(300);
+ console.log('ideas open:',await p.$eval('#ideaBox',e=>e.open),'| rec helper present:',!!(await p.$('#recHelpBtn')),'| record btn in rows:',await p.evaluate(()=>document.documentElement.innerHTML.includes('Record to analyse')));
+ await p.tap('#ideaBox summary');console.log('after tap open:',await p.$eval('#ideaBox',e=>e.open));
+ await p.tap('[data-tab=tune]');await p.tap('[data-tab=song]');await p.waitForTimeout(200);console.log('after leaving and coming back:',await p.$eval('#ideaBox',e=>e.open));
+ await p.screenshot({path:require('path').join(__dirname,'out','clean.png'),fullPage:true});console.log('errors',errs);await b.close()})();

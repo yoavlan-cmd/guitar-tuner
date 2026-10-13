@@ -1,0 +1,1 @@
+{ "name": "guitaring-tests", "private": true, "description": "Playwright checks for Guitaring. Run: npm i && npx playwright install chromium && bash ../tools/get_test_samples.sh && node tun_ui.js", "dependencies": { "playwright": "^1.47.0" } }
