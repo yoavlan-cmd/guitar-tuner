@@ -724,6 +724,18 @@ body.wopen{overflow:hidden}
 .pb::before{content:attr(data-n);position:absolute;right:calc(100% - 6px);bottom:calc(100% - 6px);min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:#66BB6A;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.6)}
 .pb.on{border-color:#FF6A1A;z-index:2}.pb.on::before{background:#FF6A1A;color:#fff}
 .ctltools{display:flex;flex-wrap:wrap;gap:6px}
+/* photo strip: every photo of the item, the one showing is outlined; the last tile adds more */
+.gphead{display:flex;flex-direction:column;gap:8px}
+.gpstrip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.gpstrip::-webkit-scrollbar{display:none}
+.gpthumb{position:relative;flex:0 0 auto;width:58px;height:58px;border-radius:10px;border:2px solid transparent;padding:0;overflow:hidden;background:var(--bg);cursor:pointer;display:grid;place-items:center;color:var(--muted)}
+.gpthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.gpthumb[aria-pressed="true"]{border-color:var(--accent)}
+.gpthumb i{position:absolute;right:3px;bottom:3px;min-width:17px;height:17px;border-radius:9px;background:#66BB6A;color:#0E1A12;font:700 10.5px/17px var(--mono);font-style:normal;text-align:center;padding:0 3px}
+.gpadd{border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.1}
+.gpadd b{font-size:20px;color:var(--accent)}.gpadd small{font-size:10px;text-align:center}
+.gpload{padding:40px 12px;text-align:center;color:#AAB;line-height:1.4}
+.gpon{font:600 11px var(--body);color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:middle}
 .ctltools .btn{padding:8px 11px;font-size:13px}
 .ctllist li.unplaced b::after{content:" · not on the photo yet";font-weight:500;color:var(--muted);font-size:12px}
 .ctllist li.sel{box-shadow:inset 3px 0 0 #FFB74D;background:color-mix(in srgb,#FFB74D 12%,transparent)}
@@ -4959,23 +4971,42 @@ function panelSVG(c,amp){
   s+=badge(X-21,Y-12,i,8)});
  return `<svg viewBox="0 0 ${W} ${H}" class="ctlsvg">${s}</svg>`;
 }
-let ctlView={},ctlPlace=null;// per item: 'photo' or 'draw'; placing markers by hand: {id, sel}
+// ---- more photos of a piece of gear (other angles, close-ups, the back panel): images in IndexedDB, it.photos=[{id,at}] on the item ----
+const GP=new Map();let ctlSel={},gpOv={};// loaded images by id; photo shown in Controls / in Overview, per item
+function gpAll(it){const out=[];if(it.photo)out.push({id:'main',src:it.photo});(it.photos||[]).forEach(p=>out.push({id:p.id,src:GP.get(p.id)||null}));return out}
+const gpBlobs=it=>gpAll(it).filter(p=>p.src).slice(0,Math.max(0,imgLimit)).map(p=>dataUrlBlob(p.src));
+async function gpEnsure(it){let changed=false;
+ // a close-up added before more photos existed (it.ctlPhoto) becomes one of the photos, with its marks
+ if(it.ctlPhoto){const id='g'+Date.now().toString(36),u=it.ctlPhoto;try{await mxPut('gearphoto:'+id,u);GP.set(id,u);ctlUpd(it,x=>{x.photos=[...(x.photos||[]),{id,at:Date.now()}];const pos={...(x.ctlPos||{})};for(const k in pos)if(!pos[k][2])pos[k]=[pos[k][0],pos[k][1],id];x.ctlPos=pos;delete x.ctlPhoto});delete it.ctlPhoto;changed=true}catch(e){}}
+ for(const p of (it.photos||[]))if(!GP.has(p.id)){try{const u=await mxGet('gearphoto:'+p.id);if(u){GP.set(p.id,u);changed=true}}catch(e){}}
+ if(changed&&instOpen===it.id&&!instEdit)renderGear()}
+async function gpAdd(it,files){let last=null;
+ for(const f of [...(files||[])].slice(0,8)){try{const u=await shrinkPhoto(f,1200),id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);await mxPut('gearphoto:'+id,u);GP.set(id,u);ctlUpd(it,x=>{x.photos=[...(x.photos||[]),{id,at:Date.now()}]});last=id}catch(e){}}
+ if(last){ctlSel[it.id]=last;gpOv[it.id]=last;ctlView[it.id]='photo'}renderGear()}
+async function gpDel(it,id){try{await mxDel('gearphoto:'+id)}catch(e){}GP.delete(id);
+ ctlUpd(it,x=>{x.photos=(x.photos||[]).filter(p=>p.id!==id);const pos={...(x.ctlPos||{})};for(const k in pos)if(pos[k][2]===id)delete pos[k];x.ctlPos=pos});
+ if(ctlSel[it.id]===id)delete ctlSel[it.id];if(gpOv[it.id]===id)delete gpOv[it.id];renderGear()}
+// thumbnail strip: data-gph (Controls) or data-ovp (Overview) picks a photo; the last tile adds more
+function gpStrip(it,attr,sel,count){return `<div class="gpstrip" role="group" aria-label="Photos of ${esc(it.name)}">${gpAll(it).map((p,i)=>{const n=count?count(p.id):0;return `<button type="button" class="gpthumb" ${attr}="${p.id}" aria-pressed="${p.id===sel}" aria-label="Photo ${i+1}">${p.src?`<img src="${p.src}" alt="">`:'<span>…</span>'}${n?`<i>${n}</i>`:''}</button>`}).join('')}<label class="gpthumb gpadd"><b>+</b><small>Add photos</small><input type="file" accept="image/*" multiple hidden data-gpadd></label></div>`}
+let ctlView={},ctlPlace=null;// per item: 'photo' or 'draw'; placing marks by hand: {id, sel}
 function controlsHTML(it){
  const key=ctlKey(it);if(!key)return '';
  const c=ctlList(it,key),guitar=it.type==='electric',exact=!!(it.controls&&it.controls.length);
- const photo=it.ctlPhoto||it.photo,pos=it.ctlPos||{},view=photo?(ctlView[it.id]||'photo'):'draw',placing=!!(ctlPlace&&ctlPlace.id===it.id&&view==='photo');
- const placed=c.filter(x=>pos[x.n]).length;
- const pic=view==='photo'?`<div class="ctlphoto${placing?' placing':''}" id="ctlPhoto"><img src="${photo}" alt="Your ${esc(it.name)}" draggable="false">${c.map((x,i)=>pos[x.n]?`<button type="button" class="cbadge pb${placing&&ctlPlace.sel===i?' on':''}" data-c="${i}" style="left:${(pos[x.n][0]*100).toFixed(2)}%;top:${(pos[x.n][1]*100).toFixed(2)}%" data-n="${i+1}" aria-label="${i+1}. ${esc(x.n)}"></button>`:'').join('')}</div>`
+ const P=gpAll(it),pos=it.ctlPos||{},pidOf=x=>(pos[x.n]&&pos[x.n][2])||'main',pnum=id=>P.findIndex(p=>p.id===id)+1,on=x=>!!(pos[x.n]&&pnum(pidOf(x)));
+ const view=P.length?(ctlView[it.id]||'photo'):'draw',placing=!!(ctlPlace&&ctlPlace.id===it.id&&view==='photo');
+ let sel=ctlSel[it.id];if(!P.some(p=>p.id===sel))sel=ctlSel[it.id]=P.length?P[0].id:null;
+ const cur=P.find(p=>p.id===sel),placed=c.filter(on).length,many=P.length>1;
+ const pic=view==='photo'?`<div class="ctlphoto${placing?' placing':''}" id="ctlPhoto">${cur&&cur.src?`<img src="${cur.src}" alt="Your ${esc(it.name)}, photo ${pnum(sel)}" draggable="false">`:'<p class="gpload">Loading the photo…</p>'}${c.map((x,i)=>pos[x.n]&&pidOf(x)===sel?`<button type="button" class="cbadge pb${placing&&ctlPlace.sel===i?' on':''}" data-c="${i}" data-n="${i+1}" style="left:${(pos[x.n][0]*100).toFixed(2)}%;top:${(pos[x.n][1]*100).toFixed(2)}%" aria-label="${i+1}. ${esc(x.n)}"></button>`:'').join('')}</div>`
   :guitar&&!exact?guitarSVG(key,c):panelSVG(c,/amp$/.test(it.type));
  const canSee=!!(sampleFn&&imgLimit>0);
- const tools=view!=='photo'?'':`<p class="tip ctlnote">${placing?`Tap a number in the list, then tap where it is on the photo. ${ctlPlace.sel!=null&&c[ctlPlace.sel]?`Now placing <b>${ctlPlace.sel+1}. ${esc(c[ctlPlace.sel].n)}</b>.`:''}`:placed?`${placed} of ${c.length} marked on your photo.${placed<c.length?' The rest aren’t marked yet: they may be out of the picture.':''}`:'Your own photo. Mark where each control is'+(canSee?': Claude can find them, or place them yourself.':' by placing the numbers yourself.')}</p>
- <div class="ctltools">${canSee&&!placing?`<button type="button" class="btn" id="ctlFind">${SK('ASK')} ${placed?'Find them again':'Find them on my photo'}</button>`:''}<button type="button" class="btn ${placing?'':'ghost'}" id="ctlHand">${placing?'Done':placed?'Move or add marks':'Place them myself'}</button>${placing&&ctlPlace.sel!=null&&c[ctlPlace.sel]&&pos[c[ctlPlace.sel].n]?`<button type="button" class="btn ghost" id="ctlUnmark">Remove mark ${ctlPlace.sel+1}</button>`:''}${!placing?`<label class="btn ghost">${SK('PHOTO')} ${it.ctlPhoto?'New close-up':'Close-up of the controls'}<input type="file" accept="image/*" id="ctlPhotoIn" hidden></label>`:''}</div>`;
+ const tools=view!=='photo'?'':`<p class="tip ctlnote">${placing?`Tap a number in the list, then tap where it is on this photo. ${ctlPlace.sel!=null&&c[ctlPlace.sel]?`Now placing <b>${ctlPlace.sel+1}. ${esc(c[ctlPlace.sel].n)}</b>.`:''}`:placed?`${placed} of ${c.length} marked on your photo${many?'s':''}.${placed<c.length?` The rest aren’t marked yet: they may not be in ${many?'any of the photos':'the picture'}. Add a photo from another angle to show them.`:''}`:`Your own photo${many?'s':''}. Mark where each control is`+(canSee?`: Claude can find them${many?' across all your photos':''}, or place them yourself.`:' by placing the numbers yourself.')}</p>
+ <div class="ctltools">${canSee&&!placing?`<button type="button" class="btn" id="ctlFind">${SK('ASK')} ${placed?'Find them again':many?'Find them on my photos':'Find them on my photo'}</button>`:''}<button type="button" class="btn ${placing?'':'ghost'}" id="ctlHand">${placing?'Done':placed?'Move or add marks':'Place them myself'}</button>${placing&&ctlPlace.sel!=null&&c[ctlPlace.sel]&&pos[c[ctlPlace.sel].n]?`<button type="button" class="btn ghost" id="ctlUnmark">Remove mark ${ctlPlace.sel+1}</button>`:''}${!placing&&sel&&sel!=='main'?`<button type="button" class="btn ghost danger" id="gpDel">Remove this photo</button>`:''}</div>`;
  const label=it.type==='electroacoustic'?'The built-in preamp: what each control does':/amp$/.test(it.type)?'What each knob, button and socket does':'What each knob and switch does';
  return `<div class="ctlbox"><div class="gsech"><span class="sic">${SK('CTRL')}</span><span class="stx"><b>Controls and switches</b><small>${label}. Tap a number.</small></span></div>
- ${photo?`<div class="seg ctlview" role="group" aria-label="Show the controls on"><button type="button" data-cv="photo" aria-pressed="${view==='photo'}">Your photo</button><button type="button" data-cv="draw" aria-pressed="${view==='draw'}">Drawing</button></div>`:''}
- ${view==='photo'?pic+tools:`<div class="ctlpic">${pic}</div>`}
- ${view==='photo'?'':`<p class="tip ctlnote">${!photo?'Add a photo of your guitar (Edit details) to see these numbers on it. ':''}${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>`}
- <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}" class="${view==='photo'&&!pos[x.n]?'unplaced':''}${placing&&ctlPlace.sel===i?' sel':''}"><b>${esc(x.n)}</b><span>${esc(x.d)}</span>${x.t?`<em>${SK('TIP')} ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
+ ${P.length?`<div class="seg ctlview" role="group" aria-label="Show the controls on"><button type="button" data-cv="photo" aria-pressed="${view==='photo'}">Your photo${many?'s':''}</button><button type="button" data-cv="draw" aria-pressed="${view==='draw'}">Drawing</button></div>`:''}
+ ${view==='photo'?gpStrip(it,'data-gph',sel,id=>c.filter(x=>pos[x.n]&&pidOf(x)===id).length)+pic+tools:`<div class="ctlpic">${pic}</div>`}
+ ${view==='photo'?'':`<p class="tip ctlnote">${!P.length?`Add photos of your ${/amp$/.test(it.type)?'amp':'guitar'} to see these numbers on them. `:''}${exact?`The exact controls of your ${esc([it.brand,it.model].filter(Boolean).join(' '))}, from Claude.`:`Typical layout for this kind of ${/amp$/.test(it.type)?'amp':'guitar'}. Yours may differ a little.`}</p>${!P.length?`<label class="btn ghost">${SK('PHOTO')} Add photos<input type="file" accept="image/*" multiple hidden data-gpadd></label>`:''}`}
+ <ol class="ctllist">${c.map((x,i)=>`<li data-c="${i}" class="${view==='photo'&&!on(x)?'unplaced':''}${placing&&ctlPlace.sel===i?' sel':''}"><b>${esc(x.n)}${view==='photo'&&many&&on(x)?` <small class="gpon">photo ${pnum(pidOf(x))}</small>`:''}</b><span>${esc(x.d)}</span>${x.t?`<em>${SK('TIP')} ${esc(x.t)}</em>`:''}</li>`).join('')}</ol>
  ${sampleFn&&(it.brand||it.model)?`<button class="btn ghost wide" id="ctlAsk" type="button">${SK('ASK')} ${exact?'Refresh':'Get'} the exact controls of my ${esc(it.model||it.brand)} from Claude</button>`:''}
  <p class="tip" id="ctlMsg" role="status"></p></div>`;
 }
@@ -4983,41 +5014,57 @@ function wireControls(it){
  const box=document.querySelector('.ctlbox');if(!box)return;
  const pick=i=>{box.querySelectorAll('.cbadge').forEach(b=>b.classList.toggle('on',+b.dataset.c===i));box.querySelectorAll('.ctllist li').forEach(l=>l.classList.toggle('on',+l.dataset.c===i));const li=box.querySelector(`.ctllist li[data-c="${i}"]`);if(li)li.scrollIntoView({behavior:'smooth',block:'nearest'})};
  box.querySelectorAll('.cbadge').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.c)));
- box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>{if(ctlPlace&&ctlPlace.id===it.id){ctlPlace.sel=+l.dataset.c;renderGear();const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}pick(+l.dataset.c)}));
+ box.querySelectorAll('.ctllist li').forEach(l=>l.addEventListener('click',()=>{const i=+l.dataset.c;if(ctlPlace&&ctlPlace.id===it.id){ctlPlace.sel=i;renderGear();const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}
+  const k=ctlKey(it),x=k&&ctlList(it,k)[i],pp=x&&it.ctlPos&&it.ctlPos[x.n],pid=pp&&(pp[2]||'main');
+  if(pid&&$('ctlPhoto')&&pid!==(ctlSel[it.id]||'main')){ctlSel[it.id]=pid;renderGear();document.querySelectorAll(`.ctllist li[data-c="${i}"],#ctlPhoto .pb[data-c="${i}"]`).forEach(e=>e.classList.add('on'));const ph=$('ctlPhoto');if(ph)ph.scrollIntoView({block:'nearest',behavior:'smooth'});return}
+  pick(i)}));
  wireCtlPhoto(it);
  const ask=$('ctlAsk');if(ask)ask.onclick=async()=>{ask.disabled=true;$('ctlMsg').textContent='Claude is looking up your exact model…';
   const prompt=`List the physical controls of this ${GEAR[it.type].name}: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}${it.type==='electroacoustic'?' (the built-in preamp and pickup system)':''}.
 Include every knob, switch, button, selector, slider, socket/jack and battery compartment a player uses, in the order they appear (front panel first, then back or side). Only include controls you are confident this model has. If you don't know this exact model, say so in "note" and list the controls of the closest model you know.
 For each: a short name as printed on the item, its kind, what it does in one sentence, and one practical tip.
 Reply with only JSON: {"note": string or null, "controls": [{"name": string, "kind": "knob"|"slider"|"switch"|"toggle"|"blade"|"button"|"selector"|"jack"|"battery"|"arm", "what": string, "tip": string}]}`;
-  try{const opt={};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];const r=await sampleFn.json(prompt,opt);const list=Array.isArray(r&&r.controls)?r.controls.filter(x=>x&&x.name).slice(0,24):[];
+  try{const opt={};if(imgLimit>0&&gpAll(it).some(p=>p.src))opt.images=gpBlobs(it);const r=await sampleFn.json(prompt,opt);const list=Array.isArray(r&&r.controls)?r.controls.filter(x=>x&&x.name).slice(0,24):[];
    if(!list.length)throw new Error('none');const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.controls=list;x.controlsNote=r.note||'';store.set('instruments',l)}it.controls=list;renderGear()}
   catch(e){ask.disabled=false;$('ctlMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get the controls this time. Try again.'}};
 }
 // ---- controls on the player's own photo ----
 function ctlUpd(it,f){const l=instAll(),x=l.find(y=>y.id===it.id);if(!x)return;f(x);instSave(l);Object.assign(it,x)}
 function wireCtlPhoto(it){
- const key=ctlKey(it);if(!key)return;const c=ctlList(it,key);
+ const key=ctlKey(it);if(!key)return;const c=ctlList(it,key),cur=()=>ctlSel[it.id]||'main';
  document.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{ctlView[it.id]=b.dataset.cv;if(b.dataset.cv!=='photo'&&ctlPlace&&ctlPlace.id===it.id)ctlPlace=null;renderGear()});
+ document.querySelectorAll('[data-gph]').forEach(b=>b.onclick=()=>{ctlSel[it.id]=b.dataset.gph;renderGear()});
+ const del=$('gpDel');if(del)del.onclick=()=>{const m=$('ctlMsg');if(del.dataset.sure){gpDel(it,cur());return}del.dataset.sure='1';del.textContent='Tap again to remove it';if(m)m.textContent='Its marks are removed too.'};
  const hand=$('ctlHand');if(hand)hand.onclick=()=>{if(ctlPlace&&ctlPlace.id===it.id){ctlPlace=null}else{const pos=it.ctlPos||{};const first=c.findIndex(x=>!pos[x.n]);ctlPlace={id:it.id,sel:first<0?0:first}}renderGear()};
  const un=$('ctlUnmark');if(un)un.onclick=()=>{const n=c[ctlPlace.sel]&&c[ctlPlace.sel].n;ctlUpd(it,x=>{x.ctlPos={...(x.ctlPos||{})};delete x.ctlPos[n]});renderGear()};
  const ph=$('ctlPhoto');
- if(ph&&ctlPlace&&ctlPlace.id===it.id)ph.addEventListener('click',e=>{if(ctlPlace.sel==null||!c[ctlPlace.sel])return;const b=e.target.closest('.pb');if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;renderGear();return}
+ if(ph&&ctlPlace&&ctlPlace.id===it.id)ph.addEventListener('click',e=>{if(ctlPlace.sel==null||!c[ctlPlace.sel]||!ph.querySelector('img'))return;const b=e.target.closest('.pb');if(b&&+b.dataset.c!==ctlPlace.sel){ctlPlace.sel=+b.dataset.c;renderGear();return}
   const r=ph.getBoundingClientRect(),x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height)),n=c[ctlPlace.sel].n;
-  ctlUpd(it,o=>{o.ctlPos={...(o.ctlPos||{}),[n]:[+x.toFixed(4),+y.toFixed(4)]}});
+  ctlUpd(it,o=>{o.ctlPos={...(o.ctlPos||{}),[n]:[+x.toFixed(4),+y.toFixed(4),cur()]}});
   // move on to the next control that has no mark yet
   const pos=it.ctlPos||{},next=c.findIndex((q,i)=>i>ctlPlace.sel&&!pos[q.n]),any=c.findIndex(q=>!pos[q.n]);ctlPlace.sel=next>=0?next:any>=0?any:ctlPlace.sel;renderGear()});
- const inp=$('ctlPhotoIn');if(inp)inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const u=await shrinkPhoto(f,1000);ctlUpd(it,x=>{x.ctlPhoto=u;x.ctlPos={}});ctlView[it.id]='photo';renderGear()}catch(err){const m=$('ctlMsg');if(m)m.textContent='That image couldn’t be opened. Try a JPG or PNG photo.'}};
- const find=$('ctlFind');if(find)find.onclick=async()=>{find.disabled=true;const m=$('ctlMsg');m.textContent='Claude is looking at your photo…';
-  const prompt=`This is a photo of a guitarist's own ${GEAR[it.type].name}${it.brand||it.model?` (${[it.brand,it.model].filter(Boolean).join(' ')})`:''}. Find each of these controls in the photo:
+ const find=$('ctlFind');if(find)find.onclick=async()=>{find.disabled=true;const m=$('ctlMsg');
+  const P=gpAll(it).filter(p=>p.src).slice(0,Math.max(1,imgLimit)),many=P.length>1;m.textContent=`Claude is looking at your photo${many?'s':''}…`;
+  const KINDS=['knob','slider','switch','toggle','blade','button','selector','jack','battery','arm','screen'];
+  const prompt=`${many?`These are ${P.length} photos`:'This is a photo'} of a guitarist's own ${GEAR[it.type].name}${it.brand||it.model?` (${[it.brand,it.model].filter(Boolean).join(' ')})`:''}${many?`, from different angles. Photo 1 is the first image, photo 2 the second, and so on`:''}.
+Find each of these controls:
 ${c.map((x,i)=>`${i+1}. ${x.n} (${x.k})`).join('\n')}
-For each one you can actually see, give the centre of that control as fractions of the image: x from 0 (left edge) to 1 (right edge), y from 0 (top edge) to 1 (bottom edge). If a control is not visible in this photo (out of frame, hidden, or you are not sure which one it is), use null. Don't guess.
-Reply with only JSON: {"positions": [{"n": number from the list, "x": number, "y": number} or null, ...]}`;
-  try{const r=await sampleFn.json(prompt,{images:[dataUrlBlob(it.ctlPhoto||it.photo)]})||{};const got={};
-   (Array.isArray(r.positions)?r.positions:[]).forEach((p,i)=>{if(!p)return;const k=(+p.n||i+1)-1,x=+p.x,y=+p.y;if(c[k]&&x>=0&&x<=1&&y>=0&&y<=1)got[c[k].n]=[+x.toFixed(4),+y.toFixed(4)]});
-   const n=Object.keys(got).length;if(!n)throw Object.assign(new Error('none'),{none:true});
-   ctlUpd(it,x=>{x.ctlPos=got});renderGear();const m2=$('ctlMsg');if(m2)m2.textContent=`Claude marked ${n} of ${c.length}. If one is off, tap “Move or add marks”, tap its number, then tap the right spot.`}
-  catch(e){find.disabled=false;m.textContent=e&&e.none?'Claude couldn’t see the controls in this photo. Try a close-up of the controls, or place them yourself.':e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude this time. Try again, or place them yourself.'}};
+For each one you can actually see, ${many?'choose the one photo where it is seen most clearly and ':''}give the centre of that control as fractions of ${many?'that':'the'} image: x from 0 (left edge) to 1 (right edge), y from 0 (top edge) to 1 (bottom edge). If a control is not visible${many?' in any photo':''} (out of frame, hidden, or you are not sure which one it is), use null. Don't guess.
+Also list controls you can clearly see that are NOT in the list above, for example a screen or display, an extra switch, a push-pull knob or a second jack: the name as printed on it (or a short plain name), its kind, what it does in one sentence, one practical tip, and where it is. At most 8. Leave the list empty if there are none; never invent.
+Reply with only JSON: {"positions": [{"n": number from the list${many?', "photo": photo number':''}, "x": number, "y": number} or null, ...], "extra": [{"name": string, "kind": ${KINDS.map(k=>`"${k}"`).join('|')}, "what": string, "tip": string${many?', "photo": photo number':''}, "x": number, "y": number}]}`;
+  try{const r=await sampleFn.json(prompt,{images:P.map(p=>dataUrlBlob(p.src))})||{};const got={};
+   const at=(o,i)=>{const ph=P[Math.max(1,Math.min(P.length,+o.photo||1))-1],x=+o.x,y=+o.y;return ph&&x>=0&&x<=1&&y>=0&&y<=1?[+x.toFixed(4),+y.toFixed(4),ph.id]:null};
+   (Array.isArray(r.positions)?r.positions:[]).forEach((p,i)=>{if(!p)return;const k=(+p.n||i+1)-1,v=at(p);if(c[k]&&v)got[c[k].n]=v});
+   // controls Claude saw that weren't listed join the item's own control list
+   const same=(a,b)=>normArt(a).replace(/[^\p{L}\p{N}]/gu,'')===normArt(b).replace(/[^\p{L}\p{N}]/gu,'');
+   const extra=(Array.isArray(r.extra)?r.extra:[]).filter(e=>e&&e.name&&at(e)&&!c.some(x=>same(x.n,e.name))).slice(0,8);
+   if(!Object.keys(got).length&&!extra.length)throw Object.assign(new Error('none'),{none:true});
+   ctlUpd(it,x=>{if(extra.length){const base=x.controls&&x.controls.length?x.controls:c.map(q=>({name:q.n,kind:q.k,what:q.d,tip:q.t}));
+     x.controls=[...base,...extra.map(e=>({name:String(e.name).slice(0,40),kind:KINDS.includes(e.kind)?e.kind:'button',what:String(e.what||'').slice(0,200),tip:String(e.tip||'').slice(0,200)}))];extra.forEach(e=>got[String(e.name).slice(0,40)]=at(e))}
+    x.ctlPos=got});
+   const n=Object.keys(got).length-extra.length;renderGear();const m2=$('ctlMsg');
+   if(m2)m2.textContent=`Claude marked ${n} of ${c.length}${extra.length?` and found ${extra.length} more: ${extra.map(e=>e.name).join(', ')}`:''}. If one is off, tap “Move or add marks”, tap its number, then tap the right spot.`}
+  catch(e){find.disabled=false;m.textContent=e&&e.none?`Claude couldn’t see the controls in ${many?'these photos':'this photo'}. Add a close-up of the controls, or place them yourself.`:e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude this time. Try again, or place them yourself.'}};
 }
 let gearVisit=null,gearTab='overview';// which item's page is showing, and which of its tabs
 const GTABS=[['overview','Overview'],['controls','Controls'],['tips','Tips'],['care','Care'],['ask','Ask Claude']];
@@ -5029,7 +5076,7 @@ function renderInstDetail(it){
  $('gearOut').innerHTML=`<section class="card gearcard">
  <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">Edit details</button></div>${it.photo&&claudeReads()?`<button class="btn ghost wide" id="iFromPhoto" type="button">Update the details from the photo</button>`:''}
  <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
- ${it.photo?`<img class="iphotobig" src="${it.photo}" alt="${esc(it.name)}">`:''}
+ ${(()=>{const P=gpAll(it),sel=P.find(p=>p.id===gpOv[it.id])||P[0];return `<div class="gphead">${sel&&sel.src?`<img class="iphotobig" src="${sel.src}" alt="${esc(it.name)}">`:''}<div class="ovonly">${gpStrip(it,'data-ovp',sel&&sel.id)}</div></div>`})()}
  <div class="gtabs" id="gTabs" role="tablist">${GTABS.filter(([k])=>k!=='controls'||ctl).map(([k,t])=>`<button type="button" role="tab" data-gt="${k}" aria-selected="${k===gearTab}">${t}${k==='care'&&st.due&&!g.amp?'<i class="gdot" aria-label="strings due"></i>':''}</button>`).join('')}</div>
  <div class="gpanel" data-gp="overview">
  ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
@@ -5064,10 +5111,15 @@ function renderInstDetail(it){
  $('iDelY').onclick=()=>{gearRemoving=it.id;instSave(instAll().filter(x=>x.id!==it.id));gearRemoving=null;instOpen=null;renderGear()};
  if($('iAsk'))$('iAsk').onclick=()=>askClaudeInst(it);
  renderGearChat(it);wireControls(it);
- const showTab=k=>{gearTab=k;$('gearOut').querySelectorAll('[data-gt]').forEach(b=>b.setAttribute('aria-selected',b.dataset.gt===k));$('gearOut').querySelectorAll('[data-gp]').forEach(p=>p.hidden=p.dataset.gp!==k)};
+ const showTab=k=>{gearTab=k;
+  // the photo above the tabs: with its strip on Overview; hidden on Controls when the controls are shown on the photos
+  $('gearOut').querySelectorAll('.gphead').forEach(e=>e.hidden=k==='controls'&&!!ctlKey(it)&&gpAll(it).length>0&&(ctlView[it.id]||'photo')==='photo');$('gearOut').querySelectorAll('.ovonly').forEach(e=>e.hidden=k!=='overview');$('gearOut').querySelectorAll('[data-gt]').forEach(b=>b.setAttribute('aria-selected',b.dataset.gt===k));$('gearOut').querySelectorAll('[data-gp]').forEach(p=>p.hidden=p.dataset.gp!==k)};
  $('gTabs').onclick=e=>{const b=e.target.closest('[data-gt]');if(!b)return;showTab(b.dataset.gt);b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})};
  $('gearOut').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{showTab(b.dataset.goto);$('gTabs').scrollIntoView({block:'start',behavior:'smooth'})});
  showTab(gearTab);gearVisit=it.id;
+ document.querySelectorAll('[data-gpadd]').forEach(inp=>inp.onchange=e=>gpAdd(it,e.target.files));
+ document.querySelectorAll('[data-ovp]').forEach(b=>b.onclick=()=>{gpOv[it.id]=b.dataset.ovp;renderGear()});
+ gpEnsure(it);
 }
 
 /* ================= I'm learning: every song you have something for, and what kind of material it has ================= */
@@ -5368,7 +5420,7 @@ async function askClaudeInst(it){
  const prompt=`A guitarist owns this ${GEAR[it.type].amp?"amplifier":"instrument"}: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}, type ${GEAR[it.type].name}${sp?`, they say: ${sp}`:''}.
 Give accurate, practical advice specific to this exact model. If you don't know this exact model, say so in the summary and base the advice on the closest model you do know, saying which. Don't invent specs you aren't confident about. Keep each item to one short sentence.
 Reply with only JSON: {"summary": string, "specs": [strings], "strengths": [strings], "weaknesses": [strings], "known_issues": [strings], "care": [strings], "strings": string (${GEAR[it.type].amp?'good starting settings for this amp (gain, EQ, effects) for this kind of guitar':'recommended string type and gauge'}), "setup": [strings]}`;
- try{const opt={modelTier:'default'};if(it.photo&&imgLimit>0)opt.images=[dataUrlBlob(it.photo)];const r=await sampleFn.json(prompt+(opt.images?'\nA photo of this exact guitar is attached; use it to confirm the version and to spot anything worth checking.':''),opt);const l=instAll(),x=l.find(y=>y.id===it.id);if(x&&r){x.ai=r;x.aiAt=Date.now();instSave(l)}renderGear()}
+ try{const opt={modelTier:'default'};if(imgLimit>0&&gpAll(it).some(p=>p.src))opt.images=gpBlobs(it);const r=await sampleFn.json(prompt+(opt.images?`\n${opt.images.length>1?opt.images.length+' photos':'A photo'} of this exact ${GEAR[it.type].amp?'amp':'guitar'} ${opt.images.length>1?'are':'is'} attached; use ${opt.images.length>1?'them':'it'} to confirm the version and to spot anything worth checking.`:''),opt);const l=instAll(),x=l.find(y=>y.id===it.id);if(x&&r){x.ai=r;x.aiAt=Date.now();instSave(l)}renderGear()}
  catch(e){b.disabled=false;b.textContent=e&&e.code==='rate_limited'?'Too many requests. Try again in a little while.':'Couldn’t reach Claude. Tap to try again.'}
 }
 renderGear();
