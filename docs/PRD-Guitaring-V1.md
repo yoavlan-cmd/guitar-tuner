@@ -8,13 +8,14 @@
 
 ## 0. Instructions for the agent
 
-1. **The whole app is one file: `src/tuner.html`** (~4,500 lines: CSS + HTML + one `<script>`). There is no framework, bundler or npm runtime dependency. `tools/build.sh` wraps it into `index.html` at the repo root (adds `<head>`, manifest link, service-worker registration).
-2. **Never edit `index.html` by hand.** Edit `src/tuner.html`, then run `bash tools/build.sh`. For a release run `bash tools/release.sh` (build + bump the cache version in `sw.js`). Phones only pick up a new version when `sw.js` changes.
-3. **The repo root is the GitHub Pages site** (`index.html`, `sw.js`, `manifest.webmanifest`, icons, `ideas.json`, `ideas_build.py` for the daily job). Deploy = commit `src/tuner.html` + `index.html` + `sw.js` and get them onto `main`.
+1. **The whole app is one file: `src/guitaring.html`** (~4,500 lines: CSS + HTML + one `<script>`). There is no framework, bundler or npm runtime dependency. `tools/build.sh` wraps it into `index.html` at the repo root (adds `<head>`, manifest link, service-worker registration).
+2. **Never edit `index.html` by hand.** Edit `src/guitaring.html`, then run `bash tools/build.sh`. For a release run `bash tools/release.sh` (build + bump the cache version in `sw.js`). Phones only pick up a new version when `sw.js` changes.
+3. **The repo root is the GitHub Pages site** (`index.html`, `sw.js`, `manifest.webmanifest`, icons, `ideas.json`, `ideas_build.py` for the daily job). Deploy = commit `src/guitaring.html` + `index.html` + `sw.js` and get them onto `main`.
 4. **Edit surgically.** The file is long and dense (many one-line functions). Find code by the section banners listed in §9 (`/* ===== … ===== */`) and by element `id`s. Prefer small, exact replacements over rewrites. Keep existing ids, `localStorage` keys and data shapes stable — users have data saved under them (§7).
-5. **Test with Playwright before shipping** (`tests/`, see §11). Every change to the tuner must re-run the tuner suite; audio behaviour is easy to break silently.
-6. **Product rules that override "nice to have"** (§2): phone-first, clean and minimal UI (sections collapsed until opened), everything works without an account, nothing personal leaves the phone unless the user asks.
-7. **Check §13 before re-adding anything listed there.** Getting a song video from a link was tested and removed until a better solution exists; lyrics are not sent to Claude because Claude declines to transcribe them.
+5. **The app is called Guitaring** (renamed from "the tuner" in Oct 2026 — the tuner is now one of its features). Use that name everywhere a person reads it. Kept on purpose: the repo `guitar-tuner` (it is the live web address and the installed app's address), the `tuner.*` storage keys (users' data), `window.__tunerTest` and the `tun_*` tests (they test the tuner feature).
+6. **Test with Playwright before shipping** (`tests/`, see §11). Every change to the tuner must re-run the tuner suite; audio behaviour is easy to break silently.
+7. **Product rules that override "nice to have"** (§2): phone-first, clean and minimal UI (sections collapsed until opened), everything works without an account, nothing personal leaves the phone unless the user asks.
+8. **Check §13 before re-adding anything listed there.** Getting a song video from a link was tested and removed until a better solution exists; lyrics are not sent to Claude because Claude declines to transcribe them.
 
 ---
 
@@ -50,15 +51,15 @@ Yoav — Israeli PM, plays electric and acoustic guitar, uses **only the phone a
 ## 3. Platform & architecture
 
 ```
-src/tuner.html ──(tools/build.sh)──► index.html ─────┐
-sw.js  (offline cache, version string tuner-vNN)      │  GitHub Pages: yoavlan-cmd.github.io/guitar-tuner/
+src/guitaring.html ──(tools/build.sh)──► index.html ─────┐
+sw.js  (offline cache, version guitaring-vNN)         │  GitHub Pages: yoavlan-cmd.github.io/guitar-tuner/
 manifest.webmanifest (PWA + Android share target)     ├─► installed on the phone as "Guitaring"
 ideas.json  ◄── written daily by a scheduled ────┘
                     Claude job (tools/daily-job-prompt.md + tools/ideas_build.py)
 ```
 
 ### 3.1 Two runtimes, one file
-The same `tuner.html` runs in two places; code branches on `window.claude`:
+The same `guitaring.html` runs in two places; code branches on `window.claude`:
 
 | | **Phone app (GitHub Pages PWA)** — primary | **Claude artifact** (claude.ai, private) |
 |---|---|---|
@@ -69,7 +70,7 @@ The same `tuner.html` runs in two places; code branches on `window.claude`:
 Both paths expose one internal interface: `sampleFn(prompt, opts)` / `sampleFn.json(...)` (`claudeOn(fn,limit)` / `claudeOff()`). New Claude features must go through `sampleFn`, never call the API directly.
 
 ### 3.2 Service worker (`sw.js`)
-- Cache name `tuner-vNN` — **bump on every release** (release.sh does it).
+- Cache name `guitaring-vNN` (`tuner-vNN` up to v105) — **bump on every release** (release.sh does it).
 - Navigations: network-first with `cache:'no-cache'`, fall back to cached `index.html` offline.
 - Same-origin files + CDN libraries/fonts: cache-first with background refresh.
 - `ideas.json` is never cached (always network).
@@ -302,7 +303,7 @@ Canonical keys: chord names via `canon()` (C, C#, D, Eb, E, F, F#, G, Ab, A, Bb,
 
 ---
 
-## 9. Code map (`src/tuner.html`, line numbers as of v86 — sections after the practice mixer CSS/HTML are shifted by ~+60…+600 lines in v92; search the banners)
+## 9. Code map (`src/guitaring.html`, line numbers as of v86 — sections after the practice mixer CSS/HTML are shifted by ~+60…+600 lines in v92; search the banners)
 
 | Lines | Section (search for the banner text) | Key functions / ids |
 |---|---|---|
@@ -332,11 +333,11 @@ Test hooks kept in production (harmless, no UI): `window.__tunerTest` (needle/he
 ## 10. Build, release, deploy
 
 ```bash
-bash tools/build.sh      # src/tuner.html -> index.html (repo root)
-bash tools/release.sh    # build + bump sw.js tuner-vNN -> tuner-v(NN+1)
-# deploy: commit src/tuner.html + index.html + sw.js, push / merge to main (GitHub Pages serves main)
+bash tools/build.sh      # src/guitaring.html -> index.html (repo root)
+bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
+# deploy: commit src/guitaring.html + index.html + sw.js, push / merge to main (GitHub Pages serves main)
 ```
-- Until 13 Oct 2026 the user uploaded built files through GitHub's web upload. From now on changes are made with Claude Code in the repo; `src/tuner.html` and `index.html` must always be committed together.
+- Until 13 Oct 2026 the user uploaded built files through GitHub's web upload. From now on changes are made with Claude Code in the repo; `src/guitaring.html` and `index.html` must always be committed together.
 - Always bump `sw.js` with any `index.html` change.
 
 ---
@@ -399,7 +400,7 @@ Not automated (manual on a real phone): real microphone behaviour on Android, An
 ---
 
 ### UI redesign (Oct 2026)
-The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("original UI / UX"). To roll back: deploy that branch's `index.html` + `src/tuner.html` with a bumped `sw.js`.
+The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("original UI / UX"). To roll back: deploy that branch's `index.html` + `src/tuner.html` (the source file's name before it became `src/guitaring.html`) with a bumped `sw.js`.
 
 ## 14. V2 backlog (suggested, not committed)
 
@@ -417,11 +418,11 @@ The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("origina
 
 ```
 guitar-tuner/                   ← GitHub Pages serves this root from main
-├─ index.html                   ← BUILT from src/tuner.html (do not edit)
+├─ index.html                   ← BUILT from src/guitaring.html (do not edit)
 ├─ sw.js  manifest.webmanifest  icon-*.png  apple-touch-icon.png
 ├─ ideas.json  ideas_build.py   ← owned by the daily job
 ├─ CLAUDE.md  README.md
-├─ src/tuner.html               ← THE source (edit this)
+├─ src/guitaring.html           ← THE source (edit this)
 ├─ docs/PRD-Guitaring-V1.md     ← this document
 ├─ tools/  build.sh  release.sh  get_test_samples.sh  daily-job-prompt.md
 └─ tests/                       ← Playwright checks (see §11), package.json

@@ -1194,7 +1194,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
         <label class="taste">Your taste <textarea id="taste" rows="2"></textarea></label>
         <div class="links" id="links"></div>
         <button class="btn" id="aiAsk" hidden>Ask Claude to check this song</button>
-        <p class="tip" id="aiNote">Claude’s check works when you open this tuner inside Claude. The search links work everywhere.</p>
+        <p class="tip" id="aiNote">Claude’s check works when you open Guitaring inside Claude. The search links work everywhere.</p>
         <div id="aiOut"></div>
       </section>
 
@@ -1689,7 +1689,7 @@ async function startListening(){
   try{wake=await navigator.wakeLock.request('screen')}catch(e){}
   loop();
  }catch(e){
-  msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open the tuner link in Chrome to tune with the mic.';
+  msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open Guitaring in Chrome to tune with the mic.';
  }
 }
 function stopListening(why){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}

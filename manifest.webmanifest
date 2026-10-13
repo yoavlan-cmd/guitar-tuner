@@ -1,7 +1,7 @@
 {
   "name": "Guitaring",
   "short_name": "Guitaring",
-  "description": "Tune your guitar, learn songs from videos and write chord sheets.",
+  "description": "Your guitar companion: tune, learn songs, write chord sheets, practise with a mixer and look after your gear.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
