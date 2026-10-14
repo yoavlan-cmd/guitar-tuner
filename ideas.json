@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-13T02:55:42Z",
- "date": "2026-10-13",
+ "at": "2026-10-14T02:54:55Z",
+ "date": "2026-10-14",
  "index": {
   "artists": [
    "Green Day",
@@ -296,179 +296,160 @@
    }
   ]
  },
- "level": "Solid intermediate: comfortable with full barre chords in flat keys (Eb, Ab, Bbm), maj7 and dim colours, slash-chord bass lines, capo work and Drop D.",
+ "level": "Solid intermediate: confident with full barre chords in flat keys (Eb, Ab, Bbm), maj7 and dim colours, slash-chord bass lines, capo work and Drop D.",
  "suggestions": [
   {
-   "title": "Boulevard of Broken Dreams",
-   "artist": "Green Day",
-   "style": "Pop punk",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "G",
-    "D",
-    "A",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy win after Basket Case and Good Riddance: open chords, the challenge is keeping the steady driving strum tight."
-  },
-  {
-   "title": "Dani California",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
+   "title": "עולם משוגע",
+   "artist": "טונה",
+   "style": "Israeli hip-hop",
    "difficulty": 3,
    "chords": [
-    "Am",
-    "G",
-    "Dm",
-    "F",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Simple chords like My Friends' world but in a punchier rock groove; work on muted, funky strumming."
-  },
-  {
-   "title": "About a Girl",
-   "artist": "Nirvana",
-   "style": "Grunge / unplugged",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "G",
+    "Fm",
     "C#",
-    "F#",
-    "A",
-    "C"
+    "Cm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A start for your empty Nirvana folder: Em–G riff you know, plus a sudden jump to C# and F# barres."
+   "why": "Another Tuna track built on the same Cm/C# barre loop as יא, now with Fm; focus on tight, punchy hip-hop strumming."
   },
   {
-   "title": "Where Is My Mind?",
-   "artist": "Pixies",
-   "style": "Alt rock",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "C#m",
-    "G#",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Small step up: same E/C#m shapes as Jimbo J, plus a major G# barre and a moody arpeggiated intro."
-  },
-  {
-   "title": "נגד הרוח",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "C/G",
-    "Fmaj7/C",
-    "Fmaj7",
-    "G",
-    "C/E",
-    "D/F#",
-    "Am"
-   ],
-   "capo": 0,
-   "tuning": "Half step down",
-   "why": "More Amir Dadon in a friendly key; new are the walking slash-chord basses (C/E, D/F#) and tuning half a step down."
-  },
-  {
-   "title": "חלליות",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "Dm",
-    "C",
-    "Bb",
-    "A",
-    "Am",
-    "F",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Berry Sakharof classic in D minor with the Bb and Gm barres you already play from Better Together."
-  },
-  {
-   "title": "יש לי סיכוי",
+   "title": "אבא",
    "artist": "אביתר בנאי",
    "style": "Israeli singer-songwriter",
    "difficulty": 2,
    "chords": [
-    "Em",
-    "F",
-    "Dm",
     "Am",
-    "Am/G",
-    "Fmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Gentle Eviatar Banai ballad; practise the F barre and the descending Am–Am/G–Fmaj7 bass line."
-  },
-  {
-   "title": "ואולי עכשיו",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "F#m",
-    "Bm",
-    "D",
-    "C#m",
-    "A",
-    "G",
-    "Ebadd9",
-    "B"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Step up: Mashina pop-rock in F#m with lots of moving barres and a tricky Ebadd9 colour chord."
-  },
-  {
-   "title": "בלוז כנעני",
-   "artist": "אהוד בנאי",
-   "style": "Israeli blues rock",
-   "difficulty": 4,
-   "chords": [
-    "Dadd9",
-    "D/C",
-    "G",
-    "Fmaj7",
     "Em",
-    "Am"
+    "B",
+    "B4",
+    "Cmaj7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Step up in technique: the famous intro riff over a D chord with a moving bass, a fresh skill beyond strumming."
+   "why": "An easier, emotional Eviatar Banai song; the B to B4 suspension is a nice little colour to add."
   },
   {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
+   "title": "ככה זה",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Em",
+    "G",
+    "D",
+    "D4",
+    "Bm",
+    "F#m",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Berry Sakharof at your level: Bm and F#m barres you know from Tuna, with D4 suspensions for colour."
+  },
+  {
+   "title": "לא פראיירים",
+   "artist": "הדג נחש",
+   "style": "Israeli hip-hop / funk",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits your Tuna and Jimbo J taste; the challenge is the funky, muted 16th-note groove rather than the chords."
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock classic",
+   "difficulty": 4,
+   "chords": [
+    "E",
+    "A",
+    "D",
+    "Dmaj7",
+    "Amaj7",
+    "Bm7",
+    "F#m",
+    "C#m7",
+    "G#m7",
+    "Dm7",
+    "D#m7b5",
+    "F#7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up: a classic full of maj7 and m7 colours plus a m7b5 chord, building on the maj7 shapes from חלל."
+  },
+  {
+   "title": "Wake Me Up When September Ends",
+   "artist": "Green Day",
+   "style": "Rock ballad",
    "difficulty": 2,
    "chords": [
-    "Am",
-    "C",
     "G",
-    "E",
-    "F",
-    "D",
+    "G/F#",
     "Em",
-    "Bm"
+    "Em/D",
+    "C",
+    "Cm",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier, beloved singalong to relax with; mostly open chords, good for fingerpicking practice."
+   "why": "An easier Green Day ballad after Good Riddance: a walking bass line under open chords and the C to Cm change."
+  },
+  {
+   "title": "The Man Who Sold the World",
+   "artist": "Nirvana",
+   "style": "Grunge / unplugged",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "Dm",
+    "F",
+    "C",
+    "A7",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A first song for your empty Nirvana folder; new is the famous single-note riff between the chords."
+  },
+  {
+   "title": "Snow (Hey Oh)",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alt rock",
+   "difficulty": 4,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up in technique after My Friends: a fast, continuous picked riff that trains alternate picking and stamina."
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "style": "Acoustic / surf folk",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Easy-going Jack Johnson like Better Together; work on the laid-back, muted percussive strum."
+  },
+  {
+   "title": "Champagne Supernova",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "A/G#",
+    "F#m",
+    "E",
+    "D",
+    "Dsus2"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Oasis beyond Wanderwall: a long, building song with a descending bass line from A to F#m."
   }
  ],
  "history": [
@@ -671,6 +652,56 @@
    "title": "עוף גוזל",
    "artist": "אריק איינשטיין",
    "date": "2026-10-13"
+  },
+  {
+   "title": "עולם משוגע",
+   "artist": "טונה",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "אבא",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "ככה זה",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "לא פראיירים",
+   "artist": "הדג נחש",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "Wake Me Up When September Ends",
+   "artist": "Green Day",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "The Man Who Sold the World",
+   "artist": "Nirvana",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "Snow (Hey Oh)",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "date": "2026-10-14"
+  },
+  {
+   "title": "Champagne Supernova",
+   "artist": "Oasis",
+   "date": "2026-10-14"
   }
  ],
  "sheets": [
@@ -1057,7 +1088,23 @@
   {
    "text": "Tuna rhymes at 100 words a minute. Your chord changes can manage four a bar, {n}. Probably.",
    "date": "2026-10-12"
+  },
+  {
+   "text": "Your guitar case has been closed so long it's started a podcast, {n}. Episode one: “Is anyone out there?”",
+   "date": "2026-10-14"
+  },
+  {
+   "text": "The tuner is warmed up, the capo is ready and the pick is right there. The only thing missing is you, {n}.",
+   "date": "2026-10-14"
+  },
+  {
+   "text": "The Beatles needed four people to make a band. You only need one guitar and 15 minutes, {n}.",
+   "date": "2026-10-14"
+  },
+  {
+   "text": "Brian May built his own guitar from a fireplace. You just have to pick yours up off the stand, {n}.",
+   "date": "2026-10-14"
   }
  ],
- "jokesDate": "2026-10-12"
+ "jokesDate": "2026-10-14"
 }
