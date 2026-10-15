@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-14T02:54:55Z",
- "date": "2026-10-14",
+ "at": "2026-10-15T02:55:46Z",
+ "date": "2026-10-15",
  "index": {
   "artists": [
    "Green Day",
@@ -296,160 +296,170 @@
    }
   ]
  },
- "level": "Solid intermediate: confident with full barre chords in flat keys (Eb, Ab, Bbm), maj7 and dim colours, slash-chord bass lines, capo work and Drop D.",
+ "level": "Solid intermediate: comfortable with full barre chords in flat keys (Eb, Ab, Bbm), maj7 and dim colours, slash-chord bass lines, capo work and Drop D.",
  "suggestions": [
   {
-   "title": "עולם משוגע",
-   "artist": "טונה",
-   "style": "Israeli hip-hop",
+   "title": "סוף עונת התפוזים",
+   "artist": "תמוז",
+   "style": "Israeli classic rock",
    "difficulty": 3,
    "chords": [
-    "Fm",
+    "A",
+    "D",
+    "G",
+    "C",
     "C#",
-    "Cm"
+    "B",
+    "D/F#",
+    "Am",
+    "Em",
+    "Dm",
+    "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Tuna track built on the same Cm/C# barre loop as יא, now with Fm; focus on tight, punchy hip-hop strumming."
+   "why": "A Shalom Hanoch classic from Tamuz; mostly open chords, with a D/F# walking bass and quick key shifts to C# and B as the new challenge."
   },
   {
-   "title": "אבא",
+   "title": "עד מחר",
    "artist": "אביתר בנאי",
    "style": "Israeli singer-songwriter",
    "difficulty": 2,
    "chords": [
-    "Am",
-    "Em",
-    "B",
-    "B4",
-    "Cmaj7"
+    "Dm",
+    "F",
+    "C",
+    "Gm",
+    "Bb",
+    "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier, emotional Eviatar Banai song; the B to B4 suspension is a nice little colour to add."
+   "why": "Eviatar Banai in the same Dm/F/Gm/Bb family as עד מתי, so you can focus on feel and dynamics."
   },
   {
-   "title": "ככה זה",
+   "title": "עבדים",
    "artist": "ברי סחרוף",
    "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "G",
-    "D",
-    "D4",
-    "Bm",
-    "F#m",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Berry Sakharof at your level: Bm and F#m barres you know from Tuna, with D4 suspensions for colour."
-  },
-  {
-   "title": "לא פראיירים",
-   "artist": "הדג נחש",
-   "style": "Israeli hip-hop / funk",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits your Tuna and Jimbo J taste; the challenge is the funky, muted 16th-note groove rather than the chords."
-  },
-  {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock classic",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "A",
-    "D",
-    "Dmaj7",
-    "Amaj7",
-    "Bm7",
-    "F#m",
-    "C#m7",
-    "G#m7",
-    "Dm7",
-    "D#m7b5",
-    "F#7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Step up: a classic full of maj7 and m7 colours plus a m7b5 chord, building on the maj7 shapes from חלל."
-  },
-  {
-   "title": "Wake Me Up When September Ends",
-   "artist": "Green Day",
-   "style": "Rock ballad",
    "difficulty": 2,
    "chords": [
-    "G",
-    "G/F#",
     "Em",
-    "Em/D",
+    "Bm",
+    "G",
+    "Am",
     "C",
-    "Cm",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier Green Day ballad after Good Riddance: a walking bass line under open chords and the C to Cm change."
+   "why": "An easier Berry Sakharof rocker with familiar chords; great for driving electric strumming."
   },
   {
-   "title": "The Man Who Sold the World",
-   "artist": "Nirvana",
-   "style": "Grunge / unplugged",
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
    "difficulty": 3,
    "chords": [
+    "D",
+    "F#m7",
+    "Gmaj7",
+    "E/G#",
     "A",
-    "Dm",
-    "F",
-    "C",
-    "A7",
+    "Bm",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Ivri Lider's smooth side: F#m7 and Gmaj7 colours plus an E/G# passing chord build on your maj7 and slash-chord work."
+  },
+  {
+   "title": "גלים",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock ballad",
+   "difficulty": 3,
+   "chords": [
+    "Eb/F",
+    "Eb",
+    "Ab",
+    "Fm",
+    "Cm",
     "Bb"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A first song for your empty Nirvana folder; new is the famous single-note riff between the chords."
+   "why": "More Amir Dadon in the Eb/Ab/Cm barre family you know from אור גדול, with an Eb/F colour chord to learn."
   },
   {
-   "title": "Snow (Hey Oh)",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
+   "title": "סוף הדרך",
+   "artist": "רוקפור",
+   "style": "Israeli alt-rock",
+   "difficulty": 4,
+   "chords": [
+    "Am",
+    "F",
+    "Am/F",
+    "Am/F#",
+    "Am/G",
+    "Em",
+    "G",
+    "C",
+    "Gm",
+    "Dm",
+    "Eb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from הכעס: a descending bass line under Am (Am/G, Am/F#, Am/F) is the new technique."
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "style": "Pop punk",
+   "difficulty": 1,
+   "chords": [
+    "G",
+    "D",
+    "Em",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy Green Day groove on four open chords; work on palm-muted, punchy strumming."
+  },
+  {
+   "title": "Last Kiss",
+   "artist": "Pearl Jam",
+   "style": "Rock",
+   "difficulty": 1,
+   "chords": [
+    "G",
+    "Em",
+    "C",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed, easy singalong from a new band in your grunge corner; perfect warm-up song."
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
    "difficulty": 4,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Step up in technique after My Friends: a fast, continuous picked riff that trains alternate picking and stamina."
+   "why": "A step up for your Foo folder: ringing open-string chord shapes over a moving bass, played with steady eighth-note drive."
   },
   {
-   "title": "Banana Pancakes",
-   "artist": "Jack Johnson",
-   "style": "Acoustic / surf folk",
-   "difficulty": 2,
+   "title": "Can't Stop",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Funk rock",
+   "difficulty": 4,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Easy-going Jack Johnson like Better Together; work on the laid-back, muted percussive strum."
-  },
-  {
-   "title": "Champagne Supernova",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [
-    "A",
-    "A/G#",
-    "F#m",
-    "E",
-    "D",
-    "Dsus2"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Oasis beyond Wanderwall: a long, building song with a descending bass line from A to F#m."
+   "why": "After My Friends, try Frusciante's funk side: muted 16th-note strumming and small chord stabs are the new technique."
   }
  ],
  "history": [
@@ -702,6 +712,56 @@
    "title": "Champagne Supernova",
    "artist": "Oasis",
    "date": "2026-10-14"
+  },
+  {
+   "title": "סוף עונת התפוזים",
+   "artist": "תמוז",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "עד מחר",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "עבדים",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "גלים",
+   "artist": "אמיר דדון",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "סוף הדרך",
+   "artist": "רוקפור",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "Last Kiss",
+   "artist": "Pearl Jam",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "date": "2026-10-15"
+  },
+  {
+   "title": "Can't Stop",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-15"
   }
  ],
  "sheets": [
