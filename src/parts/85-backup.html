@@ -100,6 +100,8 @@ async function bkOpen(file){const z=await zipRead(file);
 // merge for "Add what's missing": lists gain the items they don't have (by id, else by content), objects gain missing entries; anything else stays as it is
 function bkMerge(cur,add){if(Array.isArray(cur)&&Array.isArray(add)){const key=x=>x&&typeof x==='object'&&x.id!=null?'id:'+x.id:'j:'+JSON.stringify(x),have=new Set(cur.map(key));return cur.concat(add.filter(x=>!have.has(key(x))))}
  if(cur&&add&&typeof cur==='object'&&typeof add==='object'&&!Array.isArray(cur)&&!Array.isArray(add)){const o={...cur};for(const k in add)if(!(k in o))o[k]=add[k];return o}return cur}
+// how many profile answers are filled in
+function bkAnswers(p){return ['name','years','level'].filter(f=>p[f]).length+['songLang','skills','instruments','genres','artists','dreamSongs','goals','learnBy','context'].filter(f=>Array.isArray(p[f])&&p[f].length).length+(p.time&&p.time.minPerDay?1:0)}
 // restore; mode 'add' (default) or 'replace'
 async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept:0};
  await safetyCopy('restore');
@@ -110,6 +112,9 @@ async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept
  for(const k0 in local){const k=fix(k0),cur=localStorage.getItem(k);
   if(cur==null||mode==='replace'){localStorage.setItem(k,local[k0]);rep.local++;continue}
   let a,c;try{a=JSON.parse(local[k0]);c=JSON.parse(cur)}catch(e){rep.kept++;continue}
+  // a profile that was never filled in (a new or reset phone) counts as missing; the migration log keeps every step either side has done
+  if(k===KP+'profile'&&c&&a&&!(c.onboarding&&c.onboarding.done)&&((a.onboarding&&a.onboarding.done)||bkAnswers(a)>bkAnswers(c))){localStorage.setItem(k,local[k0]);rep.local++;continue}
+  if(k===KP+'v2mig'&&c&&a){const m={...c,...a,done:[...new Set([...(a.done||[]),...(c.done||[])])]};localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   const m=bkMerge(c,a);if(JSON.stringify(m)!==cur){localStorage.setItem(k,JSON.stringify(m));rep.local++}else rep.kept++}
  if(mode==='replace')await idbClear(k=>/^backup:pre-/.test(k)||(!man.opt.parts&&bkIsPart(k)));
  for(let n=0;n<man.idb;n++){const meta=JSON.parse(await txt(`idb/${n}.json`)),k=meta.key;

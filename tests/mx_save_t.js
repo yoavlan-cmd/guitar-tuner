@@ -8,7 +8,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const ctx=await b.newContext({viewport:{width:390,height:844},acceptDownloads:true});await ctx.route(/^https:\/\//,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{localStorage.setItem('tuner.userName','"Yoav"')});
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});
  // three saved songs, 3 s at 44.1 kHz: guitars = 3000-level square wave L/R, drums = 9000, vocals = 5000
  //  s1: normal · s2: the guitar parts are silent · s3: the bass part is shorter than the song
  await p.evaluate(async()=>{const M=window.__mxTest,sr=44100,n=sr*3,mk=v=>{const a=new Int16Array(n*2);for(let i=0;i<n*2;i++)a[i]=((i>>6)&1?v:-v);return a};

@@ -98,6 +98,17 @@ All user data is in `localStorage` under the prefix `tuner.` through the `store.
 
 ## 4. Navigation & screens
 
+**V2 (phase 1, `90-v2-shell`)** — the app opens on **Home**; sections are opened with `goSec(s)`:
+- **Header** (every screen): logo + three small icons — **Tuner** (`#hTuner`), **My Library** (`#hLib`), **My profile** (`#hMe`). These open *pages* that close with ✕ / ‹ (`[data-back]`) or the phone's back button (`history.state.gpage`); the page you came from is kept (`secBack`).
+- **Bottom bar** `#bnav` (z-index 30, under every overlay): **Home · Learn · Write · Jam · Gear**. Learn and Write are the V1 Songs pane (`#paneSong[data-seg=learn|write]`, heading `#songSech`); Gear is the V1 gear pane; Home `#paneHome`, Jam `#paneJam`, My Library `#paneLib`, My profile `#paneProfile` are new panes. The tuner (`#paneTune`) and the chord book (`#paneChords`, "My chords" from My Library) are pages.
+- V1 code that calls `setTab('song'|'gear'|'tune'|'chords')` still works: `setTab` hides the V2 panes and `v2After` marks the right section. Song views opened from another page (`showSheet`, `showSong`, `showReady`, `runAnalysis`, `openWriter`) switch to the Songs pane themselves.
+- **Where V1 things went:** Song video tile → Learn; I'm learning + New songs to learn → Learn; Write a sheet, Screenshots/PDF, draft card, **chord finder tile** (`#findNew`) → Write; Practice mixer → Jam as **Band breakdown** (`#mixNew`, moved at start) + **Jamming player** (`#jamOpen`) + a list of jam tracks; sheet catalog, video lessons, saved on phone → My Library (moved at start); Claude features, Songs folder link, **GitHub for Band breakdown** (`#ghCfg`), Backup → My profile. The old tab bar `#tabs` and the Songs switch `#songSeg` are gone/hidden. `tests/nav_t.js` checks every V1 feature is reachable.
+- **Home**: greeting by the profile's name, a joke (`#hJoke`, "Another one ↻" `#hMore`), **Continue** cards (unfinished sheet, last jam, "Finish setting up Guitaring" while onboarding isn't done), four tiles (Learn, Write, Jam, Check my gear). The welcome overlay `#welcome` is no longer shown.
+- **Onboarding** `#onb` (full screen, z 65): Welcome + privacy · About you · Your playing · Quick check · Your instruments · Music you love · Your goals · How you learn · Summary ("Here's what Guitaring will do for you"). Progress bar; every screen has Skip; **Finish later** (`#wSkip`) any time (then a Home card); big chips, typing only for names and favourites. Opens on the first start when the profile isn't done. Existing players: the profile is prefilled (M1) and only the screens with gaps are shown. My profile › "Change my answers" opens all screens with the answers in.
+- **My profile**: the answers, "Change my answers", Connections, Backup, and "The update to the new Guitaring" (what M1 did + **Undo the new version's data**, two taps: removes only `profile` and `v2mig`).
+
+**V1 (before phase 1):**
+
 Tabs (`#tabs`, `setTab(t)`): **Tuner** (`#paneTune`) · **Songs** (`#paneSong`) · **Chords** (`#paneChords`) · **My gear** (`#paneGear`). Last tab is remembered (`tab`).
 
 - **Welcome overlay** (`#welcome`) on every app open: asks the first name once, then "Hey, {name}." + a joke + quick buttons + Skip. Button hierarchy: **Tune up** (primary, filled cream) › **Learn a song** (filled dark) › Write a song / My gear (outline row). "Write a song" opens Songs home with all creation options visible.
@@ -219,7 +230,7 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - Safety net: removed instruments are kept in `gearLost` with a restore box (an earlier bug deleted amps).
 - Detail page (UI redesign): horizontal chip tabs under the photo — **Overview** (specs, last tuned, strings status line, model notes, photo notes, strengths/limits) · **Controls** (diagram on a dark card) · **Tips** · **Care** (strings date, cleaning, care, repair; orange dot when strings are due) · **Ask Claude** (model profile + gear chat). One panel at a time; every visit opens on Overview (`gearTab`).
 
-### 5.11 Welcome jokes
+### 5.11 Welcome jokes (on Home since V2 phase 1)
 - 46 built-in jokes (`JOKES`, `{n}` = user's name) + extras from `ideas.json.jokes` (`jokesExtra`). Fresh extras are shown first, once each (`jokesSeen`), then random (never the same twice in a row). "Another one ↻".
 
 ### 5.12 Claude features (optional)
@@ -283,6 +294,8 @@ The phone replaces its list when `date` changes **or** `at` is newer (so a same-
 | `bookTun`, `bookSeeded`, `cfTun`, `cfCapo` | chord-book view tuning; finder defaults |
 | `lib` | My songs: `[{id,name,saved,data:<song or sheet object>,drive?}]` |
 | `song.<fileKey>` | saved analyses (last 8), list in `songs` |
+| `profile` | V2 player profile (see `docs/V2-build-plan.md` §7.1): name, songLang, years, level, skills, instruments, genres, artists, dreamSongs, goals, learnBy, time {minPerDay, daysPerWeek}, context, onboarding {done, later, skipped, prefilled, at}, pending, sync. Saving it also sets `userName` and `ideaPrefs.lang` when they differ. |
+| `v2mig` | V2 migration log `{done:['M1',…], at, report, warn}`; safety copies `backup:pre-<step>:<time>` in the phone database |
 | `writeDraft` | unfinished hand-written sheet (`kind:'lyrics'`, `lc:[{t:"line", ch:{wordIndex:"Am"}}]`, `play:{tun,capo}`, `fing`) |
 | `sheetCat`, `sheetIndex` | sheet catalog: this phone / from Drive (daily) |
 | `songIndex` | Drive songs folder index `{at,src,songs:[{a,t,ch}],artists}` |
@@ -327,6 +340,7 @@ Since V2 phase 0 the source is split into parts (`src/parts/`, joined in name or
 | `70-welcome` | welcome + jokes |
 | `75-gear` | My gear |
 | `80-learning-ideas` | I'm learning, song ideas, gear chat |
+| `90-v2-shell` | V2 navigation (`goSec`, `v2Hide`, `v2After`, pages + history), Home, Jam, My Library, My profile, profile (`profGet`/`profSet`/`profTaste`/`profPrefill`), M1 (`v2MigM1`), onboarding (`openOnb`, `obRender`, `OB_OPTS`, `OB_STEPS`), `v2Start` |
 | `85-backup` | backup and restore (`bkMake`, `bkOpen`, `bkRestore`, `safetyCopy`, ZIP writer/reader) |
 | `99-startup` | start-up calls; the app script closes here |
 
@@ -393,6 +407,9 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `mx_send_t.js` | sending to GitHub (API mocked): retries the start after a fresh splitter install, error names the step and quotes GitHub, Try again order |
 | `mx_silent_t.js` | a silent file is not sent to GitHub (red message), one with sound is, an undecodable one still is; phone split says so; an all-silent split says why when opened |
 | `mx_save_t.js` | Save this mix: exactly the chosen parts at full length/rate after playing, Everything, silent guitars and all-muted give a message not an empty file, short part, guitars → chord analysis |
+| `nav_t.js` | V2 navigation: opens on Home (greeting, joke, Continue, 4 tiles); 22 V1 features each reachable in their new place; chord finder from Write; tuner one tap from every section, ✕ returns, closing stops listening; back button / ‹ on pages; the old tab bar is gone |
+| `onb_new_t.js` | onboarding for a new player: privacy line, Finish later + Home card + no re-popup, all screens in order, progress, skip, typed artist/dream song, summary, profile saved and used (greeting, song-idea language), doesn't return, My profile shows answers, Change my answers, no built-in taste |
+| `onb_old_t.js` | existing player: M1 prefill (name, languages, instruments, level, artists, chords), V1 data unchanged (also after finishing), log + safety copy, only gap screens asked, runs once, an interrupted first run reruns identically, Undo removes only V2 data |
 | `split_t.js` | the source parts join into the page verbatim and in order, one app script, every part ends with a newline; `LIVE=1`: the committed `index.html` is exactly a fresh build |
 | `bk_t.js` | backup: real ZIP (checked with Python's zipfile), keys out by default, counts; wipe → restore identical (typed arrays, Blobs, Files); Add what's missing never overwrites; Replace everything (two taps); without parts (smaller, keeps phone parts on replace); damaged / cut-short / foreign files refused with nothing changed; safety copy |
 | `beta_t.js` | beta: copies live data on first open, reads big items through and keeps its copy, deletes stick, live data and database untouched, reopening keeps beta changes, "Copy my live data again", own manifest |

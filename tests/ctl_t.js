@@ -19,7 +19,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   if(!photo){const c=document.createElement('canvas');c.width=400;c.height=372;const g=c.getContext('2d');g.fillStyle='#2a6fb0';g.fillRect(0,0,400,372);g.fillStyle='#ddd';[[110,17],[284,290],[284,353],[336,257],[332,327]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,14,0,7);g.fill()});photo=c.toDataURL('image/jpeg',.8)}
   localStorage.setItem('tuner.userName','"Yoav"');
   localStorage.setItem('tuner.instruments',JSON.stringify([{id:'m1',type:'electric',name:'Muse',brand:'Epiphone',model:'Les Paul Muse',year:'2020',specs:{pickups:'humbucker',bridge:'fixed',body:'solid'},photo,strings:'2026-05-01'}]))},PHOTO);
- await p.goto(APP);await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
  await p.tap('[data-tab=gear]');await p.tap('[data-open=m1]');await p.tap('[data-gt=controls]');await p.waitForTimeout(200);
  ok(await p.$('#ctlPhoto img')!==null,'Controls opens on your own photo');
  ok(await p.$eval('[data-cv=photo]',b=>b.getAttribute('aria-pressed')==='true'),'"Your photo" is selected');
@@ -45,10 +45,10 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('[data-cv=draw]');ok(await p.$('.ctlpic svg')!==null&&await p.$('#ctlPhoto')===null,'"Drawing" shows the drawn guitar');
  await p.tap('[data-cv=photo]');
  // persistence across reload
- await p.reload();await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');await p.tap('[data-tab=gear]');await p.tap('[data-open=m1]');await p.tap('[data-gt=controls]');
+ await p.reload();await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});await p.tap('[data-tab=gear]');await p.tap('[data-open=m1]');await p.tap('[data-gt=controls]');
  ok((await p.$$('#ctlPhoto .pb')).length===1,'marks are still there after reopening the app');
  // Claude finds them (phone key, API mocked)
- await p.evaluate(()=>localStorage.setItem('tuner.apiKey','"sk-test"'));await p.reload();await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.evaluate(()=>localStorage.setItem('tuner.apiKey','"sk-test"'));await p.reload();await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
  await p.tap('[data-tab=gear]');await p.tap('[data-open=m1]');await p.tap('[data-gt=controls]');
  ok(await p.$('#ctlFind')!==null,'with Claude on, "Find them on my photo" is offered');
  await p.tap('#ctlFind');await p.waitForSelector('#ctlMsg:has-text("Claude marked")',{timeout:5000}).catch(()=>{});

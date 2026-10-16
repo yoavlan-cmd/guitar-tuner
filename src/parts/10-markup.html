@@ -25,12 +25,12 @@
     <div class="editrow cfbtns"><button type="button" class="btn" id="cfUse"></button><button type="button" class="btn ghost" id="cfClear">Clear</button></div>
   </div>
 </div>
-<div class="welcome" id="welcome" role="dialog" aria-label="Welcome">
+<div class="welcome" id="welcome" role="dialog" aria-label="Welcome" hidden>
   <div class="wcard">
     <svg class="wlogo" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg>
     <div class="wtitle">Guitaring</div>
     <div class="wbody"></div>
-    <button type="button" class="wskip" id="wSkip">Skip ›</button>
+    <button type="button" class="wskip">Skip ›</button>
   </div>
 </div>
 <div class="wrap">
@@ -44,16 +44,52 @@
 <linearGradient id="lg-pickO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#D9301A"/></linearGradient>
 <filter id="lg-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#5A0E05" flood-opacity=".55"/></filter>
 </defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg><h1>Guitaring</h1></div>
+    <div class="hicons">
+      <button type="button" class="hic" id="hTuner" data-tab="tune" data-sec="tuner" aria-label="Tuner"><span data-pd="TUNE"></span><small>Tuner</small></button>
+      <button type="button" class="hic" id="hLib" data-sec="library" aria-label="My Library"><span data-pd="LIB"></span><small>Library</small></button>
+      <button type="button" class="hic" id="hMe" data-sec="profile" aria-label="My profile"><span data-pd="PROFILE"></span><small>Profile</small></button>
+    </div>
   </header>
 
-  <nav class="tabs" id="tabs">
-    <button data-tab="tune" aria-pressed="true">Tuner</button>
-    <button data-tab="song" aria-pressed="false">Songs</button>
-    <button data-tab="chords" aria-pressed="false">Chords</button>
-    <button data-tab="gear" aria-pressed="false">My gear</button>
-  </nav>
 
-  <div class="pane" id="paneTune">
+  <div class="pane" id="paneHome">
+    <section class="homehero" id="homeHero"></section>
+    <div id="homeCont" class="homecont"></div>
+    <div class="hometiles">
+      <button type="button" class="htile" data-sec="learn"><span data-pd="LEARN"></span><b>Learn</b><small>Your songs, video lessons and new songs to learn</small></button>
+      <button type="button" class="htile" data-sec="write"><span data-pd="WRITE"></span><b>Write</b><small>Write a chord sheet, or make one from screenshots</small></button>
+      <button type="button" class="htile" data-sec="jam"><span data-pd="MIX"></span><b>Jam</b><small>Band breakdown: play along with the parts of a song</small></button>
+      <button type="button" class="htile" data-sec="gear"><span data-pd="GEAR"></span><b>Check my gear</b><small>Your guitars and amps, and how to get the most from them</small></button>
+    </div>
+  </div>
+
+  <div class="pane" id="paneJam" hidden>
+    <h2 class="sech">Jam</h2>
+    <div class="addgrid jamgrid" id="jamGrid"></div>
+    <div id="jamList" class="jamlist"></div>
+  </div>
+
+  <div class="pane" id="paneLib" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My Library</h2></div>
+    <p class="tip">Everything you keep in Guitaring. The songs you’re learning are in <button type="button" class="linkbtn" data-sec="learn">Learn</button>.</p>
+    <div class="libnav">
+      <button type="button" class="libgo" data-sec="chords"><span data-pd="CHORDS"></span><b>My chords</b><small>Your chord book</small><i>›</i></button>
+      <button type="button" class="libgo" data-sec="jam"><span data-pd="MIX"></span><b>My jam tracks</b><small id="libJamSub">Band breakdown songs</small><i>›</i></button>
+    </div>
+    <div id="libHolder" class="libholder"></div>
+  </div>
+
+  <div class="pane" id="paneProfile" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My profile</h2></div>
+    <section class="card" id="profCard"></section>
+    <p class="libsub">Connections</p>
+    <div id="profConn" class="profconn"></div>
+    <p class="libsub">Backup</p>
+    <div id="profBackup"></div>
+  </div>
+
+  <div class="pane" id="paneTune" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Close the tuner">✕</button><h2>Tuner</h2></div>
   <button type="button" class="gtrline" id="gtrLine" hidden aria-expanded="false"></button>
   <div class="gtrpick" id="gtrPick" hidden></div>
   <div class="chips" id="tunings" aria-label="Tuning"></div>
@@ -115,6 +151,7 @@
     <div id="gearOut" class="gearout"></div>
   </div>
   <div class="pane" id="paneChords" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My chords</h2></div>
     <div class="searchrow" id="chSearchRow">
       <input id="chSearch" class="textin" type="search" placeholder="Search chords, e.g. Am7, G/B, sus2" aria-label="Search chords" autocapitalize="off" autocomplete="off" spellcheck="false">
     </div>
@@ -129,7 +166,8 @@
   </div>
 
   <div class="pane" id="paneSong" hidden>
-    <div class="seg songseg" id="songSeg" role="tablist">
+    <h2 class="sech" id="songSech">Learn</h2>
+    <div class="seg songseg" id="songSeg" role="tablist" hidden>
       <button data-s="lib" aria-pressed="true"><span data-pd="LIB"></span> My library</button>
       <button data-s="add" aria-pressed="false"><span data-pd="ADD"></span> Add a song</button>
     </div>
@@ -150,8 +188,12 @@
         <span class="sub">Type lyrics, tap to add chords</span>
       </button>
       <button class="drop write addtile" id="mixNew" type="button">
-        <i aria-hidden="true"><span data-pd="MIX"></span></i><b>Practice mixer</b>
-        <span class="sub">Turn parts of a song up or down</span>
+        <i aria-hidden="true"><span data-pd="MIX"></span></i><b>Band breakdown</b>
+        <span class="sub">Split a song into its parts</span>
+      </button>
+      <button class="drop write addtile" id="findNew" type="button">
+        <i aria-hidden="true"><span data-pd="FINDER"></span></i><b>Chord finder</b>
+        <span class="sub">Put your fingers on a fretboard, get the chord’s name</span>
       </button>
       <p class="tip addnote">Everything is read on this phone. Nothing is uploaded, and you check it before it’s saved.</p>
     </div>
@@ -163,7 +205,6 @@
       <div class="cardhead"><h2>I’m learning</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
       <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span data-pd="DRIVE"></span> My songs folder in Google Drive <span>↗</span></a>
       <div id="learnBox" class="learn"></div>
-      <p class="libsub">Sheets, lessons and settings</p>
       <details class="ideabox catbox" id="catBox" hidden></details>
       <details class="ideabox vidbox" id="vidBox"></details>
       <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
@@ -291,7 +332,7 @@
 
       <section class="card" id="aiCard">
         <h2>Better versions &amp; Claude’s check</h2>
-        <label class="taste">Your taste <textarea id="taste" rows="2"></textarea></label>
+        <label class="taste">Your taste <textarea id="taste" rows="2" placeholder="Leave empty to use your profile"></textarea></label>
         <div class="links" id="links"></div>
         <button class="btn" id="aiAsk" hidden>Ask Claude to check this song</button>
         <p class="tip" id="aiNote">Claude’s check works when you open Guitaring inside Claude. The search links work everywhere.</p>
@@ -373,5 +414,13 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
   </div>
 </div>
 
+<nav class="bnav" id="bnav" aria-label="Sections">
+  <button type="button" data-sec="home"><span data-pd="HOME"></span><small>Home</small></button>
+  <button type="button" data-sec="learn" data-tab="song"><span data-pd="LEARN"></span><small>Learn</small></button>
+  <button type="button" data-sec="write"><span data-pd="WRITE"></span><small>Write</small></button>
+  <button type="button" data-sec="jam"><span data-pd="MIX"></span><small>Jam</small></button>
+  <button type="button" data-sec="gear" data-tab="gear"><span data-pd="GEAR"></span><small>Gear</small></button>
+</nav>
+<div class="onb" id="onb" role="dialog" aria-label="Set up Guitaring" hidden></div>
 <div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>

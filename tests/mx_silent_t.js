@@ -16,7 +16,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
    for(let i=0;i<n;i++)d[2*i]=d[2*i+1]=Math.round(level*Math.sin(i*2*Math.PI*220/sr));
    w(0,'RIFF');h.setUint32(4,36+n*4,true);w(8,'WAVE');w(12,'fmt ');h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,2,true);h.setUint32(24,sr,true);h.setUint32(28,sr*4,true);h.setUint16(32,4,true);h.setUint16(34,16,true);w(36,'data');h.setUint32(40,n*4,true);
    return new Blob([h.buffer,d.buffer],{type:'audio/wav'})}});
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});
  const toast=()=>p.$eval('#toast',e=>({t:e.hidden?'':e.textContent,err:e.classList.contains('err')})).catch(()=>({t:'',err:false}));
  // 1. GitHub: a silent WAV (like the silent "(my mix).wav") is not sent
  const n0=await p.evaluate(()=>window.__mxTest.idx().length);
