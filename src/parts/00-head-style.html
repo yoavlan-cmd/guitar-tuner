@@ -1172,4 +1172,15 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 .dsnote{font-size:12px;margin:0}
 #paneSong[data-seg="learn"] #addSong{--tex:var(--tex-learn);grid-column:1/-1;min-height:132px}
 #paneSong[data-seg="learn"] #addSong b{word-spacing:normal}
+.dsname{margin:-4px 0 0;font:600 15px var(--body);color:var(--muted)}
+.dsbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.dsbar i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),#8AF0D2);transition:width .6s}
+.dseta{margin:0;font:500 14px var(--body);color:var(--muted)}.dseta b{color:var(--ink);font-family:var(--mono)}
+.dssteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dssteps li{display:flex;gap:10px;align-items:flex-start;font:500 14px var(--body);color:var(--muted)}
+.dssteps li i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 11px var(--body);font-style:normal;color:var(--bg)}
+.dssteps li.done{color:var(--ink);background:none;border:0;padding:0;border-radius:0;justify-content:flex-start}.dssteps li.done i{background:var(--accent);border-color:var(--accent)}
+.dssteps li.now{color:var(--ink);font-weight:700}.dssteps li.now i{border-color:var(--accent);animation:dspulse 1.2s ease-in-out infinite}
+.dssteps li small{display:block;font:500 12px var(--body);color:var(--muted)}
+@keyframes dspulse{0%,100%{box-shadow:0 0 0 0 rgba(78,226,183,.5)}50%{box-shadow:0 0 0 6px rgba(78,226,183,0)}}
+.dsacts{display:flex;gap:8px}.dsacts .btn{flex:1}
 </style>

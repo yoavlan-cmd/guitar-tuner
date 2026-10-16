@@ -1187,6 +1187,17 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 .dsnote{font-size:12px;margin:0}
 #paneSong[data-seg="learn"] #addSong{--tex:var(--tex-learn);grid-column:1/-1;min-height:132px}
 #paneSong[data-seg="learn"] #addSong b{word-spacing:normal}
+.dsname{margin:-4px 0 0;font:600 15px var(--body);color:var(--muted)}
+.dsbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.dsbar i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),#8AF0D2);transition:width .6s}
+.dseta{margin:0;font:500 14px var(--body);color:var(--muted)}.dseta b{color:var(--ink);font-family:var(--mono)}
+.dssteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dssteps li{display:flex;gap:10px;align-items:flex-start;font:500 14px var(--body);color:var(--muted)}
+.dssteps li i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 11px var(--body);font-style:normal;color:var(--bg)}
+.dssteps li.done{color:var(--ink);background:none;border:0;padding:0;border-radius:0;justify-content:flex-start}.dssteps li.done i{background:var(--accent);border-color:var(--accent)}
+.dssteps li.now{color:var(--ink);font-weight:700}.dssteps li.now i{border-color:var(--accent);animation:dspulse 1.2s ease-in-out infinite}
+.dssteps li small{display:block;font:500 12px var(--body);color:var(--muted)}
+@keyframes dspulse{0%,100%{box-shadow:0 0 0 0 rgba(78,226,183,.5)}50%{box-shadow:0 0 0 6px rgba(78,226,183,0)}}
+.dsacts{display:flex;gap:8px}.dsacts .btn{flex:1}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -4983,7 +4994,9 @@ async function dsMeta(id){const r=await fetch(`${GD_API}/${encodeURIComponent(id
  if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}throw {code:'gd_http',status:r.status,message:r.status===404?'That file wasn’t found in your Drive. Check the link (and that it’s your own Drive).':m||'HTTP '+r.status}}return r.json()}
 const dsKind=f=>/^video\//.test(f.mimeType)||/\.(mp4|mov|m4v|webm|mkv)$/i.test(f.name)?'video':/^audio\//.test(f.mimeType)||/\.(mp3|m4a|wav|flac|aac|ogg)$/i.test(f.name)?'audio':'';
 // the dialog: one link (video or audio), a second one optional (the other kind of the same song)
-function openAddSong(){const d=$('dsDlg');if(!d)return;d.hidden=false;document.body.classList.add('wopen');
+function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
+ const busy=!fresh&&mxIdx.find(x=>x.drive&&['up','wait','get'].includes(x.state));if(busy)return dsShowProgress(busy.id);
+ d.hidden=false;document.body.classList.add('wopen');
  d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Add a song from Google Drive"><div class="dshead"><h3>Add a song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
  <p class="tip">Paste the link to the song’s <b>video (MP4)</b> or <b>audio (MP3)</b> in your Google Drive songs folder. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
  <label class="dslab">Link to the video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label>
@@ -5009,7 +5022,8 @@ function openAddSong(){const d=$('dsDlg');if(!d)return;d.hidden=false;document.b
    const src=files[kinds.indexOf('audio')]||files[0],vid=files[kinds.indexOf('video')]||null,folder=(src.parents||[])[0]||(vid&&(vid.parents||[])[0])||'';
    if(!folder)throw {code:'gd_http',message:'Couldn’t tell which folder the file is in. Use a file in your own Drive songs folder.'};
    msg.textContent='Sending it to your GitHub…';
-   await dsSubmit({src,vid,folder,base:cleanName(src.name)});close()}
+   const it=await dsSubmit({src,vid,folder,base:cleanName(src.name)});
+   if(it.state==='failed'){go.disabled=false;msg.textContent=it.err||'Couldn’t send it to GitHub.';return}dsShowProgress(it.id)}
   catch(e){go.disabled=false;msg.innerHTML=e&&e.code==='gd_http'?esc(e.message):gdErr(e).replace(/Save to Google Drive/g,'Make the song’s session')}}}
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
 async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
@@ -5018,7 +5032,49 @@ async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
  await mxUpload(it,null,job);
- if(it.state==='wait')toast(`“${esc(base)}” is on its way: it’s split on your GitHub, and the full and guitars-only MP3s go into the same Drive folder. It usually takes 15–25 minutes. You’ll get a notification.`,'ok')}
+ return it}
+// ---- the progress while GitHub works: real steps from GitHub (its job's steps), the long split estimated from the time it takes ----
+const DS_ST=[['sent','Sent to your GitHub',2],['queue','Waiting for a free GitHub computer',3],['setup','Setting up the splitter',10],['get','Getting the song from your Drive',3],
+ ['split','Splitting it into parts (the long step)',70],['mp3','Saving the full and guitars-only MP3s to your Drive',6],['back','Bringing the parts back to Guitaring',6]];
+let dsTimer=0,dsShown='';
+// which step the job is on, from GitHub's own step names
+async function dsRunInfo(it){let runs=[];try{runs=(await gh('/actions/runs?event=workflow_dispatch&per_page=30')).workflow_runs||[]}catch(e){}
+ const run=runs.find(r=>r.display_title==='split '+it.id||r.name==='split '+it.id);if(!run)return {stage:'sent'};if(run.status==='queued'||run.status==='waiting')return {stage:'queue'};
+ let steps=[];try{steps=((await gh('/actions/runs/'+run.id+'/jobs')).jobs||[])[0].steps||[]}catch(e){}
+ const of=n=>/^Get the song/.test(n)?'get':/^Split it/.test(n)?'split':/^Make the MP3s/.test(n)?'mp3':/^Hand the parts back|^Report a failure|^Complete job|^Post /.test(n)?'back':'setup';
+ const cur=steps.find(x=>x.status!=='completed'),sp=steps.find(x=>/^Split it/.test(x.name));
+ const stage=run.status==='completed'?'back':cur?of(cur.name):'back';
+ // learn how long a split takes on your GitHub (it depends on the song's length, so keep a running average)
+ if(sp&&sp.status==='completed'&&sp.started_at&&sp.completed_at&&!it.splitMin){it.splitMin=(Date.parse(sp.completed_at)-Date.parse(sp.started_at))/60000;const a=store.get('dsSplitMin',0);store.set('dsSplitMin',a?a*.6+it.splitMin*.4:it.splitMin)}
+ return {stage,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
+function dsProgHTML(it,info){const i=info||{stage:'sent'},k=DS_ST.findIndex(x=>x[0]===(it.state==='get'?'back':it.state==='up'?'sent':i.stage)),exp=store.get('dsSplitMin',0)||14;
+ const inSplit=k===4&&i.splitAt?Math.min(.95,(Date.now()-i.splitAt)/60000/exp):0;
+ let pct=0;DS_ST.forEach(([,,w],j)=>{if(j<k)pct+=w;else if(j===k)pct+=w*(j===4?inSplit:.3)});pct=Math.min(99,Math.round(pct));
+ const left=k<=3?exp+4-(k===3?2:0):k===4?Math.max(1,exp*(1-inSplit))+2:k===5?2:1;
+ return `<div class="dshead"><h3>Making the song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
+ <p class="dsname" dir="auto">${esc(it.name)}</p>
+ <div class="dsbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>
+ <p class="dseta"><b>${pct}%</b> · ${k>=5?'Almost done':`About ${Math.round(left)} min left`}</p>
+ <ol class="dssteps">${DS_ST.map(([id,l],j)=>`<li class="${j<k?'done':j===k?'now':''}"><i aria-hidden="true">${j<k?'✓':''}</i><span>${l}${j===4&&j===k?` <small>${Math.round(inSplit*100)}%, from how long your splits usually take</small>`:''}</span></li>`).join('')}</ol>
+ <p class="tip">You can close this and use Guitaring, or lock the phone: GitHub keeps working and you’ll get a notification. Tapping <b>Add a song</b> shows this again.</p>
+ <div class="dsacts"><button type="button" class="btn ghost" id="dsHide">Close</button><button type="button" class="btn ghost" id="dsAnother">Add another song</button></div>`}
+async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false;document.body.classList.add('wopen');dsShown=id;clearInterval(dsTimer);
+ const close=()=>{dsShown='';clearInterval(dsTimer);d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen')};
+ const draw=async(fetchInfo)=>{if(dsShown!==id)return;const it=mxIdx.find(x=>x.id===id);if(!it)return close();
+  let html;
+  if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
+   <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', and the MP3s are in your Drive folder':''}.</p><button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
+  else if(it.state==='failed')html=`<div class="dshead"><h3>Didn’t finish</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><p class="msg">${esc(it.err||'The split stopped on GitHub.')}</p><div class="dsacts"><button type="button" class="btn" id="dsRetry">Try again</button><button type="button" class="btn ghost" id="dsHide">Close</button></div>`;
+  else{const info=fetchInfo&&it.state==='wait'?await dsRunInfo(it).catch(()=>null):d._info;if(dsShown!==id)return;d._info=info;html=dsProgHTML(it,info)}
+  d.innerHTML=`<section class="dsbox dsprog" role="dialog" aria-label="Making the song">${html}</section>`;
+  $('dsX').onclick=close;const h=$('dsHide');if(h)h.onclick=close;const a=$('dsAnother');if(a)a.onclick=()=>{clearInterval(dsTimer);dsShown='';openAddSong(true)};
+  const r=$('dsRetry');if(r)r.onclick=async()=>{await mxRetry(id);draw(true)};
+  const o=$('dsOpen');if(o)o.onclick=()=>{close();const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')};
+  if(it.state==='ready'||it.state==='failed')clearInterval(dsTimer)};
+ d.onclick=e=>{if(e.target===d)close()};
+ await draw(true);
+ // every few seconds: what GitHub says, and a look for the finished parts
+ dsTimer=setInterval(()=>{if(dsShown!==id){clearInterval(dsTimer);return}mxPoll();draw(true)},window.__dsTickMs||8000)}
 // after the parts come back: the MP3s GitHub saved in Drive (or, if Google's sign-in ran out there, the phone saves them on the next tap)
 async function dsCollect(it){const out=await gh('/contents/drive.json?ref=r-'+it.id,{raw:true}).then(r=>r.text()).then(t=>JSON.parse(t)).catch(()=>null);
  it.drive.out=out&&out.files||{};it.drive.ok=!!(out&&out.ok&&out.files&&out.files.guitars);
@@ -5038,7 +5094,7 @@ function dsRows(g){const rows=[];for(const m of g.r.mix){const it=mxIdx.find(x=>
   for(const [k,l] of [['full','Full song MP3 in Drive'],['guitars','Guitars-only MP3 in Drive']])if(o[k])rows.push(`<div class="lit"><span class="ltt"><b>${l}</b><small dir="auto">${esc(o[k].name||'')}</small></span><a href="${esc(o[k].url||'https://drive.google.com/file/d/'+o[k].id+'/view')}" target="_blank" rel="noopener">Open ↗</a></div>`);
   if(it.state==='ready'&&!d.ok)rows.push(`<div class="lit miss"><span class="ltt"><b>The MP3s aren’t in Drive yet</b><small>Google’s sign-in ran out while GitHub worked</small></span><button type="button" data-dssave="${esc(it.id)}">Save them</button></div>`)}
  return rows.join('')}
-{const b=$('addSong');if(b)b.onclick=openAddSong}
+{const b=$('addSong');if(b)b.onclick=()=>openAddSong()}
 window.__ds={fileId:dsFileId,open:openAddSong};// test hooks
 /* ================= Welcome screen ================= */
 const JOKES=[
