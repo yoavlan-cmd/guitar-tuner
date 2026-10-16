@@ -28,7 +28,7 @@ const GTR=path.join(OUT,'auto_gtr.flac');execFileSync('ffmpeg',['-y','-v','error
  // while it builds: the bar and the progress say so
  await p.waitForFunction(()=>{const it=window.__mxTest.idx().find(x=>x.id==='z1');return it&&it.sess==='building'},null,{timeout:8000}).catch(()=>{});
  const bar=await p.$eval('#mxBar',e=>e.hidden?'':e.innerText.replace(/\s+/g,' ')).catch(()=>'');console.log('  bar while building:',bar);
- ok(/Building the song’s session/.test(bar)&&/99%/.test(bar),'while it builds, the bottom bar says “Building the song’s session”');
+ ok(/Building the song’s session|Listening to the guitars-only part|Listening to the whole song/.test(bar)&&/99%/.test(bar),'while it builds, the bottom bar says which step of the session it’s on');
  const t0=Date.now();await p.waitForFunction(()=>{const it=window.__mxTest.idx().find(x=>x.id==='z1');return it&&(it.sess==='done'||it.sess==='failed')},null,{timeout:180000}).catch(()=>{});
  const it=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.id==='z1'));console.log(`  built in ${Math.round((Date.now()-t0)/1000)} s:`,it.sess,it.anaKey);
  ok(it.sess==='done'&&it.anaKey==='mix_z1','the guitars-only part is analysed on the phone and saved to the song');

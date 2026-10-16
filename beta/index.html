@@ -1181,6 +1181,7 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .gdblock h4{margin:0;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 .gdbig{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sesguide .gdre{margin-top:10px}
+.gdsrc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gdsrc li{display:flex;gap:8px;font-size:13.5px;line-height:1.35}.gdsrc li span{flex:0 0 16px;font-weight:800;color:var(--accent)}.gdsrc li.n{color:var(--muted)}.gdsrc li.n span{color:var(--muted)}
 .gdcapo{display:flex;flex-direction:column;gap:6px;margin-top:10px}.gdcapo small{color:var(--muted);font-size:12.5px}
 .gdcapo .seg{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.gdcapo .seg button{min-width:0;padding:8px 0;font-size:13px}
 .gdbig>div{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:rgba(255,255,255,.05)}
@@ -1675,9 +1676,11 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v4
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v5
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
+# v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
+# with the parts (stills.bin + stills.json), so the app can check the chords against the guitarist's hand without the video.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -1784,6 +1787,45 @@ jobs:
                   out['error'] = str(e)[:200]
           json.dump(out, open('res/drive.json', 'w'))
           print('drive', json.dumps(out)[:300])
+          PY
+      - name: Take stills from the video
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee -a log.txt
+          import glob, json, os, subprocess, urllib.request
+          d = json.load(open('job/drive.json')) if os.path.exists('job/drive.json') else {}
+          song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
+          vid = None
+          if d.get('video') and d.get('video') != d.get('file'):
+              vid = 'job/video.' + (d.get('vext') or 'mp4')
+              req = urllib.request.Request('https://www.googleapis.com/drive/v3/files/%s?alt=media&supportsAllDrives=true' % d['video'], headers={'Authorization': 'Bearer ' + d['token']})
+              with urllib.request.urlopen(req) as r, open(vid, 'wb') as f:
+                  while True:
+                      b = r.read(1 << 20)
+                      if not b:
+                          break
+                      f.write(b)
+          elif os.path.splitext(song)[1].lower() in ('.mp4', '.mov', '.m4v', '.webm', '.mkv'):
+              vid = song
+          if not vid:
+              print('no video: no stills')
+              raise SystemExit(0)
+          has = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', vid], capture_output=True, text=True).stdout.strip()
+          if not has:
+              print('no picture in the video file: no stills')
+              raise SystemExit(0)
+          os.makedirs('stills', exist_ok=True)
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'fps=1/2,scale=480:-2', '-q:v', '6', 'stills/s%04d.jpg'], check=True)
+          idx, o = [], 0
+          with open('res/stills.bin', 'wb') as out:
+              for i, f in enumerate(sorted(glob.glob('stills/*.jpg'))):
+                  b = open(f, 'rb').read()
+                  out.write(b)
+                  idx.append([i * 2, o, len(b)])
+                  o += len(b)
+          json.dump({'every': 2, 'n': len(idx), 'idx': idx}, open('res/stills.json', 'w'))
+          print('stills', len(idx), 'bytes', o)
           PY
       - name: Report a failure to the app
         if: failure()
@@ -4848,7 +4890,7 @@ function mxHome(){if(mxBusy)return;mxCreating=false;const v=$('mixView');
 function mxSheetUI(){if(mxBusy)return;if(mxCreating&&mxSheetOpen())return mxCreate();if(mxSong&&mxSong.tracks){const m=$('mxMore');if(m&&$('mxRows'))mxLibUI();else mxMixer()}else if($('mxSetMsg')){}else mxHome()}
 async function mxForget(id,quiet){const it=mxIdx.find(x=>x.id===id);mxIdx=mxIdx.filter(x=>x.id!==id);
  if(mxSong&&mxSong.id===id){mxStopAudio();mxSong=null;mxPos=0}
- try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}await mxIdxSave();
+ try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}await mxIdxSave();
  if(it&&it.src==='cloud'&&mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
  if(!quiet){mxSheetUI();mxBar();renderMixNew()}}
 const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannels>1?au.getChannelData(1):a,o=new Int16Array(n*2);for(let i=0;i<n;i++){let x=a[i],y=b[i];o[2*i]=(x>1?1:x<-1?-1:x)*32767;o[2*i+1]=(y>1?1:y<-1?-1:y)*32767}return o};
@@ -5009,7 +5051,10 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
+   await mxPut('mixdata:'+it.id,{stems});
+   // stills from the song's video (splitter v5), for the chord check
+   try{const j=await gh('/contents/stills.json?ref=r-'+it.id,{raw:true,ok404:true});if(j){const m=JSON.parse(await j.text());if(m&&m.n){const bin=await gh('/contents/stills.bin?ref=r-'+it.id,{raw:true});await mxPut('mixstills:'+it.id,{every:m.every,idx:m.idx,bin})}}}catch(e){}
+   if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
    try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
    try{asBuild(it.id)}catch(e){}
    toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`,'ok');
@@ -5111,9 +5156,13 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
 async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
  const it={id,name:base,at:Date.now(),src:'cloud',state:'up',drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
+ // no video given with the audio: a video of the song in the same folder is used too (for the chord check)
+ if(!vid&&dsKind(src)==='audio'){try{const v=await vlFind(it,gdFullTok);if(v)vid={id:v.id,name:v.name}}catch(e){}}
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
+ // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
+ if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
  return it}
 // ---- the progress while GitHub works: real steps from GitHub (its job's steps), the long split estimated from the time it takes ----
@@ -5124,12 +5173,12 @@ let dsTimer=0,dsShown='';
 async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_dispatch&per_page=30')).workflow_runs||[];// can't reach GitHub: the caller says so
  const run=runs.find(r=>r.display_title==='split '+it.id||r.name==='split '+it.id);if(!run)return {stage:'sent'};if(run.status==='queued'||run.status==='waiting')return {stage:'queue'};
  let steps=[];try{steps=((await gh('/actions/runs/'+run.id+'/jobs')).jobs||[])[0].steps||[]}catch(e){}
- const of=n=>/^Get the song/.test(n)?'get':/^Split it/.test(n)?'split':/^Make the MP3s/.test(n)?'mp3':/^Hand the parts back|^Report a failure|^Complete job|^Post /.test(n)?'back':'setup';
+ const of=n=>/^Get the song/.test(n)?'get':/^Split it/.test(n)?'split':/^Make the MP3s|^Take stills/.test(n)?'mp3':/^Hand the parts back|^Report a failure|^Complete job|^Post /.test(n)?'back':'setup';
  const cur=steps.find(x=>x.status!=='completed'),sp=steps.find(x=>/^Split it/.test(x.name));
- const stage=run.status==='completed'?'back':cur?of(cur.name):'back';
+ const stage=run.status==='completed'?'back':cur?of(cur.name):'back',step=cur&&/^Take stills/.test(cur.name)?'stills':'';
  // learn how long a split takes on your GitHub (it depends on the song's length, so keep a running average)
  if(sp&&sp.status==='completed'&&sp.started_at&&sp.completed_at&&!it.splitMin){it.splitMin=(Date.parse(sp.completed_at)-Date.parse(sp.started_at))/60000;const a=store.get('dsSplitMin',0);store.set('dsSplitMin',a?a*.6+it.splitMin*.4:it.splitMin)}
- return {stage,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
+ return {stage,step,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
 // where a song being made stands: stage, %, minutes left, and a plain warning when something is slow (never silent)
 function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='ready'?'sess':it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
  const sm=k===4&&i.splitAt?(now-i.splitAt)/60000:0,inSplit=Math.min(.95,sm/exp);
@@ -5140,7 +5189,8 @@ function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_
  else if(k<=1&&since>8)warn='GitHub hasn’t started yet. It usually takes under a minute; its free computers may be busy. Guitaring keeps checking, nothing is lost.';
  else if(k===4&&sm>exp*2.2)warn='This split is taking longer than usual (long songs take longer). GitHub is still working on it.';
  return {k,pct,left,inSplit,warn,label:dsStageLabel(it,k)}}
-const dsStageLabel=(it,k)=>k===7&&it.sessStep==='video'?'Looking at the song’s video: the capo and the chord shapes':k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
+const AS_STEP={guitar:'Listening to the guitars-only part',whole:'Listening to the whole song too',video:'Looking at the song’s video: the capo and the chord shapes'};
+const dsStageLabel=(it,k)=>k===7&&AS_STEP[it.sessStep]?AS_STEP[it.sessStep]:k===5&&it._info&&it._info.step==='stills'?'Taking stills from the video (for the chord check)':k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
 const dsAgo=t=>{if(!t)return '';const s=Math.round((Date.now()-t)/1000);return s<10?'just now':s<60?s+' s ago':Math.round(s/60)+' min ago'};
 function dsProgHTML(it,info){const c=dsCalc(it,info),k=c.k,pct=c.pct,left=c.left,inSplit=c.inSplit;
  return `<div class="dshead"><h3>Making the song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
@@ -5211,6 +5261,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
  it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
  try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
   const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
+  it.sessStep='guitar';try{dsStatusUI()}catch(e){}
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
   const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
@@ -5218,8 +5270,11 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const key='mix_'+id;
   // built again: a capo you set from the video stays
   try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
-  // and the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
-  if(it.drive){it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}}
+  // 2. the whole song (every part but the drums): where the guitar's 3rd is faint, the other instruments often play it
+  it.sessStep='whole';try{dsStatusUI()}catch(e){}
+  try{const w=await asWhole(d);if(w)asFuse(a,w);else a.whole={skip:'parts'}}catch(e){a.whole={skip:'err'};try{console.error('whole song',e)}catch(_){}}
+  // 3. the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
+  it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;
@@ -5228,6 +5283,22 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const o=$('asOpen');if(o)o.onclick=()=>{const t=$('toast');if(t)t.hidden=true;asOpenSong(id)}}
  catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
  await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
+// the whole song from its split parts (all but the drums), at the analysis' rate, and its chord analysis
+async function asWhole(d){const S=d&&d.stems;if(!S)return null;let sum=null,n=0;
+ for(const k of ['bass','other','vocals','piano','guitar']){const b=S[k];if(!b)continue;const y=await decodeFile(new File([b],k+'.flac',{type:'audio/flac'}));
+  if(!sum)sum=new Float32Array(y.length);const L=Math.min(sum.length,y.length);for(let i=0;i<L;i++)sum[i]+=y[i];n++;await tick()}
+ if(n<2)return null;return await analyse(sum,()=>{},null)}
+// what the whole song adds: where the guitar's 3rd was too faint to tell minor from major and the whole song plays one clearly,
+// the whole song decides; how often both hear the same root (a check on the guitar's chords). The guitar's chords stay the base.
+function asFuse(a,w){const gE=gdThirds(a),wE=gdThirds({feat:w.feat});if(!gE||!wE)return;
+ const MJ=TYPES.findIndex(x=>x.id===''),MN=TYPES.findIndex(x=>x.id==='m'),D7=TYPES.findIndex(x=>x.id==='7'),M7=TYPES.findIndex(x=>x.id==='m7');
+ const flip={[MJ]:MN,[MN]:MJ,[D7]:M7,[M7]:D7},fixed=new Set();let same=0,tot=0;
+ for(const g of a.segs){if(g.c>=NS)continue;const l=g.t1-g.t0,r=Math.floor(g.c/NT),q=g.c%NT,mid=(g.t0+g.t1)/2;tot+=l;
+  const o=w.segs.find(s=>s.c<NS&&mid>=s.t0&&mid<s.t1);if(o&&Math.floor(o.c/NT)===r)same+=l;
+  if(!(q in flip))continue;const isM=q===MJ||q===D7,ge=gE(g),we=wE(g),gm=isM?ge.M:ge.m,go=isM?ge.m:ge.M,wm=isM?we.M:we.m,wo=isM?we.m:we.M;
+  const gFaint=gm===0||go/gm>=.6,wOther=wo>0&&(wm===0||wm/wo<=.5);
+  if(gFaint&&wOther){const k=chordName(g.c)+' → '+chordName(r*NT+flip[q]);fixed.add(k);g.c=r*NT+flip[q]}}
+ a.mfeat={n:w.feat.n,c:w.feat.c,hop:w.feat.hop,off:w.feat.off};a.whole={agree:tot?+(same/tot).toFixed(2):0,fixed:[...fixed]}}
 function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
 // build one by hand (the song's page offers it for a split with no guide, or when the build failed)
 function asStart(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready')return;if(!AS_ON.includes(it.sess)){it.sess='queued';mxIdxSave();try{dsStatusUI()}catch(e){}}asBuild(id)}
@@ -5294,15 +5365,20 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
  if(vc!=null&&a.play.capoBy!=='you'){a.play.capo=vc;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vc,frames:seen,asked:pts.length,agree,differ,fixed:[...fixed]};return a}
+// the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
+function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
-async function vlLook(it,a){if(!it.drive)return;
- if(!claudeReads()){if(it.drive.video)a.video={skip:'claude'};return}
- const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
- try{const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
-  const pts=vlTimes(a.segs);if(pts.length<2){a.video={skip:'few'};return}
+// The stills from the split come first (no download, no Drive sign-in needed); an older song without them reads the video from Drive.
+async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(!st&&!it.drive)return;
+ const vname=it.drive&&it.drive.video&&it.drive.video.name||'',vurl=it.drive&&it.drive.video&&it.drive.video.url||'';
+ if(!claudeReads()){if(st||(it.drive&&it.drive.video))a.video={skip:'claude',name:vname};return}
+ try{const pts=vlTimes(a.segs);if(pts.length<2){a.video={skip:'few'};return}
+  if(st&&st.idx&&st.idx.length){const fr=vlStills(st,pts.map(p=>p.t));const res=await vlAsk(a.title,fr);vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';return}
+  const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
+  const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
   const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
   const res=await vlAsk(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
- catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:it.drive.video&&it.drive.video.name||''};try{console.error('video look',e)}catch(_){}}}
+ catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:vname};try{console.error('video look',e)}catch(_){}}}
 // the guide's line about the video (and a way to check it when it was skipped)
 function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='drive')return `<p class="tip vlnote">The song’s video wasn’t looked at: Guitaring needs your Drive for that. <button type="button" class="tlink" id="vlCheck">Rebuild and check the video</button></p>`;
@@ -6286,7 +6362,7 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#id
 let dailyAt=0,dailyTried=false;
 async function loadDailyIdeas(force){
  if(window.claude||location.protocol==='file:'&&!force)return;if(!force&&Date.now()-dailyAt<3*3600e3)return;dailyAt=Date.now();
- try{const r=await fetch('ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
+ try{const r=await fetch((BETA?'../':'')+'ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
   if(Array.isArray(d.sheets)){store.set('sheetIndex',d.sheets);try{renderCatalog()}catch(e){}}
   if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
   store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
@@ -6545,24 +6621,42 @@ function gdParts(M){if(A.sections&&A.sections.length)return M.secs.map(s=>({t:s.
  const reps=[],lab=blocks.map(bl=>{if(!bl.seq.some(Boolean))return -1;let j=reps.findIndex(r=>sim(r,bl.seq)>=.75);if(j<0){reps.push(bl.seq);j=reps.length-1}return j});
  const out=[];blocks.forEach((bl,i)=>{const name=lab[i]<0?'No guitar':'Part '+String.fromCharCode(65+Math.min(25,lab[i]));if(!out.length||out[out.length-1].name!==name)out.push({t:bl.t,name})});
  if(out.length)out[0].t=Math.min(out[0].t,0);return out}
-// the capo to show and, when the song has a chord sheet, its chords: a capo can't be heard (an open C#m sounds like an Am shape with
-// capo 4), so it comes from you (set from the video), else the sheet, else none: the chords as they sound. With a sheet, each chord
-// heard is matched to the sheet chord that shares the most notes (same root first), e.g. a heard F# → the sheet's F#m.
-// The fitted analysis is saved, so the play-along shows the same.
+// Three sources, in this order (Oct 2026): the SOUND of the isolated guitar decides the chords, their roots and timing; the VIDEO
+// (when it was looked at) decides the capo and a chord's minor / major where it saw the hand clearly; a CHORD SHEET for the song is
+// only a sanity check, because sheets are informal and often of another version: it settles a chord only where the sound's 3rd was
+// too faint to tell minor from major and the video didn't show it (never a chord's root), its capo is offered, not applied, and
+// where it differs from a clear recording the guide says so and keeps the recording.
+// how strong each 3rd is during a chord, from the analysis' saved notes (feat); null when there are none
+function gdThirds(d){const F=d.feat;if(!F||!F.c)return null;let c;try{c=b64u8(F.c)}catch(e){return null}const hop=F.hop||HOP,off=F.off||0,n=F.n||c.length/12;
+ return g=>{const r=Math.floor(g.c/NT);let M=0,m=0;const f0=Math.max(0,Math.floor((g.t0*SR-off)/hop)),f1=Math.min(n,Math.ceil((g.t1*SR-off)/hop));
+  for(let f=f0;f<f1;f++){M+=c[f*12+(r+4)%12];m+=c[f*12+(r+3)%12]}return {M,m}}}
+const gd3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
 function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoBy==='you',vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
- // the capo: yours, else the one seen in the video, else the sheet's, else none
- const by=you?'you':vc!=null?'video':ref&&ref.capo!=null?'sheet':'none',capo=you?+v.play.capo||0:by==='video'?vc:by==='sheet'?ref.capo:0;
- let fit=0,tot=0;const S=[];
- if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0);
-  ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=TYPES[1].iv.every(i=>p.iv.includes(i))?1:0;
-   const r=(p.root+d0)%12,c=r*NT+t;if(!S.some(x=>x.c===c))S.push({c,r,pc:TYPES[t].iv.map(i=>(r+i)%12)})});
-  if(S.length)v.segs=v.segs.map(g=>{if(g.c>=NS)return g;const l=g.t1-g.t0;tot+=l;if(S.some(x=>x.c===g.c))return g;
-   const r=Math.floor(g.c/NT),pc=TYPES[g.c%NT].iv.map(i=>(r+i)%12);let best=null,bs=0;
-   S.forEach(x=>{const sc=pc.filter(q=>x.pc.includes(q)).length+(x.r===r?.5:0);if(sc>bs){bs=sc;best=x}});
-   if(!best||bs<2)return g;fit+=l;return {...g,c:best.c}})}
- v.play={...v.play,capo,capoBy:by};v.fit=S.length?{by:'sheet',share:tot?fit/tot:0,chords:ref.chords.slice(0,8)}:null;
- // keep it, so the play-along shows the same chords and capo
- if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by||fit))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
+ // the capo: yours, else the one seen in the video, else none (the chords as they sound); a sheet's capo is only offered
+ const by=you?'you':vc!=null?'video':'none',capo=you?+v.play.capo||0:by==='video'?vc:0;
+ let fit=null;
+ if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0),S=[];
+  ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
+   const r=(p.root+d0)%12;if(!S.some(x=>x.r===r&&x.t===t))S.push({r,t,name:CH[r]+TYPES[t].id})});
+  const ev=gdThirds(v),wv=v.mfeat?gdThirds({feat:v.mfeat}):null,seen=new Set(((v.video&&v.video.frames)||[]).map(f=>{const p=parseChord(f.seen||'');return p?p.root:-1}));
+  const tuned=new Map(),clash=new Map(),dur=new Map();let tot=0,inSheet=0;
+  v.segs=v.segs.map(g=>{if(g.c>=NS)return g;const l=g.t1-g.t0,r=Math.floor(g.c/NT),q=g.c%NT,h3=gd3(q);tot+=l;dur.set(r,(dur.get(r)||0)+l);
+   const same=S.filter(x=>x.r===r);if(!same.length)return g;inSheet+=l;
+   // the sheet only speaks to a 3rd: same root, the other 3rd
+   const o=same.find(x=>gd3(x.t)&&h3&&gd3(x.t)!==h3);if(!o||same.some(x=>gd3(x.t)===h3))return g;
+   // faint: in the guitars-only part, and in the whole song too when it was listened to
+   const fz=x=>{if(!x)return false;const mine=h3==='M'?x.M:x.m,other=h3==='M'?x.m:x.M;return mine===0||other/mine>=.6};
+   const e=ev?ev(g):null,we=wv?wv(g):null,faint=fz(e)&&(!we||fz(we));
+   const k=chordName(g.c)+' → '+o.name;
+   if(faint&&!seen.has(r)){tuned.set(k,(tuned.get(k)||0)+l);return {...g,c:r*NT+o.t}}
+   clash.set(chordName(g.c),o.name);return g});
+  const heard=[...dur].filter(([r,l])=>l/(tot||1)>=.05&&!S.some(x=>x.r===r)).map(([r])=>CH[r]),missing=S.filter(x=>(dur.get(x.r)||0)/(tot||1)<.02).map(x=>x.name);
+  fit={by:'sheet',chords:ref.chords.slice(0,8),capo:ref.capo,match:tot?inSheet/tot:0,tuned:[...tuned.keys()],clash:[...clash].map(([h,s])=>({heard:h,sheet:s})),extra:heard,missing}}
+ // a guide matched to the sheet by the earlier version (its chords were replaced): say so until it's rebuilt
+ if(d.fit&&(d.fit.share!=null||d.fit.legacy))(fit=fit||{by:'sheet',chords:d.fit.chords||[],capo:null,match:0,tuned:[],clash:[],extra:[],missing:[]}).legacy=true;
+ v.play={...v.play,capo,capoBy:by};v.fit=fit;
+ // keep it (a chord the sheet settled, the capo's source), so the play-along shows the same
+ if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by||(fit&&fit.tuned.length)))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
  return v}
 // set the capo you see in the video (Full): it wins over the sheet and is kept with the analysis
 function gdSetCapo(key,c){const d=loadSong(key);if(!d)return;d.play={...d.play,capo:c,capoBy:'you'};try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(d)))}catch(e){}}
@@ -6591,18 +6685,32 @@ function gdBuild(d){const keep=A;A=d;try{
  // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
  const V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
- const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||d.fit||(V&&vSeen>=2&&!vDiff.length)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
- const cb=d.play.capoBy,capoLv=cb==='you'||cb==='sheet'||cb==='video'?'solid':'guess';
+ const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||(V&&vSeen>=2&&!vDiff.length)||(d.fit&&d.fit.match>=.9&&!(d.fit.clash||[]).length&&rep>=.6)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
+ const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':sc===capo?'likely':'guess';
  const share=pTop&&pN?pTop[1]/pN:0,strumLv=!d.ons?'guess':share>=.6?'solid':share>=.35?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
- const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':d.fit?`Matched to your chord sheet (${d.fit.chords.join(' · ')})${d.fit.share>.02?`: ${Math.round(d.fit.share*100)}% of what was heard was set to the sheet’s nearest chord`:''}.`:chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy},
-  {k:'Capo and shapes',lv:capoLv,why:cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:cb==='sheet'?`From your chord sheet (${capo?'capo '+capo:'no capo'}).`:'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.'},
+ const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
+  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':strumLv==='solid'?`The same pattern is heard in ${Math.round(share*100)}% of the bars.`:`The pattern changes between parts (the most common one is in ${Math.round(share*100)}% of the bars).`},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?'Measured from the beat of the recording.':'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+ return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
+// what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
+function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
+ o.push([1,d.from==='guitars'?'The guitars-only part: the chords, their timing and the strumming':'The recording you analysed: the chords, their timing and the strumming']);
+ if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
+ o.push(V&&!V.skip?[1,`The video: ${V.frames.length?`the hand was clear at ${V.frames.length} of ${V.asked} moments`:'the hand wasn’t clear in the stills'}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
+  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time')]);
+ o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
+ return o}
+// what the chord sheet check found, in plain words
+function gdSheetWhy(f){if(!f||f.by!=='sheet')return '';if(f.legacy)return ' This guide was matched to your chord sheet by an earlier version of Guitaring: rebuild it to hear it from the recording again.';
+ const o=[];if(f.tuned.length)o.push(`Where the 3rd was too faint to hear, your chord sheet settled it: ${f.tuned.join(', ')}.`);
+ if(f.clash.length)o.push(`Your chord sheet has ${f.clash.map(x=>x.sheet).join(', ')}, but this recording clearly plays ${f.clash.map(x=>x.heard).join(', ')} (sheets don’t always match this version).`);
+ if(f.extra.length)o.push(`Heard but not on your sheet: ${f.extra.join(', ')}.`);if(f.missing.length)o.push(`On your sheet but not heard: ${f.missing.join(', ')}.`);
+ if(!o.length)o.push(`Your chord sheet agrees (${f.chords.join(' · ')}).`);return ' '+o.join(' ')}
 // eight boxes for one bar: 1 & 2 & 3 & 4 &, with D / U where you strum
 function gdPat(p){const lab=['1','&','2','&','3','&','4','&'];return `<div class="gdpat" role="img" aria-label="Strumming: ${esc(p.split('').map((c,i)=>c==='·'?'':(c==='D'?'down':'up')+' on '+lab[i]).filter(Boolean).join(', '))}">${[...p].map((c,i)=>`<span class="${c==='·'?'rest':c==='D'?'dn':'up'}"><b>${c==='·'?'':c==='D'?'↓':'↑'}</b><small>${lab[i]}</small></span>`).join('')}</div>`}
 let gdMode=null;// 'easy' | 'full', per visit; the profile picks the first one
@@ -6613,8 +6721,10 @@ function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tNa
  return `<div class="gdtabs seg" role="tablist"><button type="button" role="tab" data-gd="easy" aria-pressed="${easy}">Easy</button><button type="button" role="tab" data-gd="full" aria-pressed="${!easy}">Full</button></div>
  <p class="tip gdintro">${easy?(G.eCapo!==G.capo?`The easier version: capo ${G.eCapo} with basic shapes, one strum on every beat. It sounds the same as the recording.`:'Basic chord shapes, one strum on every beat: play along today.'):'As it’s played in the recording: its chords, capo and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
+  ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo&&G.capoBy!=='you'?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. <button type="button" class="tlink" data-gdcapo="${G.sheetCapo}">Use ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}</button></p>`:''}
   ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
   ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; capo ${G.eCapo} gives the same song with easier shapes. Full shows it as played.</p>`:''}</div>
+ <div class="gdblock"><h4>Built from</h4><ul class="gdsrc">${G.sources.map(([y,t])=>`<li class="${y?'y':'n'}"><span aria-hidden="true">${y?'✓':'–'}</span>${esc(t)}</li>`).join('')}</ul></div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
  <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
@@ -6628,7 +6738,7 @@ window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null}
 // Restore: "Add what's missing" (default) never overwrites anything; "Replace everything" replaces only the kinds the file has.
 // Before restoring, a safety copy of the small data is kept in the database (backup:pre-*, 30 days).
 const BK_SECRET=[KP+'apiKey',KG+'gh'];// the Claude key and the GitHub key (left out unless asked)
-const bkIsPart=k=>/^mix(data|src):/.test(k);// Band breakdown audio parts (big; can be split again)
+const bkIsPart=k=>/^mix(data|src|stills):/.test(k);// Band breakdown audio parts and video stills (big; can be split again)
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crcAdd(c,u8){for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return c}
 async function crcBlob(b){let c=0xFFFFFFFF;const S=1<<23;for(let o=0;o<b.size;o+=S){c=crcAdd(c,new Uint8Array(await b.slice(o,o+S).arrayBuffer()));await tick()}return (c^0xFFFFFFFF)>>>0}

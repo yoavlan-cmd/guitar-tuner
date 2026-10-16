@@ -58,15 +58,20 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
  if(vc!=null&&a.play.capoBy!=='you'){a.play.capo=vc;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vc,frames:seen,asked:pts.length,agree,differ,fixed:[...fixed]};return a}
+// the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
+function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
-async function vlLook(it,a){if(!it.drive)return;
- if(!claudeReads()){if(it.drive.video)a.video={skip:'claude'};return}
- const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
- try{const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
-  const pts=vlTimes(a.segs);if(pts.length<2){a.video={skip:'few'};return}
+// The stills from the split come first (no download, no Drive sign-in needed); an older song without them reads the video from Drive.
+async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(!st&&!it.drive)return;
+ const vname=it.drive&&it.drive.video&&it.drive.video.name||'',vurl=it.drive&&it.drive.video&&it.drive.video.url||'';
+ if(!claudeReads()){if(st||(it.drive&&it.drive.video))a.video={skip:'claude',name:vname};return}
+ try{const pts=vlTimes(a.segs);if(pts.length<2){a.video={skip:'few'};return}
+  if(st&&st.idx&&st.idx.length){const fr=vlStills(st,pts.map(p=>p.t));const res=await vlAsk(a.title,fr);vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';return}
+  const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
+  const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
   const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
   const res=await vlAsk(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
- catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:it.drive.video&&it.drive.video.name||''};try{console.error('video look',e)}catch(_){}}}
+ catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:vname};try{console.error('video look',e)}catch(_){}}}
 // the guide's line about the video (and a way to check it when it was skipped)
 function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='drive')return `<p class="tip vlnote">The song’s video wasn’t looked at: Guitaring needs your Drive for that. <button type="button" class="tlink" id="vlCheck">Rebuild and check the video</button></p>`;
