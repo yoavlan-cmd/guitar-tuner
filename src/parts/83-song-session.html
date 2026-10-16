@@ -14,7 +14,10 @@ function sesFacts(g){const f={tun:'',capo:null,chords:[],bpm:0};const addCh=l=>(
   if(!f.chords.length){const prevA=A;try{A=d;addCh(d.segs.filter(s=>s.t1-s.t0>=.5).map(s=>nameOf(s)))}catch(e){}A=prevA}}
  return f}
 // a chord's diagram from the chord library (fingers shown); unknown names just show the name
-function sesDiagram(name){try{if(LIB[name])return `<div class="sesdg">${diagram({...parseLib(LIB[name]),name},name)}</div>`}catch(e){}return `<div class="sesdg none"><b>${esc(name)}</b></div>`}
+const SES_ENH={'A#':'Bb','Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab'};
+function sesDiagram(name){try{const n=String(name).replace(/^([A-G][#b]?)/,m=>SES_ENH[m]||m);let sh=LIB[n]?{...parseLib(LIB[n]),name:n}:null;
+  if(!sh){for(let c=0;c<NS;c++)if(chordName(c)===n){sh=shapeFor(c);break}}
+  if(sh)return `<div class="sesdg dg">${diagram(sh,name)}</div>`}catch(e){}return `<div class="sesdg none"><b>${esc(name)}</b></div>`}
 // the Practise button: the best thing you have for playing the song now (guides join it in the next step)
 function sesPractise(g){if(g.r.analysis.length)return {a:'ana',v:g.r.analysis[0].key,l:'Practise with the play-along',s:'The song video with its chords, in time'};
  if(g.r.mix.length)return {a:'mix',v:g.r.mix[0].mix,l:'Practise with the jam track',s:'Play along with the band, guitars down'};
