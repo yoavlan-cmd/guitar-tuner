@@ -5,9 +5,11 @@ const PDI={pick:'<path d="M12 20.5C8.2 16.6 5 12.3 5 8.6 5 5.4 8.2 3.5 12 3.5s7 
 const PDM={'TUNE':['tune','#66BB6A'],'LEARN':['learn','#66BB6A'],'WRITE':['write','#FFB74D'],'GEAR':['gear','#4FC3F7'],'LIB':['library','#66BB6A'],'ADD':['add','#FFB74D'],'VIDEO':['video','#FFB74D'],'SCAN':['shots','#FFB74D'],'MIX':['mixer','#4FC3F7'],'DRAFT':['draft','#FFB74D'],'SHEETS':['search','#66BB6A'],'SHEET':['sheet','#66BB6A'],'LESSON':['lessons','#66BB6A'],'IDEAS':['ideas','#FFB74D'],'DRIVE':['folder','#4FC3F7'],'NOTE':['draft','#8E9A95'],'GTR':['guitar','#FFB74D'],'GTR L':['guitar','#FFB74D'],'GTR C':['guitar','#FFB74D'],'GTR R':['guitar','#FFB74D'],'VOX':['vocals','#66BB6A'],'DRM':['drums','#4FC3F7'],'BASS':['bass','#4FC3F7'],'KEYS':['piano','#66BB6A'],'OTHER':['other','#8E9A95'],'PART':['other','#8E9A95'],'AMP':['amp','#4FC3F7'],'MODEL':['model','#FFB74D'],'PHOTO':['photo','#66BB6A'],'RANGE':['strengths','#66BB6A'],'TIP':['tips','#FFB74D'],'CLEAN':['cleaning','#4FC3F7'],'HUMID':['care','#4FC3F7'],'REPAIR':['repair','#FF6A1A'],'STRINGS':['strings','#66BB6A'],'ASK':['ask','#66BB6A'],'PROFILE':['profile','#66BB6A'],'GALLERY':['gallery','#8E9A95'],'CTRL':['ctrl','#4FC3F7'],'CHORDS':['learn','#66BB6A'],'FINDER':['finder','#66BB6A'],'DEL':['trash','#FF6A1A'],'OK':['done','#66BB6A'],'HOME':['pick','#FF6A1A']};
 // ICONS: off for now (text-only look); set to true to bring the pedal icons back everywhere
 const ICONS=false;
-const SK=t=>{if(!ICONS)return '';const m=PDM[t]||['other','#8E9A95'];return `<span class="pd" style="--led:${m[1]}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${PDI[m[0]]}</svg></span>`};
+const SK=t=>ICONS?SKA(t):'';
+// SKA: always drawn (the bottom bar keeps its icons)
+const SKA=t=>{const m=PDM[t]||['other','#8E9A95'];return `<span class="pd" style="--led:${m[1]}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${PDI[m[0]]}</svg></span>`};
 // static markup carries <span data-pd="LABEL"></span>; drawn once at start
-document.querySelectorAll('[data-pd]').forEach(e=>{e.outerHTML=SK(e.dataset.pd)});
+document.querySelectorAll('[data-pd]').forEach(e=>{e.outerHTML=(e.closest('#bnav')?SKA:SK)(e.dataset.pd)});
 const NAMES=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 const TUNINGS=[
  {id:'std',name:'Standard',n:[40,45,50,55,59,64]},
