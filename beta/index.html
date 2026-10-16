@@ -798,8 +798,8 @@ body.wopen{overflow:hidden}
 .addgrid .addtile:active{transform:scale(.98)}
 .addgrid .addnote{grid-column:1/-1;margin:0;text-align:center}
 /* the Songs pane is two sections: Learn (I'm learning, new songs, a song video) and Write (write a sheet, screenshots/PDF, chord finder, drafts) */
-#paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #findNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
-#paneSong[data-seg="learn"] #drop{grid-column:1/-1;min-height:0}
+#paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
+/* Learn: Song video and Chord finder side by side (the finder is in Write too) */
 #paneSong[data-seg="learn"] #driveIntro{display:none!important}
 #paneSong[data-seg="write"] #drop,#paneSong[data-seg="write"] #libCard,#paneSong[data-seg="write"] #suggCard{display:none!important}
 #libCard[hidden]~#suggCard{display:none}
@@ -1078,6 +1078,54 @@ body[data-cursec=home].hasbar .wrap{height:calc(100dvh - 14px - var(--bnh) - 96p
 body.hasbar #paneHome .hcont.hc-jam{display:none}
 @media (max-height:700px){#paneHome .hjoke{-webkit-line-clamp:3}#paneHome .htile small{-webkit-line-clamp:1}#paneHome .hcont:not(.hc-jam)~.hcont{display:none}body:not(.hasbar) #paneHome .hcont.hc-jam~.hcont{display:none}}
 @media (max-height:620px){#paneHome .htile small{display:none}#paneHome .hjoke{-webkit-line-clamp:2}body.hasbar #paneHome .homecont{display:none}}
+/* ===== the player: a small mixing desk ===== */
+.mxpanel{background:linear-gradient(180deg,#141a17,var(--bg) 220px)}
+.mixhead{align-items:flex-start}
+.mixttl{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mixk{display:flex;align-items:center;gap:7px;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mixttl b{font:800 24px/1.05 var(--display);letter-spacing:.02em;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mixttl span{font:500 13.5px var(--body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* little equalizer bars: still when paused, dancing while playing */
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.eq i{display:block;width:3px;height:30%;border-radius:1px;background:var(--accent)}
+body.mxon .eq i{animation:eqb .9s ease-in-out infinite alternate}
+body.mxon .eq i:nth-child(2){animation-delay:-.3s;animation-duration:.7s}body.mxon .eq i:nth-child(3){animation-delay:-.6s;animation-duration:1.1s}body.mxon .eq i:nth-child(4){animation-delay:-.15s;animation-duration:.8s}
+@keyframes eqb{0%{height:20%}100%{height:100%}}
+.mxbar-k{display:flex;align-items:center;gap:6px}
+/* transport: the song's progress on top, then −5s · play · +5s */
+.mixtrans{flex-direction:column;align-items:stretch;gap:10px;padding:14px 14px 12px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);box-shadow:var(--shadow-in)}
+.mixtimes{display:flex;justify-content:space-between}.mixtimes small{font:500 12px var(--mono);color:var(--muted)}
+.mixbtns{display:flex;align-items:center;justify-content:center;gap:22px}
+.mixplay{width:64px;height:64px;font-size:24px;display:grid;place-items:center;box-shadow:0 6px 18px rgba(78,226,183,.25);transition:transform .15s,box-shadow .3s}
+.mixplay:active{transform:scale(.94)}
+body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,226,183,.45)}
+.mixback{width:46px;height:46px;background:transparent;border-color:var(--line);color:var(--muted)}
+/* slim custom sliders: a coloured fill up to the thumb */
+#mxSeek,.strip input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:24px;margin:0;cursor:pointer}
+#mxSeek{--c:var(--accent)}
+#mxSeek::-webkit-slider-runnable-track,.strip input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--c) var(--p,0%),rgba(255,255,255,.12) var(--p,0%))}
+#mxSeek::-moz-range-track,.strip input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.12)}
+#mxSeek::-moz-range-progress,.strip input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--c)}
+#mxSeek::-webkit-slider-thumb,.strip input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:3px solid var(--c);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+#mxSeek::-moz-range-thumb,.strip input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c)}
+/* presets: one row that scrolls */
+.mixpre{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.mixpre::-webkit-scrollbar{display:none}
+.mixpre .chip{flex:0 0 auto}
+/* the desk: one strip per part */
+.mixrows{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:6px;padding:12px 8px;border:1px solid var(--line);border-radius:var(--r-card);background:linear-gradient(180deg,#1a201d,#121714);box-shadow:var(--shadow-in),var(--shadow-card)}
+.mixrow.strip{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 2px;border:0;border-radius:12px;background:transparent;box-shadow:none;min-width:0}
+.mixrow.strip.gtr{border:0;background:rgba(78,226,183,.06)}
+.strip output{font:600 11px var(--mono);color:var(--c);min-width:0;text-align:center}
+.strip .fader{position:relative;width:100%;height:150px}
+.strip .fader input{position:absolute;left:50%;top:50%;width:150px;transform:translate(-50%,-50%) rotate(-90deg)}
+.strip .meter{position:absolute;display:block;left:calc(50% + 11px);bottom:9px;top:9px;height:calc(100% - 18px);width:4px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
+.strip .meter i{position:absolute;display:block;left:0;right:0;top:0;bottom:0;height:auto;width:auto;margin:0;border-radius:0;transform-origin:bottom;transform:scaleY(0);transition:transform .09s linear;background:linear-gradient(to top,var(--c) 0%,var(--c) 70%,#FFE27A 88%,#FF6A4D 100%)}
+.strip b{font:700 11.5px var(--body);text-align:center;line-height:1.15;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.strip .ms{display:flex;flex-direction:column;gap:4px;width:100%;align-items:center}
+.strip .ms button{min-width:0;width:min(36px,100%);height:26px;font-size:11.5px}
+.mixrow.strip.off{opacity:.45}
+.mixrows.many .strip b{font-size:10px;letter-spacing:-.01em}.mixrows.many .strip output{font-size:10px}
+.mixrow.strip.off .fader input{filter:grayscale(1)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -1504,7 +1552,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
   <button type="button" data-sec="gear" data-tab="gear"><span data-pd="GEAR"></span><small>Gear</small></button>
 </nav>
 <div class="onb" id="onb" role="dialog" aria-label="Set up Guitaring" hidden></div>
-<div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><small class="mxbar-k" id="mxBarK">Now playing</small><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
+<div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><small class="mxbar-k"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="mxBarK">Now playing</span></small><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
@@ -4443,41 +4491,52 @@ async function mxStart(file){
 }
 // ---- live mixing: an audio worklet mixes all parts with the slider volumes ----
 const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;
-this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice()}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
+this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice();this.acc=new Float64Array(m.tracks.length);this.cnt=0}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
 process(_,outs){const o=outs[0],L=o[0],R=o[1]||o[0],n=L.length;L.fill(0);if(R!==L)R.fill(0);if(!this.on||!this.t.length)return true;
-for(let k=0;k<this.t.length;k++){let g=this.g[k];const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;L[i]+=a[2*q]*g/32768;R[i]+=a[2*q+1]*g/32768}this.g[k]=tg}
-this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n)this.port.postMessage({pos:this.p});return true}}
+for(let k=0;k<this.t.length;k++){let g=this.g[k],e=0;const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;const l=a[2*q]*g/32768,r=a[2*q+1]*g/32768;L[i]+=l;R[i]+=r;e+=l*l+r*r}this.g[k]=tg;this.acc[k]+=e}this.cnt+=n;
+this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n){this.port.postMessage({pos:this.p,lv:Array.from(this.acc,x=>Math.sqrt(x/(2*this.cnt||1)))});this.acc.fill(0);this.cnt=0}return true}}
 registerProcessor('gmix',M);`;
 const mxGains=()=>{const t=mxSong.tracks;return t.map(x=>{const on=mxSolo?mxSolo===x.id:!x.mute;return on?x.gain:0})};
 async function mxAudio(){
  if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:mxSR()});
  const url=URL.createObjectURL(new Blob([MX_WORKLET],{type:'text/javascript'}));await mxCtx.audioWorklet.addModule(url);
  mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
- mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}};
+ mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.lv)mxMeters(m.lv);if(m.ended){mxPlaying=false;mxPlayUI();mxMeters(null)}};
  // the worklet keeps its own copy of the parts; the phone keeps the saved copy for next time
  const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));
 }
 function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
 const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
 const mxFmt=n=>mmss(n/mxSR());
-function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)}mxBarTime()}
-function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'❚❚':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}});const k=$('mxBarK');if(k&&mxSong&&mxSong.tracks&&!mxBusy)k.textContent=mxBarWord()}
+function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;mxSeekUI()}mxBarTime()}
+// the progress bar's fill and the two times (where you are · how long the song is)
+function mxSeekUI(){const s=$('mxSeek');if(!s||!mxSong)return;const v=+s.value;s.style.setProperty('--p',(mxSong.len?v/mxSong.len*100:0)+'%');$('mxT').textContent=mxFmt(v);const d=$('mxD');if(d)d.textContent=mxFmt(mxSong.len)}
+// the level meters next to each fader: loudness in dB, falling back slowly like a desk's meters
+let mxLv=[];
+function mxMeters(lv){const els=document.querySelectorAll('#mxRows [data-lv]');els.forEach(el=>{const k=+el.dataset.lv,r=lv&&lv[k]||0,db=r>0?20*Math.log10(r):-99,t=Math.max(0,Math.min(1,(db+48)/45));
+ mxLv[k]=lv?Math.max(t,(mxLv[k]||0)*.72):0;el.style.transform=`scaleY(${mxLv[k].toFixed(3)})`})}
+function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'❚❚':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}});document.body.classList.toggle('mxon',!!mxPlaying);if(!mxPlaying)mxMeters(null);const k=$('mxBarK');if(k&&mxSong&&mxSong.tracks&&!mxBusy)k.textContent=mxBarWord()}
 const mxBarWord=()=>mxPlaying?'Now playing':mxPos>0?'Paused':'Ready to play';
 async function mxToggle(){if(!mxSong||!mxSong.tracks)return;await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=mxSong.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI();mxBarTime()}
 function mxPause(){try{if(mxPlaying&&mxNode){mxPlaying=false;mxNode.port.postMessage({play:false});mxPlayUI();mxBarTime()}}catch(e){}}
 const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars only'],['novox','No vocals']];
 function mxPreset(k){mxSolo=null;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':false;t.gain=1});mxRows();mxSend()}
 function mxSend(){if(mxNode)mxNode.port.postMessage({gains:mxGains()})}
-function mxRows(){const box=$('mxRows');if(!box)return;
- box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute;return `<div class="mixrow${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}"><b>${SK(MX_ICON[t.id]||'PART')} ${esc(t.name)}</b>
- <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo">S</button></div>
- <input type="range" min="0" max="150" step="5" value="${Math.round(t.gain*100)}" data-vol="${k}" aria-label="${esc(t.name)} volume"><output>${Math.round(t.gain*100)}%</output></div>`}).join('')}
+// one channel strip per part: its %, a fader with a live level meter, its name, Mute and Solo; each part has its own colour
+const MX_COLOR={guitar:'#4EE2B7',gL:'#4EE2B7',gC:'#8AF0D2',gR:'#26B98F',vocals:'#FF8C32',drums:'#FF5D8F',bass:'#6C8CFF',piano:'#B78CFF',other:'#E8D36A'};
+const MX_SHORT={guitar:'Guitars',gL:'Gtr L',gC:'Gtr C',gR:'Gtr R',vocals:'Vox',drums:'Drums',bass:'Bass',piano:'Keys',other:'Other'};
+function mxRows(){const box=$('mxRows');if(!box)return;box.style.setProperty('--n',mxSong.tracks.length);box.classList.toggle('many',mxSong.tracks.length>6);
+ box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute,v=Math.round(t.gain*100);return `<div class="mixrow strip${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}" style="--c:${MX_COLOR[t.id]||'#9AA0A6'}">
+ <output>${v}%</output><div class="fader"><i class="meter" aria-hidden="true"><i data-lv="${k}"></i></i><input type="range" min="0" max="150" step="5" value="${v}" data-vol="${k}" aria-label="${esc(t.name)} volume" style="--p:${(v/150*100).toFixed(1)}%"></div>
+ <b title="${esc(t.name)}">${esc(MX_SHORT[t.id]||t.name)}</b>
+ <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute ${esc(t.name)}">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo ${esc(t.name)}">S</button></div></div>`}).join('');mxLv=[]}
 // the open song: transport, presets, one slider per part; the list of songs folds away underneath
 function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome();
  const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length,n=mxIdx.length;
- v.innerHTML=`<div class="mixhead"><b dir="auto">${SK('MIX')} ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
- <div class="mixtrans"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button>
- <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
+ let nm=null;try{nm=songFromName(s.name)}catch(e){}if(!nm||!nm.t)nm={t:s.name,a:''};
+ v.innerHTML=`<div class="mixhead"><div class="mixttl"><small class="mixk"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Band breakdown</small><b dir="auto">${esc(nm.t)}</b>${nm.a?`<span dir="auto">${esc(nm.a)}</span>`:''}</div><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
+ <div class="mixtrans"><div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
+ <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
@@ -4487,9 +4546,10 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  $('mxClose').onclick=()=>mxView(false);
  $('mxPlay').onclick=mxToggle;
  $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
- const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(s.len)});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
+ $('mxFwd').onclick=()=>{mxPos=Math.min(s.len,mxPos+5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
+ const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;mxSeekUI()});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
- $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.nextElementSibling.textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
+ $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.style.setProperty('--p',(r.value/150*100).toFixed(1)+'%');r.closest('.strip').querySelector('output').textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
  $('mxRows').addEventListener('click',e=>{const m=e.target.closest('[data-mute]'),so=e.target.closest('[data-solo]');if(m){const t=s.tracks[+m.dataset.mute];t.mute=!t.mute;if(mxSolo===t.id)mxSolo=null}else if(so){const t=s.tracks[+so.dataset.solo];mxSolo=mxSolo===t.id?null:t.id}else return;mxRows();mxSend()});
  $('mxSave').onclick=()=>mxRender(mxGains(),'mix',b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=s.name+' (my mix).wav';toast(`${SK('OK')} Saved “${esc(s.name)} (my mix).wav” to your downloads.`,'ok');document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)});
  $('mxChords').onclick=()=>mxRender(s.tracks.map(t=>mxIsGtr(t.id)?1:0),'guitars',b=>{const f=new File([b],s.name+' (guitars).wav',{type:'audio/wav'});mxPause();mxView(false);
