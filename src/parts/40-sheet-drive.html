@@ -11,9 +11,8 @@ function renderLib(){
   const dr=e.drive?(e.drive.at>=e.saved?'<span class="badge">In Drive</span>':'<span class="badge old">Drive copy older</span>'):'';
   return `<button class="libitem" data-id="${esc(e.id)}"><b dir="auto">${esc(e.name)}${dr}</b><span>${d.artist?`<span dir="auto">${esc(d.artist)}</span> · `:''}${esc(t)} · saved ${fmtDate(e.saved)}</span></button>`}).join('')
   :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
- // with a Drive folder button the list stays tucked away; without one it's the main view
- const hasFolder=!$('folderBtn').hidden;$('libCount').textContent=l.length?'('+l.length+')':'';
- $('libSaved').hidden=hasFolder&&!l.length;const ls=$('libSaved');if(!hasFolder)ls.open=true;else if(!ls._mine)ls.open=false;$('libSaved').classList.toggle('flat',!hasFolder);
+ // V2: a box in My Library, closed until opened (it was the main Songs view in V1 when no Drive folder was linked)
+ $('libCount').textContent=l.length?'('+l.length+')':'';$('libSaved').hidden=false;const ls=$('libSaved');if(!ls._mine)ls.open=false;ls.classList.remove('flat');
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
@@ -75,7 +74,7 @@ function sheetHTML(print){
  return h;
 }
 function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
-function showSheet(){
+function showSheet(){if($('paneSong').hidden)setTab('song');
  wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
  const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');try{renderSheetVid()}catch(e){}window.scrollTo({top:0});

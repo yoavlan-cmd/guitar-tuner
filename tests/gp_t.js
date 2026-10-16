@@ -23,7 +23,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
    {id:'a1',type:'elamp',name:'Katana',brand:'Boss',model:'Katana 50',specs:{ampkind:'modeling'}},
    {id:'o1',type:'electric',name:'Old one',brand:'Fender',model:'Strat',specs:{pickups:'single'},photo,ctlPhoto:photo,ctlPos:{'Output jack':[.5,.5]}}]))});
  const open=async id=>{await p.tap('[data-tab=tune]');await p.tap('[data-tab=gear]');if(await p.$('#iBack'))await p.tap('#iBack');await p.tap(`[data-open=${id}]`);await p.waitForTimeout(250)};
- await p.goto(APP);await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
  // Overview: strip with the main photo and "Add photos"; add two more
  await open('m1');
  ok((await p.$$('.gphead [data-ovp]')).length===1&&!!await p.$('.gphead .gpadd'),'Overview shows the photo strip with "Add photos"');
@@ -31,7 +31,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok((await p.$$('.gphead [data-ovp]')).length===3,'two more photos added (3 in the strip)');
  const big=await p.$eval('.iphotobig',e=>e.src.length);await p.tap('.gphead [data-ovp]:nth-child(1)');ok(await p.$eval('.iphotobig',e=>e.src.length)!==big,'tapping a photo in the strip shows it big');
  // they live on the phone (IndexedDB) and come back after reopening the app
- await p.reload();await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');await open('m1');await p.waitForTimeout(400);
+ await p.reload();await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});await open('m1');await p.waitForTimeout(400);
  ok((await p.$$('.gphead [data-ovp] img')).length===3,'all three photos are back after reopening the app');
  const meta=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.instruments'))[0].photos);ok(Array.isArray(meta)&&meta.length===2&&!JSON.stringify(meta).includes('data:'),'only small photo ids are kept in quick storage, the images go to the phone database');
  // Controls: strip, place a mark on photo 2, list says "photo 2", tapping it from photo 1 switches photos
@@ -43,7 +43,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('.ctllist li[data-c="5"]');await p.waitForTimeout(150);
  ok(await p.$eval('[data-gph]:nth-child(2)',e=>e.getAttribute('aria-pressed'))==='true'&&(await p.$$('#ctlPhoto .pb.on')).length===1,'tapping the jack in the list jumps to photo 2 and highlights it');
  // Claude sees all photos and adds a control it found that wasn't listed (duplicates ignored)
- await p.evaluate(()=>localStorage.setItem('tuner.apiKey','"sk-test"'));await p.reload();await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');await open('m1');await p.tap('[data-gt=controls]');await p.waitForTimeout(300);
+ await p.evaluate(()=>localStorage.setItem('tuner.apiKey','"sk-test"'));await p.reload();await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});await open('m1');await p.tap('[data-gt=controls]');await p.waitForTimeout(300);
  ok(/Find them on my photos/.test(await p.$eval('#ctlFind',e=>e.textContent))||/Find them again/.test(await p.$eval('#ctlFind',e=>e.textContent)),'"Find them on my photos" is offered');
  await p.tap('#ctlFind');await p.waitForSelector('#ctlMsg:has-text("Claude marked")',{timeout:5000}).catch(()=>{});const msg=await p.$eval('#ctlMsg',e=>e.textContent);console.log('msg:',msg);
  ok(nImages===3,`all three photos were sent (${nImages})`);

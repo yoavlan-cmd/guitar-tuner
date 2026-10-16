@@ -66,6 +66,6 @@ function renderWelcome(){
 }
 function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'||go==='song'){setTab('song');songsHome();if(go==='write'){const t=$('shotNew');if(t&&!t.hidden){setTimeout(()=>{t.scrollIntoView({behavior:'smooth',block:'center'});['shotNew','writeNew','draftCard'].forEach(k=>{const e=$(k);if(e&&!e.hidden){e.classList.add('pulse');setTimeout(()=>e.classList.remove('pulse'),1600)}})},80)}}}else if(go)setTab(go)}
 $('welcome').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){const g=b.dataset.go;closeWelcome(g);if(g==='song'||g==='write')setSongSeg('add')}});
-$('wSkip').onclick=()=>closeWelcome('');
-document.body.classList.add('wopen');renderWelcome();
+{const ws=document.querySelector('#welcome .wskip');if(ws)ws.onclick=()=>closeWelcome('')}
+// V2: the app opens on Home (90-v2-shell), which shows the greeting and the jokes; this overlay is no longer shown
 

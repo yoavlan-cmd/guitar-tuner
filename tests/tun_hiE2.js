@@ -14,7 +14,7 @@ const PL=+(process.env.PL||1),DET=+(process.env.DET||30),LV=+(process.env.LV||1)
     // other open strings ring along a little (B3, G3 from the A2 sample re-pitched, and low E)
     if(SYM)for(const m of [59,55,40]){const r=440*Math.pow(2,(m-69)/12)/110;const s2=ac.createBufferSource();s2.buffer=A;s2.playbackRate.value=r;const g2=ac.createGain();g2.gain.value=LV*SYM;s2.connect(g2);g2.connect(hp);s2.start(t0+t+.02);s2.stop(t0+t+PL+.4)}}
    return dst.stream}},[e4,a2,PL,DET,LV,SYM,NF,NOISE]);
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});await p.evaluate(()=>window.__v2&&window.__v2.goSec('tuner'));
  await p.click('#listen');const tr=[];let stop='';
  for(let k=0;k<36;k++){await p.waitForTimeout(500);const s=await p.evaluate(()=>[document.getElementById('listen').classList.contains('on'),document.getElementById('note').textContent,document.getElementById('cents').textContent,document.getElementById('status').textContent]);if(!s[0]){stop=s[3];break}if(k%2==0)tr.push(s[1]+' '+s[2])}
  const PLG=await p.evaluate(()=>window.__plog.slice(-3));const T=await p.evaluate(()=>{const L=window.__tlog;const n=L.length;const cl=L.filter(x=>x[4]>=.85).length;const loud=L.filter(x=>x[1]>=x[2]).length;return {n,clear:cl,aboveGate:loud,gate:L[n-1]&&L[n-1][2],rmsMax:Math.max(...L.map(x=>x[1]))}});

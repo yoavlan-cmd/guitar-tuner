@@ -96,7 +96,7 @@ function renderSheetVid(){const box=$('shVid');if(!box)return;if(!A){box.hidden=
  box.hidden=!vs.length;box.innerHTML=vs.map(v=>`<a class="shvid" href="${esc(v.url)}" target="_blank" rel="noopener"><i>${SK('LESSON')}</i><span><b>Your video lesson for this song</b><small dir="auto">${esc(v.song||v.title)}${v.artist?' · '+esc(v.artist):''} · ${esc(v.src||vlSource(v.url))} ↗</small></span></a>`).join('')}
 // shared from YouTube (Share › Guitaring) or opened with ?url=…
 (function vlShared(){try{const q=new URLSearchParams(location.search),u=firstUrl([q.get('url'),q.get('text'),q.get('title')].join(' '));if(!u)return;
- history.replaceState(null,'',location.pathname);setTimeout(()=>{try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e){}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
+ history.replaceState(null,'',location.pathname);window.__shared=true;setTimeout(()=>{try{goSec('library')}catch(e){try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e2){}}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
 setTimeout(renderVids,0);
 // screenshots are lined up in order first (top of the song first), then read together
 let shotStage=[];const SHOT_MAX=8;

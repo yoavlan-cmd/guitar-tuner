@@ -19,7 +19,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   localStorage.setItem('tuner.userName','"Yoav"');
   localStorage.setItem('tuner.instruments',JSON.stringify([{id:'a1',type:'elamp',name:'Catalyst',brand:'Boss',model:'Catalyst 100',specs:{ampkind:'modeling'},photo,photos:[{id:'gback',at:1}],controls,ctlPos}]));
   window.__back=back});
- await p.goto(APP);await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
  await p.evaluate(async()=>{await window.__mxTest.put('gearphoto:gback',window.__back)});
  await p.tap('[data-tab=gear]');await p.tap('[data-open=a1]');await p.waitForTimeout(400);await p.tap('[data-gt=controls]');await p.waitForTimeout(400);
  // where each number sits: the ring centre + its offset

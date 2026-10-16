@@ -304,8 +304,8 @@ let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=nul
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t==='tune'){try{mxPause()}catch(e){}}if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
-$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setTab(b.dataset.tab);if(b.dataset.tab==='song')songsHome()});
+function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';try{v2Hide()}catch(e){}if(t==='tune'){try{mxPause()}catch(e){}}if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause();try{v2After(t)}catch(e){}}
+// V2: the old tab bar is gone; sections are opened by goSec (90-v2-shell)
 // the Songs tab always opens on the Songs home page; whatever you were in the middle of is kept (draft card or a "back to" button)
 let songsResume=null;
 function songsHome(){
@@ -330,10 +330,10 @@ function renderResume(){
   if(x.view==='sheet'){A=x.A;fileKey=x.fileKey||fileKey;showSheet()}else if(x.view==='song'){A=x.A;showSong(false)}
   else{['drop','writeNew','draftCard','shotNew','shotCard','libCard'].forEach(k=>$(k).hidden=true);$('readyCard').hidden=false}window.scrollTo({top:0})};
 }
-// Songs home has two parts: My library (default) and Add a song
-function setSongSeg(v){v=v==='add'?'add':'lib';const p=$('paneSong');if(!p)return;p.dataset.seg=v;[...$('songSeg').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v))}
+// the Songs pane is two sections: Learn (your songs, ideas, a song video) and Write (sheets, screenshots/PDF, chord finder); old names: lib = learn, add = write
+function setSongSeg(v){v=v==='add'||v==='write'?'write':'learn';const h=$('songSech');if(h)h.textContent=v==='write'?'Write':'Learn';try{v2SegChanged(v)}catch(e){}const p=$('paneSong');if(!p)return;p.dataset.seg=v;[...$('songSeg').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v))}
 $('songSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSongSeg(b.dataset.s);window.scrollTo({top:0})});
-setSongSeg('lib');
+setSongSeg('learn');
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
@@ -350,7 +350,7 @@ $('vidIn').addEventListener('change',async e=>{
  showReady(file);
 });
 $('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
-function showReady(file){
+function showReady(file){if($('paneSong').hidden)setTab('song');
  $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
@@ -368,7 +368,7 @@ $('analyseBtn').onclick=()=>runAnalysis(curFile);
 $('preRead').addEventListener('change',e=>store.set('readScreen2',e.target.checked));
 $('preListen').checked=store.get('detailListen',true);$('preListen').addEventListener('change',e=>store.set('detailListen',e.target.checked));
 function setReadTxt(){$('preReadTxt').textContent=claudeReads()?'Also check the video: chords written on screen and the guitarist’s hand (Claude)':'Also read chord names written in the video'}
-async function runAnalysis(file){
+async function runAnalysis(file){if($('paneSong').hidden)setTab('song');
  if(!file)return;const pre=$('preTun').value,wantRead=!$('preReadWrap').hidden&&$('preRead').checked;
  const listen=store.get('detailListen',true),steps=['Read the sound'].concat(listen?['Listen to every note (AI model on this phone)']:[],['Find chords and tuning']).concat(wantRead?[claudeReads()?'Check the video: written chords and hand shapes':'Read chord names shown in the video','Match the timeline to the video']:[]);
  $('readyCard').hidden=true;songMsg('');prog(.03,'Reading the sound…');setSteps(steps,0);
@@ -402,7 +402,7 @@ async function runAnalysis(file){
   songMsg(err&&err.name==='EncodingError'||err&&/decode/i.test(err.message||'')?'This file’s sound couldn’t be read. Try an MP4 or M4A file.':'Something went wrong while analysing. The file may be too long or too large for this phone; try a shorter clip.');
  }
 }
-function showSong(fromSave){
+function showSong(fromSave){if($('paneSong').hidden)setTab('song');
  $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
@@ -877,8 +877,8 @@ $('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg(''
 $('songNotes').addEventListener('change',e=>{A.notes=e.target.value.trim();saveSong()});
 $('finish').onclick=()=>{vid.pause();A.notes=$('songNotes').value.trim();saveSong();showSheet()};
 /* better versions */
-const DEFAULT_TASTE='Acoustic versions. Israeli rock and 1990s–2000s alternative rock (e.g. Mashina, Aviv Gefen, Radiohead, Pearl Jam, Oasis).';
-$('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('change',e=>store.set('taste',e.target.value));
+// the player's taste comes from their own words here, else from their profile (no built-in taste: every player starts neutral)
+$('taste').value=store.get('taste','');$('taste').addEventListener('change',e=>store.set('taste',e.target.value));
 function renderLinks(){const t=(A&&A.title)||'';if(!t){$('links').innerHTML='<p class="tip">Type the song name above to get search links.</p>';return}
  const q=[['Acoustic',t+' acoustic'],['Unplugged / live',t+' unplugged live'],['Guitar lesson',t+' guitar lesson'],['Acoustic cover',t+' acoustic cover']];
  $('links').innerHTML=q.map(([l,s])=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(s)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}
@@ -947,7 +947,7 @@ Detected tuning: ${tName(A.tuning.id)} (${A.tuning.conf} confidence). Reason: ${
 Recording pitch offset from A440: ${A.offset} cents.
 Chord timeline (chord shapes as played in the tuning and capo above, start time in seconds): ${line}
 Share of time per chord: ${Object.entries(tot).sort((a,b)=>b[1]-a[1]).map(([n,d])=>n+' '+Math.round(d/sum*100)+'%').join(', ')}
-Player's taste: ${$('taste').value||DEFAULT_TASTE}
+Player's taste: ${$('taste').value||profTaste()||'not given'}
 
 Tasks:
 1. Identify the song from the title if you can; otherwise use null. Don't guess wildly.

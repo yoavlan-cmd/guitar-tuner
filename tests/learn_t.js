@@ -17,7 +17,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   S('lib',[{id:'l1',name:'עד מתי',saved:Date.now()-9000,data:{kind:'lyrics',title:'עד מתי',artist:'אביתר בנאי',lc:[{t:'שלום',ch:{0:'Am'}}],segs:[],play:{tun:'std',capo:0}}}]);
   S('ideas',{at:Date.now(),src:'daily',date:'2026-10-13',level:'',list:[{title:'Creep',artist:'Radiohead',style:'Rock',difficulty:2,chords:['G','B','C','Cm'],capo:0,tuning:'Standard',why:'x'}]});
  });
- await p.goto(APP);await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
  // a practice-mixer split named the way files usually are: "Artist - Song"
  await p.evaluate(async()=>{const M=window.__mxTest;await M.put('mixdata:m1',{len:10,sr:44100,tracks:[]});M.add({id:'m1',name:'Green Day - Good Riddance',at:Date.now(),src:'cloud',state:'ready'})});
  await p.tap('[data-tab=song]');await p.waitForTimeout(300);
@@ -51,8 +51,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // suggestions sit in their own card, closed; the Add part hides both
  ok(await p.$eval('#suggCard',e=>getComputedStyle(e).display!=='none'&&!!e.querySelector('#ideaBox')&&!e.querySelector('#ideaBox').open),'suggestions are their own card, closed until opened');
  ok(!(await p.$eval('#ideaBox',e=>e.innerHTML)).includes('data-unwant'),'suggestions no longer repeat the I\'m learning list');
- await p.tap('#songSeg [data-s=add]');ok(await p.$eval('#libCard',e=>getComputedStyle(e).display==='none')&&await p.$eval('#suggCard',e=>getComputedStyle(e).display==='none'),'Add a song hides the library and the suggestions');
- await p.tap('#songSeg [data-s=lib]');
+ await (await p.$('#bnav')?p.tap('#bnav [data-sec=write]'):p.tap('#songSeg [data-s=add]'));ok(await p.$eval('#libCard',e=>getComputedStyle(e).display==='none')&&await p.$eval('#suggCard',e=>getComputedStyle(e).display==='none'),'Write (Add a song before V2) hides the library and the suggestions');
+ await (await p.$('#bnav')?p.tap('#bnav [data-sec=learn]'):p.tap('#songSeg [data-s=lib]'));
  await p.screenshot({path:path.join(__dirname,'out','learn.png'),fullPage:true});
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();

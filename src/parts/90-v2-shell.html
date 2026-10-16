@@ -1,0 +1,194 @@
+/* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
+// Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
+// My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
+var curSec='home',secBack='home';
+var V2P=['paneHome','paneJam','paneLib','paneProfile'],V1P=['paneTune','paneSong','paneChords','paneGear'];
+var PAGES=['tuner','library','profile','chords'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
+function v2Hide(){V2P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
+function v1Hide(){try{if(listening)stopListening()}catch(e){}try{if(!vid.paused)vid.pause()}catch(e){}V1P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
+function v2Mark(s){curSec=s;document.body.dataset.cursec=s;
+ const tab=PAGES.includes(s)?'':s;document.querySelectorAll('#bnav [data-sec]').forEach(b=>b.setAttribute('aria-current',b.dataset.sec===tab?'page':'false'));
+ document.querySelectorAll('.hicons [data-sec]').forEach(b=>b.setAttribute('aria-current',b.dataset.sec===s?'page':'false'))}
+// called by setTab (V1 code keeps calling setTab('song') etc.): which section that is
+function v2After(t){const s=t==='tune'?'tuner':t==='chords'?'chords':t==='gear'?'gear':($('paneSong').dataset.seg==='write'?'write':'learn');v2Mark(s)}
+function v2SegChanged(v){if(!$('paneSong').hidden)v2Mark(v)}
+function goSec(s,opt){opt=opt||{};if(s===curSec&&!opt.force&&s!=='learn'&&s!=='write'){window.scrollTo({top:0});return}
+ const from=curSec;
+ if(PAGES.includes(s)&&!PAGES.includes(from))secBack=from;
+ if(s==='learn'||s==='write'){setTab('song');songsHome();setSongSeg(s)}
+ else if(s==='gear')setTab('gear');
+ else if(s==='tuner')setTab('tune');
+ else if(s==='chords')setTab('chords');
+ else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile'}[s];if(!id)return goSec('home');$(id).hidden=false;
+  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile()}
+ v2Mark(s);window.scrollTo({top:0});
+ // a header page can be closed with the phone's back button
+ if(PAGES.includes(s)&&!opt.fromPop){try{if(history.state&&history.state.gpage)history.replaceState({gpage:s},'');else history.pushState({gpage:s},'')}catch(e){}}}
+function pageClose(){if(history.state&&history.state.gpage===curSec)history.back();else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})}
+addEventListener('popstate',e=>{if(!PAGES.includes(curSec))return;const st=e.state||{};if(st.gpage===curSec)return;
+ if(st.gpage&&PAGES.includes(st.gpage))goSec(st.gpage,{fromPop:true});else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(b&&!b.closest('#onb')){e.preventDefault();goSec(b.dataset.sec,{force:b.closest('#bnav')&&b.dataset.sec==='home'})}
+ else if(e.target.closest('[data-back]'))pageClose()});
+// ---- Home ----
+function homeName(){const p=profGet();return p.name||store.get('userName','')}
+function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
+ h.innerHTML=`<p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><p class="hjoke" id="hJoke" dir="auto">${j}</p><button type="button" class="hmore" id="hMore">Another one ↻</button>`;
+ $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'))};
+ // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
+ const c=[],p=profGet();
+ try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
+ try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
+ if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
+ const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
+ box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}
+// ---- Jam: Band breakdown + the jam tracks list ----
+function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mixNew')){const m=$('mixNew');if(m)g.appendChild(m);
+  const o=document.createElement('button');o.type='button';o.className='drop write addtile';o.id='jamOpen';o.innerHTML=`<i aria-hidden="true">${SK('MIX')}</i><b>Jamming player</b><span class="sub">Open the player with your parts</span>`;o.onclick=()=>{mxView(true);if(!mxBusy)mxSheetUI2()};g.appendChild(o)}
+ try{renderMixNew()}catch(e){}
+ const l=$('jamList');if(!l)return;const L=(mxIdx||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
+ const st=x=>x.state==='ready'?'Ready':x.state==='failed'?'Didn’t work':'Splitting…';
+ l.innerHTML=L.length?`<p class="libsub">My jam tracks</p>`+L.map(x=>`<button type="button" class="jrow ${x.state}" data-jid="${esc(x.id)}"><b dir="auto">${esc(x.name||'Song')}</b><small>${st(x)}</small></button>`).join(''):'<p class="tip">No songs yet. Tap Band breakdown to split your first song into its parts.</p>';
+ l.querySelectorAll('[data-jid]').forEach(b=>b.onclick=()=>{const it=mxIdx.find(x=>x.id===b.dataset.jid);mxView(true);if(it&&it.state==='ready')mxOpen(it.id);else if(!mxBusy)mxSheetUI2()})}
+// ---- My Library: the V1 lists, gathered ----
+function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox','vidBox','libSaved'].forEach(id=>{const e=$(id);if(e)h.appendChild(e)});h.dataset.moved='1'}
+ const s=$('libJamSub');if(s){const r=(mxIdx||[]).filter(x=>x.state==='ready').length;s.textContent=r?`${r} song${r>1?'s':''} ready to play`:'Band breakdown songs'}}
+// ---- profile (tuner.profile) ----
+const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
+function profGet(){const p=store.get('profile',null)||{};return {...JSON.parse(JSON.stringify(PROF_DEF)),...p,time:{...PROF_DEF.time,...(p.time||{})},onboarding:{...PROF_DEF.onboarding,...(p.onboarding||{})}}}
+// saving the profile also feeds the V1 places that read the same things (greeting name, song-idea language)
+function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
+ // only the language, and only when it changed (V1 data is never rewritten otherwise)
+ if(p.songLang&&p.songLang.length){const lang=p.songLang.length>1?'both':p.songLang[0],ip=store.get('ideaPrefs',null)||{};if(ip.lang!==lang)store.set('ideaPrefs',{...ip,lang})}}
+// the player's taste for Claude prompts, in words, from the profile
+function profTaste(){const p=profGet(),g=p.genres.map(x=>(OB_OPTS.genres.find(o=>o[0]===x)||[0,x])[1]);return [g.length?'Genres: '+g.join(', '):'',p.artists.length?'Artists: '+p.artists.join(', '):'',p.dreamSongs.length?'Dream songs: '+p.dreamSongs.join(', '):''].filter(Boolean).join('. ')}
+const OB_OPTS={
+ songLang:[['he','Hebrew'],['en','English']],
+ years:[['<1','Less than a year'],['1-3','1–3 years'],['3-10','3–10 years'],['10+','10 years or more']],
+ level:[['beginner','Beginner'],['improving','Improving'],['intermediate','Intermediate'],['advanced','Advanced']],
+ skills:[['open','Open chords'],['barre','Barre chords'],['power','Power chords'],['strum','Strumming patterns'],['fingerpick','Fingerpicking'],['legato','Hammer-ons and slides'],['bends','Bends'],['tab','Reading tab']],
+ instruments:[['acoustic','Acoustic'],['electric','Electric'],['classical','Classical'],['bass','Bass']],
+ genres:[['israeli-rock','Israeli rock'],['israeli-pop','Israeli pop'],['mizrahi','Mizrahi'],['hebrew-sw','Hebrew singer-songwriter'],['classic-rock','Classic rock'],['alt-rock','Alternative and indie'],['pop','Pop'],['folk','Folk and acoustic'],['blues','Blues'],['metal','Metal'],['punk','Punk'],['reggae','Reggae'],['jazz','Jazz'],['country','Country']],
+ goals:[['campfire','Play around the campfire'],['sing-along','Accompany myself singing'],['band','Play in a band'],['write','Write my own songs'],['technique','Improve my technique'],['theory','Learn theory']],
+ learnBy:[['video','Videos'],['sheets','Chord sheets'],['tabs','Tabs'],['ear','By ear']],
+ minPerDay:[[10,'10 min'],[20,'20 min'],[30,'30 min'],[60,'An hour']],
+ daysPerWeek:[[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6'],[7,'7']],
+ context:[['alone','Alone'],['friends','With friends or family'],['stage','On stage']]};
+// M1: an existing player's profile, filled from what the app already knows (only reads V1 data)
+function v1HasData(){return !!(store.get('userName','')||(store.get('instruments',[])||[]).length||(store.get('lib',[])||[]).length||(store.get('vlinks',[])||[]).length||(store.get('sheetCat',[])||[]).length||(store.get('sheetIndex',[])||[]).length||((store.get('songIndex',null)||{}).songs||[]).length)}
+function profPrefill(){const p=JSON.parse(JSON.stringify(PROF_DEF)),filled=[];
+ const n=store.get('userName','');if(n){p.name=n;filled.push('name')}
+ const ip=store.get('ideaPrefs',null);if(ip&&ip.lang){p.songLang=ip.lang==='both'?['he','en']:[ip.lang];filled.push('songLang')}
+ const it=(store.get('instruments',[])||[]).map(x=>x&&x.type),ins=new Set();it.forEach(t=>{if(t==='acoustic'||t==='electroacoustic')ins.add('acoustic');if(t==='electric')ins.add('electric');if(t==='classical')ins.add('classical');if(t==='bass')ins.add('bass')});
+ if(ins.size){p.instruments=[...ins];filled.push('instruments')}
+ // artists: the Drive songs folder (most songs first) and the bands chosen for song ideas
+ const ix=store.get('songIndex',null),cnt={};((ix&&ix.songs)||[]).forEach(s=>{if(s&&s.a)cnt[s.a]=(cnt[s.a]||0)+1});
+ const arts=[...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...((ip&&ip.bands)||[])])].slice(0,12);if(arts.length){p.artists=arts;filled.push('artists')}
+ // level: the daily job's sentence, else the chords in your sheets
+ const lv=((store.get('ideas',null)||{}).level||'').toLowerCase();let level=/advanced/.test(lv)?'advanced':/intermediate/.test(lv)?'intermediate':/beginner/.test(lv)?'beginner':'';
+ const sh=[...(store.get('sheetIndex',[])||[]),...(store.get('sheetCat',[])||[])],lvs=sh.map(x=>+x.level||0).filter(Boolean);
+ if(!level&&lvs.length>=3){const a=lvs.reduce((x,y)=>x+y,0)/lvs.length;level=a>=3.6?'advanced':a>=2.4?'intermediate':'improving'}
+ if(level){p.level=level;filled.push('level')}
+ const chs=new Set(sh.flatMap(x=>x.chords||[]));if(chs.size){const sk=['open'];if([...chs].some(c=>!OPEN_CH.has(String(c).split('/')[0])))sk.push('barre');p.skills=sk;filled.push('skills')}
+ p.onboarding.prefilled=filled;return p}
+async function v2MigM1(){const log=store.get('v2mig',{done:[]})||{done:[]};if((log.done||[]).includes('M1')||store.get('profile',null))return;
+ const snap=()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(KP)&&!/\.(profile|v2mig)$/.test(k))o[k]=localStorage.getItem(k)}return JSON.stringify(o)};
+ // build and check in one go (nothing else runs in between): M1 only reads V1 data
+ const before=snap(),existing=v1HasData(),p=existing?profPrefill():JSON.parse(JSON.stringify(PROF_DEF));
+ if(snap()!==before){log.warn='M1: V1 data changed while building the profile; not written';store.set('v2mig',log);return}
+ if(existing){try{await safetyCopy('M1')}catch(e){}}
+ if(store.get('profile',null))return;// written meanwhile (another tab)
+ store.set('profile',p);log.done=[...(log.done||[]),'M1'];log.at=Date.now();log.report={...(log.report||{}),M1:{existing,prefilled:p.onboarding.prefilled||[]}};store.set('v2mig',log)}
+// ---- onboarding: about 2–3 minutes, every screen can be skipped, "Finish later" any time ----
+const OB_STEPS=[
+ {k:'hello',f:[]},
+ {k:'about',t:'About you',f:['name','songLang']},
+ {k:'playing',t:'Your playing',f:['years','level']},
+ {k:'check',t:'Quick check',f:['skills']},
+ {k:'instr',t:'Your instruments',f:['instruments']},
+ {k:'music',t:'Music you love',f:['genres','artists','dreamSongs']},
+ {k:'goals',t:'Your goals',f:['goals']},
+ {k:'learn',t:'How you learn',f:['learnBy','time','context']},
+ {k:'done',t:'Here’s what Guitaring will do for you',f:[]}];
+let ob=null;// {d: draft profile, steps: [indexes], i: position}
+const obEmpty=(d,f)=>f==='time'?!(d.time.minPerDay&&d.time.daysPerWeek):Array.isArray(d[f])?!d[f].length:!d[f];
+function openOnb(all){const d=profGet();
+ // an existing player sees only the screens with something missing (all of them when editing from My profile)
+ const steps=OB_STEPS.map((s,i)=>i).filter(i=>{const s=OB_STEPS[i];return all||!s.f.length||s.f.some(f=>obEmpty(d,f))});
+ ob={d,steps,i:all?1:0,all:!!all};document.body.classList.add('wopen');$('onb').hidden=false;obRender()}
+function obClose(done){const d=ob.d;d.onboarding.at=new Date().toISOString();if(done){d.onboarding.done=true;d.onboarding.later=false}else d.onboarding.later=true;
+ profSet(d);ob=null;$('onb').hidden=true;$('onb').innerHTML='';document.body.classList.remove('wopen');if(curSec==='home')renderHome();if(curSec==='profile')renderProfile()}
+function obChips(field,opts,multi,cur){return `<div class="obchips" data-f="${field}" data-multi="${multi?1:0}">${opts.map(([v,l])=>`<button type="button" class="obchip" data-v="${esc(String(v))}" aria-pressed="${multi?cur.map(String).includes(String(v)):String(cur)===String(v)}">${esc(l)}</button>`).join('')}</div>`}
+function obSummary(d){const L=[],nm=(k,v)=>(OB_OPTS[k].find(o=>o[0]===v)||[0,v])[1];
+ const lang=d.songLang.length===2?'Hebrew and English':d.songLang.length?nm('songLang',d.songLang[0]):'';
+ const taste=[...d.genres.slice(0,3).map(g=>nm('genres',g)),...d.artists.slice(0,3)];
+ L.push(`Song ideas ${lang?`in ${lang} `:''}${taste.length?`around ${taste.join(', ')}`:'matched to your taste'}${d.level?`, at your level (${nm('level',d.level).toLowerCase()})`:''}.`);
+ if(d.level)L.push(`Song guides open on the ${['beginner','improving'].includes(d.level)?'easy':'full'} version first (song guides are coming in a later update).`);
+ if(d.goals.length)L.push(`Suggestions that help you ${d.goals.slice(0,2).map(g=>nm('goals',g).toLowerCase()).join(' and ')}.`);
+ if(d.instruments.length)L.push(`Gear tips for your ${d.instruments.map(x=>nm('instruments',x).toLowerCase()).join(' and ')} guitar${d.instruments.length>1?'s':''} (coming soon).`);
+ if(d.time.minPerDay)L.push(`Practice ideas that fit ${nm('minPerDay',d.time.minPerDay).toLowerCase()} a day${d.time.daysPerWeek?`, ${d.time.daysPerWeek} day${d.time.daysPerWeek>1?'s':''} a week`:''}.`);
+ return L}
+function obRender(){const box=$('onb'),pos=ob.i,si=ob.steps[pos],st=OB_STEPS[si],d=ob.d,n=ob.steps.length,last=pos===n-1;
+ const pct=Math.round(pos/(n-1)*100);let body='';
+ if(st.k==='hello')body=`<h2>Let’s set up Guitaring for you</h2><p>A few quick questions so the app fits <b>your</b> level, your music and the gear you own. About 2 minutes. Skip anything you like.</p>
+  ${d.onboarding.prefilled&&d.onboarding.prefilled.length?'<p>Some answers are already filled in from what Guitaring knows. Check them as you go.</p>':''}
+  <p class="obpriv">${SK('PROFILE')} <span><b>Your answers stay on this phone.</b> They only go to your own Google Drive or your private GitHub repository if you turn on backup. Nothing is sent anywhere else.</span></p>`;
+ else if(st.k==='about')body=`<label class="oblab">Your first name <input id="obName" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" value="${esc(d.name)}" placeholder="Your first name"></label>
+  <p class="oblab">Songs in</p>${obChips('songLang',OB_OPTS.songLang,true,d.songLang)}<p class="tip">Pick both for a mix.</p>`;
+ else if(st.k==='playing')body=`<p class="oblab">Playing for</p>${obChips('years',OB_OPTS.years,false,d.years)}<p class="oblab">Your level</p>${obChips('level',OB_OPTS.level,false,d.level)}`;
+ else if(st.k==='check')body=`<p>Instead of guessing a level: tick what you can already play.</p>${obChips('skills',OB_OPTS.skills,true,d.skills)}`;
+ else if(st.k==='instr'){const g=(store.get('instruments',[])||[]).filter(x=>x&&x.name);body=`<p>What do you play?</p>${obChips('instruments',OB_OPTS.instruments,true,d.instruments)}${g.length?`<p class="tip">In Gear already: ${esc(g.map(x=>x.name).join(', '))}.</p>`:'<p class="tip">You can add your guitars and amps in Gear any time.</p>'}`}
+ else if(st.k==='music'){const ix=store.get('songIndex',null),sug=[...new Set([...d.artists,...(((ix&&ix.artists)||[]))])].slice(0,18);
+  body=`<p class="oblab">Genres you love</p>${obChips('genres',OB_OPTS.genres,true,d.genres)}
+  <p class="oblab">Favourite artists and bands</p>${obChips('artists',sug.map(a=>[a,a]),true,d.artists)}<input id="obArtist" class="textin" type="text" dir="auto" placeholder="Add an artist, then Enter">
+  <p class="oblab">Songs you’d love to play one day</p>${obChips('dreamSongs',d.dreamSongs.map(a=>[a,a]),true,d.dreamSongs)}<input id="obDream" class="textin" type="text" dir="auto" placeholder="Song – artist, then Enter">`}
+ else if(st.k==='goals')body=`<p>What do you want guitar for? Pick any.</p>${obChips('goals',OB_OPTS.goals,true,d.goals)}`;
+ else if(st.k==='learn')body=`<p class="oblab">How you like to learn</p>${obChips('learnBy',OB_OPTS.learnBy,true,d.learnBy)}
+  <p class="oblab">Time to play, a day</p>${obChips('minPerDay',OB_OPTS.minPerDay,false,d.time.minPerDay)}
+  <p class="oblab">Days a week</p>${obChips('daysPerWeek',OB_OPTS.daysPerWeek,false,d.time.daysPerWeek)}
+  <p class="oblab">You play</p>${obChips('context',OB_OPTS.context,true,d.context)}`;
+ else if(st.k==='done'){const L=obSummary(d);body=`<ul class="obsum">${L.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="tip">Change any answer later in <b>My profile</b> (top right).</p>`}
+ box.innerHTML=`<div class="obcard"><div class="obtop"><div class="obprog" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div><button type="button" class="oblater" id="wSkip">${ob.all?'Close':'Finish later'}</button></div>
+  ${st.t&&st.k!=='hello'?`<h2>${esc(st.t)}</h2>`:''}<div class="obbody">${body}</div>
+  <div class="obfoot">${pos>0?'<button type="button" class="btn ghost" id="obBack">Back</button>':'<span></span>'}${!last&&st.k!=='hello'?'<button type="button" class="btn ghost" id="obSkip">Skip</button>':''}<button type="button" class="btn cta" id="obNext">${st.k==='hello'?'Start':last?'Done':'Next'}</button></div></div>`;
+ const keep=()=>{const nm=$('obName');if(nm)d.name=nm.value.trim()};
+ box.querySelectorAll('.obchips').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('.obchip');if(!b)return;const f=g.dataset.f,multi=g.dataset.multi==='1',raw=b.dataset.v,v=/^\d+$/.test(raw)&&(f==='minPerDay'||f==='daysPerWeek')?+raw:raw;
+  if(f==='minPerDay'||f==='daysPerWeek'){d.time[f]=d.time[f]===v?0:v}
+  else if(multi){d[f]=d[f].includes(v)?d[f].filter(x=>x!==v):[...d[f],v]}else d[f]=d[f]===v?'':v;
+  if(multi)b.setAttribute('aria-pressed',String(d[f].includes(v)));else g.querySelectorAll('.obchip').forEach(x=>x.setAttribute('aria-pressed',String(x===b&&(f==='minPerDay'||f==='daysPerWeek'?d.time[f]===v:d[f]===v))))}));
+ const addTo=(id,f)=>{const i=$(id);if(i)i.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const v=i.value.trim().slice(0,60);if(v&&!d[f].includes(v))d[f].push(v);i.value='';keep();obRender();const j=$(id);if(j)j.focus()})};
+ addTo('obArtist','artists');addTo('obDream','dreamSongs');
+ $('wSkip').onclick=()=>{keep();obClose(ob.all&&d.onboarding.done)}
+ if($('obBack'))$('obBack').onclick=()=>{keep();ob.i--;obRender()};
+ if($('obSkip'))$('obSkip').onclick=()=>{d.onboarding.skipped=[...new Set([...(d.onboarding.skipped||[]),st.k])];ob.i++;obRender()};
+ $('obNext').onclick=()=>{keep();if(last){obClose(true);return}ob.i++;obRender()};
+ box.scrollTop=0}
+// ---- My profile ----
+function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm=(k,v)=>(OB_OPTS[k].find(o=>String(o[0])===String(v))||[0,v])[1],li=(k,a)=>a.map(v=>nm(k,v)).join(', ');
+ const rows=[['Name',p.name],['Songs in',li('songLang',p.songLang)],['Playing for',p.years?nm('years',p.years):''],['Level',p.level?nm('level',p.level):''],['Can play',li('skills',p.skills)],['Instruments',li('instruments',p.instruments)],['Genres',li('genres',p.genres)],['Artists',p.artists.join(', ')],['Dream songs',p.dreamSongs.join(', ')],['Goals',li('goals',p.goals)],['Learns by',li('learnBy',p.learnBy)],['Time',p.time.minPerDay?`${nm('minPerDay',p.time.minPerDay)} a day${p.time.daysPerWeek?`, ${p.time.daysPerWeek} days a week`:''}`:''],['Plays',li('context',p.context)]];
+ c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>Your answers stay on this phone.</small></div></div>
+  <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
+  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);
+ // Connections and Backup: the V1 boxes, moved here
+ const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
+  const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}
+ const gh=$('ghCfg');if(gh){const cfg=mxGh();gh.innerHTML=`<summary>GitHub for Band breakdown${cfg?` <span class="libcount">${esc(cfg.repo)}</span>`:''}</summary><p class="tip">${cfg?`Songs are split in your private repository <b>${esc(cfg.repo)}</b>, even while the phone is locked.`:'Split songs on GitHub for free, even while the phone is locked.'}</p><button type="button" class="btn ghost" id="ghSet">${cfg?'Change the GitHub connection':'Connect GitHub'}</button>`;$('ghSet').onclick=()=>{mxView(true);mxSetup()}}
+ const bk=$('profBackup');if(bk&&!bk.dataset.moved){const e=$('bkBox');if(e)bk.appendChild(e);const r=document.createElement('details');r.className='apibox';r.id='v2Box';bk.appendChild(r);bk.dataset.moved='1'}
+ // the V2 changes to your data: what was done, and a way to undo it (only V2's own data; V1 data is never changed)
+ const vb=$('v2Box');if(vb){const log=store.get('v2mig',null)||{},m1=log.report&&log.report.M1,FN={name:'name',songLang:'song languages',instruments:'instruments',artists:'artists',level:'level',skills:'chords you play'};
+  vb.innerHTML=`<summary>The update to the new Guitaring</summary><p class="tip">${(log.done||[]).includes('M1')?`Your profile was created${log.at?` on ${esc(bkDate(log.at))}`:''}${m1&&m1.prefilled&&m1.prefilled.length?`, filled in from what the app already knew: ${esc(m1.prefilled.map(f=>FN[f]||f).join(', '))}`:''}. Nothing you had before was changed.`:'Nothing has been changed yet.'}${log.warn?` Note: ${esc(log.warn)}`:''}</p>
+  <button type="button" class="btn ghost danger" id="v2Undo">Undo the new version’s data</button><p class="tip">Removes only what the new version added (your profile and answers). Your sheets, lessons, gear and settings stay. The app then starts over with the setup.</p>`;
+  $('v2Undo').onclick=()=>{const b=$('v2Undo');if(!b.dataset.sure){b.dataset.sure='1';b.textContent='Tap again to undo';return}
+   ['profile','v2mig'].forEach(k=>{try{localStorage.removeItem(KP+k)}catch(e){}});toast('The new version’s data was removed. Starting over.','ok');setTimeout(()=>location.reload(),900)}}}
+// ---- start: Home, the M1 profile, onboarding when it hasn't been done ----
+async function v2Start(){
+ // the Band breakdown tile lives in Jam; sheets, video lessons and saved-on-phone in My Library; connections and backup in My profile
+ try{renderJam()}catch(e){}try{renderLibPage()}catch(e){}try{renderProfile()}catch(e){}
+ goSec('home',{force:true});
+ try{await v2MigM1()}catch(e){}
+ const p=profGet();// not over a link shared into the app (Share › Guitaring): that flow comes first, the setup waits for the next open
+ if(!p.onboarding.done&&!p.onboarding.later&&!window.__shared)openOnb(false);
+ renderHome()}
+$('findNew').onclick=()=>cfOpen('book');
+window.__v2={goSec,profGet,profSet,openOnb,prefill:profPrefill,cur:()=>curSec};// test hooks

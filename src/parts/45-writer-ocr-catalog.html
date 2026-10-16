@@ -42,7 +42,7 @@ function remapLines(text,old){
 }
 $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
-function openWriter(a,step){
+function openWriter(a,step){if($('paneSong').hidden)setTab('song');
  vid.pause();A=a;A.made=false;wFromWriter=false;try{wResetHist()}catch(e){}
  ['drop','writeNew','draftCard','resumeCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';

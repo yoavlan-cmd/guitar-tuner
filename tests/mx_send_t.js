@@ -25,7 +25,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   return J(r,404,{message:'Not Found'})});
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'t',branch:'main'}));window.__mxWaitScale=0.001;window.__mxPollMs=1e9});
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});
  const send=async(name)=>p.evaluate(async n=>{const f=new File([new Uint8Array(2048)],n,{type:'audio/mpeg'});await window.__mxTest.send(f);const it=window.__mxTest.idx()[0];return {state:it.state,err:it.err||'',id:it.id}},name);
  // 1. first send after the splitter is (re)installed: GitHub refuses to start it twice, then accepts
  mode='late';let r=await send('Tuna יא.mp3');

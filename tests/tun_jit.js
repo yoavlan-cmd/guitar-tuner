@@ -10,7 +10,7 @@ const files=(process.env.F||'guitar-acoustic_A2.mp3,guitar-electric_A2.mp3,guita
    const s=ac.createBufferSource();s.buffer=buf;const q=ac.createBiquadFilter();q.type='highpass';q.frequency.value=200;s.connect(q);const dst=ac.createMediaStreamDestination();q.connect(dst);
    const nb=ac.createBuffer(1,ac.sampleRate*4,ac.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=noise*(Math.random()*2-1);const ns=ac.createBufferSource();ns.buffer=nb;ns.loop=true;ns.connect(dst);ns.start();
    s.start(ac.currentTime+.3);return dst.stream}},[b64,noise]);
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});await p.evaluate(()=>window.__v2&&window.__v2.goSec('tuner'));
  await p.click('#listen');await p.waitForTimeout(1300);
  const ang=[],cen=[],sts=new Set();
  for(let k=0;k<70;k++){await p.waitForTimeout(40);const r=await p.evaluate(()=>[document.getElementById('needle').getAttribute('transform'),document.getElementById('cents').textContent,document.getElementById('status').textContent]);

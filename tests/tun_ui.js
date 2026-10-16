@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
  const p=await (await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,colorScheme:scheme})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.route(/^https:\/\//,r=>r.abort());
  await p.addInitScript(()=>{localStorage.setItem('tuner.userName','"Yoav"')});
- await p.goto(APP);await p.waitForTimeout(400);if(await p.$('#wSkip:visible'))await p.click('#wSkip');await p.waitForTimeout(300);
+ await p.goto(APP);await p.waitForTimeout(400);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});await p.evaluate(()=>window.__v2&&window.__v2.goSec('tuner'));await p.waitForTimeout(300);
  await p.screenshot({path:`tun_idle_${scheme}.png`});
  if(scheme==='light'){
   const labs=await p.$$eval('.peg',x=>x.map(e=>e.innerText.replace(/\s+/g,'')));console.log('labels',labs.join(' '));

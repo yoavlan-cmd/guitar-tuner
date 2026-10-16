@@ -789,7 +789,6 @@ body.wopen{overflow:hidden}
 #drop[hidden]~#mixNew{display:none!important}
 /* Songs home: [My library] [Add a song] */
 #songSeg{display:none}
-#paneSong:has(#drop:not([hidden])) #songSeg{display:flex}
 .songseg{position:sticky;top:0;z-index:5;margin-bottom:2px}
 .songseg button{flex:1;padding:11px 6px;font-size:14.5px}
 .addgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -800,8 +799,11 @@ body.wopen{overflow:hidden}
 .addgrid .addtile .sub{font-size:12.5px;color:var(--muted);max-width:none;line-height:1.3}
 .addgrid .addtile:active{transform:scale(.98)}
 .addgrid .addnote{grid-column:1/-1;margin:0;text-align:center}
-#paneSong[data-seg="lib"] #addGrid,#paneSong[data-seg="lib"] #shotCard{display:none!important}
-#paneSong[data-seg="add"] #libCard,#paneSong[data-seg="add"] #suggCard{display:none!important}
+/* the Songs pane is two sections: Learn (I'm learning, new songs, a song video) and Write (write a sheet, screenshots/PDF, chord finder, drafts) */
+#paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #findNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
+#paneSong[data-seg="learn"] #drop{grid-column:1/-1;min-height:0}
+#paneSong[data-seg="learn"] #driveIntro{display:none!important}
+#paneSong[data-seg="write"] #drop,#paneSong[data-seg="write"] #libCard,#paneSong[data-seg="write"] #suggCard{display:none!important}
 #libCard[hidden]~#suggCard{display:none}
 /* I'm learning: one row per song, five tiles show what you have for it (lit) and what's missing (dim) */
 .learn{display:flex;flex-direction:column;gap:8px}
@@ -906,6 +908,72 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 .bkout .check{margin-top:8px;align-items:flex-start}.bkout .check span{display:block}
 .bkerr{color:#E0675F;font-weight:600}
 .bkbeta{border:1px dashed #FF6A1A;border-radius:12px;padding:8px 10px}.bkbeta .btn{display:block;margin-top:6px}
+/* ===== V2 shell: header icons, bottom bar, Home, pages, onboarding ===== */
+:root{--bnh:64px}
+body{padding-bottom:calc(var(--bnh) + 28px + env(safe-area-inset-bottom,0px))}
+/* the bottom bar sits under every overlay (they start at z-index 50); things stuck to the bottom of the page sit above it */
+.wundo{bottom:calc(var(--bnh) + 10px + env(safe-area-inset-bottom,0px))}
+header{align-items:center}
+.hicons{display:flex;gap:2px;flex:0 0 auto}
+.hic{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--muted);padding:2px 4px;border-radius:10px;cursor:pointer;font:600 10px var(--body)}
+.hic .pd{--s:30px;margin:0}.hic small{font:600 10px var(--body)}
+.hic[aria-current="page"]{color:var(--ink)}.hic[aria-current="page"] .pd{box-shadow:0 0 0 2px var(--accent)}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));max-width:100%}
+.bnav button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted);font:600 11.5px var(--body);padding:2px 0;cursor:pointer;min-height:52px}
+.bnav button .pd{--s:28px;margin:0;opacity:.75}
+.bnav button[aria-current="page"]{color:var(--ink)}.bnav button[aria-current="page"] .pd{opacity:1;box-shadow:0 0 0 2px var(--accent)}
+.mxbar{bottom:calc(var(--bnh) + 8px + env(safe-area-inset-bottom,0px))}
+.toast{bottom:calc(var(--bnh) + 12px + env(safe-area-inset-bottom,0px))}
+body.hasbar{padding-bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0px))}
+body.hasbar .toast{bottom:calc(var(--bnh) + 76px + env(safe-area-inset-bottom,0px))}
+.sech{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.02em;text-transform:uppercase;margin:2px 0 4px}
+.pagebar{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pagebar h2{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.02em;text-transform:uppercase;margin:0}
+.pgback{width:40px;height:40px;flex:0 0 auto;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 20px var(--body);cursor:pointer;line-height:1}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}
+.pane{display:flex;flex-direction:column;gap:12px}.pane[hidden]{display:none}
+/* Home */
+.homehero{border-radius:20px;padding:18px 18px 14px;color:#FFF6EA;background:radial-gradient(120% 90% at 50% 100%,#FFB02E 0%,#FF6A1A 34%,#C9301A 66%,#2A0E08 100%);display:flex;flex-direction:column;gap:10px}
+.hhey{font:700 22px var(--body);margin:0}
+.hjoke{font:500 16.5px/1.45 var(--body);background:rgba(20,6,2,.45);border-radius:14px;padding:14px 16px;margin:0;min-height:72px}
+.hmore{align-self:flex-start;border:0;background:transparent;color:#FFF6EA;font:600 14px var(--body);padding:4px 0;cursor:pointer;opacity:.9}
+.homecont{display:flex;flex-direction:column;gap:8px}.homecont:empty{display:none}
+.hcont{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:10px 12px;cursor:pointer;font:inherit}
+.hcont .pd{--s:34px;margin:0}.hcont span{flex:1;min-width:0}.hcont b{display:block;font-size:15px}.hcont small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hcont i{font-style:normal;color:var(--muted);font-size:20px}
+.hometiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.htile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:14px 12px;min-height:128px;cursor:pointer;font:inherit}
+.htile .pd{--s:40px;margin:0 0 6px}.htile b{font:700 16px var(--body)}.htile small{font-size:12.5px;color:var(--muted);line-height:1.3}
+.htile:active,.hcont:active{transform:scale(.98)}
+/* Jam */
+.jamgrid .drop.addtile{min-height:112px}
+.jamlist{display:flex;flex-direction:column;gap:8px}
+.jrow{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px;font:inherit;cursor:pointer}
+.jrow b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jrow small{flex:0 0 auto;color:var(--muted)}
+.jrow.ready{border-color:#66BB6A}.jrow.failed{border-color:#E0675F}
+/* My Library and My profile */
+.libnav{display:flex;flex-direction:column;gap:8px}
+.libgo{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;cursor:pointer}
+.libgo .pd{--s:34px;margin:0;grid-row:1/3}.libgo b{font-size:15px}.libgo small{grid-column:2;color:var(--muted);font-size:13px}.libgo i{grid-row:1/3;grid-column:3;font-style:normal;color:var(--muted);font-size:20px}
+.libholder{display:flex;flex-direction:column;gap:10px}
+.profconn{display:flex;flex-direction:column;gap:8px}
+.profhead{display:flex;align-items:center;gap:12px}.profhead .pd{--s:40px;margin:0}.profhead b{display:block;font-size:18px}.profhead small{color:var(--muted)}
+.proflist{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:12px 0;font-size:14px}.proflist dt{color:var(--muted)}.proflist dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.profnone{color:var(--muted);font-style:italic}
+/* onboarding */
+.onb{position:fixed;inset:0;z-index:65;background:var(--bg);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.obcard{max-width:460px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:12px}
+.obtop{display:flex;align-items:center;gap:12px}
+.obprog{flex:1;height:6px;border-radius:999px;background:var(--line);overflow:hidden}.obprog i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .25s}
+.oblater{border:0;background:transparent;color:var(--muted);font:600 14px var(--body);cursor:pointer;padding:8px 0}
+.obcard h2{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:.02em;text-transform:uppercase;margin:6px 0 0;line-height:1.1}
+.obbody{display:flex;flex-direction:column;gap:10px;font-size:15.5px;line-height:1.45;flex:1}.obbody p{margin:0}
+.oblab{font-weight:700;margin-top:6px!important;display:flex;flex-direction:column;gap:6px}
+.obchips{display:flex;flex-wrap:wrap;gap:8px}
+.obchip{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:11px 16px;min-height:46px;font:600 15px var(--body);cursor:pointer}
+.obchip[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
+.obpriv{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface)}.obpriv .pd{--s:30px;margin:0;flex:0 0 auto}
+.obsum{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.obfoot{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 0 2px;background:var(--bg)}.obfoot .btn{flex:1;min-height:50px}.obfoot span{flex:1}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -934,12 +1002,12 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
     <div class="editrow cfbtns"><button type="button" class="btn" id="cfUse"></button><button type="button" class="btn ghost" id="cfClear">Clear</button></div>
   </div>
 </div>
-<div class="welcome" id="welcome" role="dialog" aria-label="Welcome">
+<div class="welcome" id="welcome" role="dialog" aria-label="Welcome" hidden>
   <div class="wcard">
     <svg class="wlogo" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg>
     <div class="wtitle">Guitaring</div>
     <div class="wbody"></div>
-    <button type="button" class="wskip" id="wSkip">Skip ›</button>
+    <button type="button" class="wskip">Skip ›</button>
   </div>
 </div>
 <div class="wrap">
@@ -953,16 +1021,52 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 <linearGradient id="lg-pickO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#D9301A"/></linearGradient>
 <filter id="lg-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#5A0E05" flood-opacity=".55"/></filter>
 </defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg><h1>Guitaring</h1></div>
+    <div class="hicons">
+      <button type="button" class="hic" id="hTuner" data-tab="tune" data-sec="tuner" aria-label="Tuner"><span data-pd="TUNE"></span><small>Tuner</small></button>
+      <button type="button" class="hic" id="hLib" data-sec="library" aria-label="My Library"><span data-pd="LIB"></span><small>Library</small></button>
+      <button type="button" class="hic" id="hMe" data-sec="profile" aria-label="My profile"><span data-pd="PROFILE"></span><small>Profile</small></button>
+    </div>
   </header>
 
-  <nav class="tabs" id="tabs">
-    <button data-tab="tune" aria-pressed="true">Tuner</button>
-    <button data-tab="song" aria-pressed="false">Songs</button>
-    <button data-tab="chords" aria-pressed="false">Chords</button>
-    <button data-tab="gear" aria-pressed="false">My gear</button>
-  </nav>
 
-  <div class="pane" id="paneTune">
+  <div class="pane" id="paneHome">
+    <section class="homehero" id="homeHero"></section>
+    <div id="homeCont" class="homecont"></div>
+    <div class="hometiles">
+      <button type="button" class="htile" data-sec="learn"><span data-pd="LEARN"></span><b>Learn</b><small>Your songs, video lessons and new songs to learn</small></button>
+      <button type="button" class="htile" data-sec="write"><span data-pd="WRITE"></span><b>Write</b><small>Write a chord sheet, or make one from screenshots</small></button>
+      <button type="button" class="htile" data-sec="jam"><span data-pd="MIX"></span><b>Jam</b><small>Band breakdown: play along with the parts of a song</small></button>
+      <button type="button" class="htile" data-sec="gear"><span data-pd="GEAR"></span><b>Check my gear</b><small>Your guitars and amps, and how to get the most from them</small></button>
+    </div>
+  </div>
+
+  <div class="pane" id="paneJam" hidden>
+    <h2 class="sech">Jam</h2>
+    <div class="addgrid jamgrid" id="jamGrid"></div>
+    <div id="jamList" class="jamlist"></div>
+  </div>
+
+  <div class="pane" id="paneLib" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My Library</h2></div>
+    <p class="tip">Everything you keep in Guitaring. The songs you’re learning are in <button type="button" class="linkbtn" data-sec="learn">Learn</button>.</p>
+    <div class="libnav">
+      <button type="button" class="libgo" data-sec="chords"><span data-pd="CHORDS"></span><b>My chords</b><small>Your chord book</small><i>›</i></button>
+      <button type="button" class="libgo" data-sec="jam"><span data-pd="MIX"></span><b>My jam tracks</b><small id="libJamSub">Band breakdown songs</small><i>›</i></button>
+    </div>
+    <div id="libHolder" class="libholder"></div>
+  </div>
+
+  <div class="pane" id="paneProfile" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My profile</h2></div>
+    <section class="card" id="profCard"></section>
+    <p class="libsub">Connections</p>
+    <div id="profConn" class="profconn"></div>
+    <p class="libsub">Backup</p>
+    <div id="profBackup"></div>
+  </div>
+
+  <div class="pane" id="paneTune" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Close the tuner">✕</button><h2>Tuner</h2></div>
   <button type="button" class="gtrline" id="gtrLine" hidden aria-expanded="false"></button>
   <div class="gtrpick" id="gtrPick" hidden></div>
   <div class="chips" id="tunings" aria-label="Tuning"></div>
@@ -1024,6 +1128,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
     <div id="gearOut" class="gearout"></div>
   </div>
   <div class="pane" id="paneChords" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My chords</h2></div>
     <div class="searchrow" id="chSearchRow">
       <input id="chSearch" class="textin" type="search" placeholder="Search chords, e.g. Am7, G/B, sus2" aria-label="Search chords" autocapitalize="off" autocomplete="off" spellcheck="false">
     </div>
@@ -1038,7 +1143,8 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
   </div>
 
   <div class="pane" id="paneSong" hidden>
-    <div class="seg songseg" id="songSeg" role="tablist">
+    <h2 class="sech" id="songSech">Learn</h2>
+    <div class="seg songseg" id="songSeg" role="tablist" hidden>
       <button data-s="lib" aria-pressed="true"><span data-pd="LIB"></span> My library</button>
       <button data-s="add" aria-pressed="false"><span data-pd="ADD"></span> Add a song</button>
     </div>
@@ -1059,8 +1165,12 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
         <span class="sub">Type lyrics, tap to add chords</span>
       </button>
       <button class="drop write addtile" id="mixNew" type="button">
-        <i aria-hidden="true"><span data-pd="MIX"></span></i><b>Practice mixer</b>
-        <span class="sub">Turn parts of a song up or down</span>
+        <i aria-hidden="true"><span data-pd="MIX"></span></i><b>Band breakdown</b>
+        <span class="sub">Split a song into its parts</span>
+      </button>
+      <button class="drop write addtile" id="findNew" type="button">
+        <i aria-hidden="true"><span data-pd="FINDER"></span></i><b>Chord finder</b>
+        <span class="sub">Put your fingers on a fretboard, get the chord’s name</span>
       </button>
       <p class="tip addnote">Everything is read on this phone. Nothing is uploaded, and you check it before it’s saved.</p>
     </div>
@@ -1072,7 +1182,6 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
       <div class="cardhead"><h2>I’m learning</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
       <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span data-pd="DRIVE"></span> My songs folder in Google Drive <span>↗</span></a>
       <div id="learnBox" class="learn"></div>
-      <p class="libsub">Sheets, lessons and settings</p>
       <details class="ideabox catbox" id="catBox" hidden></details>
       <details class="ideabox vidbox" id="vidBox"></details>
       <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
@@ -1200,7 +1309,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 
       <section class="card" id="aiCard">
         <h2>Better versions &amp; Claude’s check</h2>
-        <label class="taste">Your taste <textarea id="taste" rows="2"></textarea></label>
+        <label class="taste">Your taste <textarea id="taste" rows="2" placeholder="Leave empty to use your profile"></textarea></label>
         <div class="links" id="links"></div>
         <button class="btn" id="aiAsk" hidden>Ask Claude to check this song</button>
         <p class="tip" id="aiNote">Claude’s check works when you open Guitaring inside Claude. The search links work everywhere.</p>
@@ -1282,6 +1391,14 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
   </div>
 </div>
 
+<nav class="bnav" id="bnav" aria-label="Sections">
+  <button type="button" data-sec="home"><span data-pd="HOME"></span><small>Home</small></button>
+  <button type="button" data-sec="learn" data-tab="song"><span data-pd="LEARN"></span><small>Learn</small></button>
+  <button type="button" data-sec="write"><span data-pd="WRITE"></span><small>Write</small></button>
+  <button type="button" data-sec="jam"><span data-pd="MIX"></span><small>Jam</small></button>
+  <button type="button" data-sec="gear" data-tab="gear"><span data-pd="GEAR"></span><small>Gear</small></button>
+</nav>
+<div class="onb" id="onb" role="dialog" aria-label="Set up Guitaring" hidden></div>
 <div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
@@ -1371,8 +1488,8 @@ jobs:
 <script>
 (()=>{
 // pedal icons: line drawings of guitar things on small dark metal tiles with a status LED (used instead of emoji)
-const PDI={sheet:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',ctrl:'<rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.3" fill="currentColor"/>',  tune:'<path d="M4 9.5c0-2.6 2-4.5 4.6-4.5H10v9H8.6C6 14 4 12.1 4 9.5z"/><path d="M10 9.5h5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17.5 12v8.5"/>',  learn:'<path d="M5 4.5h14"/><path d="M5 4.5V20M7.8 4.5V20M10.6 4.5V20M13.4 4.5V20M16.2 4.5V20M19 4.5V20"/><path d="M5 9h14M5 13.5h14M5 18h14" opacity=".55"/><circle cx="10.6" cy="11.2" r="1.5" fill="currentColor"/><circle cx="13.4" cy="15.7" r="1.5" fill="currentColor"/><circle cx="16.2" cy="11.2" r="1.5" fill="currentColor"/>',  write:'<path d="M3.5 7h9M3.5 11h6.5M3.5 15h4"/><path d="M12.5 20.5l.9-3.6 6.2-6.2 2.7 2.7-6.2 6.2z"/>',  gear:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5h6v2"/><circle cx="8" cy="11" r="1.3"/><circle cx="12" cy="11" r="1.3"/><circle cx="16" cy="11" r="1.3"/><path d="M6.5 15.5h11"/>',  library:'<path d="M3 14h18v6.5H3z"/><path d="M5.5 14a5 5 0 0 1 9.5-2"/><path d="M9 14a5 5 0 0 1 9.8-1.6"/><path d="M8 17.2h8"/>',  add:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 8.6v6M9 11.6h6"/>',  video:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 8.5h18M3 15.5h18" opacity=".5"/><path d="M10.3 10v4l3.5-2z" fill="currentColor"/>',  shots:'<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/><path d="M10 6.3h.01M13.5 6.3h.01M10 9.8h.01"/>',  mixer:'<path d="M6 4v16M12 4v16M18 4v16" opacity=".55"/><rect x="4.3" y="13" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="10.3" y="6.5" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="16.3" y="10.5" width="3.4" height="3" rx=".8" fill="currentColor"/>',  draft:'<path d="M6 3h8l4 4v6"/><path d="M6 3v18h6"/><path d="M14 3v4h4"/><path d="M14 21l.6-2.6 4.6-4.6 2 2-4.6 4.6z"/><path d="M8.5 11h6M8.5 14.5h3"/>',  search:'<circle cx="10" cy="10" r="6.2"/><path d="M14.6 14.6L20.5 20.5"/><path d="M7.3 8.4h5.4M7.3 11.6h5.4M8.9 7v6.2M11.1 7v6.2" opacity=".6"/>',  lessons:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M10.6 9v5.4l4.3-2.7z" fill="currentColor"/>',  ideas:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 7.6l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z" fill="currentColor" stroke="none"/>',  folder:'<path d="M3 7.2A2 2 0 0 1 5 5.2h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13.5h8" opacity=".55"/>',  guitar:'<path d="M13.5 10.5L20 4"/><path d="M18.6 2.8l2.6 2.6"/><path d="M11.8 9.6c-1.6-1.4-4-1.2-5.2.5-.6.9-.5 1.9-1.5 2.5-1.6 1-2.4 3.2-1 4.8l1 1c1.6 1.4 3.8.6 4.8-1 .6-1 1.6-.9 2.5-1.5 1.7-1.2 1.9-3.6.5-5.2z"/><circle cx="9.4" cy="14.6" r="1.3"/>',  vocals:'<rect x="9" y="3" width="6" height="10.5" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/>',  drums:'<ellipse cx="12" cy="9" rx="8" ry="2.6"/><path d="M4 9v7.5c0 1.4 3.6 2.6 8 2.6s8-1.2 8-2.6V9"/><path d="M7 3.5l3.6 4.6M17 3.5l-3.6 4.6"/>',  bass:'<path d="M5.5 9.2a4.6 4.6 0 1 1 6.8 4.1c-2 1.4-4.4 2.9-6.8 4"/><circle cx="7.6" cy="9.4" r="1.3" fill="currentColor"/><circle cx="17" cy="8" r=".9" fill="currentColor" stroke="none"/><circle cx="17" cy="12.2" r=".9" fill="currentColor" stroke="none"/>',  piano:'<rect x="3" y="5" width="18" height="14" rx="1.6"/><path d="M8.4 12.5V19M13.7 12.5V19M18 12.5V19" opacity=".55"/><rect x="6.6" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/><rect x="12" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/>',  other:'<path d="M3 12h2.2l2-5 3 10 3-12.5 3 9.5 2-2H21"/>',  amp:'<rect x="4" y="3.5" width="16" height="17" rx="2"/><circle cx="12" cy="13.5" r="4.2"/><circle cx="12" cy="13.5" r="1.2" fill="currentColor"/><path d="M7.5 6.8h.01M10.5 6.8h.01M13.5 6.8h.01"/>',  model:'<path d="M9 21.5V12.5L7 5l5-3 5 3-2 7.5v9"/><path d="M6.6 7.5h1M6.6 10.5h1.4M16.4 7.5h1M16 10.5h1.4"/>',  photo:'<rect x="3" y="7" width="18" height="12.5" rx="2"/><path d="M8.5 7l1.4-2.5h4.2L15.5 7"/><circle cx="12" cy="13.2" r="3.4"/>',  strengths:'<circle cx="12" cy="13.5" r="6.2"/><path d="M12 13.5l3.6-3.6"/><path d="M3.5 13.5H5M19 13.5h1.5M12 4.5V6M5.8 7.3l1 1M18.2 7.3l-1 1"/>',  tips:'<path d="M3 7.5h18M3 16.5h18"/><path d="M8 7.5v9M16 7.5v9" opacity=".55"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/>',  cleaning:'<path d="M9 9.5h6V21H9z"/><path d="M10.2 9.5V6.5h3.6v3"/><path d="M13.8 6.5h3l1.2 1.4"/><path d="M20 5.5h.01M21 8h.01M20 10.5h.01"/><path d="M10.8 14h2.4" opacity=".6"/>',  care:'<path d="M12 3c3.2 4 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.8-7 6-11z"/><path d="M10 17l4-4.5"/><path d="M10.2 12.8h.01M13.8 16.8h.01"/>',  repair:'<path d="M4.5 19.5L13.8 10.2h4.7"/><path d="M17.6 3.8l2.6 1.5v3l-2.6 1.5-2.6-1.5v-3z"/>',  strings:'<path d="M12 12.4a1.4 1.4 0 1 0-1.4-1.4"/><path d="M10.6 11a3.4 3.4 0 1 0 3.4-3.4"/><path d="M14 7.6A5.4 5.4 0 1 0 19.4 13"/><path d="M19.4 13c0 3.5-1.4 6.2-3.6 8"/>',  ask:'<path d="M4 5h16v11.5H10.5L6.5 20v-3.5H4z"/><path d="M8.5 10.8h.01M12 10.8h.01M15.5 10.8h.01"/>',  profile:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 12.5h6M9 16h3.5"/><path d="M17 15.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" stroke="none"/>',  finder:'<path d="M3 6h18M3 18h18" /><path d="M3 9h18M3 12h18M3 15h18" opacity=".4"/><path d="M8 6v12M14 6v12M20 6v12" opacity=".7"/><circle cx="11" cy="9" r="1.6" fill="currentColor"/><circle cx="17" cy="12" r="1.6" fill="currentColor"/><circle cx="11" cy="15" r="1.6" fill="currentColor"/>',  gallery:'<rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 16.5l5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="9" r="1.3"/>',  trash:'<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5" opacity=".6"/>',  lock:'<rect x="5.5" y="10.5" width="13" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><path d="M12 14.5v2.5"/>',  done:'<circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/>'};
-const PDM={'TUNE':['tune','#66BB6A'],'LEARN':['learn','#66BB6A'],'WRITE':['write','#FFB74D'],'GEAR':['gear','#4FC3F7'],'LIB':['library','#66BB6A'],'ADD':['add','#FFB74D'],'VIDEO':['video','#FFB74D'],'SCAN':['shots','#FFB74D'],'MIX':['mixer','#4FC3F7'],'DRAFT':['draft','#FFB74D'],'SHEETS':['search','#66BB6A'],'SHEET':['sheet','#66BB6A'],'LESSON':['lessons','#66BB6A'],'IDEAS':['ideas','#FFB74D'],'DRIVE':['folder','#4FC3F7'],'NOTE':['draft','#8E9A95'],'GTR':['guitar','#FFB74D'],'GTR L':['guitar','#FFB74D'],'GTR C':['guitar','#FFB74D'],'GTR R':['guitar','#FFB74D'],'VOX':['vocals','#66BB6A'],'DRM':['drums','#4FC3F7'],'BASS':['bass','#4FC3F7'],'KEYS':['piano','#66BB6A'],'OTHER':['other','#8E9A95'],'PART':['other','#8E9A95'],'AMP':['amp','#4FC3F7'],'MODEL':['model','#FFB74D'],'PHOTO':['photo','#66BB6A'],'RANGE':['strengths','#66BB6A'],'TIP':['tips','#FFB74D'],'CLEAN':['cleaning','#4FC3F7'],'HUMID':['care','#4FC3F7'],'REPAIR':['repair','#FF6A1A'],'STRINGS':['strings','#66BB6A'],'ASK':['ask','#66BB6A'],'PROFILE':['profile','#66BB6A'],'GALLERY':['gallery','#8E9A95'],'CTRL':['ctrl','#4FC3F7'],'CHORDS':['learn','#66BB6A'],'FINDER':['finder','#66BB6A'],'DEL':['trash','#FF6A1A'],'OK':['done','#66BB6A']};
+const PDI={pick:'<path d="M12 20.5C8.2 16.6 5 12.3 5 8.6 5 5.4 8.2 3.5 12 3.5s7 1.9 7 5.1c0 3.7-3.2 8-7 11.9z"/>',sheet:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',ctrl:'<rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.3" fill="currentColor"/>',  tune:'<path d="M4 9.5c0-2.6 2-4.5 4.6-4.5H10v9H8.6C6 14 4 12.1 4 9.5z"/><path d="M10 9.5h5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17.5 12v8.5"/>',  learn:'<path d="M5 4.5h14"/><path d="M5 4.5V20M7.8 4.5V20M10.6 4.5V20M13.4 4.5V20M16.2 4.5V20M19 4.5V20"/><path d="M5 9h14M5 13.5h14M5 18h14" opacity=".55"/><circle cx="10.6" cy="11.2" r="1.5" fill="currentColor"/><circle cx="13.4" cy="15.7" r="1.5" fill="currentColor"/><circle cx="16.2" cy="11.2" r="1.5" fill="currentColor"/>',  write:'<path d="M3.5 7h9M3.5 11h6.5M3.5 15h4"/><path d="M12.5 20.5l.9-3.6 6.2-6.2 2.7 2.7-6.2 6.2z"/>',  gear:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5h6v2"/><circle cx="8" cy="11" r="1.3"/><circle cx="12" cy="11" r="1.3"/><circle cx="16" cy="11" r="1.3"/><path d="M6.5 15.5h11"/>',  library:'<path d="M3 14h18v6.5H3z"/><path d="M5.5 14a5 5 0 0 1 9.5-2"/><path d="M9 14a5 5 0 0 1 9.8-1.6"/><path d="M8 17.2h8"/>',  add:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 8.6v6M9 11.6h6"/>',  video:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 8.5h18M3 15.5h18" opacity=".5"/><path d="M10.3 10v4l3.5-2z" fill="currentColor"/>',  shots:'<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/><path d="M10 6.3h.01M13.5 6.3h.01M10 9.8h.01"/>',  mixer:'<path d="M6 4v16M12 4v16M18 4v16" opacity=".55"/><rect x="4.3" y="13" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="10.3" y="6.5" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="16.3" y="10.5" width="3.4" height="3" rx=".8" fill="currentColor"/>',  draft:'<path d="M6 3h8l4 4v6"/><path d="M6 3v18h6"/><path d="M14 3v4h4"/><path d="M14 21l.6-2.6 4.6-4.6 2 2-4.6 4.6z"/><path d="M8.5 11h6M8.5 14.5h3"/>',  search:'<circle cx="10" cy="10" r="6.2"/><path d="M14.6 14.6L20.5 20.5"/><path d="M7.3 8.4h5.4M7.3 11.6h5.4M8.9 7v6.2M11.1 7v6.2" opacity=".6"/>',  lessons:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M10.6 9v5.4l4.3-2.7z" fill="currentColor"/>',  ideas:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 7.6l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z" fill="currentColor" stroke="none"/>',  folder:'<path d="M3 7.2A2 2 0 0 1 5 5.2h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13.5h8" opacity=".55"/>',  guitar:'<path d="M13.5 10.5L20 4"/><path d="M18.6 2.8l2.6 2.6"/><path d="M11.8 9.6c-1.6-1.4-4-1.2-5.2.5-.6.9-.5 1.9-1.5 2.5-1.6 1-2.4 3.2-1 4.8l1 1c1.6 1.4 3.8.6 4.8-1 .6-1 1.6-.9 2.5-1.5 1.7-1.2 1.9-3.6.5-5.2z"/><circle cx="9.4" cy="14.6" r="1.3"/>',  vocals:'<rect x="9" y="3" width="6" height="10.5" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/>',  drums:'<ellipse cx="12" cy="9" rx="8" ry="2.6"/><path d="M4 9v7.5c0 1.4 3.6 2.6 8 2.6s8-1.2 8-2.6V9"/><path d="M7 3.5l3.6 4.6M17 3.5l-3.6 4.6"/>',  bass:'<path d="M5.5 9.2a4.6 4.6 0 1 1 6.8 4.1c-2 1.4-4.4 2.9-6.8 4"/><circle cx="7.6" cy="9.4" r="1.3" fill="currentColor"/><circle cx="17" cy="8" r=".9" fill="currentColor" stroke="none"/><circle cx="17" cy="12.2" r=".9" fill="currentColor" stroke="none"/>',  piano:'<rect x="3" y="5" width="18" height="14" rx="1.6"/><path d="M8.4 12.5V19M13.7 12.5V19M18 12.5V19" opacity=".55"/><rect x="6.6" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/><rect x="12" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/>',  other:'<path d="M3 12h2.2l2-5 3 10 3-12.5 3 9.5 2-2H21"/>',  amp:'<rect x="4" y="3.5" width="16" height="17" rx="2"/><circle cx="12" cy="13.5" r="4.2"/><circle cx="12" cy="13.5" r="1.2" fill="currentColor"/><path d="M7.5 6.8h.01M10.5 6.8h.01M13.5 6.8h.01"/>',  model:'<path d="M9 21.5V12.5L7 5l5-3 5 3-2 7.5v9"/><path d="M6.6 7.5h1M6.6 10.5h1.4M16.4 7.5h1M16 10.5h1.4"/>',  photo:'<rect x="3" y="7" width="18" height="12.5" rx="2"/><path d="M8.5 7l1.4-2.5h4.2L15.5 7"/><circle cx="12" cy="13.2" r="3.4"/>',  strengths:'<circle cx="12" cy="13.5" r="6.2"/><path d="M12 13.5l3.6-3.6"/><path d="M3.5 13.5H5M19 13.5h1.5M12 4.5V6M5.8 7.3l1 1M18.2 7.3l-1 1"/>',  tips:'<path d="M3 7.5h18M3 16.5h18"/><path d="M8 7.5v9M16 7.5v9" opacity=".55"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/>',  cleaning:'<path d="M9 9.5h6V21H9z"/><path d="M10.2 9.5V6.5h3.6v3"/><path d="M13.8 6.5h3l1.2 1.4"/><path d="M20 5.5h.01M21 8h.01M20 10.5h.01"/><path d="M10.8 14h2.4" opacity=".6"/>',  care:'<path d="M12 3c3.2 4 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.8-7 6-11z"/><path d="M10 17l4-4.5"/><path d="M10.2 12.8h.01M13.8 16.8h.01"/>',  repair:'<path d="M4.5 19.5L13.8 10.2h4.7"/><path d="M17.6 3.8l2.6 1.5v3l-2.6 1.5-2.6-1.5v-3z"/>',  strings:'<path d="M12 12.4a1.4 1.4 0 1 0-1.4-1.4"/><path d="M10.6 11a3.4 3.4 0 1 0 3.4-3.4"/><path d="M14 7.6A5.4 5.4 0 1 0 19.4 13"/><path d="M19.4 13c0 3.5-1.4 6.2-3.6 8"/>',  ask:'<path d="M4 5h16v11.5H10.5L6.5 20v-3.5H4z"/><path d="M8.5 10.8h.01M12 10.8h.01M15.5 10.8h.01"/>',  profile:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 12.5h6M9 16h3.5"/><path d="M17 15.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" stroke="none"/>',  finder:'<path d="M3 6h18M3 18h18" /><path d="M3 9h18M3 12h18M3 15h18" opacity=".4"/><path d="M8 6v12M14 6v12M20 6v12" opacity=".7"/><circle cx="11" cy="9" r="1.6" fill="currentColor"/><circle cx="17" cy="12" r="1.6" fill="currentColor"/><circle cx="11" cy="15" r="1.6" fill="currentColor"/>',  gallery:'<rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 16.5l5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="9" r="1.3"/>',  trash:'<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5" opacity=".6"/>',  lock:'<rect x="5.5" y="10.5" width="13" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><path d="M12 14.5v2.5"/>',  done:'<circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/>'};
+const PDM={'TUNE':['tune','#66BB6A'],'LEARN':['learn','#66BB6A'],'WRITE':['write','#FFB74D'],'GEAR':['gear','#4FC3F7'],'LIB':['library','#66BB6A'],'ADD':['add','#FFB74D'],'VIDEO':['video','#FFB74D'],'SCAN':['shots','#FFB74D'],'MIX':['mixer','#4FC3F7'],'DRAFT':['draft','#FFB74D'],'SHEETS':['search','#66BB6A'],'SHEET':['sheet','#66BB6A'],'LESSON':['lessons','#66BB6A'],'IDEAS':['ideas','#FFB74D'],'DRIVE':['folder','#4FC3F7'],'NOTE':['draft','#8E9A95'],'GTR':['guitar','#FFB74D'],'GTR L':['guitar','#FFB74D'],'GTR C':['guitar','#FFB74D'],'GTR R':['guitar','#FFB74D'],'VOX':['vocals','#66BB6A'],'DRM':['drums','#4FC3F7'],'BASS':['bass','#4FC3F7'],'KEYS':['piano','#66BB6A'],'OTHER':['other','#8E9A95'],'PART':['other','#8E9A95'],'AMP':['amp','#4FC3F7'],'MODEL':['model','#FFB74D'],'PHOTO':['photo','#66BB6A'],'RANGE':['strengths','#66BB6A'],'TIP':['tips','#FFB74D'],'CLEAN':['cleaning','#4FC3F7'],'HUMID':['care','#4FC3F7'],'REPAIR':['repair','#FF6A1A'],'STRINGS':['strings','#66BB6A'],'ASK':['ask','#66BB6A'],'PROFILE':['profile','#66BB6A'],'GALLERY':['gallery','#8E9A95'],'CTRL':['ctrl','#4FC3F7'],'CHORDS':['learn','#66BB6A'],'FINDER':['finder','#66BB6A'],'DEL':['trash','#FF6A1A'],'OK':['done','#66BB6A'],'HOME':['pick','#FF6A1A']};
 const SK=t=>{const m=PDM[t]||['other','#8E9A95'];return `<span class="pd" style="--led:${m[1]}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${PDI[m[0]]}</svg></span>`};
 // static markup carries <span data-pd="LABEL"></span>; drawn once at start
 document.querySelectorAll('[data-pd]').forEach(e=>{e.outerHTML=SK(e.dataset.pd)});
@@ -2020,8 +2137,8 @@ let A=null,curIdx=-1,selIdx=-1,songRaf=0,fileKey='',sampleFn=null,pendingLib=nul
 const vid=$('vid');
 const shapeIdx=c=>transpose(c,-(TSHIFT[A.play.tun]??0)-A.play.capo);
 const soundIdx=c=>transpose(c,(TSHIFT[A.play.tun]??0)+A.play.capo);
-function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';if(t==='tune'){try{mxPause()}catch(e){}}if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';[...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===t));$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause()}
-$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setTab(b.dataset.tab);if(b.dataset.tab==='song')songsHome()});
+function setTab(t){if(!['tune','song','chords','gear'].includes(t))t='tune';try{v2Hide()}catch(e){}if(t==='tune'){try{mxPause()}catch(e){}}if(t==='gear'&&$('paneGear').hidden){try{gearVisit=null;renderGear()}catch(e){}}$('paneGear').hidden=t!=='gear';$('paneTune').hidden=t!=='tune';$('paneSong').hidden=t!=='song';$('paneChords').hidden=t!=='chords';if(t==='chords'){bookOpen=null;renderBook()}if(t!=='tune'&&listening)stopListening();store.set('tab',t);if(t==='song'&&listening)stopListening();if(t==='tune'&&!vid.paused)vid.pause();try{v2After(t)}catch(e){}}
+// V2: the old tab bar is gone; sections are opened by goSec (90-v2-shell)
 // the Songs tab always opens on the Songs home page; whatever you were in the middle of is kept (draft card or a "back to" button)
 let songsResume=null;
 function songsHome(){
@@ -2046,10 +2163,10 @@ function renderResume(){
   if(x.view==='sheet'){A=x.A;fileKey=x.fileKey||fileKey;showSheet()}else if(x.view==='song'){A=x.A;showSong(false)}
   else{['drop','writeNew','draftCard','shotNew','shotCard','libCard'].forEach(k=>$(k).hidden=true);$('readyCard').hidden=false}window.scrollTo({top:0})};
 }
-// Songs home has two parts: My library (default) and Add a song
-function setSongSeg(v){v=v==='add'?'add':'lib';const p=$('paneSong');if(!p)return;p.dataset.seg=v;[...$('songSeg').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v))}
+// the Songs pane is two sections: Learn (your songs, ideas, a song video) and Write (sheets, screenshots/PDF, chord finder); old names: lib = learn, add = write
+function setSongSeg(v){v=v==='add'||v==='write'?'write':'learn';const h=$('songSech');if(h)h.textContent=v==='write'?'Write':'Learn';try{v2SegChanged(v)}catch(e){}const p=$('paneSong');if(!p)return;p.dataset.seg=v;[...$('songSeg').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===v))}
 $('songSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSongSeg(b.dataset.s);window.scrollTo({top:0})});
-setSongSeg('lib');
+setSongSeg('learn');
 function songMsg(t){const m=$('songMsg');m.hidden=!t;m.textContent=t||''}
 function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*100)+'%';if(t)$('progTxt').textContent=t}
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
@@ -2066,7 +2183,7 @@ $('vidIn').addEventListener('change',async e=>{
  showReady(file);
 });
 $('preTun').innerHTML+=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
-function showReady(file){
+function showReady(file){if($('paneSong').hidden)setTab('song');
  $('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=true;$('prog').hidden=true;$('readyCard').hidden=false;
  $('readyFile').textContent=file.name+' · '+(file.size/1048576).toFixed(1)+' MB';
  const saved=loadSong(fileKey);$('preTun').value=saved&&saved.tuning&&saved.tuning.conf==='yours'?saved.tuning.id:'auto';
@@ -2084,7 +2201,7 @@ $('analyseBtn').onclick=()=>runAnalysis(curFile);
 $('preRead').addEventListener('change',e=>store.set('readScreen2',e.target.checked));
 $('preListen').checked=store.get('detailListen',true);$('preListen').addEventListener('change',e=>store.set('detailListen',e.target.checked));
 function setReadTxt(){$('preReadTxt').textContent=claudeReads()?'Also check the video: chords written on screen and the guitarist’s hand (Claude)':'Also read chord names written in the video'}
-async function runAnalysis(file){
+async function runAnalysis(file){if($('paneSong').hidden)setTab('song');
  if(!file)return;const pre=$('preTun').value,wantRead=!$('preReadWrap').hidden&&$('preRead').checked;
  const listen=store.get('detailListen',true),steps=['Read the sound'].concat(listen?['Listen to every note (AI model on this phone)']:[],['Find chords and tuning']).concat(wantRead?[claudeReads()?'Check the video: written chords and hand shapes':'Read chord names shown in the video','Match the timeline to the video']:[]);
  $('readyCard').hidden=true;songMsg('');prog(.03,'Reading the sound…');setSteps(steps,0);
@@ -2118,7 +2235,7 @@ async function runAnalysis(file){
   songMsg(err&&err.name==='EncodingError'||err&&/decode/i.test(err.message||'')?'This file’s sound couldn’t be read. Try an MP4 or M4A file.':'Something went wrong while analysing. The file may be too long or too large for this phone; try a shorter clip.');
  }
 }
-function showSong(fromSave){
+function showSong(fromSave){if($('paneSong').hidden)setTab('song');
  $('prog').hidden=true;$('readyCard').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('sheetView').hidden=true;$('songView').hidden=false;$('songNotes').value=A.notes||'';
  $('songTitle').value=A.title||'';$('tempoChip').textContent=A.bpm?'≈'+A.bpm+' BPM':'';
  if(fromSave){songMsg('');$('doneTitle').textContent='Saved analysis opened';$('doneText').textContent=`${tName(A.tuning.id)} · ${new Set(A.segs.filter(g=>g.c<NS).map(g=>nameOf(g))).size} chords${A.at?' · analysed '+fmtDate(A.at):''}. Tap “Analyse again” from a fresh pick to redo it.`;$('doneBanner').hidden=false}
@@ -2593,8 +2710,8 @@ $('newSong').onclick=()=>{vid.pause();A=null;fileKey='';showLanding();songMsg(''
 $('songNotes').addEventListener('change',e=>{A.notes=e.target.value.trim();saveSong()});
 $('finish').onclick=()=>{vid.pause();A.notes=$('songNotes').value.trim();saveSong();showSheet()};
 /* better versions */
-const DEFAULT_TASTE='Acoustic versions. Israeli rock and 1990s–2000s alternative rock (e.g. Mashina, Aviv Gefen, Radiohead, Pearl Jam, Oasis).';
-$('taste').value=store.get('taste',DEFAULT_TASTE);$('taste').addEventListener('change',e=>store.set('taste',e.target.value));
+// the player's taste comes from their own words here, else from their profile (no built-in taste: every player starts neutral)
+$('taste').value=store.get('taste','');$('taste').addEventListener('change',e=>store.set('taste',e.target.value));
 function renderLinks(){const t=(A&&A.title)||'';if(!t){$('links').innerHTML='<p class="tip">Type the song name above to get search links.</p>';return}
  const q=[['Acoustic',t+' acoustic'],['Unplugged / live',t+' unplugged live'],['Guitar lesson',t+' guitar lesson'],['Acoustic cover',t+' acoustic cover']];
  $('links').innerHTML=q.map(([l,s])=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(s)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}
@@ -2663,7 +2780,7 @@ Detected tuning: ${tName(A.tuning.id)} (${A.tuning.conf} confidence). Reason: ${
 Recording pitch offset from A440: ${A.offset} cents.
 Chord timeline (chord shapes as played in the tuning and capo above, start time in seconds): ${line}
 Share of time per chord: ${Object.entries(tot).sort((a,b)=>b[1]-a[1]).map(([n,d])=>n+' '+Math.round(d/sum*100)+'%').join(', ')}
-Player's taste: ${$('taste').value||DEFAULT_TASTE}
+Player's taste: ${$('taste').value||profTaste()||'not given'}
 
 Tasks:
 1. Identify the song from the title if you can; otherwise use null. Don't guess wildly.
@@ -2707,9 +2824,8 @@ function renderLib(){
   const dr=e.drive?(e.drive.at>=e.saved?'<span class="badge">In Drive</span>':'<span class="badge old">Drive copy older</span>'):'';
   return `<button class="libitem" data-id="${esc(e.id)}"><b dir="auto">${esc(e.name)}${dr}</b><span>${d.artist?`<span dir="auto">${esc(d.artist)}</span> · `:''}${esc(t)} · saved ${fmtDate(e.saved)}</span></button>`}).join('')
   :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
- // with a Drive folder button the list stays tucked away; without one it's the main view
- const hasFolder=!$('folderBtn').hidden;$('libCount').textContent=l.length?'('+l.length+')':'';
- $('libSaved').hidden=hasFolder&&!l.length;const ls=$('libSaved');if(!hasFolder)ls.open=true;else if(!ls._mine)ls.open=false;$('libSaved').classList.toggle('flat',!hasFolder);
+ // V2: a box in My Library, closed until opened (it was the main Songs view in V1 when no Drive folder was linked)
+ $('libCount').textContent=l.length?'('+l.length+')':'';$('libSaved').hidden=false;const ls=$('libSaved');if(!ls._mine)ls.open=false;ls.classList.remove('flat');
 }
 $('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
 $('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
@@ -2771,7 +2887,7 @@ function sheetHTML(print){
  return h;
 }
 function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
-function showSheet(){
+function showSheet(){if($('paneSong').hidden)setTab('song');
  wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
  const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');try{renderSheetVid()}catch(e){}window.scrollTo({top:0});
@@ -3037,7 +3153,7 @@ function remapLines(text,old){
 }
 $('wTun').innerHTML=TUNINGS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
 $('wCapo').innerHTML='<option value="0">None</option>'+[...Array(12)].map((_,i)=>`<option value="${i+1}">Fret ${i+1}</option>`).join('');
-function openWriter(a,step){
+function openWriter(a,step){if($('paneSong').hidden)setTab('song');
  vid.pause();A=a;A.made=false;wFromWriter=false;try{wResetHist()}catch(e){}
  ['drop','writeNew','draftCard','resumeCard','shotNew','shotCard','libCard','readyCard','songView','sheetView','prog'].forEach(k=>{const e=$(k);if(e)e.hidden=true});songMsg('');$('writeView').hidden=false;
  $('wTitle').value=A.title||'';$('wArtist').value=A.artist||'';$('wTun').value=A.play.tun;$('wCapo').value=String(A.play.capo||0);$('wLyrics').value=A.lyrics||'';
@@ -3630,7 +3746,7 @@ function renderSheetVid(){const box=$('shVid');if(!box)return;if(!A){box.hidden=
  box.hidden=!vs.length;box.innerHTML=vs.map(v=>`<a class="shvid" href="${esc(v.url)}" target="_blank" rel="noopener"><i>${SK('LESSON')}</i><span><b>Your video lesson for this song</b><small dir="auto">${esc(v.song||v.title)}${v.artist?' · '+esc(v.artist):''} · ${esc(v.src||vlSource(v.url))} ↗</small></span></a>`).join('')}
 // shared from YouTube (Share › Guitaring) or opened with ?url=…
 (function vlShared(){try{const q=new URLSearchParams(location.search),u=firstUrl([q.get('url'),q.get('text'),q.get('title')].join(' '));if(!u)return;
- history.replaceState(null,'',location.pathname);setTimeout(()=>{try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e){}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
+ history.replaceState(null,'',location.pathname);window.__shared=true;setTimeout(()=>{try{goSec('library')}catch(e){try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e2){}}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
 setTimeout(renderVids,0);
 // screenshots are lined up in order first (top of the song first), then read together
 let shotStage=[];const SHOT_MAX=8;
@@ -4519,7 +4635,7 @@ $('mxDim').onclick=()=>mxView(false);
 
 // ---------- the Songs page entry ----------
 function renderMixNew(){const b=$('mixNew');if(!b)return;const ready=mxIdx.filter(x=>x.state==='ready').length,pend=mxIdx.filter(x=>MX_PEND.includes(x.state)).length;
- b.querySelector('.sub').textContent='Turn parts of a song up or down'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
+ b.querySelector('.sub').textContent='Split a song into its parts'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
 $('mixNew').onclick=()=>{
  if(!mxIdx.length&&!mxSong&&!mxBusy&&mxGh()){mxPickLocal=false;$('mixIn').click();return}
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
@@ -4596,8 +4712,8 @@ function renderWelcome(){
 }
 function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'||go==='song'){setTab('song');songsHome();if(go==='write'){const t=$('shotNew');if(t&&!t.hidden){setTimeout(()=>{t.scrollIntoView({behavior:'smooth',block:'center'});['shotNew','writeNew','draftCard'].forEach(k=>{const e=$(k);if(e&&!e.hidden){e.classList.add('pulse');setTimeout(()=>e.classList.remove('pulse'),1600)}})},80)}}}else if(go)setTab(go)}
 $('welcome').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){const g=b.dataset.go;closeWelcome(g);if(g==='song'||g==='write')setSongSeg('add')}});
-$('wSkip').onclick=()=>closeWelcome('');
-document.body.classList.add('wopen');renderWelcome();
+{const ws=document.querySelector('#welcome .wskip');if(ws)ws.onclick=()=>closeWelcome('')}
+// V2: the app opens on Home (90-v2-shell), which shows the greeting and the jokes; this overlay is no longer shown
 
 /* ================= My gear: instrument adviser ================= */
 const GEAR={
@@ -5705,6 +5821,8 @@ async function bkOpen(file){const z=await zipRead(file);
 // merge for "Add what's missing": lists gain the items they don't have (by id, else by content), objects gain missing entries; anything else stays as it is
 function bkMerge(cur,add){if(Array.isArray(cur)&&Array.isArray(add)){const key=x=>x&&typeof x==='object'&&x.id!=null?'id:'+x.id:'j:'+JSON.stringify(x),have=new Set(cur.map(key));return cur.concat(add.filter(x=>!have.has(key(x))))}
  if(cur&&add&&typeof cur==='object'&&typeof add==='object'&&!Array.isArray(cur)&&!Array.isArray(add)){const o={...cur};for(const k in add)if(!(k in o))o[k]=add[k];return o}return cur}
+// how many profile answers are filled in
+function bkAnswers(p){return ['name','years','level'].filter(f=>p[f]).length+['songLang','skills','instruments','genres','artists','dreamSongs','goals','learnBy','context'].filter(f=>Array.isArray(p[f])&&p[f].length).length+(p.time&&p.time.minPerDay?1:0)}
 // restore; mode 'add' (default) or 'replace'
 async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept:0};
  await safetyCopy('restore');
@@ -5715,6 +5833,9 @@ async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept
  for(const k0 in local){const k=fix(k0),cur=localStorage.getItem(k);
   if(cur==null||mode==='replace'){localStorage.setItem(k,local[k0]);rep.local++;continue}
   let a,c;try{a=JSON.parse(local[k0]);c=JSON.parse(cur)}catch(e){rep.kept++;continue}
+  // a profile that was never filled in (a new or reset phone) counts as missing; the migration log keeps every step either side has done
+  if(k===KP+'profile'&&c&&a&&!(c.onboarding&&c.onboarding.done)&&((a.onboarding&&a.onboarding.done)||bkAnswers(a)>bkAnswers(c))){localStorage.setItem(k,local[k0]);rep.local++;continue}
+  if(k===KP+'v2mig'&&c&&a){const m={...c,...a,done:[...new Set([...(a.done||[]),...(c.done||[])])]};localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   const m=bkMerge(c,a);if(JSON.stringify(m)!==cur){localStorage.setItem(k,JSON.stringify(m));rep.local++}else rep.kept++}
  if(mode==='replace')await idbClear(k=>/^backup:pre-/.test(k)||(!man.opt.parts&&bkIsPart(k)));
  for(let n=0;n<man.idb;n++){const meta=JSON.parse(await txt(`idb/${n}.json`)),k=meta.key;
@@ -5773,6 +5894,200 @@ function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last b
 function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`;const l=$('bkLast');if(l)l.innerHTML=bkLastTxt()}
 renderBackup();
 window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,get:mxGet,put:mxPut,del:mxDel,safety:safetyCopy,beta:BETA};// test hooks
+/* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
+// Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
+// My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
+var curSec='home',secBack='home';
+var V2P=['paneHome','paneJam','paneLib','paneProfile'],V1P=['paneTune','paneSong','paneChords','paneGear'];
+var PAGES=['tuner','library','profile','chords'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
+function v2Hide(){V2P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
+function v1Hide(){try{if(listening)stopListening()}catch(e){}try{if(!vid.paused)vid.pause()}catch(e){}V1P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
+function v2Mark(s){curSec=s;document.body.dataset.cursec=s;
+ const tab=PAGES.includes(s)?'':s;document.querySelectorAll('#bnav [data-sec]').forEach(b=>b.setAttribute('aria-current',b.dataset.sec===tab?'page':'false'));
+ document.querySelectorAll('.hicons [data-sec]').forEach(b=>b.setAttribute('aria-current',b.dataset.sec===s?'page':'false'))}
+// called by setTab (V1 code keeps calling setTab('song') etc.): which section that is
+function v2After(t){const s=t==='tune'?'tuner':t==='chords'?'chords':t==='gear'?'gear':($('paneSong').dataset.seg==='write'?'write':'learn');v2Mark(s)}
+function v2SegChanged(v){if(!$('paneSong').hidden)v2Mark(v)}
+function goSec(s,opt){opt=opt||{};if(s===curSec&&!opt.force&&s!=='learn'&&s!=='write'){window.scrollTo({top:0});return}
+ const from=curSec;
+ if(PAGES.includes(s)&&!PAGES.includes(from))secBack=from;
+ if(s==='learn'||s==='write'){setTab('song');songsHome();setSongSeg(s)}
+ else if(s==='gear')setTab('gear');
+ else if(s==='tuner')setTab('tune');
+ else if(s==='chords')setTab('chords');
+ else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile'}[s];if(!id)return goSec('home');$(id).hidden=false;
+  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile()}
+ v2Mark(s);window.scrollTo({top:0});
+ // a header page can be closed with the phone's back button
+ if(PAGES.includes(s)&&!opt.fromPop){try{if(history.state&&history.state.gpage)history.replaceState({gpage:s},'');else history.pushState({gpage:s},'')}catch(e){}}}
+function pageClose(){if(history.state&&history.state.gpage===curSec)history.back();else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})}
+addEventListener('popstate',e=>{if(!PAGES.includes(curSec))return;const st=e.state||{};if(st.gpage===curSec)return;
+ if(st.gpage&&PAGES.includes(st.gpage))goSec(st.gpage,{fromPop:true});else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(b&&!b.closest('#onb')){e.preventDefault();goSec(b.dataset.sec,{force:b.closest('#bnav')&&b.dataset.sec==='home'})}
+ else if(e.target.closest('[data-back]'))pageClose()});
+// ---- Home ----
+function homeName(){const p=profGet();return p.name||store.get('userName','')}
+function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
+ h.innerHTML=`<p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><p class="hjoke" id="hJoke" dir="auto">${j}</p><button type="button" class="hmore" id="hMore">Another one ↻</button>`;
+ $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'))};
+ // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
+ const c=[],p=profGet();
+ try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
+ try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
+ if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
+ const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
+ box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}
+// ---- Jam: Band breakdown + the jam tracks list ----
+function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mixNew')){const m=$('mixNew');if(m)g.appendChild(m);
+  const o=document.createElement('button');o.type='button';o.className='drop write addtile';o.id='jamOpen';o.innerHTML=`<i aria-hidden="true">${SK('MIX')}</i><b>Jamming player</b><span class="sub">Open the player with your parts</span>`;o.onclick=()=>{mxView(true);if(!mxBusy)mxSheetUI2()};g.appendChild(o)}
+ try{renderMixNew()}catch(e){}
+ const l=$('jamList');if(!l)return;const L=(mxIdx||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
+ const st=x=>x.state==='ready'?'Ready':x.state==='failed'?'Didn’t work':'Splitting…';
+ l.innerHTML=L.length?`<p class="libsub">My jam tracks</p>`+L.map(x=>`<button type="button" class="jrow ${x.state}" data-jid="${esc(x.id)}"><b dir="auto">${esc(x.name||'Song')}</b><small>${st(x)}</small></button>`).join(''):'<p class="tip">No songs yet. Tap Band breakdown to split your first song into its parts.</p>';
+ l.querySelectorAll('[data-jid]').forEach(b=>b.onclick=()=>{const it=mxIdx.find(x=>x.id===b.dataset.jid);mxView(true);if(it&&it.state==='ready')mxOpen(it.id);else if(!mxBusy)mxSheetUI2()})}
+// ---- My Library: the V1 lists, gathered ----
+function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox','vidBox','libSaved'].forEach(id=>{const e=$(id);if(e)h.appendChild(e)});h.dataset.moved='1'}
+ const s=$('libJamSub');if(s){const r=(mxIdx||[]).filter(x=>x.state==='ready').length;s.textContent=r?`${r} song${r>1?'s':''} ready to play`:'Band breakdown songs'}}
+// ---- profile (tuner.profile) ----
+const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
+function profGet(){const p=store.get('profile',null)||{};return {...JSON.parse(JSON.stringify(PROF_DEF)),...p,time:{...PROF_DEF.time,...(p.time||{})},onboarding:{...PROF_DEF.onboarding,...(p.onboarding||{})}}}
+// saving the profile also feeds the V1 places that read the same things (greeting name, song-idea language)
+function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
+ // only the language, and only when it changed (V1 data is never rewritten otherwise)
+ if(p.songLang&&p.songLang.length){const lang=p.songLang.length>1?'both':p.songLang[0],ip=store.get('ideaPrefs',null)||{};if(ip.lang!==lang)store.set('ideaPrefs',{...ip,lang})}}
+// the player's taste for Claude prompts, in words, from the profile
+function profTaste(){const p=profGet(),g=p.genres.map(x=>(OB_OPTS.genres.find(o=>o[0]===x)||[0,x])[1]);return [g.length?'Genres: '+g.join(', '):'',p.artists.length?'Artists: '+p.artists.join(', '):'',p.dreamSongs.length?'Dream songs: '+p.dreamSongs.join(', '):''].filter(Boolean).join('. ')}
+const OB_OPTS={
+ songLang:[['he','Hebrew'],['en','English']],
+ years:[['<1','Less than a year'],['1-3','1–3 years'],['3-10','3–10 years'],['10+','10 years or more']],
+ level:[['beginner','Beginner'],['improving','Improving'],['intermediate','Intermediate'],['advanced','Advanced']],
+ skills:[['open','Open chords'],['barre','Barre chords'],['power','Power chords'],['strum','Strumming patterns'],['fingerpick','Fingerpicking'],['legato','Hammer-ons and slides'],['bends','Bends'],['tab','Reading tab']],
+ instruments:[['acoustic','Acoustic'],['electric','Electric'],['classical','Classical'],['bass','Bass']],
+ genres:[['israeli-rock','Israeli rock'],['israeli-pop','Israeli pop'],['mizrahi','Mizrahi'],['hebrew-sw','Hebrew singer-songwriter'],['classic-rock','Classic rock'],['alt-rock','Alternative and indie'],['pop','Pop'],['folk','Folk and acoustic'],['blues','Blues'],['metal','Metal'],['punk','Punk'],['reggae','Reggae'],['jazz','Jazz'],['country','Country']],
+ goals:[['campfire','Play around the campfire'],['sing-along','Accompany myself singing'],['band','Play in a band'],['write','Write my own songs'],['technique','Improve my technique'],['theory','Learn theory']],
+ learnBy:[['video','Videos'],['sheets','Chord sheets'],['tabs','Tabs'],['ear','By ear']],
+ minPerDay:[[10,'10 min'],[20,'20 min'],[30,'30 min'],[60,'An hour']],
+ daysPerWeek:[[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6'],[7,'7']],
+ context:[['alone','Alone'],['friends','With friends or family'],['stage','On stage']]};
+// M1: an existing player's profile, filled from what the app already knows (only reads V1 data)
+function v1HasData(){return !!(store.get('userName','')||(store.get('instruments',[])||[]).length||(store.get('lib',[])||[]).length||(store.get('vlinks',[])||[]).length||(store.get('sheetCat',[])||[]).length||(store.get('sheetIndex',[])||[]).length||((store.get('songIndex',null)||{}).songs||[]).length)}
+function profPrefill(){const p=JSON.parse(JSON.stringify(PROF_DEF)),filled=[];
+ const n=store.get('userName','');if(n){p.name=n;filled.push('name')}
+ const ip=store.get('ideaPrefs',null);if(ip&&ip.lang){p.songLang=ip.lang==='both'?['he','en']:[ip.lang];filled.push('songLang')}
+ const it=(store.get('instruments',[])||[]).map(x=>x&&x.type),ins=new Set();it.forEach(t=>{if(t==='acoustic'||t==='electroacoustic')ins.add('acoustic');if(t==='electric')ins.add('electric');if(t==='classical')ins.add('classical');if(t==='bass')ins.add('bass')});
+ if(ins.size){p.instruments=[...ins];filled.push('instruments')}
+ // artists: the Drive songs folder (most songs first) and the bands chosen for song ideas
+ const ix=store.get('songIndex',null),cnt={};((ix&&ix.songs)||[]).forEach(s=>{if(s&&s.a)cnt[s.a]=(cnt[s.a]||0)+1});
+ const arts=[...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...((ip&&ip.bands)||[])])].slice(0,12);if(arts.length){p.artists=arts;filled.push('artists')}
+ // level: the daily job's sentence, else the chords in your sheets
+ const lv=((store.get('ideas',null)||{}).level||'').toLowerCase();let level=/advanced/.test(lv)?'advanced':/intermediate/.test(lv)?'intermediate':/beginner/.test(lv)?'beginner':'';
+ const sh=[...(store.get('sheetIndex',[])||[]),...(store.get('sheetCat',[])||[])],lvs=sh.map(x=>+x.level||0).filter(Boolean);
+ if(!level&&lvs.length>=3){const a=lvs.reduce((x,y)=>x+y,0)/lvs.length;level=a>=3.6?'advanced':a>=2.4?'intermediate':'improving'}
+ if(level){p.level=level;filled.push('level')}
+ const chs=new Set(sh.flatMap(x=>x.chords||[]));if(chs.size){const sk=['open'];if([...chs].some(c=>!OPEN_CH.has(String(c).split('/')[0])))sk.push('barre');p.skills=sk;filled.push('skills')}
+ p.onboarding.prefilled=filled;return p}
+async function v2MigM1(){const log=store.get('v2mig',{done:[]})||{done:[]};if((log.done||[]).includes('M1')||store.get('profile',null))return;
+ const snap=()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(KP)&&!/\.(profile|v2mig)$/.test(k))o[k]=localStorage.getItem(k)}return JSON.stringify(o)};
+ // build and check in one go (nothing else runs in between): M1 only reads V1 data
+ const before=snap(),existing=v1HasData(),p=existing?profPrefill():JSON.parse(JSON.stringify(PROF_DEF));
+ if(snap()!==before){log.warn='M1: V1 data changed while building the profile; not written';store.set('v2mig',log);return}
+ if(existing){try{await safetyCopy('M1')}catch(e){}}
+ if(store.get('profile',null))return;// written meanwhile (another tab)
+ store.set('profile',p);log.done=[...(log.done||[]),'M1'];log.at=Date.now();log.report={...(log.report||{}),M1:{existing,prefilled:p.onboarding.prefilled||[]}};store.set('v2mig',log)}
+// ---- onboarding: about 2–3 minutes, every screen can be skipped, "Finish later" any time ----
+const OB_STEPS=[
+ {k:'hello',f:[]},
+ {k:'about',t:'About you',f:['name','songLang']},
+ {k:'playing',t:'Your playing',f:['years','level']},
+ {k:'check',t:'Quick check',f:['skills']},
+ {k:'instr',t:'Your instruments',f:['instruments']},
+ {k:'music',t:'Music you love',f:['genres','artists','dreamSongs']},
+ {k:'goals',t:'Your goals',f:['goals']},
+ {k:'learn',t:'How you learn',f:['learnBy','time','context']},
+ {k:'done',t:'Here’s what Guitaring will do for you',f:[]}];
+let ob=null;// {d: draft profile, steps: [indexes], i: position}
+const obEmpty=(d,f)=>f==='time'?!(d.time.minPerDay&&d.time.daysPerWeek):Array.isArray(d[f])?!d[f].length:!d[f];
+function openOnb(all){const d=profGet();
+ // an existing player sees only the screens with something missing (all of them when editing from My profile)
+ const steps=OB_STEPS.map((s,i)=>i).filter(i=>{const s=OB_STEPS[i];return all||!s.f.length||s.f.some(f=>obEmpty(d,f))});
+ ob={d,steps,i:all?1:0,all:!!all};document.body.classList.add('wopen');$('onb').hidden=false;obRender()}
+function obClose(done){const d=ob.d;d.onboarding.at=new Date().toISOString();if(done){d.onboarding.done=true;d.onboarding.later=false}else d.onboarding.later=true;
+ profSet(d);ob=null;$('onb').hidden=true;$('onb').innerHTML='';document.body.classList.remove('wopen');if(curSec==='home')renderHome();if(curSec==='profile')renderProfile()}
+function obChips(field,opts,multi,cur){return `<div class="obchips" data-f="${field}" data-multi="${multi?1:0}">${opts.map(([v,l])=>`<button type="button" class="obchip" data-v="${esc(String(v))}" aria-pressed="${multi?cur.map(String).includes(String(v)):String(cur)===String(v)}">${esc(l)}</button>`).join('')}</div>`}
+function obSummary(d){const L=[],nm=(k,v)=>(OB_OPTS[k].find(o=>o[0]===v)||[0,v])[1];
+ const lang=d.songLang.length===2?'Hebrew and English':d.songLang.length?nm('songLang',d.songLang[0]):'';
+ const taste=[...d.genres.slice(0,3).map(g=>nm('genres',g)),...d.artists.slice(0,3)];
+ L.push(`Song ideas ${lang?`in ${lang} `:''}${taste.length?`around ${taste.join(', ')}`:'matched to your taste'}${d.level?`, at your level (${nm('level',d.level).toLowerCase()})`:''}.`);
+ if(d.level)L.push(`Song guides open on the ${['beginner','improving'].includes(d.level)?'easy':'full'} version first (song guides are coming in a later update).`);
+ if(d.goals.length)L.push(`Suggestions that help you ${d.goals.slice(0,2).map(g=>nm('goals',g).toLowerCase()).join(' and ')}.`);
+ if(d.instruments.length)L.push(`Gear tips for your ${d.instruments.map(x=>nm('instruments',x).toLowerCase()).join(' and ')} guitar${d.instruments.length>1?'s':''} (coming soon).`);
+ if(d.time.minPerDay)L.push(`Practice ideas that fit ${nm('minPerDay',d.time.minPerDay).toLowerCase()} a day${d.time.daysPerWeek?`, ${d.time.daysPerWeek} day${d.time.daysPerWeek>1?'s':''} a week`:''}.`);
+ return L}
+function obRender(){const box=$('onb'),pos=ob.i,si=ob.steps[pos],st=OB_STEPS[si],d=ob.d,n=ob.steps.length,last=pos===n-1;
+ const pct=Math.round(pos/(n-1)*100);let body='';
+ if(st.k==='hello')body=`<h2>Let’s set up Guitaring for you</h2><p>A few quick questions so the app fits <b>your</b> level, your music and the gear you own. About 2 minutes. Skip anything you like.</p>
+  ${d.onboarding.prefilled&&d.onboarding.prefilled.length?'<p>Some answers are already filled in from what Guitaring knows. Check them as you go.</p>':''}
+  <p class="obpriv">${SK('PROFILE')} <span><b>Your answers stay on this phone.</b> They only go to your own Google Drive or your private GitHub repository if you turn on backup. Nothing is sent anywhere else.</span></p>`;
+ else if(st.k==='about')body=`<label class="oblab">Your first name <input id="obName" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" value="${esc(d.name)}" placeholder="Your first name"></label>
+  <p class="oblab">Songs in</p>${obChips('songLang',OB_OPTS.songLang,true,d.songLang)}<p class="tip">Pick both for a mix.</p>`;
+ else if(st.k==='playing')body=`<p class="oblab">Playing for</p>${obChips('years',OB_OPTS.years,false,d.years)}<p class="oblab">Your level</p>${obChips('level',OB_OPTS.level,false,d.level)}`;
+ else if(st.k==='check')body=`<p>Instead of guessing a level: tick what you can already play.</p>${obChips('skills',OB_OPTS.skills,true,d.skills)}`;
+ else if(st.k==='instr'){const g=(store.get('instruments',[])||[]).filter(x=>x&&x.name);body=`<p>What do you play?</p>${obChips('instruments',OB_OPTS.instruments,true,d.instruments)}${g.length?`<p class="tip">In Gear already: ${esc(g.map(x=>x.name).join(', '))}.</p>`:'<p class="tip">You can add your guitars and amps in Gear any time.</p>'}`}
+ else if(st.k==='music'){const ix=store.get('songIndex',null),sug=[...new Set([...d.artists,...(((ix&&ix.artists)||[]))])].slice(0,18);
+  body=`<p class="oblab">Genres you love</p>${obChips('genres',OB_OPTS.genres,true,d.genres)}
+  <p class="oblab">Favourite artists and bands</p>${obChips('artists',sug.map(a=>[a,a]),true,d.artists)}<input id="obArtist" class="textin" type="text" dir="auto" placeholder="Add an artist, then Enter">
+  <p class="oblab">Songs you’d love to play one day</p>${obChips('dreamSongs',d.dreamSongs.map(a=>[a,a]),true,d.dreamSongs)}<input id="obDream" class="textin" type="text" dir="auto" placeholder="Song – artist, then Enter">`}
+ else if(st.k==='goals')body=`<p>What do you want guitar for? Pick any.</p>${obChips('goals',OB_OPTS.goals,true,d.goals)}`;
+ else if(st.k==='learn')body=`<p class="oblab">How you like to learn</p>${obChips('learnBy',OB_OPTS.learnBy,true,d.learnBy)}
+  <p class="oblab">Time to play, a day</p>${obChips('minPerDay',OB_OPTS.minPerDay,false,d.time.minPerDay)}
+  <p class="oblab">Days a week</p>${obChips('daysPerWeek',OB_OPTS.daysPerWeek,false,d.time.daysPerWeek)}
+  <p class="oblab">You play</p>${obChips('context',OB_OPTS.context,true,d.context)}`;
+ else if(st.k==='done'){const L=obSummary(d);body=`<ul class="obsum">${L.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="tip">Change any answer later in <b>My profile</b> (top right).</p>`}
+ box.innerHTML=`<div class="obcard"><div class="obtop"><div class="obprog" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div><button type="button" class="oblater" id="wSkip">${ob.all?'Close':'Finish later'}</button></div>
+  ${st.t&&st.k!=='hello'?`<h2>${esc(st.t)}</h2>`:''}<div class="obbody">${body}</div>
+  <div class="obfoot">${pos>0?'<button type="button" class="btn ghost" id="obBack">Back</button>':'<span></span>'}${!last&&st.k!=='hello'?'<button type="button" class="btn ghost" id="obSkip">Skip</button>':''}<button type="button" class="btn cta" id="obNext">${st.k==='hello'?'Start':last?'Done':'Next'}</button></div></div>`;
+ const keep=()=>{const nm=$('obName');if(nm)d.name=nm.value.trim()};
+ box.querySelectorAll('.obchips').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('.obchip');if(!b)return;const f=g.dataset.f,multi=g.dataset.multi==='1',raw=b.dataset.v,v=/^\d+$/.test(raw)&&(f==='minPerDay'||f==='daysPerWeek')?+raw:raw;
+  if(f==='minPerDay'||f==='daysPerWeek'){d.time[f]=d.time[f]===v?0:v}
+  else if(multi){d[f]=d[f].includes(v)?d[f].filter(x=>x!==v):[...d[f],v]}else d[f]=d[f]===v?'':v;
+  if(multi)b.setAttribute('aria-pressed',String(d[f].includes(v)));else g.querySelectorAll('.obchip').forEach(x=>x.setAttribute('aria-pressed',String(x===b&&(f==='minPerDay'||f==='daysPerWeek'?d.time[f]===v:d[f]===v))))}));
+ const addTo=(id,f)=>{const i=$(id);if(i)i.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const v=i.value.trim().slice(0,60);if(v&&!d[f].includes(v))d[f].push(v);i.value='';keep();obRender();const j=$(id);if(j)j.focus()})};
+ addTo('obArtist','artists');addTo('obDream','dreamSongs');
+ $('wSkip').onclick=()=>{keep();obClose(ob.all&&d.onboarding.done)}
+ if($('obBack'))$('obBack').onclick=()=>{keep();ob.i--;obRender()};
+ if($('obSkip'))$('obSkip').onclick=()=>{d.onboarding.skipped=[...new Set([...(d.onboarding.skipped||[]),st.k])];ob.i++;obRender()};
+ $('obNext').onclick=()=>{keep();if(last){obClose(true);return}ob.i++;obRender()};
+ box.scrollTop=0}
+// ---- My profile ----
+function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm=(k,v)=>(OB_OPTS[k].find(o=>String(o[0])===String(v))||[0,v])[1],li=(k,a)=>a.map(v=>nm(k,v)).join(', ');
+ const rows=[['Name',p.name],['Songs in',li('songLang',p.songLang)],['Playing for',p.years?nm('years',p.years):''],['Level',p.level?nm('level',p.level):''],['Can play',li('skills',p.skills)],['Instruments',li('instruments',p.instruments)],['Genres',li('genres',p.genres)],['Artists',p.artists.join(', ')],['Dream songs',p.dreamSongs.join(', ')],['Goals',li('goals',p.goals)],['Learns by',li('learnBy',p.learnBy)],['Time',p.time.minPerDay?`${nm('minPerDay',p.time.minPerDay)} a day${p.time.daysPerWeek?`, ${p.time.daysPerWeek} days a week`:''}`:''],['Plays',li('context',p.context)]];
+ c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>Your answers stay on this phone.</small></div></div>
+  <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
+  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);
+ // Connections and Backup: the V1 boxes, moved here
+ const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
+  const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}
+ const gh=$('ghCfg');if(gh){const cfg=mxGh();gh.innerHTML=`<summary>GitHub for Band breakdown${cfg?` <span class="libcount">${esc(cfg.repo)}</span>`:''}</summary><p class="tip">${cfg?`Songs are split in your private repository <b>${esc(cfg.repo)}</b>, even while the phone is locked.`:'Split songs on GitHub for free, even while the phone is locked.'}</p><button type="button" class="btn ghost" id="ghSet">${cfg?'Change the GitHub connection':'Connect GitHub'}</button>`;$('ghSet').onclick=()=>{mxView(true);mxSetup()}}
+ const bk=$('profBackup');if(bk&&!bk.dataset.moved){const e=$('bkBox');if(e)bk.appendChild(e);const r=document.createElement('details');r.className='apibox';r.id='v2Box';bk.appendChild(r);bk.dataset.moved='1'}
+ // the V2 changes to your data: what was done, and a way to undo it (only V2's own data; V1 data is never changed)
+ const vb=$('v2Box');if(vb){const log=store.get('v2mig',null)||{},m1=log.report&&log.report.M1,FN={name:'name',songLang:'song languages',instruments:'instruments',artists:'artists',level:'level',skills:'chords you play'};
+  vb.innerHTML=`<summary>The update to the new Guitaring</summary><p class="tip">${(log.done||[]).includes('M1')?`Your profile was created${log.at?` on ${esc(bkDate(log.at))}`:''}${m1&&m1.prefilled&&m1.prefilled.length?`, filled in from what the app already knew: ${esc(m1.prefilled.map(f=>FN[f]||f).join(', '))}`:''}. Nothing you had before was changed.`:'Nothing has been changed yet.'}${log.warn?` Note: ${esc(log.warn)}`:''}</p>
+  <button type="button" class="btn ghost danger" id="v2Undo">Undo the new version’s data</button><p class="tip">Removes only what the new version added (your profile and answers). Your sheets, lessons, gear and settings stay. The app then starts over with the setup.</p>`;
+  $('v2Undo').onclick=()=>{const b=$('v2Undo');if(!b.dataset.sure){b.dataset.sure='1';b.textContent='Tap again to undo';return}
+   ['profile','v2mig'].forEach(k=>{try{localStorage.removeItem(KP+k)}catch(e){}});toast('The new version’s data was removed. Starting over.','ok');setTimeout(()=>location.reload(),900)}}}
+// ---- start: Home, the M1 profile, onboarding when it hasn't been done ----
+async function v2Start(){
+ // the Band breakdown tile lives in Jam; sheets, video lessons and saved-on-phone in My Library; connections and backup in My profile
+ try{renderJam()}catch(e){}try{renderLibPage()}catch(e){}try{renderProfile()}catch(e){}
+ goSec('home',{force:true});
+ try{await v2MigM1()}catch(e){}
+ const p=profGet();// not over a link shared into the app (Share › Guitaring): that flow comes first, the setup waits for the next open
+ if(!p.onboarding.done&&!p.onboarding.later&&!window.__shared)openOnb(false);
+ renderHome()}
+$('findNew').onclick=()=>cfOpen('book');
+window.__v2={goSec,profGet,profSet,openOnb,prefill:profPrefill,cur:()=>curSec};// test hooks
 // ---- start the app ----
 renderGear();
 
@@ -5780,7 +6095,7 @@ renderGear();
 seedBook();
 
 setBookTun(bookTun);
-setTab(store.get('tab','tune'));
+v2Start();
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
 })();

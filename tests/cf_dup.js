@@ -2,8 +2,8 @@ const APP=process.env.APP||('file://'+require('path').resolve(__dirname,'../inde
 const {chromium,devices}=require('playwright');
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});const p=await (await b.newContext({...devices['Pixel 7'],colorScheme:'dark'})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/^https:\/\//,r=>r.abort());
  await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('tuner.chordbook',JSON.stringify({'F#m':{added:1,songs:['Song A']},'G':{added:1,songs:[]}}))});
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.tap('#wSkip');
- await p.tap('[data-tab=chords]');await p.tap('#chFind');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.tap('#wSkip')).catch(()=>{});
+ await (await p.$('#hLib:visible')?p.tap('#hLib').then(()=>p.tap('.libgo[data-sec=chords]')):p.tap('[data-tab=chords]'));await p.tap('#chFind');
  const T=async sel=>{const el=await p.$('#cfBoard '+sel);const bb=await el.boundingBox();await p.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await p.waitForTimeout(60)};
  const st=async()=>(await p.$eval('#cfOut',e=>e.innerText.replace(/\n/g,' | ')))+' || BTN: '+await p.$eval('#cfUse',e=>e.textContent);
  await T('.hit[data-barre="2"]');await T('.hit[data-s="1"][data-fr="4"]');await T('.hit[data-s="2"][data-fr="4"]');console.log('F#m barre (known shape):',await st());

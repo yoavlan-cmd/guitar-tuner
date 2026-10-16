@@ -24,7 +24,7 @@ const want=process.argv[2]?process.argv[2].split(','):Object.keys(S);
    const t0=ac.currentTime+.1;
    sc.forEach(ev=>ev.notes.forEach((r,k)=>{const s=ac.createBufferSource();s.buffer=buf;s.playbackRate.value=r;const g=ac.createGain();g.gain.value=ev.notes.length>1?.45:1;s.connect(g);g.connect(q);const st=t0+ev.t+(ev.spread||0)*k;s.start(st);s.stop(st+(ev.notes.length>1?0.65:2.6))}));
    window.__t0=performance.now();return dst.stream}},[ac64,sc,bg,process.env.LVL||.2]);
- await p.goto(APP);await p.waitForTimeout(300);if(await p.$('#wSkip:visible'))await p.click('#wSkip');
+ await p.goto(APP);await p.waitForTimeout(300);await p.waitForSelector('#wSkip',{state:'visible',timeout:2000}).then(()=>p.click('#wSkip')).catch(()=>{});await p.evaluate(()=>window.__v2&&window.__v2.goSec('tuner'));
  await p.click('#listen');let stopped=null,st='';
  for(let k=0;k<end*5;k++){await p.waitForTimeout(200);const r=await p.evaluate(()=>[document.getElementById('listen').classList.contains('on'),document.getElementById('status').textContent,performance.now()-window.__t0]);if(!r[0]){stopped=(r[2]/1000).toFixed(1);st=r[1];break}}
  console.log(name.padEnd(12),stopped?`STOPPED at ${stopped}s: "${st}"`:`still listening after ${end}s`,errs.join(';'));await p.close()}));

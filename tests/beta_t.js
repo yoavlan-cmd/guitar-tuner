@@ -5,7 +5,7 @@ const ROOT=path.resolve(__dirname,'..');
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':/webmanifest$/.test(f)?'application/manifest+json':'application/octet-stream'});r.end(d)})}).listen(0);
 const BASE=process.env.BASE||`http://localhost:${srv.address().port}/`;
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
-const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');if(w)w.hidden=true});
+const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=document.getElementById(id);if(w)w.hidden=true});document.body.classList.remove('wopen')});
 (async()=>{if(!fs.existsSync(path.join(ROOT,'beta/index.html'))){console.log('FAIL beta/index.html missing: run bash tools/build.sh beta');process.exit(1)}
  const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.route(/^https:\/\//,r=>r.abort());
@@ -44,7 +44,7 @@ const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');
  // reopening the beta does not copy again
  await beta.reload();await beta.waitForTimeout(400);ok(await beta.evaluate(()=>JSON.parse(localStorage.getItem('tunerb.userName')))==='Beta tester','reopening the beta keeps the beta’s own changes');
  // "Copy my live data again" (two taps)
- await noWelcome(beta);await beta.click('[data-tab=song]');await beta.evaluate(()=>{const d=document.getElementById('bkBox');d.open=true;d.scrollIntoView()});
+ await noWelcome(beta);await (await beta.$('#hMe')?beta.click('#hMe'):beta.click('[data-tab=song]'));await beta.evaluate(()=>{const d=document.getElementById('bkBox');d.open=true;d.scrollIntoView()});
  ok(/This is the beta/.test(await beta.$eval('#bkBox',e=>e.textContent)),'the beta’s Backup box says it is the beta');
  await beta.click('#bkCopy');const nav=beta.waitForEvent('load',{timeout:10000}).catch(()=>{});await beta.click('#bkCopy');await nav;await beta.waitForTimeout(400);
  const re=await beta.evaluate(async()=>({name:JSON.parse(localStorage.getItem('tunerb.userName')),s1:!!(await window.__bk.get('mixdata:s1')),nw:await window.__bk.raw('mixdata:new')}));

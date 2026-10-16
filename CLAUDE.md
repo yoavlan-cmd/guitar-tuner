@@ -18,6 +18,8 @@ The repo root **is** the GitHub Pages site (served from `main`): `index.html`, `
 - Beta: `bash tools/build.sh beta` writes `beta/index.html` (served at …/guitar-tuner/beta/, BETA badge, installs as its own "Guitaring beta" icon via `beta/manifest.webmanifest`). The beta keeps **its own data**: `tunerb.*` / `guitaringb.*` keys and the database `guitaring-beta`, copied from the live data on its first open; big items are read from the live database when needed and copied; it never writes the live app's data. In code always use `KP` / `KG` / `IDBN` (never a literal `'tuner.'`, `'guitaring.'` or `'guitaring'` database name). Beta PRs touch `src/`, `beta/`, `tests/`, `docs/` only; the live `index.html` and `sw.js` change only in a release PR.
 
 ## Rules
+- V2 navigation: open sections with `goSec('home'|'learn'|'write'|'jam'|'gear'|'tuner'|'library'|'profile'|'chords')` (`90-v2-shell`). V1 `setTab` still works. Overlays need z-index ≥ 50 (the bottom bar is 30). Anything a V1 screen shows from another page must make its pane visible itself.
+- The player's profile (`profGet()`) is the only source of anything personal (taste, level, languages, instruments); never hard-code one player's taste or data.
 - Find code by section banners (`/* ===== … ===== */`) and element ids; PRD §9 code map (line numbers are approximate). Make small exact edits.
 - Do not rename element ids, `localStorage` keys (`tuner.*`, a prefix kept from the app's first name) or data shapes (PRD §7) — users have data saved under them. V2 only adds new keys (see `docs/V2-deployment-plan.md` §4).
 - Backup and restore (`85-backup`) must cover every new kind of data: small data under `KP`/`KG`, big data in the phone database (`mxPut`/`mxGet`).

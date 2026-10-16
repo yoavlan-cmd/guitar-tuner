@@ -510,7 +510,7 @@ $('mxDim').onclick=()=>mxView(false);
 
 // ---------- the Songs page entry ----------
 function renderMixNew(){const b=$('mixNew');if(!b)return;const ready=mxIdx.filter(x=>x.state==='ready').length,pend=mxIdx.filter(x=>MX_PEND.includes(x.state)).length;
- b.querySelector('.sub').textContent='Turn parts of a song up or down'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
+ b.querySelector('.sub').textContent='Split a song into its parts'+(ready||pend?' · '+[ready?`${ready} song${ready>1?'s':''} ready`:'',pend?`${pend} splitting`:''].filter(Boolean).join(' · ')+'.':'')}
 $('mixNew').onclick=()=>{
  if(!mxIdx.length&&!mxSong&&!mxBusy&&mxGh()){mxPickLocal=false;$('mixIn').click();return}
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
