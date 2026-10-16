@@ -49,6 +49,9 @@ const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');
  await beta.click('#bkCopy');const nav=beta.waitForEvent('load',{timeout:10000}).catch(()=>{});await beta.click('#bkCopy');await nav;await beta.waitForTimeout(400);
  const re=await beta.evaluate(async()=>({name:JSON.parse(localStorage.getItem('tunerb.userName')),s1:!!(await window.__bk.get('mixdata:s1')),nw:await window.__bk.raw('mixdata:new')}));
  ok(re.name==='Yoav'&&re.s1&&re.nw==null,'"Copy my live data again" starts the beta over from the live data');
+ // a backup made in the beta includes what it hasn't read from the live app yet (photo and song not opened in the beta)
+ const bm=await beta.evaluate(async()=>{const own=await window.__bk.keys(),{man}=await window.__bk.make({parts:true,keys:false});return {own,c:man.counts}});
+ ok(!bm.own.includes('gearphoto:g1')&&bm.c.photos===1&&bm.c.songs===1,`a beta backup holds the live photo and song it hasn’t opened yet (${JSON.stringify(bm.c)})`);
  // the beta installs as its own app
  const man=await beta.evaluate(async()=>{const l=document.querySelector('link[rel=manifest]');const u=new URL(l.getAttribute('href'),document.baseURI).href;const j=await (await fetch(u)).json();return {u,j}});
  ok(/\/beta\/manifest\.webmanifest$/.test(man.u)&&man.j.name==='Guitaring beta'&&man.j.scope==='./','the beta has its own install manifest ("Guitaring beta", scope beta/)');
