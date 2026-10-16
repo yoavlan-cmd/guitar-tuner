@@ -19,7 +19,7 @@ function sesDiagram(name){try{const n=String(name).replace(/^([A-G][#b]?)/,m=>SE
   if(!sh){for(let c=0;c<NS;c++)if(chordName(c)===n){sh=shapeFor(c);break}}
   if(sh)return `<div class="sesdg dg">${diagram(sh,name)}</div>`}catch(e){}return `<div class="sesdg none"><b>${esc(name)}</b></div>`}
 // the Practise button: the best thing you have for playing the song now (guides join it in the next step)
-function sesPractise(g){if(g.r.analysis.length)return {a:'ana',v:g.r.analysis[0].key,l:'Practise with the play-along',s:'The song video with its chords, in time'};
+function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practise with the song guide',s:gdDefault()==='easy'?'Easy version first: basic shapes, one strum per beat':'Full version first: the chords and strumming of the recording'};
  if(g.r.mix.length)return {a:'mix',v:g.r.mix[0].mix,l:'Practise with the jam track',s:'Play along with the band, guitars down'};
  const sh=g.r.sheet.find(x=>x.lib)||g.r.sheet.find(x=>x.draft)||g.r.sheet[0];
  if(sh)return sh.lib?{a:'lib',v:sh.lib,l:'Practise from the chord sheet',s:'Open your sheet'}:sh.draft?{a:'draft',v:'',l:'Finish the chord sheet',s:'Your unfinished sheet'}:{u:sh.url,l:'Practise from the chord sheet',s:'Open it in Drive'};
@@ -28,6 +28,8 @@ function sesPractise(g){if(g.r.analysis.length)return {a:'ana',v:g.r.analysis[0]
 function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
  if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
  const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
+ let G=null;if(g.r.analysis.length){try{const d=loadSong(g.r.analysis[0].key);if(d&&d.segs&&d.segs.length)G=gdBuild(d)}catch(e){try{console.error('guide',e)}catch(x){}}}
+ if(!gdMode||sesKey._g!==g.title){gdMode=gdDefault();sesKey._g=g.title}
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
  box.innerHTML=`<section class="seshero">
@@ -37,13 +39,15 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
   <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
  </section>
- ${f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
+ ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(g.r.analysis[0].key)}">▶ Play along with the chords, in time</button></section>`:''}
+ ${!G&&f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
  <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}</section>
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
  <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
- box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();learnAct(g,b.dataset.la,b.dataset.v||'')});
+ box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
+ const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;gb.innerHTML=gdHTML(G,gdMode)});
  const go=$('sesGo');if(go&&pr&&pr.u)go.onclick=()=>window.open(pr.u,'_blank','noopener');
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  $('sesFind').onclick=()=>cfOpen('book');

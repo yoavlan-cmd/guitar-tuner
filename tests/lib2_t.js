@@ -42,15 +42,15 @@ const V1=['sheetIndex','songIndex','vlinks','ideaOnIt','lib','userName'];
  await p.reload();await p.waitForTimeout(600);ok(await p.evaluate(()=>localStorage.getItem('tuner.songs2'))===JSON.stringify(st.recs),'running again changes nothing');
  // status
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);
- await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.tap('.ldet [data-la=st][data-v=learned]');await p.waitForTimeout(150);
+ await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.tap('.seshero [data-st=learned]');await p.waitForTimeout(150);await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);
  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.songs2')).find(r=>/Good Riddance/.test(r.title)).status)==='learned'&&/Learned/i.test(await p.$eval('#learnList .lrow:has-text("Good Riddance")',e=>e.textContent)),'"Learned" is saved and shown on the row');
- await p.tap('#learnList .lrow:has-text("Wonderwall")');await p.tap('.ldet [data-la=st][data-v=idea]');await p.waitForTimeout(150);
+ await p.tap('#learnList .lrow:has-text("Wonderwall")');await p.tap('.seshero [data-st=idea]');await p.waitForTimeout(150);await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);
  await p.tap('[data-ls=learned]');let n=await rows();ok(n.length===1&&/Good Riddance/.test(n[0]),`filter Learned (${n})`);
  await p.tap('[data-ls=idea]');n=await rows();ok(n.length===1&&n[0]==='Wonderwall',`filter Ideas (${n})`);
  await p.tap('[data-ls=learning]');n=await rows();ok(n.length===0,`filter Learning: no English song left (${n})`);
  await p.tap('[data-lang=he]');n=await rows();ok(n.length===2,`filter Learning in Hebrew (${n})`);
  await p.tap('[data-ls=""]');n=await rows();ok(n.length===2,'All shows every Hebrew song');
- await p.tap('[data-lang=en]');await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.screenshot({path:path.join(__dirname,'out','lib2.png'),fullPage:true});await p.tap('#learnList .lrow:has-text("Good Riddance")');
+ await p.tap('[data-lang=en]');await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.waitForTimeout(200);await p.screenshot({path:path.join(__dirname,'out','lib2.png'),fullPage:true});await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);
  // artist
  await p.selectOption('#learnArt',{label:'Oasis (1)'});n=await rows();ok(n.length===1&&n[0]==='Wonderwall',`filter by artist (${n})`);await p.selectOption('#learnArt','');await p.tap('[data-lang=en]');
  // a song added after M2: shows at once, gets a record when touched
@@ -58,7 +58,7 @@ const V1=['sheetIndex','songIndex','vlinks','ideaOnIt','lib','userName'];
  await p.tap('#bnav [data-sec=write]');await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);
  n=await rows();const c0=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.songs2')).length);
  ok(n.includes('Creep')&&c0===4,'a new song shows up before it has a record');
- await p.tap('#learnList .lrow:has-text("Creep")');await p.tap('.ldet [data-la=st][data-v=learned]');await p.waitForTimeout(150);
+ await p.tap('#learnList .lrow:has-text("Creep")');await p.tap('.seshero [data-st=learned]');await p.waitForTimeout(150);await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);
  const cr=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.songs2')).find(r=>r.title==='Creep'));
  ok(cr&&cr.status==='learned'&&cr.links.videos[0]==='https://youtu.be/bbbbbbbbbbb','…and gets one the first time it is touched');
  // My Library
@@ -68,6 +68,12 @@ const V1=['sheetIndex','songIndex','vlinks','ideaOnIt','lib','userName'];
  // the backup carries the records
  const inBk=await p.evaluate(async()=>{const {zip}=await window.__bk.make({parts:false,keys:false});const o=await window.__bk.open(zip);return JSON.parse(await o.txt('local.json'))['tuner.songs2']||''});
  ok(/Creep/.test(inBk),'the backup file holds the song records');
+ // restoring onto a phone that already made fresh records (other ids, no statuses): one record per song, the backup's statuses kept
+ const rs=await p.evaluate(async()=>{const B=window.__bk,{zip}=await B.make({parts:false,keys:false});
+  const cur=JSON.parse(localStorage.getItem('tuner.songs2'));localStorage.setItem('tuner.songs2',JSON.stringify(cur.map(r=>({...r,id:'s_fresh'+Math.random().toString(36).slice(2,7),status:'learning',notes:''}))));
+  const o=await B.open(zip);await B.restore(o,'add');const after=JSON.parse(localStorage.getItem('tuner.songs2'));return {n0:cur.length,n1:after.length,st:after.filter(r=>r.status==='learned').map(r=>r.title)}});
+ ok(rs.n1===rs.n0&&rs.st.length===2,`restoring keeps one record per song and the backup's statuses (${rs.n0} → ${rs.n1}, learned: ${rs.st})`);
+ await p.reload();await p.waitForTimeout(400);
  // "Undo the new version's data" removes the records too (the update then runs again from the V1 data)
  await p.tap('#hMe');await p.evaluate(()=>{document.getElementById('v2Box').open=true});ok(/5 songs got a record|songs got a record/.test(await p.$eval('#v2Box',e=>e.textContent)),'My profile says what M2 did');
  const nav=p.waitForEvent('load',{timeout:8000}).catch(()=>{});await p.tap('#v2Undo');await p.tap('#v2Undo');await nav;

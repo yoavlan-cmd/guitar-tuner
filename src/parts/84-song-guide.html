@@ -1,0 +1,82 @@
+/* ===== Song guide (V2 phase 3): Easy | Full, built on the phone from a song's chord analysis ===== */
+// Made from what the analysis already knows (chords, beats, note onsets, parts, tuning and capo): no new service, never lyrics.
+// Like the reference guides: "Before you play" (capo, tempo, why), "How sure is this" per item, a song map with times,
+// chord shapes with fingers, the strumming, and an easier version.
+const GD_LV={solid:'Solid',likely:'Likely',guess:'A guess'};
+// Easy shapes: the basic major / minor chord of each (Cadd9 → C, Asus2 → A, Fmaj7 → F, Am7 → Am, D/F# → D)
+function gdEasyName(n){const m=String(n||'').match(/^([A-G][#b]?)([^/]*)/);if(!m)return n;return m[1]+(/^(m(?!aj)|min|dim)/.test(m[2])?'m':'')}
+const GD_R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],GD_ALT={'Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab','A#':'Bb'};
+function gdShift(n,d){const m=String(n).match(/^([A-G][#b]?)(.*)$/);if(!m)return n;const r=GD_R.indexOf(GD_ALT[m[1]]||m[1]);return r<0?n:GD_R[((r+d)%12+12)%12]+m[2]}
+// how hard a basic chord is in standard tuning (the analysis' own shape costs: open shapes cheap, barres dear)
+function gdCost(n){const m=String(n).match(/^([A-G][#b]?)([^/]*)$/);if(!m)return 1;const r=GD_R.indexOf(GD_ALT[m[1]]||m[1]),t=TYPES.findIndex(x=>x.id===m[2]);if(r<0||t<0)return 1;
+ try{const sh=shapeFor(r*NT+t);return sh&&sh.cost!=null?sh.cost:1}catch(e){return 1}}
+// the easy shape: the basic chord, unless the original is the easier one to hold (an open Fmaj7 beats a barre F)
+const gdEasyPick=n=>{const b=gdEasyName(n);return gdCost(n)<gdCost(b)-.05?n:b};
+// the easiest capo for the basic chords (standard tuning): the same pitch, the friendliest shapes
+function gdEasyCapo(names,w,capo){let best={capo,cost:1e9};for(let k=0;k<=5;k++){let c=0;names.forEach((n,i)=>c+=w[i]*gdCost(gdEasyPick(gdShift(n,capo-k))));c=c/(w.reduce((a,b)=>a+b,0)||1)+Math.abs(k-capo)*.08+k*.01;if(c<best.cost-1e-6)best={capo:k,cost:c}}return best.capo}
+const gdTempoWord=b=>!b?'':b<70?'slow':b<95?'relaxed':b<115?'a walking pace':b<135?'upbeat':'fast';
+// a beat's chord, only when the beat falls inside it (a lead-in before the first chord has none)
+const gdSlot=x=>x.g&&x.t>=x.g.t0-.05&&x.t<x.g.t1+.05?nameOf(x.g):'';
+// the song's parts: 4-bar blocks compared by the order of their chords, bar by bar (a verse and a chorus can use the same chords
+// in a different order); the same block again gets the same letter; your own sections (set in the analysis) win
+function gdParts(M){if(A.sections&&A.sections.length)return M.secs.map(s=>({t:s.t,name:s.name}));
+ const barCh=M.bars.map(b=>{const w={};b.slots.forEach(x=>{const n=gdSlot(x);if(n)w[n]=(w[n]||0)+1});const top=Object.entries(w).sort((a,b)=>b[1]-a[1])[0];return top?top[0]:''});
+ // blocks start at the first bar with guitar (a lead-in bar would shift every block)
+ const f0=Math.max(0,barCh.findIndex(Boolean)),blocks=f0?[{t:M.bars[0].t0,seq:[]}]:[];for(let i=f0;i<M.bars.length;i+=4)blocks.push({t:M.bars[i].t0,seq:barCh.slice(i,i+4)});
+ const sim=(a,b)=>{const n=Math.max(a.length,b.length);let m=0;for(let i=0;i<n;i++)if(a[i]&&a[i]===b[i])m++;return n?m/n:0};
+ const reps=[],lab=blocks.map(bl=>{if(!bl.seq.some(Boolean))return -1;let j=reps.findIndex(r=>sim(r,bl.seq)>=.75);if(j<0){reps.push(bl.seq);j=reps.length-1}return j});
+ const out=[];blocks.forEach((bl,i)=>{const name=lab[i]<0?'No guitar':'Part '+String.fromCharCode(65+Math.min(25,lab[i]));if(!out.length||out[out.length-1].name!==name)out.push({t:bl.t,name})});
+ if(out.length)out[0].t=Math.min(out[0].t,0);return out}
+// the guide's data for one analysis (A is borrowed for the analysis helpers, then put back)
+function gdBuild(d){const keep=A;A=d;try{
+ const M=lessonModel(),bp=M.bp,bpm=Math.round(d.bpm||60/bp),tun=d.play.tun,capo=+d.play.capo||0;
+ // chords with how long each sounds
+ const dur=new Map();d.segs.forEach(g=>{if(g.c>=NS)return;const n=nameOf(g),l=g.t1-g.t0;dur.set(n,(dur.get(n)||0)+l)});
+ const tot=[...dur.values()].reduce((a,b)=>a+b,0)||1;
+ const full=[...dur.keys()].filter(n=>dur.get(n)>=.25),fullMain=full.filter(n=>dur.get(n)/tot>=.02);
+ // Easy: basic chords, passing chords shorter than a beat left out, and the friendliest capo (standard tuning)
+ const ew=new Map();d.segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<bp*.9)return;const n=nameOf(g);ew.set(n,(ew.get(n)||0)+g.t1-g.t0)});
+ const en=[...ew.keys()],eCapo=tun==='std'?gdEasyCapo(en,en.map(n=>ew.get(n)),capo):capo,eName=n=>gdEasyPick(gdShift(n,capo-eCapo));
+ // song map: the parts with their times and chords (never lyrics)
+ const secs=gdParts(M).map((s,i,all)=>{const bars=M.bars.filter(b=>b.t0>=s.t-.01&&b.t0<(all[i+1]?all[i+1].t-.01:1e9));
+  // the part's progression once (its first 4 bars, each bar's main chord) and how many times it goes round
+  const bc=bars.map(b=>{const w={};b.slots.forEach(x=>{const n=gdSlot(x);if(n)w[n]=(w[n]||0)+1});const top=Object.entries(w).sort((a,b)=>b[1]-a[1])[0];return top?top[0]:''});
+  const ch=[];bc.slice(0,4).forEach(n=>{if(n&&ch[ch.length-1]!==n)ch.push(n)});const times=Math.max(1,Math.round(bars.length/4));
+  // the strumming pattern of this part: the most common bar, in eighth notes (D on the beat, U between)
+  const pats=new Map();bars.forEach(b=>{if(!b.slots.some(x=>x.g))return;const p=b.slots.map((x,j)=>x.strum?(j%2?'U':'D'):'·').join('');pats.set(p,(pats.get(p)||0)+1)});
+  const top=[...pats].sort((a,b)=>b[1]-a[1])[0],n=[...pats.values()].reduce((a,b)=>a+b,0);
+  return {name:s.name,t:Math.max(0,s.t),bars:bars.length,times,chords:ch,pat:top?top[0]:'',patShare:top&&n?top[1]/n:0,patBars:n}}).filter(s=>s.bars>0&&!(s.name==='No guitar'&&s.bars<2));
+ // the song's main strumming pattern (over every bar with guitar)
+ const allP=new Map();M.bars.forEach(b=>{if(!b.slots.some(x=>x.g))return;const p=b.slots.map((x,j)=>x.strum?(j%2?'U':'D'):'·').join('');allP.set(p,(allP.get(p)||0)+1)});
+ const pTop=[...allP].sort((a,b)=>b[1]-a[1])[0],pN=[...allP.values()].reduce((a,b)=>a+b,0);
+ // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
+ const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
+ const chordsLv=d.fb&&(d.fb.chords||d.fb.sections)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
+ const tc=d.tuning&&d.tuning.conf,capoLv=tc==='yours'||tc==='high'?'solid':tc==='medium'?'likely':'guess';
+ const share=pTop&&pN?pTop[1]/pN:0,strumLv=!d.ons?'guess':share>=.6?'solid':share>=.35?'likely':'guess';
+ const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
+ const sure=[{k:'Chords and order',lv:chordsLv,why:d.fb&&(d.fb.chords||d.fb.sections)?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.'},
+  {k:'Capo and shapes',lv:capoLv,why:tc==='yours'?'You set the tuning and capo yourself.':capoLv==='solid'?'The pitch fits these shapes clearly.':capoLv==='likely'?'The pitch fits these shapes; the song may also be played tuned down with a higher capo.':'Not sure: the same chords could be played with another capo. Try it against the recording.'},
+  ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
+  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':strumLv==='solid'?`The same pattern is heard in ${Math.round(share*100)}% of the bars.`:`The pattern changes between parts (the most common one is in ${Math.round(share*100)}% of the bars).`},
+  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?'Measured from the beat of the recording.':'Estimated; the beat wasn’t measured in detail.'}];
+ return {bpm,tun,capo,eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+ finally{A=keep}}
+// eight boxes for one bar: 1 & 2 & 3 & 4 &, with D / U where you strum
+function gdPat(p){const lab=['1','&','2','&','3','&','4','&'];return `<div class="gdpat" role="img" aria-label="Strumming: ${esc(p.split('').map((c,i)=>c==='·'?'':(c==='D'?'down':'up')+' on '+lab[i]).filter(Boolean).join(', '))}">${[...p].map((c,i)=>`<span class="${c==='·'?'rest':c==='D'?'dn':'up'}"><b>${c==='·'?'':c==='D'?'↓':'↑'}</b><small>${lab[i]}</small></span>`).join('')}</div>`}
+let gdMode=null;// 'easy' | 'full', per visit; the profile picks the first one
+function gdDefault(){try{const l=profGet().level;return l==='beginner'||l==='improving'?'easy':'full'}catch(e){return 'easy'}}
+function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tName(G.tun),nm=n=>easy?G.eName(n):n,lv=x=>`<span class="gdlv ${x}">${GD_LV[x]}</span>`;
+ const chords=easy?G.easy:G.full,mapCh=s=>{const o=[];s.chords.forEach(n=>{const v=nm(n);if(o[o.length-1]!==v)o.push(v)});return o.slice(0,10)};
+ const beat='D·D·D·D·'.split('').join('');
+ return `<div class="gdtabs seg" role="tablist"><button type="button" role="tab" data-gd="easy" aria-pressed="${easy}">Easy</button><button type="button" role="tab" data-gd="full" aria-pressed="${!easy}">Full</button></div>
+ <p class="tip gdintro">${easy?'Basic chord shapes, one strum on every beat: play along today.':'The chords and the strumming heard in the recording: sound like the song.'}</p>
+ <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
+  ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording’s shapes are with ${G.capo?'capo '+G.capo:'no capo'}; with capo ${G.eCapo} the same song uses easier shapes. Full shows the recording’s.</p>`:''}</div>
+ <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
+  <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
+ <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
+ <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">The pattern heard in most bars${G.share<.6?'; it changes between parts (see the song map)':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
+ <div class="gdblock"><h4>Song map</h4><ol class="gdmap">${G.secs.map(s=>`<li><span class="gdt">${mmss(s.t)}</span><b>${esc(s.name)}</b><span class="gdch">${mapCh(s).map(esc).join(' · ')||'no guitar'}${s.times>1&&mapCh(s).length?` <em>×${s.times}</em>`:''}</span>${!easy&&s.pat&&/[DU]/.test(s.pat)&&s.patBars>=2?`<span class="gdsp">${s.pat.replace(/·/g,' ').replace(/(..)/g,'$1 ').trim()}</span>`:''}<small>${s.bars} bar${s.bars>1?'s':''}</small></li>`).join('')}</ol>
+  <p class="tip">Parts, times and chords only: lyrics are never shown.</p></div>`}
+window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(d):null},bars:k=>{const keep=A;A=loadSong(k);try{const M=lessonModel();return M.bars.map(b=>({t0:+b.t0.toFixed(2),ch:b.slots.map(x=>x.g?nameOf(x.g):'-').join(' ')}))}finally{A=keep}}};// test hooks

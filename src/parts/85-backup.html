@@ -114,6 +114,8 @@ async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept
   let a,c;try{a=JSON.parse(local[k0]);c=JSON.parse(cur)}catch(e){rep.kept++;continue}
   // a profile that was never filled in (a new or reset phone) counts as missing; the migration log keeps every step either side has done
   if(k===KP+'profile'&&c&&a&&!(c.onboarding&&c.onboarding.done)&&((a.onboarding&&a.onboarding.done)||bkAnswers(a)>bkAnswers(c))){localStorage.setItem(k,local[k0]);rep.local++;continue}
+  // song records: matched by song (a phone that just started has fresh records with other ids); the backup's record wins (status, notes)
+  if(k===KP+'songs2'&&Array.isArray(c)&&Array.isArray(a)){const m=a.concat(c.filter(x=>!a.some(y=>sameSong(y,x)||sameSong(x,y))));localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   if(k===KP+'v2mig'&&c&&a){const m={...c,...a,done:[...new Set([...(a.done||[]),...(c.done||[])])]};localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   const m=bkMerge(c,a);if(JSON.stringify(m)!==cur){localStorage.setItem(k,JSON.stringify(m));rep.local++}else rep.kept++}
  if(mode==='replace')await idbClear(k=>/^backup:pre-/.test(k)||(!man.opt.parts&&bkIsPart(k)));
