@@ -26,6 +26,13 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // a fader changes only its part
  await p.evaluate(()=>{const r=document.querySelector('[data-vol="2"]');r.value=50;r.dispatchEvent(new Event('input',{bubbles:true}))});
  const g=await p.evaluate(()=>window.__mx.gains());ok(g&&g[2]===.5&&g[0]===1&&/50%/.test(await p.$eval('[data-k="2"] output',e=>e.textContent)),'a fader sets its own part only '+JSON.stringify(g));
+ // presets for practising: drums only (a rhythm track) and drums + vocals; the chosen one lights up; a hand change turns it off
+ await p.tap('[data-pre=drums]');await p.waitForTimeout(150);let gp=await p.evaluate(()=>window.__mx.gains());
+ ok(JSON.stringify(gp)==='[0,0,1,0,0]'&&await p.$eval('[data-pre=drums]',e=>e.getAttribute('aria-pressed'))==='true','"Drums only" plays just the drums (a rhythm track) '+JSON.stringify(gp));
+ await p.tap('[data-pre=drumsvox]');await p.waitForTimeout(150);gp=await p.evaluate(()=>window.__mx.gains());
+ ok(JSON.stringify(gp)==='[0,1,1,0,0]'&&await p.$eval('[data-pre=drums]',e=>e.getAttribute('aria-pressed'))==='false','"Drums + vocals" plays the drums and the vocals '+JSON.stringify(gp));
+ await p.tap('[data-mute="0"]');ok(await p.$$eval('[data-pre][aria-pressed=true]',l=>l.length)===0,'changing a part by hand turns the preset light off');
+ await p.tap('[data-pre=all]');
  await p.tap('#mxPlay');await p.waitForTimeout(300);
  ok((await p.evaluate(()=>[...document.querySelectorAll('#mxRows [data-lv]')].map(e=>e.style.transform))).every(t=>/scaleY\(0(\.000)?\)/.test(t))&&!(await p.evaluate(()=>document.body.classList.contains('mxon'))),'on pause the meters drop to zero');
  await p.screenshot({path:path.join(OUT,'mx_ui.png')});
