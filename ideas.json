@@ -1,21 +1,21 @@
 {
  "v": 1,
- "at": "2026-10-15T02:55:46Z",
- "date": "2026-10-15",
+ "at": "2026-10-16T02:55:34Z",
+ "date": "2026-10-16",
  "index": {
   "artists": [
-   "Green Day",
-   "Jack Johnson",
-   "Nirvana",
-   "Jimbo J",
    "Tuna",
+   "Green Day",
+   "Amir dadon",
+   "Jimbo J",
+   "Nirvana",
+   "Jack Johnson",
    "Beri Saharof",
    "Oasis",
    "Eviatar Banai",
    "Rockfour",
    "RHCP",
    "Ivri lider",
-   "Amir dadon",
    "Foo"
   ],
   "songs": [
@@ -24,6 +24,7 @@
     "t": "יא",
     "ch": [
      "Cm",
+     "C",
      "C#"
     ]
    },
@@ -31,11 +32,11 @@
     "a": "Green Day",
     "t": "Good Riddance (Time Of Your Life)",
     "ch": [
-     "G",
-     "Cadd9",
      "C",
      "D",
-     "Em"
+     "Em",
+     "G",
+     "Cadd9"
     ]
    },
    {
@@ -229,19 +230,6 @@
     ]
    },
    {
-    "a": "Jack Johnson",
-    "t": "Better Together",
-    "ch": [
-     "F",
-     "F/E",
-     "Dm",
-     "Bb",
-     "Bb/A",
-     "Gm",
-     "C"
-    ]
-   },
-   {
     "a": "Rockfour",
     "t": "הכעס",
     "ch": [
@@ -254,6 +242,20 @@
      "G",
      "C",
      "D"
+    ]
+   },
+   {
+    "a": "Jack Johnson",
+    "t": "Better Together",
+    "ch": [
+     "F",
+     "F/E",
+     "Dm",
+     "Bb",
+     "Bb/A",
+     "Gm",
+     "C",
+     "B"
     ]
    },
    {
@@ -279,11 +281,11 @@
      "F#add9",
      "A",
      "D",
-     "G",
-     "C",
      "Asus2/B",
      "A/B",
      "F#add9/B",
+     "G",
+     "C",
      "D/F#",
      "F"
     ],
@@ -296,125 +298,104 @@
    }
   ]
  },
- "level": "Solid intermediate: comfortable with full barre chords in flat keys (Eb, Ab, Bbm), maj7 and dim colours, slash-chord bass lines, capo work and Drop D.",
+ "level": "Comfortable with open chords and full barre chords in flat keys (Bbm, Ebm, Abm), plus maj7, dim and slash chords; ready for faster changes and new strumming feels.",
  "suggestions": [
   {
-   "title": "סוף עונת התפוזים",
-   "artist": "תמוז",
-   "style": "Israeli classic rock",
+   "title": "כל הכוכבים",
+   "artist": "טונה",
+   "style": "Israeli hip-hop",
    "difficulty": 3,
-   "chords": [
-    "A",
-    "D",
-    "G",
-    "C",
-    "C#",
-    "B",
-    "D/F#",
-    "Am",
-    "Em",
-    "Dm",
-    "F"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A Shalom Hanoch classic from Tamuz; mostly open chords, with a D/F# walking bass and quick key shifts to C# and B as the new challenge."
+   "why": "You already play three Tuna songs; this one keeps the groove-based strumming you know."
   },
   {
-   "title": "עד מחר",
+   "title": "לא סתם",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Amir Dadon is your biggest folder; another of his ballads at your current level."
+  },
+  {
+   "title": "מישהו פעם",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits right next to ביום שמש יפה; smooth chord changes and a gentle strum."
+  },
+  {
+   "title": "אבות ובנים",
    "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A fourth Eviatar Banai song for your folder, in the same style as עד מתי."
+  },
+  {
+   "title": "על הרצפה",
+   "artist": "מוניקה סקס",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A new band close to Rockfour's sound: driving rock strumming with a punchy rhythm."
+  },
+  {
+   "title": "היינו עושים אהבה",
+   "artist": "כנסיית השכל",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A small step up: an energetic Israeli rock classic with quicker chord changes."
+  },
+  {
+   "title": "Stand By Me",
+   "artist": "Oasis",
+   "style": "Britpop",
    "difficulty": 2,
    "chords": [
-    "Dm",
-    "F",
+    "G",
+    "D",
     "C",
-    "Gm",
-    "Bb",
+    "Em",
     "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Eviatar Banai in the same Dm/F/Gm/Bb family as עד מתי, so you can focus on feel and dynamics."
+   "why": "The natural next Oasis song after Wonderwall, all open chords you already know."
   },
   {
-   "title": "עבדים",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "Bm",
-    "G",
-    "Am",
-    "C",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier Berry Sakharof rocker with familiar chords; great for driving electric strumming."
-  },
-  {
-   "title": "בתי קפה",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
-   "difficulty": 3,
-   "chords": [
-    "D",
-    "F#m7",
-    "Gmaj7",
-    "E/G#",
-    "A",
-    "Bm",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Ivri Lider's smooth side: F#m7 and Gmaj7 colours plus an E/G# passing chord build on your maj7 and slash-chord work."
-  },
-  {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "Eb/F",
-    "Eb",
-    "Ab",
-    "Fm",
-    "Cm",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Amir Dadon in the Eb/Ab/Cm barre family you know from אור גדול, with an Eb/F colour chord to learn."
-  },
-  {
-   "title": "סוף הדרך",
-   "artist": "רוקפור",
-   "style": "Israeli alt-rock",
+   "title": "21 Guns",
+   "artist": "Green Day",
+   "style": "Rock",
    "difficulty": 4,
    "chords": [
-    "Am",
-    "F",
-    "Am/F",
-    "Am/F#",
-    "Am/G",
     "Em",
-    "G",
     "C",
-    "Gm",
-    "Dm",
-    "Eb"
+    "G",
+    "D",
+    "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from הכעס: a descending bass line under Am (Am/G, Am/F#, Am/F) is the new technique."
+   "why": "A step up from Basket Case: a long build from soft picking to a big chorus."
   },
   {
-   "title": "When I Come Around",
-   "artist": "Green Day",
-   "style": "Pop punk",
+   "title": "I'm Yours",
+   "artist": "Jason Mraz",
+   "style": "Acoustic pop",
    "difficulty": 1,
    "chords": [
     "G",
@@ -422,44 +403,19 @@
     "Em",
     "C"
    ],
-   "capo": 0,
+   "capo": 4,
    "tuning": "Standard",
-   "why": "An easy Green Day groove on four open chords; work on palm-muted, punchy strumming."
+   "why": "An easy one in the Jack Johnson mood; practise the reggae-style chunk strum."
   },
   {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "style": "Rock",
-   "difficulty": 1,
-   "chords": [
-    "G",
-    "Em",
-    "C",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A relaxed, easy singalong from a new band in your grunge corner; perfect warm-up song."
-  },
-  {
-   "title": "Learn to Fly",
-   "artist": "Foo Fighters",
-   "style": "Alternative rock",
-   "difficulty": 4,
+   "title": "Polly",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 2,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up for your Foo folder: ringing open-string chord shapes over a moving bass, played with steady eighth-note drive."
-  },
-  {
-   "title": "Can't Stop",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Funk rock",
-   "difficulty": 4,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "After My Friends, try Frusciante's funk side: muted 16th-note strumming and small chord stabs are the new technique."
+   "why": "Your Nirvana folder is still empty; a short acoustic song built on simple power chords."
   }
  ],
  "history": [
@@ -762,6 +718,56 @@
    "title": "Can't Stop",
    "artist": "Red Hot Chili Peppers",
    "date": "2026-10-15"
+  },
+  {
+   "title": "כל הכוכבים",
+   "artist": "טונה",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "לא סתם",
+   "artist": "אמיר דדון",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "מישהו פעם",
+   "artist": "עברי לידר",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "על הרצפה",
+   "artist": "מוניקה סקס",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "היינו עושים אהבה",
+   "artist": "כנסיית השכל",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "Stand By Me",
+   "artist": "Oasis",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "21 Guns",
+   "artist": "Green Day",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "I'm Yours",
+   "artist": "Jason Mraz",
+   "date": "2026-10-16"
+  },
+  {
+   "title": "Polly",
+   "artist": "Nirvana",
+   "date": "2026-10-16"
   }
  ],
  "sheets": [
@@ -830,9 +836,10 @@
     "Abm",
     "Emaj7",
     "F#",
-    "Ebm"
+    "Ebm",
+    "F"
    ],
-   "level": 4,
+   "level": 5,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
    "at": "2026-10-12T04:21:21.095Z"
   },
@@ -1053,24 +1060,6 @@
    "at": "2026-10-10T22:31:59.230Z"
   },
   {
-   "title": "Better Together",
-   "artist": "Jack Johnson",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F",
-    "F/E",
-    "Dm",
-    "Bb",
-    "Bb/A",
-    "Gm",
-    "C"
-   ],
-   "level": 5,
-   "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
-   "at": "2026-10-11T04:46:28.822Z"
-  },
-  {
    "title": "הכעס",
    "artist": "Rockfour",
    "capo": 0,
@@ -1083,11 +1072,31 @@
     "F#m",
     "A",
     "G",
-    "C"
+    "C",
+    "D"
    ],
    "level": 4,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
    "at": "2026-10-10T19:13:35.115Z"
+  },
+  {
+   "title": "Better Together",
+   "artist": "Jack Johnson",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F",
+    "F/E",
+    "Dm",
+    "Bb",
+    "Bb/A",
+    "Gm",
+    "C",
+    "B"
+   ],
+   "level": 5,
+   "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
+   "at": "2026-10-11T04:46:28.822Z"
   },
   {
    "title": "במקום בו אני גר",
@@ -1164,7 +1173,23 @@
   {
    "text": "Brian May built his own guitar from a fireplace. You just have to pick yours up off the stand, {n}.",
    "date": "2026-10-14"
+  },
+  {
+   "text": "Angus Young plays in a school uniform. You're allowed to practise in pyjamas, {n}. No excuses left.",
+   "date": "2026-10-16"
+  },
+  {
+   "text": "Jimmy Page played with a violin bow. You don't need one, {n}. Just the guitar and five spare minutes.",
+   "date": "2026-10-16"
+  },
+  {
+   "text": "Your chord sheets are in Drive, your guitar is on the stand and your thumbs are on your phone. Swap one of those, {n}.",
+   "date": "2026-10-16"
+  },
+  {
+   "text": "Hadag Nahash learned to groove one strum at a time. Your right hand is next in line, {n}.",
+   "date": "2026-10-16"
   }
  ],
- "jokesDate": "2026-10-14"
+ "jokesDate": "2026-10-16"
 }
