@@ -5,7 +5,7 @@ const {chromium}=require('playwright');const path=require('path'),fs=require('fs
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(__dirname,'out');fs.mkdirSync(OUT,{recursive:true});
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':'application/octet-stream'});r.end(d)})}).listen(0);
 const APP=process.env.APP||`http://localhost:${srv.address().port}/index.html`;
-const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');if(w)w.hidden=true});
+const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=document.getElementById(id);if(w)w.hidden=true});document.body.classList.remove('wopen')});
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844},acceptDownloads:true});await ctx.route(/^https:\/\//,r=>r.abort());

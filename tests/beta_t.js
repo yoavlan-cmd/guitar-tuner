@@ -5,7 +5,7 @@ const ROOT=path.resolve(__dirname,'..');
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':/webmanifest$/.test(f)?'application/manifest+json':'application/octet-stream'});r.end(d)})}).listen(0);
 const BASE=process.env.BASE||`http://localhost:${srv.address().port}/`;
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
-const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');if(w)w.hidden=true});
+const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=document.getElementById(id);if(w)w.hidden=true});document.body.classList.remove('wopen')});
 (async()=>{if(!fs.existsSync(path.join(ROOT,'beta/index.html'))){console.log('FAIL beta/index.html missing: run bash tools/build.sh beta');process.exit(1)}
  const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.route(/^https:\/\//,r=>r.abort());
