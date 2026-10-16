@@ -783,8 +783,8 @@ body.wopen{overflow:hidden}
 .addgrid .addtile:active{transform:scale(.98)}
 .addgrid .addnote{grid-column:1/-1;margin:0;text-align:center}
 /* the Songs pane is two sections: Learn (I'm learning, new songs, a song video) and Write (write a sheet, screenshots/PDF, chord finder, drafts) */
-#paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #findNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
-#paneSong[data-seg="learn"] #drop{grid-column:1/-1;min-height:0}
+#paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
+/* Learn: Song video and Chord finder side by side (the finder is in Write too) */
 #paneSong[data-seg="learn"] #driveIntro{display:none!important}
 #paneSong[data-seg="write"] #drop,#paneSong[data-seg="write"] #libCard,#paneSong[data-seg="write"] #suggCard{display:none!important}
 #libCard[hidden]~#suggCard{display:none}
@@ -1063,4 +1063,52 @@ body[data-cursec=home].hasbar .wrap{height:calc(100dvh - 14px - var(--bnh) - 96p
 body.hasbar #paneHome .hcont.hc-jam{display:none}
 @media (max-height:700px){#paneHome .hjoke{-webkit-line-clamp:3}#paneHome .htile small{-webkit-line-clamp:1}#paneHome .hcont:not(.hc-jam)~.hcont{display:none}body:not(.hasbar) #paneHome .hcont.hc-jam~.hcont{display:none}}
 @media (max-height:620px){#paneHome .htile small{display:none}#paneHome .hjoke{-webkit-line-clamp:2}body.hasbar #paneHome .homecont{display:none}}
+/* ===== the player: a small mixing desk ===== */
+.mxpanel{background:linear-gradient(180deg,#141a17,var(--bg) 220px)}
+.mixhead{align-items:flex-start}
+.mixttl{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mixk{display:flex;align-items:center;gap:7px;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mixttl b{font:800 24px/1.05 var(--display);letter-spacing:.02em;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mixttl span{font:500 13.5px var(--body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* little equalizer bars: still when paused, dancing while playing */
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.eq i{display:block;width:3px;height:30%;border-radius:1px;background:var(--accent)}
+body.mxon .eq i{animation:eqb .9s ease-in-out infinite alternate}
+body.mxon .eq i:nth-child(2){animation-delay:-.3s;animation-duration:.7s}body.mxon .eq i:nth-child(3){animation-delay:-.6s;animation-duration:1.1s}body.mxon .eq i:nth-child(4){animation-delay:-.15s;animation-duration:.8s}
+@keyframes eqb{0%{height:20%}100%{height:100%}}
+.mxbar-k{display:flex;align-items:center;gap:6px}
+/* transport: the song's progress on top, then −5s · play · +5s */
+.mixtrans{flex-direction:column;align-items:stretch;gap:10px;padding:14px 14px 12px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);box-shadow:var(--shadow-in)}
+.mixtimes{display:flex;justify-content:space-between}.mixtimes small{font:500 12px var(--mono);color:var(--muted)}
+.mixbtns{display:flex;align-items:center;justify-content:center;gap:22px}
+.mixplay{width:64px;height:64px;font-size:24px;display:grid;place-items:center;box-shadow:0 6px 18px rgba(78,226,183,.25);transition:transform .15s,box-shadow .3s}
+.mixplay:active{transform:scale(.94)}
+body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,226,183,.45)}
+.mixback{width:46px;height:46px;background:transparent;border-color:var(--line);color:var(--muted)}
+/* slim custom sliders: a coloured fill up to the thumb */
+#mxSeek,.strip input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:24px;margin:0;cursor:pointer}
+#mxSeek{--c:var(--accent)}
+#mxSeek::-webkit-slider-runnable-track,.strip input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--c) var(--p,0%),rgba(255,255,255,.12) var(--p,0%))}
+#mxSeek::-moz-range-track,.strip input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.12)}
+#mxSeek::-moz-range-progress,.strip input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--c)}
+#mxSeek::-webkit-slider-thumb,.strip input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:3px solid var(--c);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+#mxSeek::-moz-range-thumb,.strip input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c)}
+/* presets: one row that scrolls */
+.mixpre{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.mixpre::-webkit-scrollbar{display:none}
+.mixpre .chip{flex:0 0 auto}
+/* the desk: one strip per part */
+.mixrows{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:6px;padding:12px 8px;border:1px solid var(--line);border-radius:var(--r-card);background:linear-gradient(180deg,#1a201d,#121714);box-shadow:var(--shadow-in),var(--shadow-card)}
+.mixrow.strip{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 2px;border:0;border-radius:12px;background:transparent;box-shadow:none;min-width:0}
+.mixrow.strip.gtr{border:0;background:rgba(78,226,183,.06)}
+.strip output{font:600 11px var(--mono);color:var(--c);min-width:0;text-align:center}
+.strip .fader{position:relative;width:100%;height:150px}
+.strip .fader input{position:absolute;left:50%;top:50%;width:150px;transform:translate(-50%,-50%) rotate(-90deg)}
+.strip .meter{position:absolute;display:block;left:calc(50% + 11px);bottom:9px;top:9px;height:calc(100% - 18px);width:4px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
+.strip .meter i{position:absolute;display:block;left:0;right:0;top:0;bottom:0;height:auto;width:auto;margin:0;border-radius:0;transform-origin:bottom;transform:scaleY(0);transition:transform .09s linear;background:linear-gradient(to top,var(--c) 0%,var(--c) 70%,#FFE27A 88%,#FF6A4D 100%)}
+.strip b{font:700 11.5px var(--body);text-align:center;line-height:1.15;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.strip .ms{display:flex;flex-direction:column;gap:4px;width:100%;align-items:center}
+.strip .ms button{min-width:0;width:min(36px,100%);height:26px;font-size:11.5px}
+.mixrow.strip.off{opacity:.45}
+.mixrows.many .strip b{font-size:10px;letter-spacing:-.01em}.mixrows.many .strip output{font-size:10px}
+.mixrow.strip.off .fader input{filter:grayscale(1)}
 </style>
