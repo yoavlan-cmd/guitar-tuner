@@ -14,7 +14,10 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
-  const key='mix_'+id;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
+  const key='mix_'+id;
+  // built again: a capo you set from the video stays
+  try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
+  localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
