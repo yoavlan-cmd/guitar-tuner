@@ -21,7 +21,12 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // a practice-mixer split named the way files usually are: "Artist - Song"
  await p.evaluate(async()=>{const M=window.__mxTest;await M.put('mixdata:m1',{len:10,sr:44100,tracks:[]});M.add({id:'m1',name:'Green Day - Good Riddance',at:Date.now(),src:'cloud',state:'ready'})});
  await p.tap('[data-tab=song]');await p.waitForTimeout(300);
- const rows=await p.$$eval('#learnList .lrow',l=>l.map(r=>({t:r.querySelector('b').textContent,a:r.querySelector('small').textContent,lit:r.querySelectorAll('.lres .pd:not(.off),.lres .ltag:not(.none)').length,label:r.querySelector('.lres').getAttribute('aria-label')})));
+ const grab=()=>p.$$eval('#learnList .lrow',l=>l.map(r=>({t:r.querySelector('b').textContent,a:r.querySelector('small').textContent,lit:r.querySelectorAll('.lres .pd:not(.off),.lres .ltag:not(.none)').length,label:r.querySelector('.lres').getAttribute('aria-label')})));
+ // one language at a time: Hebrew or English (a switch, one always chosen)
+ await p.tap('[data-lang=en]');const en=await grab();await p.tap('[data-lang=he]');const he=await grab();await p.tap('[data-lang=en]');
+ const rows=en.concat(he);
+ ok(en.length===2&&he.length===2&&en.every(r=>!/[\u0590-\u05FF]/.test(r.t))&&he.every(r=>/[\u0590-\u05FF]/.test(r.t)),`the language switch shows English songs (${en.map(r=>r.t)}) or Hebrew songs (${he.map(r=>r.t)}), never mixed`);
+ ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.learnLang')))==='en','the chosen language is remembered');
  console.log(JSON.stringify(rows));
  const gr=rows.filter(r=>/good riddance/i.test(r.t));
  ok(rows.length===4,`four songs in I'm learning (${rows.map(r=>r.t).join(' / ')})`);
@@ -32,8 +37,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // filters: lesson → have it → missing → off
  await p.tap('[data-lf=lesson]');let n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));
  ok(n.length===1&&/Good Riddance/.test(n[0]),`"Video lesson · have it" shows only Good Riddance (${n})`);
- await p.tap('[data-lf=lesson]');n=await p.$$eval('#learnList .lrow',l=>l.length);ok(n===3,`"Video lesson · missing" shows the other three (${n})`);
- await p.tap('[data-lf=lesson]');n=await p.$$eval('#learnList .lrow',l=>l.length);ok(n===4,'third tap clears the filter');
+ await p.tap('[data-lf=lesson]');n=await p.$$eval('#learnList .lrow',l=>l.length);ok(n===1,`"Video lesson · missing" shows the other English song (${n})`);
+ await p.tap('[data-lf=lesson]');n=await p.$$eval('#learnList .lrow',l=>l.length);ok(n===2,'third tap clears the filter');
  // search
  await p.fill('#learnQ','oasis');n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));ok(n.length===1&&n[0]==='Wonderwall','search finds by artist');await p.fill('#learnQ','');
  // details
@@ -45,7 +50,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok(/No chord sheet yet/.test(det2)&&/Write it/.test(det2)&&/Not learning it any more/.test(det2),'an "On it" song offers to write the sheet, find a lesson, or drop it');
  await p.tap('.ldet [data-la=drop]');n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));ok(!n.includes('Wonderwall'),'"Not learning it any more" removes it');
  // opening a phone sheet from the list
- await p.tap('#learnList .lrow:has-text("עד מתי")');await p.tap('.ldet [data-la=lib]');await p.waitForTimeout(300);
+ await p.tap('[data-lang=he]');await p.tap('#learnList .lrow:has-text("עד מתי")');await p.tap('.ldet [data-la=lib]');await p.waitForTimeout(300);
  ok(await p.$eval('#sheetView',e=>!e.hidden),'Open on a phone sheet shows the chord sheet');
  await p.tap('[data-tab=tune]');await p.tap('[data-tab=song]');await p.waitForTimeout(200);
  // suggestions sit in their own card, closed; the Add part hides both

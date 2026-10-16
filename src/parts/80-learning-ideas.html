@@ -23,23 +23,28 @@ function learnSongs(){
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
-function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
+function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
+ // one language at a time (Hebrew or English songs, by the title's letters): the list reads one way, never mixed
+ const heb=x=>/[\u0590-\u05FF]/.test(x),L=G.map(g=>heb(g.title)?'he':/[a-z]/i.test(g.title)?'en':heb(g.artist)?'he':'en'),nL={he:0,en:0};L.forEach(x=>nL[x]++);
+ const lang=learnLang(nL),I=G.map((g,i)=>i).filter(i=>L[i]===lang),inL=i=>L[i]===lang,cnt=k=>I.filter(i=>G[i].r[k].length).length;
  // status from the song records; artists for the artist filter
- const S=G.map(songStatus),am=new Map();G.forEach(g=>{if(!g.artist)return;const k=vlKey(g.artist),o=am.get(k);if(o)o[2]++;else am.set(k,[k,g.artist,1])});
+ const S=G.map(songStatus),am=new Map();G.forEach((g,i)=>{if(!g.artist||!inL(i))return;const k=vlKey(g.artist),o=am.get(k);if(o)o[2]++;else am.set(k,[k,g.artist,1])});
  const arts=[...am.values()].sort((a,b)=>a[1].localeCompare(b[1],'he'));if(learnArt&&!am.has(learnArt))learnArt='';
- box.innerHTML=G.length?`<input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${G.length} song${G.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
- <div class="lstat" role="group" aria-label="Show songs by status">${[['','All',G.length],...SONG_ST.map(([k,l])=>[k,k==='idea'?'Ideas':l,S.filter(x=>x===k).length])].map(([k,l,n])=>`<button type="button" class="chip" data-ls="${k}" aria-pressed="${learnSt===k}">${l}<small>${n}</small></button>`).join('')}</div>
+ box.innerHTML=G.length?`${nL.he&&nL.en?`<div class="seg llang" role="radiogroup" aria-label="Song language">${[['he','Hebrew'],['en','English']].map(([k,l])=>`<button type="button" role="radio" data-lang="${k}" aria-checked="${lang===k}" aria-pressed="${lang===k}">${l} <small>${nL[k]}</small></button>`).join('')}</div>`:''}
+ <input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${I.length} song${I.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
+ <div class="lstat" role="group" aria-label="Show songs by status">${[['','All',I.length],...SONG_ST.map(([k,l])=>[k,k==='idea'?'Ideas':l,I.filter(i=>S[i]===k).length])].map(([k,l,n])=>`<button type="button" class="chip" data-ls="${k}" aria-pressed="${learnSt===k}">${l}<small>${n}</small></button>`).join('')}</div>
  ${arts.length>1?`<select id="learnArt" class="textin lart" aria-label="Show one artist"><option value="">All artists (${arts.length})</option>${arts.map(([k,a,n])=>`<option value="${esc(k)}"${learnArt===k?' selected':''} dir="auto">${esc(a)} (${n})</option>`).join('')}</select>`:''}
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
  if(!G.length)return;
- const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
+ const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
    return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
+ box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{learnSt=b.dataset.ls;renderLearn()});
  if($('learnArt'))$('learnArt').onchange=e=>{learnArt=e.target.value;renderLearn()};
  box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
@@ -56,6 +61,9 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
   else if(a==='video'){$('vidIn').click()}
   else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
 }
+// the language shown: the player's choice, else the profile's first song language, else the one with more songs
+function learnLang(nL){const c=store.get('learnLang','');if(c==='he'||c==='en')return c;let p='';try{p=(profGet().songLang||[])[0]||''}catch(e){}
+ return (p==='he'||p==='en')&&nL[p]?p:nL.he>nL.en?'he':'en'}
 function learnDetail(g,i){
  const row=(t,title,sub,act)=>`<div class="lit">${SK(t)}<span class="ltt"><b dir="auto">${title}</b>${sub?`<small dir="auto">${sub}</small>`:''}</span>${act}</div>`;
  const miss=(t,title,act)=>`<div class="lit miss">${SKoff(t)}<span class="ltt"><b>${title}</b></span>${act}</div>`;

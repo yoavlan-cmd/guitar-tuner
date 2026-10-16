@@ -1004,7 +1004,7 @@ details.v2fold[open]>summary::after{content:"✕";margin-left:auto;flex:0 0 auto
 .htile[data-sec=write],#paneSong[data-seg=write] .addtile{--tex:var(--tex-write)}
 .htile[data-sec=jam],#paneJam .addtile{--tex:var(--tex-jam)}
 .htile[data-sec=gear],#paneGear .addtile{--tex:var(--tex-gear)}
-.sic:empty,.ithumb:empty,.mxbar-ic:empty{display:none}
+.sic:empty,span.ithumb:empty,.mxbar-ic:empty{display:none}
 /* I'm learning: what a song has, as short words */
 .lres{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .ltag{font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line-on);border-radius:var(--r-pill);padding:2px 7px;white-space:nowrap}
@@ -1040,4 +1040,9 @@ input[type=range]{accent-color:var(--accent)}
 .lstbtns button[aria-pressed="true"]{border-color:var(--line-on);color:var(--accent);background:rgba(78,226,183,.12)}
 .lrow{flex-wrap:wrap;row-gap:6px}.lrow .ltxt{min-width:55%}.lrow .lres{margin-left:auto}
 .lart{font:500 14px var(--body)}
+.llang button small{font:500 12px var(--mono);opacity:.75;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.iphoto0{display:grid;place-items:center;background:var(--surface)}
+.gpcov{position:absolute;left:0;right:0;bottom:0;font:700 9px/14px var(--body);font-style:normal;letter-spacing:.06em;text-transform:uppercase;text-align:center;background:var(--accent);color:var(--bg)}
+.gpcovbtn{margin-top:8px;width:100%}.gpcovnote{margin:8px 0 0;font:600 13px var(--body);color:var(--accent)}
 </style>

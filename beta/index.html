@@ -1019,7 +1019,7 @@ details.v2fold[open]>summary::after{content:"✕";margin-left:auto;flex:0 0 auto
 .htile[data-sec=write],#paneSong[data-seg=write] .addtile{--tex:var(--tex-write)}
 .htile[data-sec=jam],#paneJam .addtile{--tex:var(--tex-jam)}
 .htile[data-sec=gear],#paneGear .addtile{--tex:var(--tex-gear)}
-.sic:empty,.ithumb:empty,.mxbar-ic:empty{display:none}
+.sic:empty,span.ithumb:empty,.mxbar-ic:empty{display:none}
 /* I'm learning: what a song has, as short words */
 .lres{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .ltag{font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line-on);border-radius:var(--r-pill);padding:2px 7px;white-space:nowrap}
@@ -1055,6 +1055,11 @@ input[type=range]{accent-color:var(--accent)}
 .lstbtns button[aria-pressed="true"]{border-color:var(--line-on);color:var(--accent);background:rgba(78,226,183,.12)}
 .lrow{flex-wrap:wrap;row-gap:6px}.lrow .ltxt{min-width:55%}.lrow .lres{margin-left:auto}
 .lart{font:500 14px var(--body)}
+.llang button small{font:500 12px var(--mono);opacity:.75;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.iphoto0{display:grid;place-items:center;background:var(--surface)}
+.gpcov{position:absolute;left:0;right:0;bottom:0;font:700 9px/14px var(--body);font-style:normal;letter-spacing:.06em;text-transform:uppercase;text-align:center;background:var(--accent);color:var(--bg)}
+.gpcovbtn{margin-top:8px;width:100%}.gpcovnote{margin:8px 0 0;font:600 13px var(--body);color:var(--accent)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -4933,10 +4938,11 @@ function renderGear(){
  const lost=(store.get('gearLost',[])||[]).filter(x=>x&&x.id&&!l.some(y=>y.id===x.id));
  $('gearOut').innerHTML=`<section class="card"><div class="cardhead"><h2>My gear</h2><button class="btn" id="instAdd" type="button">+ Add gear</button></div>
  ${lost.length?`<div class="confirm lostbox"><span>↩ Removed without you asking (an app bug). Bring back:</span>${lost.map(x=>`<button class="btn" type="button" data-restore="${esc(x.id)}">${SK(GEAR[x.type]&&GEAR[x.type].amp?'AMP':'GTR')} ${esc(x.name)}</button>`).join('')}<button class="btn ghost" type="button" id="lostNo">Not needed</button></div>`:''}
- ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${it.photo?`<img class="ithumb" src="${it.photo}" alt="">`:`<span class="ithumb none">${SK(GEAR[it.type].amp?'AMP':'GTR')}</span>`}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
+ ${l.length?`<div class="instlist">${l.map(it=>{const st=stringsStatus(it);return `<button type="button" class="instrow" data-open="${it.id}">${(()=>{const c=gpCover(it);return c&&c.src?`<img class="ithumb" src="${c.src}" alt="">`:`<span class="ithumb none">${SKA(GEAR[it.type].amp?'AMP':'GTR')}</span>`})()}<span class="itxt"><b dir="auto">${esc(it.name)}</b><span dir="auto">${esc([it.brand,it.model].filter(Boolean).join(' ')||GEAR[it.type].name)}</span><span class="${st.due?'due':''}">${esc(st.txt)}</span></span></button>`}).join('')}</div>`
  :'<p class="tip">Add the guitars and amps you own: give each one a name, its brand and model, and get advice for that exact piece of gear. They stay here until you remove them.</p>'}</section>`;
  document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>{const all=store.get('gearLost',[])||[],x=all.find(y=>y.id===b.dataset.restore);if(x){instSave(instAll().concat(x));store.set('gearLost',all.filter(y=>y.id!==x.id))}renderGear()});
  if($('lostNo'))$('lostNo').onclick=()=>{store.set('gearLost',[]);renderGear()};
+ gpCoversLoad(l);
  $('instAdd').onclick=()=>{instEdit={id:'',name:'',type:'acoustic',brand:'',model:'',year:'',specs:{},strings:''};renderGear()};
 }
 $('gearOut').addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r){instOpen=r.dataset.open;renderGear();window.scrollTo({top:0})}});
@@ -5027,7 +5033,7 @@ Notes: a classical guitar has nylon strings tied at the bridge and a wide slotte
 function renderInstForm(){
  const it=instEdit,m=matchModel(it.brand,it.model,it.type),isA=!!GEAR[it.type].amp;
  $('gearOut').innerHTML=`<section class="card instform"><h2>${it.id?(GEAR[it.type].amp?'Edit amp':'Edit guitar'):'Add gear'}</h2>
- <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">'+SK('PHOTO')+'</div>'}<div class="iphotobtns"><label class="btn ghost">${SK('PHOTO')} ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn ghost" id="iPhotoAsk">Fill in from the photo again</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
+ <div class="iphoto">${it.photo?`<img id="iPhotoImg" src="${it.photo}" alt="Your guitar">`:'<div class="iphoto0">'+SKA(GEAR[it.type]&&GEAR[it.type].amp?'AMP':'GTR')+'</div>'}<div class="iphotobtns"><label class="btn ghost">${SK('PHOTO')} ${it.photo?'Change photo':'Add a photo'}<input type="file" id="iPhotoIn" accept="image/*" hidden></label>${it.photo?'<button type="button" class="btn ghost" id="iPhotoDel">Remove photo</button>':''}${it.photo&&claudeReads()?'<button type="button" class="btn ghost" id="iPhotoAsk">Fill in from the photo again</button>':''}</div><p class="tip" id="iPhotoMsg">${it._pmsg||(it.photo?'':'A clear photo of the whole guitar, front on, works best.')}</p></div>
  <label class="namefield">Name it <input id="iName" type="text" dir="auto" maxlength="40" placeholder="${isA?'e.g. Home amp, Gig amp':'e.g. Old faithful, The red one'}" value="${esc(it.name||'')}"></label>
  <div class="namefield">Type<div class="chips2" id="iType">${Object.entries(GEAR).map(([k,g])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${it.type===k}">${esc(g.short)}</button>`).join('')}</div></div>
  <div class="wrow"><label class="namefield">Brand <input id="iBrand" type="text" list="iBrands" autocomplete="off" value="${esc(it.brand||'')}" placeholder="e.g. Yamaha"></label><label class="namefield">Year <input id="iYear" type="text" inputmode="numeric" maxlength="4" value="${esc(it.year||'')}" placeholder="optional"></label></div>
@@ -5050,7 +5056,9 @@ function renderInstForm(){
  {const F={brand:'iBrand',model:'iModel',year:'iYear',colour:'iColor',watts:'iWatts',name:'iName',strings:'iSet',serial:'iSerial'};(it._filled||[]).forEach(k=>{const e=$(F[k]);if(e)e.classList.add('filled')});(it._filled||[]).forEach(k=>{const q=Object.keys(SPEC_Q).find(x=>SPEC_Q[x].label.toLowerCase()===k);if(q){const e=document.querySelector(`[data-spec="${q}"]`);if(e)e.classList.add('filled')}})}
  $('iSave').onclick=()=>{sync();if(!it.name)it.name=[it.brand,it.model].filter(Boolean).join(' ')||'My '+GEAR[it.type].short.toLowerCase();if(GEAR[it.type].amp)it.strings='';
   const l=instAll();const clean={id:it.id||'i'+Date.now().toString(36),name:it.name,type:it.type,brand:it.brand,model:it.model,year:it.year,specs:it.specs,strings:it.strings,color:it.color||'',watts:GEAR[it.type].amp?(it.watts||''):'',stringSet:GEAR[it.type].amp?'':(it.stringSet||''),serial:it.serial||'',chat:it.chat,lastTuned:it.lastTuned,tuning:it.tuning,added:it.added||Date.now(),ai:it.ai,photo:it.photo||'',photoNotes:it.photoNotes||null};
-  if(it._key&&it._key!==(it.brand+'|'+it.model)){delete clean.ai;delete clean.controls}else{clean.controls=it.controls}
+  // keep everything the form doesn't edit (more photos, control marks, the preview choice…)
+  const old=l.find(x=>x.id===clean.id);if(old)for(const k in old)if(!(k in clean))clean[k]=old[k];
+  if(it._key&&it._key!==(it.brand+'|'+it.model)){delete clean.ai;delete clean.controls;delete clean.ctlPos}else{clean.controls=it.controls}
   const i=l.findIndex(x=>x.id===clean.id);if(i>=0)l[i]=clean;else l.push(clean);instSave(l);
   if(clean.photo&&!(instAll().find(x=>x.id===clean.id)||{}).photo){clean.photo='';l[l.findIndex(x=>x.id===clean.id)]=clean;instSave(l);$('iPhotoMsg').textContent='This phone’s storage is full, so the photo couldn’t be saved. The rest was saved.';instEdit=null;instOpen=clean.id;setTimeout(renderGear,2200);return}
   instEdit=null;instOpen=clean.id;renderGear();window.scrollTo({top:0})};
@@ -5262,6 +5270,11 @@ function panelSVG(c,amp){
 }
 // ---- more photos of a piece of gear (other angles, close-ups, the back panel): images in IndexedDB, it.photos=[{id,at}] on the item ----
 const GP=new Map();let ctlSel={},gpOv={};// loaded images by id; photo shown in Controls / in Overview, per item
+// the picture on My gear: the photo the player picked as the preview (it.cover), else the main photo, else the first other photo
+function gpCover(it){const P=gpAll(it);return P.find(p=>p.id===it.cover)||P[0]||null}
+// the list shows previews kept in the phone database: load the missing ones, then draw the list again
+async function gpCoversLoad(l){let got=false;for(const it of l){const c=gpCover(it);if(c&&!c.src&&c.id!=='main'){try{const u=await mxGet('gearphoto:'+c.id);if(u){GP.set(c.id,u);got=true}}catch(e){}}}
+ if(got&&!instOpen&&!instEdit)renderGear()}
 function gpAll(it){const out=[];if(it.photo)out.push({id:'main',src:it.photo});(it.photos||[]).forEach(p=>out.push({id:p.id,src:GP.get(p.id)||null}));return out}
 const gpBlobs=it=>gpAll(it).filter(p=>p.src).slice(0,Math.max(0,imgLimit)).map(p=>dataUrlBlob(p.src));
 async function gpEnsure(it){let changed=false;
@@ -5273,10 +5286,10 @@ async function gpAdd(it,files){let last=null;
  for(const f of [...(files||[])].slice(0,8)){try{const u=await shrinkPhoto(f,1200),id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);await mxPut('gearphoto:'+id,u);GP.set(id,u);ctlUpd(it,x=>{x.photos=[...(x.photos||[]),{id,at:Date.now()}]});last=id}catch(e){}}
  if(last){ctlSel[it.id]=last;gpOv[it.id]=last;ctlView[it.id]='photo'}renderGear()}
 async function gpDel(it,id){try{await mxDel('gearphoto:'+id)}catch(e){}GP.delete(id);
- ctlUpd(it,x=>{x.photos=(x.photos||[]).filter(p=>p.id!==id);const pos={...(x.ctlPos||{})};for(const k in pos)if(pos[k][2]===id)delete pos[k];x.ctlPos=pos});
+ ctlUpd(it,x=>{x.photos=(x.photos||[]).filter(p=>p.id!==id);if(x.cover===id)delete x.cover;const pos={...(x.ctlPos||{})};for(const k in pos)if(pos[k][2]===id)delete pos[k];x.ctlPos=pos});
  if(ctlSel[it.id]===id)delete ctlSel[it.id];if(gpOv[it.id]===id)delete gpOv[it.id];renderGear()}
 // thumbnail strip: data-gph (Controls) or data-ovp (Overview) picks a photo; the last tile adds more
-function gpStrip(it,attr,sel,count){return `<div class="gpstrip" role="group" aria-label="Photos of ${esc(it.name)}">${gpAll(it).map((p,i)=>{const n=count?count(p.id):0;return `<button type="button" class="gpthumb" ${attr}="${p.id}" aria-pressed="${p.id===sel}" aria-label="Photo ${i+1}">${p.src?`<img src="${p.src}" alt="">`:'<span>…</span>'}${n?`<i>${n}</i>`:''}</button>`}).join('')}<label class="gpthumb gpadd"><b>+</b><small>Add photos</small><input type="file" accept="image/*" multiple hidden data-gpadd></label></div>`}
+function gpStrip(it,attr,sel,count){const cov=gpCover(it);return `<div class="gpstrip" role="group" aria-label="Photos of ${esc(it.name)}">${gpAll(it).map((p,i)=>{const n=count?count(p.id):0;return `<button type="button" class="gpthumb" ${attr}="${p.id}" aria-pressed="${p.id===sel}" aria-label="Photo ${i+1}">${p.src?`<img src="${p.src}" alt="">`:'<span>…</span>'}${n?`<i>${n}</i>`:''}${attr==='data-ovp'&&cov&&p.id===cov.id&&gpAll(it).length>1?'<em class="gpcov">Preview</em>':''}</button>`}).join('')}<label class="gpthumb gpadd"><b>+</b><small>Add photos</small><input type="file" accept="image/*" multiple hidden data-gpadd></label></div>`}
 let ctlView={},ctlPlace=null;// per item: 'photo' or 'draw'; placing marks by hand: {id, sel}
 function controlsHTML(it){
  const key=ctlKey(it);if(!key)return '';
@@ -5461,7 +5474,7 @@ function renderInstDetail(it){
  $('gearOut').innerHTML=`<section class="card gearcard">
  <div class="editrow sheettop"><button class="btn ghost" id="iBack" type="button">← My gear</button><button class="btn ghost" id="iEdit" type="button">Edit details</button></div>${it.photo&&claudeReads()?`<button class="btn ghost wide" id="iFromPhoto" type="button">Update the details from the photo</button>`:''}
  <h2 dir="auto">${esc(it.name)}</h2><p class="tip" dir="auto">${esc([it.brand,it.model,it.year].filter(Boolean).join(' · ')||g.name)} · ${esc(g.short)}</p>
- ${(()=>{const P=gpAll(it),sel=P.find(p=>p.id===gpOv[it.id])||P[0];return `<div class="gphead">${sel&&sel.src?`<img class="iphotobig" src="${sel.src}" alt="${esc(it.name)}">`:''}<div class="ovonly">${gpStrip(it,'data-ovp',sel&&sel.id)}</div></div>`})()}
+ ${(()=>{const P=gpAll(it),cov=gpCover(it),sel=P.find(p=>p.id===gpOv[it.id])||cov;return `<div class="gphead">${sel&&sel.src?`<img class="iphotobig" src="${sel.src}" alt="${esc(it.name)}">`:''}<div class="ovonly">${gpStrip(it,'data-ovp',sel&&sel.id)}${P.length>1&&sel?(cov&&sel.id===cov.id?`<p class="gpcovnote">✓ This photo is the preview in My gear</p>`:`<button type="button" class="btn ghost gpcovbtn" id="gpCover" data-id="${esc(sel.id)}">Use this photo as the preview in My gear</button>`):''}</div></div>`})()}
  <div class="gtabs" id="gTabs" role="tablist">${GTABS.filter(([k])=>k!=='controls'||ctl).map(([k,t])=>`<button type="button" role="tab" data-gt="${k}" aria-selected="${k===gearTab}">${t}${k==='care'&&st.due&&!g.amp?'<i class="gdot" aria-label="strings due"></i>':''}</button>`).join('')}</div>
  <div class="gpanel" data-gp="overview">
  ${specTxt.length?`<div class="specchips">${specTxt.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
@@ -5504,6 +5517,7 @@ function renderInstDetail(it){
  showTab(gearTab);gearVisit=it.id;
  document.querySelectorAll('[data-gpadd]').forEach(inp=>inp.onchange=e=>gpAdd(it,e.target.files));
  document.querySelectorAll('[data-ovp]').forEach(b=>b.onclick=()=>{gpOv[it.id]=b.dataset.ovp;renderGear()});
+ if($('gpCover'))$('gpCover').onclick=()=>{const id=$('gpCover').dataset.id;ctlUpd(it,x=>{x.cover=id});toast('This photo is now the preview in My gear.','ok');renderGear()};
  gpEnsure(it);
 }
 
@@ -5532,23 +5546,28 @@ function learnSongs(){
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
-function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
+function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
+ // one language at a time (Hebrew or English songs, by the title's letters): the list reads one way, never mixed
+ const heb=x=>/[\u0590-\u05FF]/.test(x),L=G.map(g=>heb(g.title)?'he':/[a-z]/i.test(g.title)?'en':heb(g.artist)?'he':'en'),nL={he:0,en:0};L.forEach(x=>nL[x]++);
+ const lang=learnLang(nL),I=G.map((g,i)=>i).filter(i=>L[i]===lang),inL=i=>L[i]===lang,cnt=k=>I.filter(i=>G[i].r[k].length).length;
  // status from the song records; artists for the artist filter
- const S=G.map(songStatus),am=new Map();G.forEach(g=>{if(!g.artist)return;const k=vlKey(g.artist),o=am.get(k);if(o)o[2]++;else am.set(k,[k,g.artist,1])});
+ const S=G.map(songStatus),am=new Map();G.forEach((g,i)=>{if(!g.artist||!inL(i))return;const k=vlKey(g.artist),o=am.get(k);if(o)o[2]++;else am.set(k,[k,g.artist,1])});
  const arts=[...am.values()].sort((a,b)=>a[1].localeCompare(b[1],'he'));if(learnArt&&!am.has(learnArt))learnArt='';
- box.innerHTML=G.length?`<input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${G.length} song${G.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
- <div class="lstat" role="group" aria-label="Show songs by status">${[['','All',G.length],...SONG_ST.map(([k,l])=>[k,k==='idea'?'Ideas':l,S.filter(x=>x===k).length])].map(([k,l,n])=>`<button type="button" class="chip" data-ls="${k}" aria-pressed="${learnSt===k}">${l}<small>${n}</small></button>`).join('')}</div>
+ box.innerHTML=G.length?`${nL.he&&nL.en?`<div class="seg llang" role="radiogroup" aria-label="Song language">${[['he','Hebrew'],['en','English']].map(([k,l])=>`<button type="button" role="radio" data-lang="${k}" aria-checked="${lang===k}" aria-pressed="${lang===k}">${l} <small>${nL[k]}</small></button>`).join('')}</div>`:''}
+ <input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${I.length} song${I.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
+ <div class="lstat" role="group" aria-label="Show songs by status">${[['','All',I.length],...SONG_ST.map(([k,l])=>[k,k==='idea'?'Ideas':l,I.filter(i=>S[i]===k).length])].map(([k,l,n])=>`<button type="button" class="chip" data-ls="${k}" aria-pressed="${learnSt===k}">${l}<small>${n}</small></button>`).join('')}</div>
  ${arts.length>1?`<select id="learnArt" class="textin lart" aria-label="Show one artist"><option value="">All artists (${arts.length})</option>${arts.map(([k,a,n])=>`<option value="${esc(k)}"${learnArt===k?' selected':''} dir="auto">${esc(a)} (${n})</option>`).join('')}</select>`:''}
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
  if(!G.length)return;
- const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
+ const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
    return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
+ box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{learnSt=b.dataset.ls;renderLearn()});
  if($('learnArt'))$('learnArt').onchange=e=>{learnArt=e.target.value;renderLearn()};
  box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
@@ -5565,6 +5584,9 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
   else if(a==='video'){$('vidIn').click()}
   else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
 }
+// the language shown: the player's choice, else the profile's first song language, else the one with more songs
+function learnLang(nL){const c=store.get('learnLang','');if(c==='he'||c==='en')return c;let p='';try{p=(profGet().songLang||[])[0]||''}catch(e){}
+ return (p==='he'||p==='en')&&nL[p]?p:nL.he>nL.en?'he':'en'}
 function learnDetail(g,i){
  const row=(t,title,sub,act)=>`<div class="lit">${SK(t)}<span class="ltt"><b dir="auto">${title}</b>${sub?`<small dir="auto">${sub}</small>`:''}</span>${act}</div>`;
  const miss=(t,title,act)=>`<div class="lit miss">${SKoff(t)}<span class="ltt"><b>${title}</b></span>${act}</div>`;
