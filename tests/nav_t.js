@@ -32,6 +32,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   ['Write a sheet','write',['#writeNew']],
   ['Sheet from screenshots or PDF','write',['#shotNew']],
   ['Chord finder','write',['#findNew']],
+  ['Chord finder in Learn too','learn',['#findNew']],
   ['Unfinished sheet (draft)','write',['#draftCard']],
   ['Band breakdown','jam',['#mixNew']],
   ['Jamming player','jam',['#jamOpen']],

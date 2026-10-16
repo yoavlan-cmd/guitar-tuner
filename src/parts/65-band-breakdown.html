@@ -207,41 +207,52 @@ async function mxStart(file){
 }
 // ---- live mixing: an audio worklet mixes all parts with the slider volumes ----
 const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;
-this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice()}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
+this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice();this.acc=new Float64Array(m.tracks.length);this.cnt=0}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
 process(_,outs){const o=outs[0],L=o[0],R=o[1]||o[0],n=L.length;L.fill(0);if(R!==L)R.fill(0);if(!this.on||!this.t.length)return true;
-for(let k=0;k<this.t.length;k++){let g=this.g[k];const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;L[i]+=a[2*q]*g/32768;R[i]+=a[2*q+1]*g/32768}this.g[k]=tg}
-this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n)this.port.postMessage({pos:this.p});return true}}
+for(let k=0;k<this.t.length;k++){let g=this.g[k],e=0;const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;const l=a[2*q]*g/32768,r=a[2*q+1]*g/32768;L[i]+=l;R[i]+=r;e+=l*l+r*r}this.g[k]=tg;this.acc[k]+=e}this.cnt+=n;
+this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n){this.port.postMessage({pos:this.p,lv:Array.from(this.acc,x=>Math.sqrt(x/(2*this.cnt||1)))});this.acc.fill(0);this.cnt=0}return true}}
 registerProcessor('gmix',M);`;
 const mxGains=()=>{const t=mxSong.tracks;return t.map(x=>{const on=mxSolo?mxSolo===x.id:!x.mute;return on?x.gain:0})};
 async function mxAudio(){
  if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:mxSR()});
  const url=URL.createObjectURL(new Blob([MX_WORKLET],{type:'text/javascript'}));await mxCtx.audioWorklet.addModule(url);
  mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
- mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.ended){mxPlaying=false;mxPlayUI()}};
+ mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.lv)mxMeters(m.lv);if(m.ended){mxPlaying=false;mxPlayUI();mxMeters(null)}};
  // the worklet keeps its own copy of the parts; the phone keeps the saved copy for next time
  const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));
 }
 function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
 const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
 const mxFmt=n=>mmss(n/mxSR());
-function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)}mxBarTime()}
-function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'❚❚':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}});const k=$('mxBarK');if(k&&mxSong&&mxSong.tracks&&!mxBusy)k.textContent=mxBarWord()}
+function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;mxSeekUI()}mxBarTime()}
+// the progress bar's fill and the two times (where you are · how long the song is)
+function mxSeekUI(){const s=$('mxSeek');if(!s||!mxSong)return;const v=+s.value;s.style.setProperty('--p',(mxSong.len?v/mxSong.len*100:0)+'%');$('mxT').textContent=mxFmt(v);const d=$('mxD');if(d)d.textContent=mxFmt(mxSong.len)}
+// the level meters next to each fader: loudness in dB, falling back slowly like a desk's meters
+let mxLv=[];
+function mxMeters(lv){const els=document.querySelectorAll('#mxRows [data-lv]');els.forEach(el=>{const k=+el.dataset.lv,r=lv&&lv[k]||0,db=r>0?20*Math.log10(r):-99,t=Math.max(0,Math.min(1,(db+48)/45));
+ mxLv[k]=lv?Math.max(t,(mxLv[k]||0)*.72):0;el.style.transform=`scaleY(${mxLv[k].toFixed(3)})`})}
+function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'❚❚':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}});document.body.classList.toggle('mxon',!!mxPlaying);if(!mxPlaying)mxMeters(null);const k=$('mxBarK');if(k&&mxSong&&mxSong.tracks&&!mxBusy)k.textContent=mxBarWord()}
 const mxBarWord=()=>mxPlaying?'Now playing':mxPos>0?'Paused':'Ready to play';
 async function mxToggle(){if(!mxSong||!mxSong.tracks)return;await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=mxSong.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI();mxBarTime()}
 function mxPause(){try{if(mxPlaying&&mxNode){mxPlaying=false;mxNode.port.postMessage({play:false});mxPlayUI();mxBarTime()}}catch(e){}}
 const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars only'],['novox','No vocals']];
 function mxPreset(k){mxSolo=null;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':false;t.gain=1});mxRows();mxSend()}
 function mxSend(){if(mxNode)mxNode.port.postMessage({gains:mxGains()})}
-function mxRows(){const box=$('mxRows');if(!box)return;
- box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute;return `<div class="mixrow${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}"><b>${SK(MX_ICON[t.id]||'PART')} ${esc(t.name)}</b>
- <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo">S</button></div>
- <input type="range" min="0" max="150" step="5" value="${Math.round(t.gain*100)}" data-vol="${k}" aria-label="${esc(t.name)} volume"><output>${Math.round(t.gain*100)}%</output></div>`}).join('')}
+// one channel strip per part: its %, a fader with a live level meter, its name, Mute and Solo; each part has its own colour
+const MX_COLOR={guitar:'#4EE2B7',gL:'#4EE2B7',gC:'#8AF0D2',gR:'#26B98F',vocals:'#FF8C32',drums:'#FF5D8F',bass:'#6C8CFF',piano:'#B78CFF',other:'#E8D36A'};
+const MX_SHORT={guitar:'Guitars',gL:'Gtr L',gC:'Gtr C',gR:'Gtr R',vocals:'Vox',drums:'Drums',bass:'Bass',piano:'Keys',other:'Other'};
+function mxRows(){const box=$('mxRows');if(!box)return;box.style.setProperty('--n',mxSong.tracks.length);box.classList.toggle('many',mxSong.tracks.length>6);
+ box.innerHTML=mxSong.tracks.map((t,k)=>{const on=mxSolo?mxSolo===t.id:!t.mute,v=Math.round(t.gain*100);return `<div class="mixrow strip${mxIsGtr(t.id)?' gtr':''}${on?'':' off'}" data-k="${k}" style="--c:${MX_COLOR[t.id]||'#9AA0A6'}">
+ <output>${v}%</output><div class="fader"><i class="meter" aria-hidden="true"><i data-lv="${k}"></i></i><input type="range" min="0" max="150" step="5" value="${v}" data-vol="${k}" aria-label="${esc(t.name)} volume" style="--p:${(v/150*100).toFixed(1)}%"></div>
+ <b title="${esc(t.name)}">${esc(MX_SHORT[t.id]||t.name)}</b>
+ <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute ${esc(t.name)}">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo ${esc(t.name)}">S</button></div></div>`}).join('');mxLv=[]}
 // the open song: transport, presets, one slider per part; the list of songs folds away underneath
 function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome();
  const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length,n=mxIdx.length;
- v.innerHTML=`<div class="mixhead"><b dir="auto">${SK('MIX')} ${esc(s.name)}</b><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
- <div class="mixtrans"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button>
- <div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><small id="mxT"></small></div></div>
+ let nm=null;try{nm=songFromName(s.name)}catch(e){}if(!nm||!nm.t)nm={t:s.name,a:''};
+ v.innerHTML=`<div class="mixhead"><div class="mixttl"><small class="mixk"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Band breakdown</small><b dir="auto">${esc(nm.t)}</b>${nm.a?`<span dir="auto">${esc(nm.a)}</span>`:''}</div><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
+ <div class="mixtrans"><div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
+ <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
@@ -251,9 +262,10 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  $('mxClose').onclick=()=>mxView(false);
  $('mxPlay').onclick=mxToggle;
  $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
- const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(s.len)});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
+ $('mxFwd').onclick=()=>{mxPos=Math.min(s.len,mxPos+5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
+ const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;mxSeekUI()});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
- $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.nextElementSibling.textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
+ $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.style.setProperty('--p',(r.value/150*100).toFixed(1)+'%');r.closest('.strip').querySelector('output').textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
  $('mxRows').addEventListener('click',e=>{const m=e.target.closest('[data-mute]'),so=e.target.closest('[data-solo]');if(m){const t=s.tracks[+m.dataset.mute];t.mute=!t.mute;if(mxSolo===t.id)mxSolo=null}else if(so){const t=s.tracks[+so.dataset.solo];mxSolo=mxSolo===t.id?null:t.id}else return;mxRows();mxSend()});
  $('mxSave').onclick=()=>mxRender(mxGains(),'mix',b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=s.name+' (my mix).wav';toast(`${SK('OK')} Saved “${esc(s.name)} (my mix).wav” to your downloads.`,'ok');document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)});
  $('mxChords').onclick=()=>mxRender(s.tracks.map(t=>mxIsGtr(t.id)?1:0),'guitars',b=>{const f=new File([b],s.name+' (guitars).wav',{type:'audio/wav'});mxPause();mxView(false);
