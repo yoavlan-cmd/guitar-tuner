@@ -70,8 +70,10 @@ async function safetyCopy(tag){const local={};bkLocalKeys().forEach(k=>local[k]=
 async function bkMake(opt,onp){
  const local={};bkLocalKeys().forEach(k=>{if(!opt.keys&&BK_SECRET.includes(k))return;local[k]=localStorage.getItem(k)});
  const entries=[],names=[];let ks=[];try{ks=await idbKeys()}catch(e){}
+ // the beta: also what it hasn't read from the live app's database yet (its own copies and deletions win)
+ if(BETA){try{const own=new Set(ks);for(const k of await idbLiveKeys())if(!own.has(k))ks.push(k)}catch(e){}}
  ks=ks.filter(k=>typeof k==='string'&&!/^backup:pre-/.test(k)&&(opt.parts||!bkIsPart(k)));
- let i=0;for(const k of ks){const v=await idbRaw(k);if(v==null||(v&&v.__gone))continue;
+ let i=0;for(const k of ks){let v=await idbRaw(k);if(v===undefined&&BETA)v=await idbLiveGet(k);if(v==null||(v&&v.__gone))continue;
   let val=v;// without the audio parts, the list keeps only songs that can still be opened (or are still being split)
   if(k==='mixIndex'&&!opt.parts&&Array.isArray(v))val=v.filter(x=>x&&x.state!=='ready');
   const bins=[],enc=bkEnc(val,bins),n=i++;names.push(k);

@@ -20,6 +20,10 @@ async function mxGet(k){const db=await mxDB();const v=await new Promise((res,rej
  if(v&&v.__gone)return null;if(v!=null||!BETA)return v;
  // beta: not copied yet → read it from the live app's database (never written to) and keep a copy here
  const lv=await idbLiveGet(k);if(lv!=null){try{await mxPut(k,lv)}catch(e){}}return lv}
+// every key in the live app's database (the beta's backup includes what it hasn't read yet)
+function idbLiveKeys(){return new Promise(res=>{let r;try{r=indexedDB.open('guitaring')}catch(e){return res([])}
+ r.onupgradeneeded=e=>{try{e.target.transaction.abort()}catch(_){}};r.onerror=()=>res([]);r.onblocked=()=>res([]);
+ r.onsuccess=()=>{const db=r.result;try{const q=db.transaction('kv','readonly').objectStore('kv').getAllKeys();q.onsuccess=()=>{db.close();res(q.result||[])};q.onerror=()=>{db.close();res([])}}catch(e){db.close();res([])}}})}
 // the live app's database, read-only (used by the beta); if it doesn't exist it is not created
 function idbLiveGet(k){return new Promise(res=>{let r;try{r=indexedDB.open('guitaring')}catch(e){return res(null)}
  r.onupgradeneeded=e=>{try{e.target.transaction.abort()}catch(_){}};r.onerror=()=>res(null);r.onblocked=()=>res(null);
