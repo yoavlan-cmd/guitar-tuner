@@ -181,6 +181,10 @@
     <div id="resumeCard" hidden></div>
     <section class="card draftcard" id="draftCard" hidden></section>
     <div class="addgrid" id="addGrid">
+      <button class="drop addtile" id="addSong" type="button">
+        <i aria-hidden="true"><span data-pd="ADD"></span></i><b>Add a song</b>
+        <span class="sub">From your Google Drive: split, MP3s and a session, made for you</span>
+      </button>
       <label class="drop addtile" for="vidIn" id="drop">
         <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Song video</b>
         <span class="sub">Get the chords from a video</span>
@@ -428,5 +432,6 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
   <button type="button" data-sec="gear" data-tab="gear"><span data-pd="GEAR"></span><small>Gear</small></button>
 </nav>
 <div class="onb" id="onb" role="dialog" aria-label="Set up Guitaring" hidden></div>
+<div class="dsdlg" id="dsDlg" hidden></div>
 <div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><small class="mxbar-k"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="mxBarK">Now playing</span></small><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>

@@ -203,6 +203,14 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - **Jam along** (when it has a jam track): Guitars only · Without the guitars · Drums only (rhythm) · Drums + vocals · The whole band (opens the player with that preset).
 - **Everything for this song:** the material rows with Open / Watch and next steps for what's missing (`learnDetail`, actions in `learnAct`); the chord finder; **My notes** (saved in the song record's `notes`).
 
+### 5.5d Add a song from Google Drive (V2 phase 4, part `66-drive-song`)
+- Learn › **Add a song** (`#addSong`, dialog `#dsDlg`): paste the link to the song's **video (MP4) and/or audio (MP3)** in your Drive songs folder (a second link is optional). A YouTube link is refused kindly (YouTube doesn't allow downloading) and offered as a video lesson; a non-Drive link, a non-media file and a missing GitHub connection each say what to do.
+- Drive access: **full Drive scope** (`gdTokenFull`, user's choice, Oct 2026), asked straight from the tap; used only to read the linked file and save the two MP3s next to it.
+- The job (`dsSubmit` → `mxUpload(it,null,job)`): branch `j-<id>` carries **`drive.json`** `{file, ext, folder, base, token, full}` instead of the song. The audio file is the source when there are both (cleaner); the video is kept as the song's video. No MP3 is made of an MP3 (`full:false`).
+- **Splitter v4** (`15-splitter-workflow`): fetches the file from Drive (a refused sign-in stops with a clear message), splits it, makes `<song> (full).mp3` and `<song> (guitars only).mp3` with ffmpeg and uploads both into the same Drive folder (`res/drive.json` says what was saved); it also hands both MP3s back to the app.
+- Collect (`mxCollect` → `dsCollect`): links the MP3s GitHub saved (`mixIndex[].drive.out`); if Google's 1-hour sign-in ran out on GitHub, the MP3s are kept on the phone (`mixdrive:<id>`) and the song's page offers **Save them** (`dsSaveLater`). A phone notification says the song is ready.
+- The song's page lists **The video in Drive**, **Full song MP3 in Drive**, **Guitars-only MP3 in Drive** (`dsRows`) with the jam track.
+
 ### 5.6 My chord sheets (catalog) (`#catBox`)
 - Lists every sheet made with Guitaring: from Drive (`sheetIndex`, written daily into `ideas.json.sheets`) + this phone (`sheetCat`). Search by song/artist; filters: artist, capo (none/with), tuning, level (Easy/Medium/Hard from `chordLevel`, an open-vs-barre heuristic). Rows open the Drive file. Rows with a saved video lesson show 🎬.
 
@@ -354,6 +362,7 @@ Since V2 phase 0 the source is split into parts (`src/parts/`, joined in name or
 | `70-welcome` | welcome + jokes |
 | `75-gear` | My gear |
 | `80-learning-ideas` | I'm learning (My learning library), song ideas, gear chat |
+| `66-drive-song` | add a song from a Drive link: `gdTokenFull`, `openAddSong`, `dsSubmit`, `dsCollect`, `dsSaveLater`, `dsRows` |
 | `82-song-records` | song records `songs2`: `sameSong`, `songRec`, `songStatus`, `songTouch`, migration `v2MigM2` |
 | `83-song-session` | song session page: `openSession`, `renderSession`, `sesFacts`, `sesPractise`, `sesDiagram` |
 | `84-song-guide` | song guide Easy / Full: `gdBuild`, `gdParts`, `gdEasyPick`, `gdEasyCapo`, `gdHTML` |
@@ -437,6 +446,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `ses_t.js` | song session: opens from Learn, title/artist/tuning/capo, what it has, Practise picks the best material and opens it, chord diagrams (incl. built ones), status and notes saved, jam buttons set the player, chord finder, ‹ and back return to Learn |
 | `guide_t.js` | song guide against the reference "שאריות של החיים" (capo 2, 108 BPM, Cadd9 · Asus2 · Fmaj7 · G, D · DU · UDU): before you play, how sure, Full and Easy chords, strumming, song map with repeating parts and no lyrics, level picks the tab, play-along; a messy analysis is "a guess" |
 | `mx_speed_t.js` | jam track at Slow / Medium / Full: the song moves at 0.6× / 0.8× real time and a 440 Hz tone stays 440 Hz, meters move, seek works, back to Full |
+| `ds_t.js` | add a song from Drive (Google, Drive, GitHub mocked): YouTube / non-Drive / no GitHub / a document refused with a reason; video + audio → drive.json job (audio source, folder, name, sign-in); parts back, Drive MP3s linked, notification, the song's page; sign-in ran out → Save them uploads both MP3s to the folder |
 | `beta_t.js` | beta: copies live data on first open, reads big items through and keeps its copy, deletes stick, live data and database untouched, reopening keeps beta changes, "Copy my live data again", own manifest |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 

@@ -1,6 +1,8 @@
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v3
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v4
+# v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
+# and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -47,6 +49,24 @@ jobs:
           git init -q job && cd job
           git fetch -q --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/heads/j-${ID}"
           git checkout -q FETCH_HEAD
+          if [ -f drive.json ]; then
+            set -o pipefail
+            python - <<'PY' 2>&1 | tee -a ../log.txt
+          import json, urllib.request, urllib.error
+          d = json.load(open('drive.json'))
+          url = 'https://www.googleapis.com/drive/v3/files/%s?alt=media&supportsAllDrives=true' % d['file']
+          try:
+              with urllib.request.urlopen(urllib.request.Request(url, headers={'Authorization': 'Bearer ' + d['token']})) as r, open('song.' + d.get('ext', 'mp4'), 'wb') as f:
+                  while True:
+                      b = r.read(1 << 20)
+                      if not b:
+                          break
+                      f.write(b)
+          except urllib.error.HTTPError as e:
+              raise SystemExit("Couldn't get the song from Google Drive (HTTP %d). Open Guitaring and send it again." % e.code)
+          print('got the song from Google Drive')
+          PY
+          fi
           ls -la
       - name: Split it
         run: |
@@ -57,6 +77,39 @@ jobs:
           dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" || echo 0)
           echo "{\"ok\":true,\"format\":\"flac\",\"stems\":[\"drums\",\"bass\",\"other\",\"vocals\",\"guitar\",\"piano\"],\"duration\":${dur:-0}}" > res/done.json
           ls -la res
+      - name: Make the MP3s and save them to Google Drive
+        if: hashFiles('job/drive.json') != ''
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee -a log.txt
+          import json, os, subprocess, urllib.request, uuid
+          d = json.load(open('job/drive.json'))
+          base = d.get('base') or 'Song'
+          song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
+          out = {'ok': True, 'files': {}}
+          make = {}
+          if d.get('full', True):
+              subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', song, '-vn', '-ac', '2', '-b:a', '192k', 'res/full.mp3'], check=True)
+              make['full'] = base + ' (full).mp3'
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', 'res/guitar.flac', '-b:a', '192k', 'res/guitars.mp3'], check=True)
+          make['guitars'] = base + ' (guitars only).mp3'
+          for k, name in make.items():
+              try:
+                  meta = json.dumps({'name': name, 'parents': [d['folder']], 'mimeType': 'audio/mpeg'}).encode()
+                  bnd = 'gtr' + uuid.uuid4().hex
+                  body = (b'--' + bnd.encode() + b'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + meta + b'\r\n--' + bnd.encode()
+                          + b'\r\nContent-Type: audio/mpeg\r\n\r\n' + open('res/' + k + '.mp3', 'rb').read() + b'\r\n--' + bnd.encode() + b'--\r\n')
+                  req = urllib.request.Request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink',
+                                               data=body, method='POST', headers={'Authorization': 'Bearer ' + d['token'], 'Content-Type': 'multipart/related; boundary=' + bnd})
+                  r = json.load(urllib.request.urlopen(req))
+                  out['files'][k] = {'id': r['id'], 'name': r.get('name', name), 'url': r.get('webViewLink', '')}
+              except Exception as e:
+                  out['ok'] = False
+                  out['error'] = str(e)[:200]
+          json.dump(out, open('res/drive.json', 'w'))
+          print('drive', json.dumps(out)[:300])
+          PY
       - name: Report a failure to the app
         if: failure()
         run: |
