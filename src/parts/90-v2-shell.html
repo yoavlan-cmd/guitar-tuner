@@ -34,11 +34,16 @@ function homeName(){const p=profGet();return p.name||store.get('userName','')}
 function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
  h.innerHTML=`<p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><p class="hjoke" id="hJoke" dir="auto">${j}</p><button type="button" class="hmore" id="hMore">Another one ↻</button>`;
  $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'))};
+ renderHomeCont()}
+// Continue: refreshed on its own (the joke stays)
+function renderHomeCont(){
  // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
  const c=[],p=profGet();
  try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
  try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
+ // a song being made comes first: where it stands, tap for the progress
+ try{mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state)).slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}
  if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
  const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont${x.k?' hc-'+x.k:''}" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
  box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}

@@ -512,7 +512,7 @@ async function mxPoll(){
   }
  }catch(e){try{console.error('mixer poll',e&&e.message||e)}catch(_){}if(e&&e.status===401)mxIdx.forEach(x=>{if(x.state==='wait'){x.state='failed';x.errKind='key';x.err=mxGhErr(e)+' The split may still finish on GitHub: after fixing the key it’s picked up, not sent again.'}})}
  finally{mxPolling=false}
- await mxIdxSave();mxBar();mxSheetUI();renderMixNew();mxPollSoon()}
+ await mxIdxSave();try{await dsTrack()}catch(e){}mxBar();mxSheetUI();renderMixNew();mxPollSoon()}
 async function mxCollect(it){mxBarOff=false;
  it.state='get';mxBar();mxSheetUI();
  try{
@@ -544,12 +544,12 @@ function mxBar(){const b=$('mxBar');if(!b)return;
  if(mxBusy){t=mxSong&&mxSong.name||'Splitting';s=mxPhoneNote||'Splitting on this phone…';p=mxPhoneFrac}
  else if(mxSong&&mxSong.tracks){t=mxSong.name}
  else if(mxSong){t=mxSong.name;s='Opening…'}
- else{t=pend.length===1?pend[0].name:pend.length+' songs splitting';s=mxSub(pend[0])}
+ else{t=pend.length===1?pend[0].name:pend.length+' songs being made';if(pend[0].src==='cloud'&&typeof dsCalc==='function'){const c=dsCalc(pend[0]);s=`${c.label} · ${c.pct}% · ${c.k>=5?'almost done':'about '+Math.round(c.left)+' min left'}`;p=c.pct/100;if(c.warn)s='Slower than usual · tap to see why'}else s=mxSub(pend[0])}
  $('mxBarT').textContent=t;$('mxBarK').textContent=mxBusy||!mxSong?'Band breakdown':mxSong.tracks?mxBarWord():'Opening';$('mxBarPlay').hidden=!(mxSong&&mxSong.tracks&&!mxBusy);b.classList.toggle('work',!(mxSong&&mxSong.tracks)||mxBusy);
  if(mxSong&&mxSong.tracks&&!mxBusy){mxBarTime();mxPlayUI()}else{$('mxBarS').textContent=s;$('mxBarP').style.width=Math.round(p*100)+'%'}}
-$('mxBarOpen').onclick=()=>{mxView(true);if(!mxBusy)mxSheetUI2()};
+$('mxBarOpen').onclick=()=>{const pend=mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state));if(!mxSong&&!mxBusy&&pend.length&&typeof dsShowProgress==='function')return dsShowProgress(pend[0].id);mxView(true);if(!mxBusy)mxSheetUI2()};
 $('mxBarPlay').onclick=mxToggle;
-$('mxBarX').onclick=()=>{mxBarOff=true;if(!mxBusy){mxStopAudio();if(mxSong&&!mxSong.opening)mxSong=null;mxPos=0}mxBar()};
+$('mxBarX').onclick=()=>{mxBarOff=true;if(!mxBusy){mxStopAudio();if(mxSong&&!mxSong.opening)mxSong=null;mxPos=0}mxBar();try{dsStatusUI()}catch(e){}};
 $('mxDim').onclick=()=>mxView(false);
 // swipe the panel down to hide it
 (()=>{const p=$('mxPanel');let y0=null,dy=0;
