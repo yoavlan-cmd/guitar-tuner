@@ -1,0 +1,77 @@
+/* ===== The video's view (V2 phase 4): building a song's session also looks at its video, when there is one ===== */
+// Sound can't tell a capo (an open C#m sounds like an Am shape with capo 4), and a faint 3rd can't always tell minor from major;
+// the guitarist's hand can. When the song has a video in Drive and Claude is on, one frame from the middle of each main chord the
+// sound found (up to 8) goes to Claude in one call: what capo it sees, and which shape the hand holds. Sound keeps the chords and
+// their timing; the video decides the capo and a chord's quality (minor / major) where both agree on the root; where the roots
+// differ, the guide says so. The video is read from Drive for this only (not kept on the phone). Needs Drive (signed in during
+// this visit: a tap on Rebuild asks) and your Claude key. Claude is asked not to read lyrics or any other text.
+const VL_MAX=8;
+const vlTok=()=>gdFullTok&&Date.now()<gdFullExp-60000?gdFullTok:'';
+const VL_GD='https://www.googleapis.com/drive/v3/files';
+// the song's video: the one you linked, else a video in the song's Drive folder with the same name (or the only one there)
+async function vlFind(it,tok){const d=it.drive;if(!d)return null;if(d.video&&d.video.id)return d.video;if(!d.folder)return null;
+ const q=encodeURIComponent(`'${d.folder}' in parents and mimeType contains 'video/' and trashed=false`);
+ const r=await fetch(`${VL_GD}?q=${q}&fields=files(id,name,size,webViewLink)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+tok}});
+ if(!r.ok)throw {code:'gd_http',status:r.status};const fs=(await r.json()).files||[];if(!fs.length)return null;
+ const k=n=>vlKey(String(n||'').replace(/\.[a-z0-9]+$/i,'')),base=k(it.name);
+ const f=fs.find(x=>k(x.name)===base)||fs.find(x=>base&&(k(x.name).includes(base)||base.includes(k(x.name))))||(fs.length===1?fs[0]:null);if(!f)return null;
+ return d.video={id:f.id,name:f.name,url:f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`,found:true}}
+// the moments to look at: the middle of the longest stretch of each main chord, then a second one of the commonest, up to 8
+function vlTimes(segs){const by=new Map();segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<1.5)return;if(!by.has(g.c))by.set(g.c,[]);by.get(g.c).push(g)});
+ const kinds=[...by.values()].map(l=>l.sort((a,b)=>(b.t1-b.t0)-(a.t1-a.t0))).sort((a,b)=>b.reduce((s,g)=>s+g.t1-g.t0,0)-a.reduce((s,g)=>s+g.t1-g.t0,0));
+ const out=[];for(let round=0;round<3&&out.length<VL_MAX;round++)for(const l of kinds){if(out.length>=VL_MAX)break;const g=l[round];if(g&&!out.some(x=>Math.abs(x.t-(g.t0+g.t1)/2)<2))out.push({t:+((g.t0+g.t1)/2).toFixed(1),c:g.c})}
+ return out.sort((a,b)=>a.t-b.t)}
+// read the video from Drive and take a still at each moment (an off-screen player; the file isn't kept)
+async function vlFrames(v,tok,times){
+ const r=await fetch(`${VL_GD}/${v.id}?alt=media&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+tok}});if(!r.ok)throw {code:'gd_http',status:r.status};
+ const blob=await r.blob(),url=URL.createObjectURL(blob),el=document.createElement('video');
+ el.muted=true;el.playsInline=true;el.preload='auto';el.style.cssText='position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0';el.src=url;document.body.appendChild(el);
+ try{await new Promise((res,rej)=>{el.onloadeddata=res;el.onerror=()=>rej({code:'video_decode'});setTimeout(()=>rej({code:'video_timeout'}),30000)});
+  const cv=document.createElement('canvas'),out=[];
+  for(const t of times){await new Promise(ok=>{let done=false;const h=()=>{if(done)return;done=true;el.removeEventListener('seeked',h);ok()};el.addEventListener('seeked',h);setTimeout(h,4000);el.currentTime=Math.min(t,Math.max(0,(el.duration||t)-.1))});
+   const w=Math.min(960,el.videoWidth||960),h=Math.round((el.videoHeight||540)*w/(el.videoWidth||960));cv.width=w;cv.height=h;cv.getContext('2d').drawImage(el,0,0,w,h);
+   const b=await new Promise(ok=>cv.toBlob(ok,'image/jpeg',.8));if(b)out.push({t,blob:b})}
+  return {frames:out,mb:+(blob.size/1048576).toFixed(1)}}
+ finally{el.remove();URL.revokeObjectURL(url)}}
+// ask Claude what it sees (it isn't told what the sound heard, so it can't just agree)
+async function vlAsk(title,frames){
+ const prompt=`These ${frames.length} images are stills from a video of a guitarist playing the song "${title}", taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
+1. Capo: look at the guitar's neck. If you can see the neck clearly, give the fret the capo is on, or 0 if you can clearly see there is no capo. If you can't see the neck well enough, give null.
+2. For each image, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
+Don't read lyrics or any other text on screen.
+Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low"|null, "frames": [{"t": seconds, "shape": chord name or null, "conf": "high"|"medium"|"low"|null}]}`;
+ return await sampleFn.json(prompt,{images:frames.slice(0,Math.max(1,imgLimit)).map(f=>f.blob)})}
+// a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
+const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
+// what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
+function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';
+ const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
+ const capo=a.play.capoBy==='you'?+a.play.capo||0:vc!=null?vc:0,sh=tshift(a.play.tun,capo);
+ const seen=[],votes={},differ=[];let agree=0;
+ (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
+  const g=a.segs.find(s=>s.c<NS&&t>=s.t0&&t<s.t1);if(!p||!ok(f.conf)||!g)return;
+  let q=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(q<0)q=p.iv.includes(3)?1:0;const r=(p.root+sh)%12,hr=Math.floor(g.c/NT);
+  seen.push({t,shape:String(f.shape),conf:f.conf,heard:chordName(g.c),seen:CH[r]+TYPES[q].id});
+  if(r===hr){agree++;(votes[r]=votes[r]||{})[q]=(votes[r][q]||0)+(f.conf==='high'?2:1)}else differ.push({t,heard:chordName(g.c),seen:CH[r]+TYPES[q].id})});
+ // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
+ const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
+  a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
+ if(vc!=null&&a.play.capoBy!=='you'){a.play.capo=vc;a.play.capoBy='video'}
+ a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vc,frames:seen,asked:pts.length,agree,differ,fixed:[...fixed]};return a}
+// the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
+async function vlLook(it,a){if(!it.drive)return;
+ if(!claudeReads()){if(it.drive.video)a.video={skip:'claude'};return}
+ const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
+ try{const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
+  const pts=vlTimes(a.segs);if(pts.length<2){a.video={skip:'few'};return}
+  const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
+  const res=await vlAsk(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
+ catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:it.drive.video&&it.drive.video.name||''};try{console.error('video look',e)}catch(_){}}}
+// the guide's line about the video (and a way to check it when it was skipped)
+function vlNote(d){const v=d&&d.video;if(!v)return '';
+ if(v.skip==='drive')return `<p class="tip vlnote">The song’s video wasn’t looked at: Guitaring needs your Drive for that. <button type="button" class="tlink" id="vlCheck">Rebuild and check the video</button></p>`;
+ if(v.skip==='claude')return `<p class="tip vlnote">With your Claude key (My profile › Claude features), Guitaring also looks at the song’s video for the capo and the chord shapes.</p>`;
+ if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${v.code===403||v.code===404?' (Drive refused it)':v.code==='video_decode'||v.code==='video_timeout'?' (the phone couldn’t open it)':''}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
+ if(v.skip)return '';
+ const seen=v.frames.length;return `<p class="tip vlnote">Checked against the video: ${seen?`the hand was clear at ${seen} of ${v.asked} moments`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
+window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s)};// test hooks

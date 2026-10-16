@@ -31,8 +31,9 @@ function gdParts(M){if(A.sections&&A.sections.length)return M.secs.map(s=>({t:s.
 // capo 4), so it comes from you (set from the video), else the sheet, else none: the chords as they sound. With a sheet, each chord
 // heard is matched to the sheet chord that shares the most notes (same root first), e.g. a heard F# → the sheet's F#m.
 // The fitted analysis is saved, so the play-along shows the same.
-function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoBy==='you';
- const by=you?'you':ref&&ref.capo!=null?'sheet':'none',capo=you?+v.play.capo||0:by==='sheet'?ref.capo:0;
+function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoBy==='you',vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
+ // the capo: yours, else the one seen in the video, else the sheet's, else none
+ const by=you?'you':vc!=null?'video':ref&&ref.capo!=null?'sheet':'none',capo=you?+v.play.capo||0:by==='video'?vc:by==='sheet'?ref.capo:0;
  let fit=0,tot=0;const S=[];
  if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0);
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=TYPES[1].iv.every(i=>p.iv.includes(i))?1:0;
@@ -71,12 +72,14 @@ function gdBuild(d){const keep=A;A=d;try{
  const pTop=[...allP].sort((a,b)=>b[1]-a[1])[0],pN=[...allP.values()].reduce((a,b)=>a+b,0);
  // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
- const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=byYou||d.fit?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
- const cb=d.play.capoBy,capoLv=cb==='you'||cb==='sheet'?'solid':'guess';
+ const V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
+ const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||d.fit||(V&&vSeen>=2&&!vDiff.length)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
+ const cb=d.play.capoBy,capoLv=cb==='you'||cb==='sheet'||cb==='video'?'solid':'guess';
  const share=pTop&&pN?pTop[1]/pN:0,strumLv=!d.ons?'guess':share>=.6?'solid':share>=.35?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
- const sure=[{k:'Chords and order',lv:chordsLv,why:byYou?'You checked them in the analysis.':d.fit?`Matched to your chord sheet (${d.fit.chords.join(' · ')})${d.fit.share>.02?`: ${Math.round(d.fit.share*100)}% of what was heard was set to the sheet’s nearest chord`:''}.`:chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.'},
-  {k:'Capo and shapes',lv:capoLv,why:cb==='you'?'You set the capo from the video.':cb==='sheet'?`From your chord sheet (${capo?'capo '+capo:'no capo'}).`:'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.'},
+ const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
+ const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':d.fit?`Matched to your chord sheet (${d.fit.chords.join(' · ')})${d.fit.share>.02?`: ${Math.round(d.fit.share*100)}% of what was heard was set to the sheet’s nearest chord`:''}.`:chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy},
+  {k:'Capo and shapes',lv:capoLv,why:cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:cb==='sheet'?`From your chord sheet (${capo?'capo '+capo:'no capo'}).`:'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.'},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':strumLv==='solid'?`The same pattern is heard in ${Math.round(share*100)}% of the bars.`:`The pattern changes between parts (the most common one is in ${Math.round(share*100)}% of the bars).`},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?'Measured from the beat of the recording.':'Estimated; the beat wasn’t measured in detail.'}];

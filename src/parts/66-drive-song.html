@@ -79,7 +79,7 @@ function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_
  else if(k<=1&&since>8)warn='GitHub hasn’t started yet. It usually takes under a minute; its free computers may be busy. Guitaring keeps checking, nothing is lost.';
  else if(k===4&&sm>exp*2.2)warn='This split is taking longer than usual (long songs take longer). GitHub is still working on it.';
  return {k,pct,left,inSplit,warn,label:dsStageLabel(it,k)}}
-const dsStageLabel=(it,k)=>k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
+const dsStageLabel=(it,k)=>k===7&&it.sessStep==='video'?'Looking at the song’s video: the capo and the chord shapes':k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
 const dsAgo=t=>{if(!t)return '';const s=Math.round((Date.now()-t)/1000);return s<10?'just now':s<60?s+' s ago':Math.round(s/60)+' min ago'};
 function dsProgHTML(it,info){const c=dsCalc(it,info),k=c.k,pct=c.pct,left=c.left,inSplit=c.inSplit;
  return `<div class="dshead"><h3>Making the song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
