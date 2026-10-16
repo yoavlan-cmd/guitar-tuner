@@ -20,7 +20,9 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   doc1XyZ12345abcDEF:{id:'doc1XyZ12345abcDEF',name:'Notes.docx',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',parents:['folderA']}};
  await ctx.route(/^https:\/\/www\.googleapis\.com\//,async r=>{const q=r.request(),u=q.url();if(q.method()==='OPTIONS')return r.fulfill({status:204,headers:H});
   // a folder's videos (an MP3 given alone: its video is looked for next to it)
-  if(/drive\/v3\/files\?q=/.test(u)){const q=decodeURIComponent(u);return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({files:/folderC/.test(q)?[{id:'vid3XyZ12345abcDEF',name:'Band C - Song C.mp4',webViewLink:'https://drive.google.com/file/d/vid3XyZ12345abcDEF/view'}]:[]})})}
+  if(/drive\/v3\/files\?q=/.test(u)){const q=decodeURIComponent(u);return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({files:/folderC/.test(q)?[{id:'vid3XyZ12345abcDEF',name:'Band C - Song C.mp4',webViewLink:'https://drive.google.com/file/d/vid3XyZ12345abcDEF/view'}]:
+   /folderD1234567/.test(q)?[{id:'fullD',name:'Band D - Song D (full).mp3',mimeType:'audio/mpeg',parents:['folderD1234567']},{id:'gtrD',name:'Band D - Song D (guitars only).mp3',mimeType:'audio/mpeg',parents:['folderD1234567']},
+    {id:'vidD',name:'Band D - Song D.mp4',mimeType:'video/mp4',parents:['folderD1234567'],webViewLink:'https://drive.google.com/file/d/vidD/view'},{id:'audD',name:'Band D - Song D.mp3',mimeType:'audio/mpeg',parents:['folderD1234567']}]:[]})})}
   const m=u.match(/drive\/v3\/files\/([\w-]+)\?fields/);if(m){const f=FILES[m[1]];return r.fulfill({status:f?200:404,headers:{...H,'content-type':'application/json'},body:JSON.stringify(f||{error:{message:'File not found'}})})}
   if(/upload\/drive\/v3\/files\?uploadType=multipart/.test(u)){const body=q.postData()||'';const name=(body.match(/"name":"([^"]+)"/)||[])[1];uploads.push({name,parents:(body.match(/"parents":\["([^"]+)"/)||[])[1],auth:q.headers()['authorization']});return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({id:'up'+uploads.length,name,webViewLink:'https://drive.google.com/file/d/up'+uploads.length+'/view'})})}
   return r.fulfill({status:404,headers:H,body:'{}'})});
@@ -54,7 +56,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('#addSong');await p.waitForTimeout(150);ok(await p.$eval('#dsDlg',e=>!e.hidden)&&!!await p.$('#dsL1'),'it asks for a link to the video or audio in Drive');
  const go=async(l1,l2)=>{await p.fill('#dsL1',l1);if(l2){await p.evaluate(()=>document.querySelector('.dsmore').open=true);await p.fill('#dsL2',l2)}await p.tap('#dsGo');await p.waitForTimeout(500);return p.$eval('#dsMsg',e=>e.textContent).catch(()=>'(closed)')};
  let m=await go('https://youtu.be/abcdefghijk');ok(/YouTube links can’t be turned into song files/.test(m)&&!!await p.$('#dsAsLesson'),'a YouTube link: explains, and offers to keep it as a video lesson');
- m=await go('https://example.com/song.mp3');ok(/doesn’t look like a Google Drive file link/.test(m),'a non-Drive link: says how to copy the Drive link');
+ m=await go('https://example.com/song.mp3');ok(/doesn’t look like a Google Drive link/.test(m),'a non-Drive link: says how to copy the Drive link');
  m=await go('https://drive.google.com/file/d/vid1XyZ12345abcDEF/view?usp=sharing');ok(/connect your GitHub/i.test(m),'without GitHub: asks to connect it first');
  await p.evaluate(()=>localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'t',branch:'main'})));
  m=await go('https://drive.google.com/file/d/doc1XyZ12345abcDEF/view');ok(/isn’t a video or audio file/.test(m),'a document: says it isn’t a video or audio file');
@@ -105,6 +107,11 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('#addSong').catch(()=>{});await p.waitForTimeout(150);if(await p.$('#dsAnother'))await p.tap('#dsAnother');await p.waitForTimeout(100);await go('https://drive.google.com/file/d/aud3XyZ12345abcDEF/view');await p.tap('#dsHide').catch(()=>{});
  {const it5=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.drive&&x.drive.file==='aud3XyZ12345abcDEF'));const job5=it5&&jobs[it5.id]?JSON.parse(jobs[it5.id].body):{};
   ok(job5.video==='vid3XyZ12345abcDEF'&&it5.drive.video&&it5.drive.video.id==='vid3XyZ12345abcDEF','an MP3 alone: its video in the same folder is found and named in the job');}
+ // the song's folder link: its video and audio are picked (the MP3s made before are left out)
+ await p.tap('#addSong').catch(()=>{});await p.waitForTimeout(150);if(await p.$('#dsAnother'))await p.tap('#dsAnother');await p.waitForTimeout(100);
+ await go('https://drive.google.com/drive/folders/folderD1234567?usp=sharing');await p.tap('#dsHide').catch(()=>{});
+ {const it6=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.drive&&x.drive.folder==='folderD1234567'));const job6=it6&&jobs[it6.id]?JSON.parse(jobs[it6.id].body):{};console.log('  folder job:',JSON.stringify({file:job6.file,video:job6.video,base:job6.base}));
+  ok(job6.file==='audD'&&job6.video==='vidD'&&job6.base==='Band D - Song D','a folder link: the song’s audio and video in it are used (not the MP3s made before)');}
  done[it3.id]={'done.json':JSON.stringify({ok:true,format:'flac'}),...stems,'drive.json':JSON.stringify({ok:false,error:'401 Unauthorized',files:{}}),'full.mp3':Buffer.from('ID3full'),'guitars.mp3':Buffer.from('ID3gtr')};
  for(let k=0;k<3;k++){await p.evaluate(()=>window.__mxTest.poll());await p.waitForTimeout(400)}
   await p.tap('#bnav [data-sec=home]');await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("Ya")');await p.waitForTimeout(300);
