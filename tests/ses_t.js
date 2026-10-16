@@ -38,6 +38,10 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('[data-jam=gtr]');await p.waitForTimeout(800);
  const g=await p.evaluate(()=>window.__mx.gains());ok(g&&g[0]===1&&g[1]===0&&g[2]===0,'"Guitars only" opens the jam track with only the guitars up '+JSON.stringify(g));
  await p.evaluate(()=>{const x=document.getElementById('mxClose');if(x)x.click()});await p.waitForTimeout(300);
+ await p.tap('[data-jam=drums]');await p.waitForTimeout(500);let g2=await p.evaluate(()=>window.__mx.gains());ok(JSON.stringify(g2)==='[0,1,0]','"Drums only (rhythm)" from the song session '+JSON.stringify(g2));
+ await p.evaluate(()=>{const x=document.getElementById('mxClose');if(x)x.click()});await p.waitForTimeout(300);
+ await p.tap('[data-jam=drumsvox]');await p.waitForTimeout(500);g2=await p.evaluate(()=>window.__mx.gains());ok(JSON.stringify(g2)==='[0,1,1]','"Drums + vocals" from the song session '+JSON.stringify(g2));
+ await p.evaluate(()=>{const x=document.getElementById('mxClose');if(x)x.click()});await p.waitForTimeout(300);
  // chord finder
  await p.tap('#sesFind');await p.waitForTimeout(200);ok(await p.$eval('#cfWrap',e=>!e.hidden&&getComputedStyle(e).display!=='none'),'the chord finder opens from the session');
  await p.evaluate(()=>{const c=document.getElementById('cfClose')||document.querySelector('#cfWrap [aria-label=Close]');if(c)c.click()});await p.waitForTimeout(200);

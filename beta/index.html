@@ -4544,8 +4544,11 @@ function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent
 const mxBarWord=()=>mxPlaying?'Now playing':mxPos>0?'Paused':'Ready to play';
 async function mxToggle(){if(!mxSong||!mxSong.tracks)return;await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=mxSong.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI();mxBarTime()}
 function mxPause(){try{if(mxPlaying&&mxNode){mxPlaying=false;mxNode.port.postMessage({play:false});mxPlayUI();mxBarTime()}}catch(e){}}
-const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars only'],['novox','No vocals']];
-function mxPreset(k){mxSolo=null;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':false;t.gain=1});mxRows();mxSend()}
+// presets: drums only = a rhythm track to keep time; drums + vocals = the beat and the melody to play your guitar over
+const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['drums','Drums only'],['drumsvox','Drums + vocals'],['gtr','Guitars only'],['novox','No vocals']];
+let mxPre='';// the preset that's on (lit), until a part is changed by hand
+const mxPreUI=()=>document.querySelectorAll('#mixView [data-pre]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pre===mxPre));
+function mxPreset(k){mxSolo=null;mxPre=k;mxSong.tracks.forEach(t=>{const g=mxIsGtr(t.id);t.mute=k==='nogtr'?g:k==='gtr'?!g:k==='novox'?t.id==='vocals':k==='drums'?t.id!=='drums':k==='drumsvox'?!(t.id==='drums'||t.id==='vocals'):false;t.gain=1});mxRows();mxSend();mxPreUI()}
 function mxSend(){if(mxNode)mxNode.port.postMessage({gains:mxGains()})}
 // one channel strip per part: its %, a fader with a live level meter, its name, Mute and Solo; each part has its own colour
 const MX_COLOR={guitar:'#4EE2B7',gL:'#4EE2B7',gC:'#8AF0D2',gR:'#26B98F',vocals:'#FF8C32',drums:'#FF5D8F',bass:'#6C8CFF',piano:'#B78CFF',other:'#E8D36A'};
@@ -4562,7 +4565,7 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  v.innerHTML=`<div class="mixhead"><div class="mixttl"><small class="mixk"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Band breakdown</small><b dir="auto">${esc(nm.t)}</b>${nm.a?`<span dir="auto">${esc(nm.a)}</span>`:''}</div><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
  <div class="mixtrans"><div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
  <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div></div>
- <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}">${l}</button>`).join('')}</div>
+ <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}" aria-pressed="${mxPre===k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
  <div class="mixacts"><button type="button" class="btn ghost" id="mxChords">${SK('CHORDS')} Find the chords from the guitars only</button><button type="button" class="btn ghost" id="mxSave">Save this mix as an audio file</button></div>
@@ -4574,8 +4577,8 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  $('mxFwd').onclick=()=>{mxPos=Math.min(s.len,mxPos+5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
  const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;mxSeekUI()});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
- $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.style.setProperty('--p',(r.value/150*100).toFixed(1)+'%');r.closest('.strip').querySelector('output').textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxSend()});
- $('mxRows').addEventListener('click',e=>{const m=e.target.closest('[data-mute]'),so=e.target.closest('[data-solo]');if(m){const t=s.tracks[+m.dataset.mute];t.mute=!t.mute;if(mxSolo===t.id)mxSolo=null}else if(so){const t=s.tracks[+so.dataset.solo];mxSolo=mxSolo===t.id?null:t.id}else return;mxRows();mxSend()});
+ $('mxRows').addEventListener('input',e=>{const r=e.target.closest('[data-vol]');if(!r)return;const t=s.tracks[+r.dataset.vol];t.gain=+r.value/100;r.style.setProperty('--p',(r.value/150*100).toFixed(1)+'%');r.closest('.strip').querySelector('output').textContent=r.value+'%';if(t.mute&&t.gain>0){t.mute=false;mxRows()}mxPre='';mxPreUI();mxSend()});
+ $('mxRows').addEventListener('click',e=>{const m=e.target.closest('[data-mute]'),so=e.target.closest('[data-solo]');if(m){const t=s.tracks[+m.dataset.mute];t.mute=!t.mute;if(mxSolo===t.id)mxSolo=null}else if(so){const t=s.tracks[+so.dataset.solo];mxSolo=mxSolo===t.id?null:t.id}else return;mxPre='';mxPreUI();mxRows();mxSend()});
  $('mxSave').onclick=()=>mxRender(mxGains(),'mix',b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=s.name+' (my mix).wav';toast(`${SK('OK')} Saved “${esc(s.name)} (my mix).wav” to your downloads.`,'ok');document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)});
  $('mxChords').onclick=()=>mxRender(s.tracks.map(t=>mxIsGtr(t.id)?1:0),'guitars',b=>{const f=new File([b],s.name+' (guitars).wav',{type:'audio/wav'});mxPause();mxView(false);
   try{setTab('song');songsHome()}catch(e){}
@@ -4643,7 +4646,7 @@ const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannel
 async function mxOpen(id){
  const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready')return;
  if(mxSong&&mxSong.id===id&&mxSong.tracks){mxMixer();return}
- mxStopAudio();mxSong={id,name:it.name,tracks:null,opening:true};mxPos=0;mxSolo=null;mxBar();mxLibUI();
+ mxStopAudio();mxSong={id,name:it.name,tracks:null,opening:true};mxPos=0;mxSolo=null;mxPre='';mxBar();mxLibUI();
  try{const d=await mxGet('mixdata:'+id);if(!d)throw new Error('missing');
   if(d.tracks){mxSong.tracks=d.tracks.map(t=>({...t,gain:1,mute:false}));mxSong.len=d.len;mxSong.sr=d.sr||MX.OUT_SR}
   else{// parts from GitHub (lossless FLAC, or MP3 from older splits): decoded at full rate unless the song is long
@@ -6020,7 +6023,7 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
   <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
  </section>
  ${f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
- ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
+ ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
  <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}</section>
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
  <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
