@@ -8,7 +8,7 @@ const APP=process.env.APP||`http://localhost:${srv.address().port}/index.html`;
 const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=document.getElementById(id);if(w)w.hidden=true});document.body.classList.remove('wopen')});
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
- const ctx=await b.newContext({viewport:{width:390,height:844},acceptDownloads:true});await ctx.route(/^https:\/\//,r=>r.abort());
+ const ctx=await b.newContext({viewport:{width:390,height:844},acceptDownloads:true});await ctx.route(/^https:\/\//,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());// the repo's daily file would change the song list mid-test
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(APP);await p.waitForTimeout(300);
  // let the app's own start-up updates finish first (the song records, M2), so they don't land between backup and restore
