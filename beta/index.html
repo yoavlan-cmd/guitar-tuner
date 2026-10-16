@@ -1060,6 +1060,24 @@ input[type=range]{accent-color:var(--accent)}
 .iphoto0{display:grid;place-items:center;background:var(--surface)}
 .gpcov{position:absolute;left:0;right:0;bottom:0;font:700 9px/14px var(--body);font-style:normal;letter-spacing:.06em;text-transform:uppercase;text-align:center;background:var(--accent);color:var(--bg)}
 .gpcovbtn{margin-top:8px;width:100%}.gpcovnote{margin:8px 0 0;font:600 13px var(--body);color:var(--accent)}
+/* Home fits one screen (no scrolling): the greeting, joke and Continue cards take what they need, the four tiles share the rest */
+body[data-cursec=home]{height:100dvh;overflow:hidden;padding-bottom:0}
+body[data-cursec=home] .wrap{height:calc(100dvh - 14px - var(--bnh) - 12px - env(safe-area-inset-bottom,0px))}
+body[data-cursec=home].hasbar .wrap{height:calc(100dvh - 14px - var(--bnh) - 96px - env(safe-area-inset-bottom,0px))}
+#paneHome{display:flex;flex-direction:column;gap:10px;flex:1 1 auto;min-height:0}
+#paneHome .homehero{flex:0 0 auto;padding:12px 16px 8px;gap:6px}
+#paneHome .hhey{font-size:19px}
+#paneHome .hjoke{font-size:15px;line-height:1.4;padding:10px 14px;min-height:0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+#paneHome .hmore{padding:2px 0;font-size:13.5px}
+#paneHome .homecont{flex:0 0 auto;gap:6px}
+#paneHome .hcont{padding:8px 12px}
+#paneHome .hometiles{flex:1 1 0;min-height:0;grid-template-rows:1fr 1fr}
+#paneHome .htile{min-height:0;padding:14px 16px}
+#paneHome .htile b{font-size:clamp(20px,6.4vw,26px)}
+/* the player bar is the jam: no "Back to your jam" card while it shows; short screens keep one Continue card */
+body.hasbar #paneHome .hcont.hc-jam{display:none}
+@media (max-height:700px){#paneHome .hjoke{-webkit-line-clamp:3}#paneHome .htile small{-webkit-line-clamp:1}#paneHome .hcont:not(.hc-jam)~.hcont{display:none}body:not(.hasbar) #paneHome .hcont.hc-jam~.hcont{display:none}}
+@media (max-height:620px){#paneHome .htile small{display:none}#paneHome .hjoke{-webkit-line-clamp:2}body.hasbar #paneHome .homecont{display:none}}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -6141,10 +6159,10 @@ function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=es
  // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
  const c=[],p=profGet();
  try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
- try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
- const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
+ const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont${x.k?' hc-'+x.k:''}" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
  box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}
 // ---- Jam: Band breakdown + the jam tracks list ----
 function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mixNew')){const m=$('mixNew');if(m)g.appendChild(m);
