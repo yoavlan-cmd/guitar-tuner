@@ -122,7 +122,7 @@ function bkSize(n){return n>1048576?(n/1048576).toFixed(n>1e8?0:1)+' MB':Math.ma
 function renderBackup(){const box=$('bkBox');if(!box)return;const last=store.get('lastBackup',null);
  box.innerHTML=`<summary>Backup and restore${last?` <span class="libcount">${esc(bkDate(last.at))}</span>`:''}</summary>
  ${BETA?`<p class="tip bkbeta">This is the <b>beta</b>. It works on its own copy of your data, so nothing here changes the live app. <button type="button" class="btn ghost" id="bkCopy">Copy my live data again</button></p>`:''}
- <p class="tip">One file with everything Guitaring keeps on this phone: sheets, video lessons, chord book, gear and its photos, settings and Band breakdown songs. Keep it in Google Drive.${last?` Last backup: ${esc(bkDate(last.at))}${last.size?`, ${bkSize(last.size)}`:''}.`:' No backup yet.'}</p>
+ <p class="tip">One file with everything Guitaring keeps on this phone: sheets, video lessons, chord book, gear and its photos, settings and Band breakdown songs. Keep it in Google Drive. <span id="bkLast">${bkLastTxt()}</span></p>
  <label class="check"><input type="checkbox" id="bkParts" checked> Include Band breakdown songs (big: about 20–60 MB each; without them they need splitting again)</label>
  <label class="check"><input type="checkbox" id="bkKeys"> Include my Claude and GitHub keys (only if the file stays private)</label>
  <button type="button" class="btn wide" id="bkGo">${SK('DRIVE')} Back up everything</button>
@@ -139,7 +139,7 @@ function wireBackup(){
    const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=nm;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
    store.set('lastBackup',{at:Date.now(),size:file.size,parts:opt.parts});
    let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
-   out.innerHTML=`<b>Saved: ${esc(nm)}</b> (${bkSize(file.size)}) in your Downloads.<br>${esc(bkCountText(man.counts))}.<br>Upload it to Google Drive to keep it safe${canShare?':':' (Drive app › + › Upload).'}${canShare?` <button type="button" class="btn ghost" id="bkShare">${SK('DRIVE')} Share to Drive</button>`:''}`;
+   out.innerHTML=`<b>Saved: ${esc(nm)}</b> (${bkSize(file.size)}) in your Downloads.<br>It holds: ${esc(bkCountText(man.counts))}.<br>Upload it to Google Drive to keep it safe${canShare?':':' (Drive app › + › Upload).'}${canShare?` <button type="button" class="btn ghost" id="bkShare">${SK('DRIVE')} Share to Drive</button>`:''}`;
    const sh=$('bkShare');if(sh)sh.onclick=()=>navigator.share({files:[file],title:nm}).catch(()=>{});
    toast('Backup saved: '+esc(nm),'ok');renderBackupDate()}
   catch(e){out.textContent='Couldn’t make the backup: '+(e&&e.message||e)+'. Try again, or untick Band breakdown songs for a smaller file.';toast('The backup didn’t finish.','err')}
@@ -148,7 +148,7 @@ function wireBackup(){
  if(inp)inp.onchange=async()=>{const f=inp.files&&inp.files[0];inp.value='';if(!f)return;res.textContent='Checking the file…';
   let b;try{b=await bkOpen(f)}catch(e){res.innerHTML=`<span class="bkerr">${esc(e&&e.bk?e.message:'This isn’t a Guitaring backup file.')}</span>`;toast('That file can’t be restored.','err');return}
   const m=b.man;
-  res.innerHTML=`<b>Backup from ${esc(bkDate(m.at))}${m.beta?' (beta)':''}</b><br>${esc(bkCountText(m.counts||{}))}${m.opt&&!m.opt.parts?'<br>Band breakdown songs aren’t in this file.':''}
+  res.innerHTML=`<b>Backup from ${esc(bkDate(m.at))}${m.beta?' (beta)':''}</b><br>It holds: ${esc(bkCountText(m.counts||{}))}${m.opt&&!m.opt.parts?'<br>Band breakdown songs aren’t in this file.':''}
   <label class="check"><input type="radio" name="bkMode" value="add" checked> <span><b>Add what’s missing</b>: keeps everything on this phone and adds what the file has that the phone doesn’t (safe)</span></label>
   <label class="check"><input type="radio" name="bkMode" value="replace"> <span><b>Replace everything</b>: the phone becomes exactly the backup${m.opt&&!m.opt.parts?' (your Band breakdown songs on the phone are kept)':''}</span></label>
   <button type="button" class="btn wide" id="bkDo">Restore</button>`;
@@ -162,6 +162,7 @@ function wireBackup(){
  const cp=$('bkCopy');if(cp)cp.onclick=async()=>{if(!cp.dataset.sure){cp.dataset.sure='1';cp.textContent='Tap again: the beta’s own changes are replaced';return}
   cp.disabled=true;betaCopyLive();try{await idbWipe()}catch(e){}toast('Copied your live data into the beta.','ok');setTimeout(()=>location.reload(),900)};
 }
-function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`}
+function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last backup: ${esc(bkDate(last.at))}${last.size?`, ${bkSize(last.size)}`:''}.`:'No backup yet.'}
+function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`;const l=$('bkLast');if(l)l.innerHTML=bkLastTxt()}
 renderBackup();
 window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,get:mxGet,put:mxPut,del:mxDel,safety:safetyCopy,beta:BETA};// test hooks

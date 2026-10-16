@@ -13,10 +13,14 @@ const noWelcome=pg=>pg.evaluate(()=>{const w=document.getElementById('welcome');
  await live.goto(BASE+'index.html');await live.waitForTimeout(300);
  await live.evaluate(async()=>{const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));S('userName','Yoav');S('instruments',[{id:'m1',type:'electric',name:'Muse'}]);
   localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'t',branch:'main'}));
-  const B=window.__bk;await B.put('mixIndex',[{id:'s1',name:'Song one',at:1,src:'phone',state:'ready'}]);
+  // straight into the live database (works with any live version)
+  const db=await new Promise((res,rej)=>{const r=indexedDB.open('guitaring',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+  const B={put:(k,v)=>new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})};await B.put('mixIndex',[{id:'s1',name:'Song one',at:1,src:'phone',state:'ready'}]);
   await B.put('mixdata:s1',{len:4,sr:44100,tracks:[{id:'drums',name:'Drums',data:new Int16Array([1,2,3,4,5,6,7,8])}]});await B.put('gearphoto:g1','data:live-photo')});
  const liveState=()=>live.evaluate(async()=>{const l={};Object.keys(localStorage).filter(k=>/^(tuner|guitaring)\./.test(k)).sort().forEach(k=>l[k]=localStorage.getItem(k));
-  const B=window.__bk,d={};for(const k of (await B.keys()).sort()){const v=await B.raw(k);d[k]=JSON.stringify(v,(kk,vv)=>ArrayBuffer.isView(vv)?Array.from(vv):vv)}return {l,d}});
+  const db=await new Promise((res,rej)=>{const r=indexedDB.open('guitaring');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+  const all=await new Promise(res=>{const st=db.transaction('kv','readonly').objectStore('kv'),ks=st.getAllKeys(),vs=st.getAll();vs.onsuccess=()=>res(ks.result.map((k,i)=>[k,vs.result[i]]))});db.close();
+  const d={};for(const [k,v] of all.sort((a,b)=>a[0]<b[0]?-1:1)){d[k]=JSON.stringify(v,(kk,vv)=>ArrayBuffer.isView(vv)?Array.from(vv):vv)}return {l,d}});
  const s0=await liveState();
  // the beta, first open
  const beta=await ctx.newPage();beta.on('pageerror',e=>errs.push('beta: '+e.message));await beta.goto(BASE+'beta/');await beta.waitForTimeout(500);
