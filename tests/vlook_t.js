@@ -73,7 +73,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  const lv=await p.$$eval('.gdsure li',l=>Object.fromEntries(l.map(x=>[x.querySelector('span').textContent,[x.querySelector('.gdlv').className.split(' ')[1],x.querySelector('small').textContent]])));
  ok(lv['Capo and shapes'][0]==='solid'&&/Seen in the song’s video/.test(lv['Capo and shapes'][1]),'How sure: capo solid, seen in the video');
  ok(/video shows something else at \d:\d\d \(heard E, the hand plays B\)/.test(lv['Chords and order'][1]),'How sure names where the video disagrees: '+lv['Chords and order'][1]);
- ok(/Checked against the video: the hand was clear at \d of \d moments; capo on fret 4/.test(await p.$eval('.vlnote',e=>e.textContent).catch(()=>'')),'the guide says it was checked against the video');
+ ok(/Checked against the video: the hand was clear at \d+ of \d+ moments; capo on fret 4/.test(await p.$eval('.vlnote',e=>e.textContent).catch(()=>'')),'the guide says it was checked against the video');
  await p.screenshot({path:path.join(OUT,'vlook.png'),fullPage:true});
  // ---- 3. a video where the guitarist's hand is never shown clearly: one Claude call only (no close-ups), and the guide says so ----
  calls.nohand=true;const before3=calls.claude;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
