@@ -4744,7 +4744,7 @@ let mxIdx=[];
 async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');
  // beta: leave a "deleted" mark, so it isn't read again from the live app's database
  if(BETA)t.objectStore('kv').put({__gone:1},k);else t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive})))}catch(e){}}
+async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})))}catch(e){}}
 async function mxIdxLoad(){
  try{mxIdx=(await mxGet('mixIndex'))||[]}catch(e){mxIdx=[]}
  // older versions kept only the last song
@@ -4951,8 +4951,9 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();mxDel('mixsrc:'+it.id).catch(()=>{});
-   try{bkNotify(`“${it.name}” is ready`,it.drive?(it.drive.ok?'Split, and the full and guitars-only MP3s are in your Drive folder.':'Split. Open Guitaring to save the MP3s to your Drive.'):'Split into its parts. Open Guitaring to play along.')}catch(e){}
+   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
+   try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
+   try{asBuild(it.id)}catch(e){}
    toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`,'ok');
    const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}}
   gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
@@ -4969,17 +4970,17 @@ function mxBarTime(){if(!mxSong||!mxSong.tracks)return;const s=$('mxBarS'),p=$('
  s.textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)+(mxRate!==1?` · ${Math.round(mxRate*100)}% speed`:'')+(pend?` · ${pend} splitting`:'');p.style.width=(mxSong.len?mxPos/mxSong.len*100:0)+'%'}
 let mxBarOff=false;// closed with ✕: stays away until a song is opened or a split starts or finishes
 function mxBar(){const b=$('mxBar');if(!b)return;
- const pend=mxIdx.filter(x=>MX_PEND.includes(x.state));
+ const pend=typeof mkList==='function'?mkList():mxIdx.filter(x=>MX_PEND.includes(x.state));
  const show=!mxBarOff&&!!(mxSong||mxBusy||pend.length);b.hidden=!show||mxSheetOpen();document.body.classList.toggle('hasbar',!b.hidden);
  if(!show)return;
  let t,s,p=0;
  if(mxBusy){t=mxSong&&mxSong.name||'Splitting';s=mxPhoneNote||'Splitting on this phone…';p=mxPhoneFrac}
  else if(mxSong&&mxSong.tracks){t=mxSong.name}
  else if(mxSong){t=mxSong.name;s='Opening…'}
- else{t=pend.length===1?pend[0].name:pend.length+' songs being made';if(pend[0].src==='cloud'&&typeof dsCalc==='function'){const c=dsCalc(pend[0]);s=`${c.label} · ${c.pct}% · ${c.k>=5?'almost done':'about '+Math.round(c.left)+' min left'}`;p=c.pct/100;if(c.warn)s='Slower than usual · tap to see why'}else s=mxSub(pend[0])}
+ else{t=pend.length===1?pend[0].name:pend.length+' songs being made';if(pend[0].src==='cloud'&&typeof dsCalc==='function'){if(pend[0].state==='ready')b.classList.add('work');const c=dsCalc(pend[0]);s=`${c.label} · ${c.pct}% · ${c.k>=5?'almost done':'about '+Math.round(c.left)+' min left'}`;p=c.pct/100;if(c.warn)s='Slower than usual · tap to see why'}else s=mxSub(pend[0])}
  $('mxBarT').textContent=t;$('mxBarK').textContent=mxBusy||!mxSong?'Band breakdown':mxSong.tracks?mxBarWord():'Opening';$('mxBarPlay').hidden=!(mxSong&&mxSong.tracks&&!mxBusy);b.classList.toggle('work',!(mxSong&&mxSong.tracks)||mxBusy);
  if(mxSong&&mxSong.tracks&&!mxBusy){mxBarTime();mxPlayUI()}else{$('mxBarS').textContent=s;$('mxBarP').style.width=Math.round(p*100)+'%'}}
-$('mxBarOpen').onclick=()=>{const pend=mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state));if(!mxSong&&!mxBusy&&pend.length&&typeof dsShowProgress==='function')return dsShowProgress(pend[0].id);mxView(true);if(!mxBusy)mxSheetUI2()};
+$('mxBarOpen').onclick=()=>{const pend=mkList().filter(x=>x.src==='cloud');if(!mxSong&&!mxBusy&&pend.length&&typeof dsShowProgress==='function')return dsShowProgress(pend[0].id);mxView(true);if(!mxBusy)mxSheetUI2()};
 $('mxBarPlay').onclick=mxToggle;
 $('mxBarX').onclick=()=>{mxBarOff=true;if(!mxBusy){mxStopAudio();if(mxSong&&!mxSong.opening)mxSong=null;mxPos=0}mxBar();try{dsStatusUI()}catch(e){}};
 $('mxDim').onclick=()=>mxView(false);
@@ -5059,7 +5060,7 @@ async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
  return it}
 // ---- the progress while GitHub works: real steps from GitHub (its job's steps), the long split estimated from the time it takes ----
 const DS_ST=[['sent','Sent to your GitHub',2],['queue','Waiting for a free GitHub computer',3],['setup','Setting up the splitter',10],['get','Getting the song from your Drive',3],
- ['split','Splitting it into parts (the long step)',70],['mp3','Saving the full and guitars-only MP3s to your Drive',6],['back','Bringing the parts back to Guitaring',6]];
+ ['split','Splitting it into parts (the long step)',70],['mp3','Saving the full and guitars-only MP3s to your Drive',6],['back','Bringing the parts back to Guitaring',4],['sess','Building the song’s session: its chords and guide',2]];
 let dsTimer=0,dsShown='';
 // which step the job is on, from GitHub's own step names
 async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_dispatch&per_page=30')).workflow_runs||[];// can't reach GitHub: the caller says so
@@ -5072,10 +5073,10 @@ async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_
  if(sp&&sp.status==='completed'&&sp.started_at&&sp.completed_at&&!it.splitMin){it.splitMin=(Date.parse(sp.completed_at)-Date.parse(sp.started_at))/60000;const a=store.get('dsSplitMin',0);store.set('dsSplitMin',a?a*.6+it.splitMin*.4:it.splitMin)}
  return {stage,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
 // where a song being made stands: stage, %, minutes left, and a plain warning when something is slow (never silent)
-function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
+function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='ready'?'sess':it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
  const sm=k===4&&i.splitAt?(now-i.splitAt)/60000:0,inSplit=Math.min(.95,sm/exp);
  let pct=0;DS_ST.forEach(([,,w],j)=>{if(j<k)pct+=w;else if(j===k)pct+=w*(j===4?inSplit:.3)});pct=Math.min(99,Math.round(pct));
- const left=k<=3?exp+4-(k===3?2:0):k===4?Math.max(1,exp*(1-inSplit))+2:k===5?2:1;
+ const left=k<=3?exp+4-(k===3?2:0):k===4?Math.max(1,exp*(1-inSplit))+2:k===5?2:1;if(k===7)pct=99;
  const since=it.sent?(now-it.sent)/60000:0;let warn='';
  if(it._err&&(!it._chk||it._err>it._chk)&&now-(it._chk||it.sent||now)>120000)warn='Guitaring can’t reach GitHub right now. Check the internet connection: the work goes on there, and Guitaring catches up when it can.';
  else if(k<=1&&since>8)warn='GitHub hasn’t started yet. It usually takes under a minute; its free computers may be busy. Guitaring keeps checking, nothing is lost.';
@@ -5097,15 +5098,16 @@ async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false
  const close=()=>{dsShown='';clearInterval(dsTimer);d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen');dsStatusUI()};
  const draw=async(fetchInfo)=>{if(dsShown!==id)return;const it=mxIdx.find(x=>x.id===id);if(!it)return close();
   let html;
-  if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
-   <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', and the MP3s are in your Drive folder':''}.</p><button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
+  if(it.state==='ready'&&AS_ON.includes(it.sess))html=dsProgHTML(it);
+  else if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
+   <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', the MP3s are in your Drive folder':''}${it.sess==='done'?', and its session is built: chords, guide and jam track':''}.</p>${it.sess==='failed'?'<p class="dswarn">The chords couldn’t be found automatically. The jam track is ready; on the song’s page, tap Pick a video or Find the chords from the guitars only.</p>':''}<button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
   else if(it.state==='failed')html=`<div class="dshead"><h3>Didn’t finish</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><p class="msg">${esc(it.err||'The split stopped on GitHub.')}</p><div class="dsacts"><button type="button" class="btn" id="dsRetry">Try again</button><button type="button" class="btn ghost" id="dsHide">Close</button></div>`;
   else{if(fetchInfo&&it.state==='wait')await dsCheck(it);if(dsShown!==id)return;html=dsProgHTML(it)}
   d.innerHTML=`<section class="dsbox dsprog" role="dialog" aria-label="Making the song">${html}</section>`;
   $('dsX').onclick=close;const h=$('dsHide');if(h)h.onclick=close;const a=$('dsAnother');if(a)a.onclick=()=>{clearInterval(dsTimer);dsShown='';openAddSong(true)};
   const r=$('dsRetry');if(r)r.onclick=async()=>{await mxRetry(id);draw(true)};
   const o=$('dsOpen');if(o)o.onclick=()=>{close();const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')};
-  if(it.state==='ready'||it.state==='failed')clearInterval(dsTimer)};
+  if((it.state==='ready'&&!AS_ON.includes(it.sess))||it.state==='failed')clearInterval(dsTimer)};
  d.onclick=e=>{if(e.target===d)close()};
  await draw(true);
  // every few seconds: what GitHub says, and a look for the finished parts
@@ -5114,7 +5116,7 @@ async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false
 async function dsCheck(it){try{const info=await dsRunInfo(it);it._info=info;it._chk=Date.now()}catch(e){it._err=Date.now()}}
 async function dsTrack(){const pend=mxIdx.filter(x=>x.src==='cloud'&&x.state==='wait');for(const it of pend.slice(0,2))await dsCheck(it);dsStatusUI()}
 // everywhere it shows: the bottom bar (mxBar), the % badge when the bar is closed or playing a song, and Home
-function dsStatusUI(){try{mxBar()}catch(e){}const pill=$('mkPill');const pend=mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state));
+function dsStatusUI(){try{mxBar()}catch(e){}const pill=$('mkPill');const pend=mkList().filter(x=>x.src==='cloud');
  if(pill){const barShowsIt=!$('mxBar').hidden&&!(mxSong&&mxSong.tracks)&&!mxBusy;pill.hidden=!pend.length||barShowsIt||!$('dsDlg').hidden;
   if(pend.length){const c=dsCalc(pend[0]);pill.style.setProperty('--p',c.pct);pill.querySelector('b').textContent=c.pct+'%';pill.classList.toggle('warn',!!c.warn);pill.setAttribute('aria-label',`Making “${pend[0].name}”: ${c.label}, ${c.pct}%. Tap for the progress.`);pill.onclick=()=>dsShowProgress(pend[0].id)}}
  try{if(curSec==='home')renderHomeCont()}catch(e){}}
@@ -5139,6 +5141,35 @@ function dsRows(g){const rows=[];for(const m of g.r.mix){const it=mxIdx.find(x=>
  return rows.join('')}
 {const b=$('addSong');if(b)b.onclick=()=>openAddSong()}
 window.__ds={fileId:dsFileId,open:openAddSong};// test hooks
+/* ===== The song's session builds itself (V2 phase 4): after a split, the chords from the guitars-only part, then the guide ===== */
+// When a split comes back from GitHub, Guitaring analyses the guitars-only part on the phone (the same analysis as "Song video",
+// about a minute, in the background), saves it to the song, and the song's page has its Easy / Full guide and play-along.
+// One at a time; resumed after a restart. A failed analysis leaves the jam track as it is and says so.
+const AS_ON=['queued','building'];
+const mkList=()=>mxIdx.filter(x=>MX_PEND.includes(x.state)||(x.state==='ready'&&AS_ON.includes(x.sess)));// what is being made, now
+let asQ=Promise.resolve();
+function asBuild(id){asQ=asQ.then(()=>asRun(id)).catch(()=>{});return asQ}
+async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready'||!AS_ON.includes(it.sess))return;
+ it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
+ try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
+  const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
+  // the capo with the easiest shapes, as the song-video analysis does
+  let b=null;for(let c=0;c<=7;c++){const sc=ease(a.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}a.play.capo=b.c;
+  // kept like a song-video analysis (the last 8 are kept), named after the split
+  const key='mix_'+id;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
+  const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
+  it.sess='done';it.anaKey=key;
+  try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
+  toast(`“${esc(it.name)}”: the session is ready. <button type="button" class="tlink" id="asOpen">Open the song</button>`,'ok');
+  const o=$('asOpen');if(o)o.onclick=()=>{const t=$('toast');if(t)t.hidden=true;asOpenSong(id)}}
+ catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
+ await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
+function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
+// after a restart: finish what was being built
+mxReady.then(()=>{mxIdx.filter(x=>x.state==='ready'&&AS_ON.includes(x.sess)).forEach(x=>{x.sess='queued';asBuild(x.id)})}).catch(()=>{});
+window.__as={build:asBuild,list:()=>mkList()};// test hooks
 /* ================= Welcome screen ================= */
 const JOKES=[
  "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
@@ -6687,7 +6718,7 @@ function renderHomeCont(){
  try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  // a song being made comes first: where it stands, tap for the progress
- try{mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state)).slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}
+ try{mkList().filter(x=>x.src==='cloud').slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}
  if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
  const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont${x.k?' hc-'+x.k:''}" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
  box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}

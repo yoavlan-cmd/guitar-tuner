@@ -86,7 +86,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.waitForTimeout(900);
  ok(/Ready/.test(await p.$eval('#dsDlg',e=>e.textContent))&&!!await p.$('#dsOpen'),'when it’s done the progress says Ready with “Open the song”');
  const it2=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it2.state==='ready'&&it2.drive.ok&&it2.drive.out.guitars.id==='g9','the parts are back and the guitars-only MP3 GitHub saved in Drive is linked');
- ok((await p.evaluate(()=>window.__notes)).some(t=>/is ready/.test(t)),'a phone notification says it’s ready');
+ ok((await p.evaluate(()=>window.__notes)).some(t=>/is split|is ready/.test(t)),'a phone notification says it’s split (its session follows)');
  // the song's page, from "Open the song"
  await p.tap('#dsOpen');await p.waitForTimeout(400);ok(await p.evaluate(()=>window.__v2.cur())==='session','“Open the song” opens its page');
  const pg=await p.$eval('#sesBox',e=>e.innerText.replace(/\s+/g,' '));

@@ -312,7 +312,7 @@ let mxIdx=[];
 async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');
  // beta: leave a "deleted" mark, so it isn't read again from the live app's database
  if(BETA)t.objectStore('kv').put({__gone:1},k);else t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive})))}catch(e){}}
+async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})))}catch(e){}}
 async function mxIdxLoad(){
  try{mxIdx=(await mxGet('mixIndex'))||[]}catch(e){mxIdx=[]}
  // older versions kept only the last song
@@ -519,8 +519,9 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();mxDel('mixsrc:'+it.id).catch(()=>{});
-   try{bkNotify(`“${it.name}” is ready`,it.drive?(it.drive.ok?'Split, and the full and guitars-only MP3s are in your Drive folder.':'Split. Open Guitaring to save the MP3s to your Drive.'):'Split into its parts. Open Guitaring to play along.')}catch(e){}
+   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
+   try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
+   try{asBuild(it.id)}catch(e){}
    toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`,'ok');
    const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}}
   gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
@@ -537,17 +538,17 @@ function mxBarTime(){if(!mxSong||!mxSong.tracks)return;const s=$('mxBarS'),p=$('
  s.textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)+(mxRate!==1?` · ${Math.round(mxRate*100)}% speed`:'')+(pend?` · ${pend} splitting`:'');p.style.width=(mxSong.len?mxPos/mxSong.len*100:0)+'%'}
 let mxBarOff=false;// closed with ✕: stays away until a song is opened or a split starts or finishes
 function mxBar(){const b=$('mxBar');if(!b)return;
- const pend=mxIdx.filter(x=>MX_PEND.includes(x.state));
+ const pend=typeof mkList==='function'?mkList():mxIdx.filter(x=>MX_PEND.includes(x.state));
  const show=!mxBarOff&&!!(mxSong||mxBusy||pend.length);b.hidden=!show||mxSheetOpen();document.body.classList.toggle('hasbar',!b.hidden);
  if(!show)return;
  let t,s,p=0;
  if(mxBusy){t=mxSong&&mxSong.name||'Splitting';s=mxPhoneNote||'Splitting on this phone…';p=mxPhoneFrac}
  else if(mxSong&&mxSong.tracks){t=mxSong.name}
  else if(mxSong){t=mxSong.name;s='Opening…'}
- else{t=pend.length===1?pend[0].name:pend.length+' songs being made';if(pend[0].src==='cloud'&&typeof dsCalc==='function'){const c=dsCalc(pend[0]);s=`${c.label} · ${c.pct}% · ${c.k>=5?'almost done':'about '+Math.round(c.left)+' min left'}`;p=c.pct/100;if(c.warn)s='Slower than usual · tap to see why'}else s=mxSub(pend[0])}
+ else{t=pend.length===1?pend[0].name:pend.length+' songs being made';if(pend[0].src==='cloud'&&typeof dsCalc==='function'){if(pend[0].state==='ready')b.classList.add('work');const c=dsCalc(pend[0]);s=`${c.label} · ${c.pct}% · ${c.k>=5?'almost done':'about '+Math.round(c.left)+' min left'}`;p=c.pct/100;if(c.warn)s='Slower than usual · tap to see why'}else s=mxSub(pend[0])}
  $('mxBarT').textContent=t;$('mxBarK').textContent=mxBusy||!mxSong?'Band breakdown':mxSong.tracks?mxBarWord():'Opening';$('mxBarPlay').hidden=!(mxSong&&mxSong.tracks&&!mxBusy);b.classList.toggle('work',!(mxSong&&mxSong.tracks)||mxBusy);
  if(mxSong&&mxSong.tracks&&!mxBusy){mxBarTime();mxPlayUI()}else{$('mxBarS').textContent=s;$('mxBarP').style.width=Math.round(p*100)+'%'}}
-$('mxBarOpen').onclick=()=>{const pend=mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state));if(!mxSong&&!mxBusy&&pend.length&&typeof dsShowProgress==='function')return dsShowProgress(pend[0].id);mxView(true);if(!mxBusy)mxSheetUI2()};
+$('mxBarOpen').onclick=()=>{const pend=mkList().filter(x=>x.src==='cloud');if(!mxSong&&!mxBusy&&pend.length&&typeof dsShowProgress==='function')return dsShowProgress(pend[0].id);mxView(true);if(!mxBusy)mxSheetUI2()};
 $('mxBarPlay').onclick=mxToggle;
 $('mxBarX').onclick=()=>{mxBarOff=true;if(!mxBusy){mxStopAudio();if(mxSong&&!mxSong.opening)mxSong=null;mxPos=0}mxBar();try{dsStatusUI()}catch(e){}};
 $('mxDim').onclick=()=>mxView(false);

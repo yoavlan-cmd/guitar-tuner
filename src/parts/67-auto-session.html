@@ -1,0 +1,29 @@
+/* ===== The song's session builds itself (V2 phase 4): after a split, the chords from the guitars-only part, then the guide ===== */
+// When a split comes back from GitHub, Guitaring analyses the guitars-only part on the phone (the same analysis as "Song video",
+// about a minute, in the background), saves it to the song, and the song's page has its Easy / Full guide and play-along.
+// One at a time; resumed after a restart. A failed analysis leaves the jam track as it is and says so.
+const AS_ON=['queued','building'];
+const mkList=()=>mxIdx.filter(x=>MX_PEND.includes(x.state)||(x.state==='ready'&&AS_ON.includes(x.sess)));// what is being made, now
+let asQ=Promise.resolve();
+function asBuild(id){asQ=asQ.then(()=>asRun(id)).catch(()=>{});return asQ}
+async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready'||!AS_ON.includes(it.sess))return;
+ it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
+ try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
+  const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
+  // the capo with the easiest shapes, as the song-video analysis does
+  let b=null;for(let c=0;c<=7;c++){const sc=ease(a.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}a.play.capo=b.c;
+  // kept like a song-video analysis (the last 8 are kept), named after the split
+  const key='mix_'+id;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
+  const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
+  it.sess='done';it.anaKey=key;
+  try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
+  toast(`“${esc(it.name)}”: the session is ready. <button type="button" class="tlink" id="asOpen">Open the song</button>`,'ok');
+  const o=$('asOpen');if(o)o.onclick=()=>{const t=$('toast');if(t)t.hidden=true;asOpenSong(id)}}
+ catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
+ await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
+function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
+// after a restart: finish what was being built
+mxReady.then(()=>{mxIdx.filter(x=>x.state==='ready'&&AS_ON.includes(x.sess)).forEach(x=>{x.sess='queued';asBuild(x.id)})}).catch(()=>{});
+window.__as={build:asBuild,list:()=>mkList()};// test hooks
