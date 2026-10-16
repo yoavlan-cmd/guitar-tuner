@@ -107,7 +107,7 @@ All user data is in `localStorage` under the prefix `tuner.` through the `store.
 - **Onboarding** `#onb` (full screen, z 65): Welcome + privacy · About you · Your playing · Quick check · Your instruments · Music you love · Your goals · How you learn · Summary ("Here's what Guitaring will do for you"). Progress bar; every screen has Skip; **Finish later** (`#wSkip`) any time (then a Home card); big chips, typing only for names and favourites. Opens on the first start when the profile isn't done. Existing players: the profile is prefilled (M1) and only the screens with gaps are shown. My profile › "Change my answers" opens all screens with the answers in.
 - **Open lists can always be closed** (`v2Fold`): every list box in My Library, Jam and My profile (`catBox`, `vidBox`, `libSaved`, `jamBox`, the profile boxes) keeps its title at the top with a ✕ while open, and has **Close ✕** at the bottom. The jam tracks in Jam are a list box (`#jamBox`), closed until opened (user feedback, beta of phase 1).
 - A link shared into the app (Share › Guitaring) opens **My Library** with the video-lesson form; the setup doesn't open over it (`window.__shared`) and waits for the next open.
-- **My profile**: the answers, "Change my answers", Connections, Backup, and "The update to the new Guitaring" (what M1 did + **Undo the new version's data**, two taps: removes only `profile` and `v2mig`).
+- **My profile**: the answers, "Change my answers", Connections, Backup, and "The update to the new Guitaring" (what M1 did + **Undo the new version's data**, two taps: removes only `profile`, `songs2` and `v2mig`).
 
 **V1 (before phase 1):**
 
@@ -187,7 +187,8 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 ### 5.5b I'm learning (`#learnBox`, banner `/* ===== I'm learning … */`, Oct 2026)
 - Songs › My library opens on **I'm learning**: one row per song, merged from every source — Guitaring sheets (Drive list `sheetIndex` + phone `sheetCat`), sheets saved on the phone (`lib`), an unfinished sheet (`writeDraft`), the Drive songs folder (`songIndex`), video lessons (`vlinks`), practice-mixer splits (`mxIdx`, name parsed as "Artist - Song"), saved chord analyses (`songs` / `song.<key>`), and song ideas marked "On it" (`ideaOnIt`).
 - Same song = titles match (`vlMatch`) and artists match, or identical title with the artist written in another script (אביתר בנאי / Eviatar Banai).
-- Each row shows what the song has as short words (Sheet · Folder · Lesson · Mixer · Chords; "Nothing yet" when empty); with icons on, five pedal tiles lit when present, dim when missing. Sorted by most recent activity.
+- **V2 phase 2 (My learning library):** each song has a record in `songs2` (§7) with its **status**: Learning · Learned · Idea for later (set in the row's details; new songs start as Learning). Filters: status chips (All · Learning · Learned · Ideas, with counts) and an artist list, on top of search and the material chips. Material chips, in V2 order: Guitaring sheet · Drive sheets · Video lessons · Play-along (chords from a video) · Jam track (song guides, riff guides and gear tips join in their phases). My Library has **My learning songs** (count, learned) at the top.
+- Each row shows what the song has as short words (Sheet · Drive · Lesson · Play-along · Jam; "Nothing yet" when empty); with icons on, five pedal tiles lit when present, dim when missing. Sorted by most recent activity.
 - Search; filter chips per kind cycle *have it → missing → off*.
 - Tap a row: what it has (Open / Watch) and what's missing with a next step (Write it, Find chords, Find a lesson, Split it, Pick a video); "On it" songs can be dropped.
 - **New songs to learn** (`#suggCard`) holds the daily song ideas (`#ideaBox`), still collapsed until opened; its old "I'm learning" sub-list is gone (the main list replaces it).
@@ -297,6 +298,7 @@ The phone replaces its list when `date` changes **or** `at` is newer (so a same-
 | `lib` | My songs: `[{id,name,saved,data:<song or sheet object>,drive?}]` |
 | `song.<fileKey>` | saved analyses (last 8), list in `songs` |
 | `profile` | V2 player profile (see `docs/V2-build-plan.md` §7.1): name, songLang, years, level, skills, instruments, genres, artists, dreamSongs, goals, learnBy, time {minPerDay, daysPerWeek}, context, onboarding {done, later, skipped, prefilled, at}, pending, sync. Saving it also sets `userName` and `ideaPrefs.lang` when they differ. |
+| `songs2` | V2 song records (phase 2, M2): `[{id:'s_…',title,artist,aliases,status:'learning'|'learned'|'idea',createdAt,touchedAt,links:{sheets:[{src:'drive',url}|{src:'phone',lib}|{src:'draft'}],folder:{a,t}|null,videos:[url],analysis:[song key],jam:[mxIdx id]},notes}]`. Points to V1 data, never moves it. M2 builds one per learning-list song (check: records = rows, every item linked once, V1 keys unchanged; safety copy first). A song with no record still shows and gets one when touched (`songTouch`). Removed by "Undo the new version's data". |
 | `v2mig` | V2 migration log `{done:['M1',…], at, report, warn}`; safety copies `backup:pre-<step>:<time>` in the phone database |
 | `writeDraft` | unfinished hand-written sheet (`kind:'lyrics'`, `lc:[{t:"line", ch:{wordIndex:"Am"}}]`, `play:{tun,capo}`, `fing`) |
 | `sheetCat`, `sheetIndex` | sheet catalog: this phone / from Drive (daily) |
@@ -342,7 +344,8 @@ Since V2 phase 0 the source is split into parts (`src/parts/`, joined in name or
 | `65-band-breakdown` | practice mixer / Band breakdown, phone database helpers (`mxDB`, `mxGet` with the beta's read-through, `mxPut`, `mxDel`), GitHub splitter |
 | `70-welcome` | welcome + jokes |
 | `75-gear` | My gear |
-| `80-learning-ideas` | I'm learning, song ideas, gear chat |
+| `80-learning-ideas` | I'm learning (My learning library), song ideas, gear chat |
+| `82-song-records` | song records `songs2`: `sameSong`, `songRec`, `songStatus`, `songTouch`, migration `v2MigM2` |
 | `90-v2-shell` | V2 navigation (`goSec`, `v2Hide`, `v2After`, pages + history), Home, Jam, My Library, My profile, profile (`profGet`/`profSet`/`profTaste`/`profPrefill`), M1 (`v2MigM1`), onboarding (`openOnb`, `obRender`, `OB_OPTS`, `OB_STEPS`), `v2Start` |
 | `85-backup` | backup and restore (`bkMake`, `bkOpen`, `bkRestore`, `safetyCopy`, ZIP writer/reader) |
 | `99-startup` | start-up calls; the app script closes here |
@@ -416,6 +419,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `split_t.js` | the source parts join into the page verbatim and in order, one app script, every part ends with a newline; `LIVE=1`: the committed `index.html` is exactly a fresh build |
 | `bk_t.js` | backup: real ZIP (checked with Python's zipfile), keys out by default, counts; wipe → restore identical (typed arrays, Blobs, Files); Add what's missing never overwrites; Replace everything (two taps); without parts (smaller, keeps phone parts on replace); damaged / cut-short / foreign files refused with nothing changed; safety copy |
 | `bkdrive_t.js` | backup to Google Drive (mocked): one tap, folder made once, resumable 8 MB pieces with a failed piece resent, a valid ZIP arrives, older than 5 trashed, green toast + notification, refused upload red + notification, sheets unchanged |
+| `lib2_t.js` | V2 phase 2: M2 makes one record per learning-list song (links to sheet, Drive file, lesson, jam track; same song across scripts shares one), V1 keys unchanged, safety copy, runs once; status Learned / Idea and the status and artist filters; a later song gets its record when touched; My Library's learning entry; the backup holds the records; undo clears the statuses |
 | `beta_t.js` | beta: copies live data on first open, reads big items through and keeps its copy, deletes stick, live data and database untouched, reopening keeps beta changes, "Copy my live data again", own manifest |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 

@@ -60,6 +60,7 @@ function v2Fold(d){if(!d||d._fold)return;d._fold=true;d.classList.add('v2fold');
 function v2Folds(){['catBox','vidBox','libSaved','jamBox','apiCard','folderCfg','ghCfg','bkBox','v2Box'].forEach(id=>v2Fold($(id)))}
 // ---- My Library: the V1 lists, gathered ----
 function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox','vidBox','libSaved'].forEach(id=>{const e=$(id);if(e)h.appendChild(e)});h.dataset.moved='1'}
+ const ls=$('libLearnSub');if(ls){try{const G=learnSongs(),S=G.map(songStatus),n=k=>S.filter(x=>x===k).length;ls.textContent=G.length?`${G.length} song${G.length>1?'s':''} · ${n('learned')} learned`:'Songs you’re learning'}catch(e){}}
  const s=$('libJamSub');if(s){const r=(mxIdx||[]).filter(x=>x.state==='ready').length;s.textContent=r?`${r} song${r>1?'s':''} ready to play`:'Band breakdown songs'}}
 // ---- profile (tuner.profile) ----
 const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
@@ -185,16 +186,18 @@ function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm
  const bk=$('profBackup');if(bk&&!bk.dataset.moved){const e=$('bkBox');if(e)bk.appendChild(e);const r=document.createElement('details');r.className='apibox';r.id='v2Box';bk.appendChild(r);bk.dataset.moved='1'}
  // the V2 changes to your data: what was done, and a way to undo it (only V2's own data; V1 data is never changed)
  const vb=$('v2Box');if(vb){const log=store.get('v2mig',null)||{},m1=log.report&&log.report.M1,FN={name:'name',songLang:'song languages',instruments:'instruments',artists:'artists',level:'level',skills:'chords you play'};
-  vb.innerHTML=`<summary>The update to the new Guitaring</summary><p class="tip">${(log.done||[]).includes('M1')?`Your profile was created${log.at?` on ${esc(bkDate(log.at))}`:''}${m1&&m1.prefilled&&m1.prefilled.length?`, filled in from what the app already knew: ${esc(m1.prefilled.map(f=>FN[f]||f).join(', '))}`:''}. Nothing you had before was changed.`:'Nothing has been changed yet.'}${log.warn?` Note: ${esc(log.warn)}`:''}</p>
-  <button type="button" class="btn ghost danger" id="v2Undo">Undo the new version’s data</button><p class="tip">Removes only what the new version added (your profile and answers). Your sheets, lessons, gear and settings stay. The app then starts over with the setup.</p>`;
+  vb.innerHTML=`<summary>The update to the new Guitaring</summary><p class="tip">${(log.done||[]).includes('M1')?`Your profile was created${log.at?` on ${esc(bkDate(log.at))}`:''}${m1&&m1.prefilled&&m1.prefilled.length?`, filled in from what the app already knew: ${esc(m1.prefilled.map(f=>FN[f]||f).join(', '))}`:''}. Nothing you had before was changed.`:'Nothing has been changed yet.'}${log.report&&log.report.M2?` Your ${log.report.M2.songs} songs got a record that keeps their status (learning, learned, idea) and points to their sheets, videos and jam tracks; nothing was moved.`:''}${log.warn?` Note: ${esc(log.warn)}`:''}</p>
+  <button type="button" class="btn ghost danger" id="v2Undo">Undo the new version’s data</button><p class="tip">Removes only what the new version added (your profile and answers, and the songs’ status: learning, learned, idea). Your sheets, lessons, gear and settings stay. The app then starts over with the setup.</p>`;
   $('v2Undo').onclick=()=>{const b=$('v2Undo');if(!b.dataset.sure){b.dataset.sure='1';b.textContent='Tap again to undo';return}
-   ['profile','v2mig'].forEach(k=>{try{localStorage.removeItem(KP+k)}catch(e){}});toast('The new version’s data was removed. Starting over.','ok');setTimeout(()=>location.reload(),900)}}}
+   ['profile','v2mig','songs2'].forEach(k=>{try{localStorage.removeItem(KP+k)}catch(e){}});toast('The new version’s data was removed. Starting over.','ok');setTimeout(()=>location.reload(),900)}}}
 // ---- start: Home, the M1 profile, onboarding when it hasn't been done ----
 async function v2Start(){
  // the Band breakdown tile lives in Jam; sheets, video lessons and saved-on-phone in My Library; connections and backup in My profile
  try{renderJam()}catch(e){}try{renderLibPage()}catch(e){}try{renderProfile()}catch(e){}try{v2Folds()}catch(e){}
  goSec('home',{force:true});
  try{await v2MigM1()}catch(e){}
+ // M2 song records: after the jam tracks are known (they are part of the learning list)
+ mxReady.catch(()=>{}).then(()=>v2MigM2()).then(()=>{try{renderLibPage()}catch(e){}}).catch(()=>{});
  const p=profGet();// not over a link shared into the app (Share › Guitaring): that flow comes first, the setup waits for the next open
  if(!p.onboarding.done&&!p.onboarding.later&&!window.__shared)openOnb(false);
  renderHome()}

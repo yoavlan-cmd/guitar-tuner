@@ -1028,4 +1028,14 @@ details.v2fold[open]>summary::after{content:"✕";margin-left:auto;flex:0 0 auto
 .mixplay{width:52px;height:52px;background:var(--accent);color:var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .mxpanel{background:var(--bg);border-color:var(--line)}
 input[type=range]{accent-color:var(--accent)}
+/* my learning library: status and artist filters, a status on each song */
+.lstat{display:flex;gap:6px;flex-wrap:wrap}.lstat .chip small{margin-left:6px}
+.lart{width:100%}
+.lstate{flex:0 0 auto;font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;border-radius:var(--r-pill);padding:2px 7px;color:var(--bg);background:var(--accent)}
+.lstate.idea{background:transparent;color:var(--amber);border:1px solid var(--amber)}
+.lstbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lstbtns button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:8px 4px;font:600 13px var(--body);cursor:pointer}
+.lstbtns button[aria-pressed="true"]{border-color:var(--line-on);color:var(--accent);background:rgba(78,226,183,.12)}
+.lrow{flex-wrap:wrap;row-gap:6px}.lrow .ltxt{min-width:55%}.lrow .lres{margin-left:auto}
+.lart{font:500 14px var(--body)}
 </style>

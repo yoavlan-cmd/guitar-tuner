@@ -28,7 +28,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok(gr.length===1&&gr[0].lit===4,`Good Riddance is one row with sheet, folder, lesson and mixer lit (${gr[0]&&gr[0].label})`);
  ok(rows.some(r=>r.t==='Wonderwall'&&r.lit===0),'a song marked "On it" shows with nothing lit yet');
  ok(rows.filter(r=>r.t==='עד מתי').length===1&&rows.some(r=>r.t==='עד מתי'&&r.lit===2),'a phone sheet (אביתר בנאי) and a Drive file (Eviatar Banai) of the same song are one row');
- ok(rows.some(r=>r.t==='יא'&&/Songs folder/.test(r.label)),'a song only in the Drive folder shows the folder tile');
+ ok(rows.some(r=>r.t==='יא'&&/Drive sheets/.test(r.label)),'a song only in the Drive folder shows the folder tile');
  // filters: lesson → have it → missing → off
  await p.tap('[data-lf=lesson]');let n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));
  ok(n.length===1&&/Good Riddance/.test(n[0]),`"Video lesson · have it" shows only Good Riddance (${n})`);
