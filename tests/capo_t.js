@@ -45,6 +45,10 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  ok(L.map.length>1&&L.map.every(m=>m.replace(/×\d+/,'').split('·').map(x=>x.trim()).filter(x=>x&&x!=='no guitar').every(x=>['C#m','A','E','F#m'].includes(x))),'the song map uses the same chords');
  const saved=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_d1')));
  ok(saved.play.capo===0&&saved.play.capoBy==='sheet','the fitted capo is saved with the analysis, so the play-along shows the same');
+ // Easy: the capo version (same sound, easier shapes); Full stays as played
+ await p.tap('[data-gd=easy]');await p.waitForTimeout(150);L=await look(p);const ei=await p.$eval('.gdintro',e=>e.textContent);console.log('  easy:',L.capo,'|',L.ch.join(' '),'|',ei);
+ ok(/^Capo [1-5]$/.test(L.capo)&&/easier version: capo \d/.test(ei)&&!L.ch.some(n=>/#/.test(n)),'Easy suggests the capo version: '+L.capo+' · '+L.ch.join(' ')+' (same sound, no sharp barre chords)');
+ await p.tap('[data-gd=full]');await p.waitForTimeout(150);ok(await p.$eval('.gdbig b',e=>e.textContent)==='No capo','Full stays as played: no capo');
  // you set the capo you see in the video
  await p.tap('[data-gdcapo="4"]');await p.waitForTimeout(300);if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
  L=await look(p);console.log('  capo 4 set:',L.capo,'|',L.ch.join(' '));

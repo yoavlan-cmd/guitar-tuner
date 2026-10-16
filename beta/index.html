@@ -6465,10 +6465,10 @@ function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tNa
  const chords=easy?G.easy:G.full,mapCh=s=>{const o=[];s.chords.forEach(n=>{const v=nm(n);if(o[o.length-1]!==v)o.push(v)});return o.slice(0,10)};
  const beat='D·D·D·D·'.split('').join('');
  return `<div class="gdtabs seg" role="tablist"><button type="button" role="tab" data-gd="easy" aria-pressed="${easy}">Easy</button><button type="button" role="tab" data-gd="full" aria-pressed="${!easy}">Full</button></div>
- <p class="tip gdintro">${easy?'Basic chord shapes, one strum on every beat: play along today.':'The chords and the strumming heard in the recording: sound like the song.'}</p>
+ <p class="tip gdintro">${easy?(G.eCapo!==G.capo?`The easier version: capo ${G.eCapo} with basic shapes, one strum on every beat. It sounds the same as the recording.`:'Basic chord shapes, one strum on every beat: play along today.'):'As it’s played in the recording: its chords, capo and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
   ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
-  ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording’s shapes are with ${G.capo?'capo '+G.capo:'no capo'}; with capo ${G.eCapo} the same song uses easier shapes. Full shows the recording’s.</p>`:''}</div>
+  ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; capo ${G.eCapo} gives the same song with easier shapes. Full shows it as played.</p>`:''}</div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
  <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
