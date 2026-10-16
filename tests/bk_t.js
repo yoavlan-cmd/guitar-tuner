@@ -11,6 +11,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const ctx=await b.newContext({viewport:{width:390,height:844},acceptDownloads:true});await ctx.route(/^https:\/\//,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.goto(APP);await p.waitForTimeout(300);
+ // let the app's own start-up updates finish first (the song records, M2), so they don't land between backup and restore
+ await p.waitForFunction(()=>(JSON.parse(localStorage.getItem('tuner.v2mig')||'{}').done||[]).includes('M2'),null,{timeout:5000}).catch(()=>{});
  // a phone with data everywhere
  await p.evaluate(async()=>{const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));
   S('userName','Yoav');S('apiKey','sk-secret');localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'ghp_secret',branch:'main'}));

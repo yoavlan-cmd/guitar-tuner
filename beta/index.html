@@ -1126,6 +1126,26 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 .mixrow.strip.off{opacity:.45}
 .mixrows.many .strip b{font-size:10px;letter-spacing:-.01em}.mixrows.many .strip output{font-size:10px}
 .mixrow.strip.off .fader input{filter:grayscale(1)}
+/* ===== song session ===== */
+.lrow .lgo{font-style:normal;color:var(--muted);font-size:20px;flex:0 0 auto}
+.sesbox{display:flex;flex-direction:column;gap:14px}
+.seshero{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:var(--r-card);border:1px solid var(--line);box-shadow:var(--shadow-card);
+ background-color:var(--surface);background-size:cover;background-position:center;background-image:linear-gradient(to bottom,rgba(15,19,17,.72),rgba(15,19,17,.94)),var(--tex-learn)}
+.sesk{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.seshero h3{margin:0;font:800 32px/1.02 var(--display);letter-spacing:.02em;text-transform:uppercase;overflow-wrap:anywhere}
+.sesart{margin:-4px 0 0;color:var(--muted);font:500 15px var(--body)}
+.sesinfo{display:flex;flex-wrap:wrap;gap:6px}.sesinfo span{font:600 12px var(--body);color:var(--ink);background:rgba(255,255,255,.08);border-radius:var(--r-pill);padding:4px 10px}
+.sestags{display:flex;flex-wrap:wrap;gap:4px}
+.sesgo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:14px 16px;border-radius:16px}
+.sesgo b{font:800 20px var(--display);letter-spacing:.04em;text-transform:uppercase}.sesgo small{font:500 12.5px var(--body);opacity:.8}
+.sesnone{margin:0}
+.sessec h3{margin:0 0 10px;font:800 18px var(--display);letter-spacing:.04em;text-transform:uppercase}
+.sessec .ldet{border:0;margin:0;padding:0;background:transparent}
+.seschords{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.sesdg{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:4px}.sesdg svg{display:block;width:100%;height:auto}
+.sesdg.none{display:grid;place-items:center;min-height:80px;background:rgba(255,255,255,.06)}.sesdg.none b{font:700 16px var(--body)}
+.sesjam{display:flex;flex-wrap:wrap;gap:8px}.sesjam .btn{flex:1 1 auto}
+#sesNotes{width:100%;resize:vertical;font:400 14px var(--body)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -1207,6 +1227,11 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
       <button type="button" class="libgo" data-sec="jam"><span data-pd="MIX"></span><b>My jam tracks</b><small id="libJamSub">Band breakdown songs</small><i>›</i></button>
     </div>
     <div id="libHolder" class="libholder"></div>
+  </div>
+
+  <div class="pane" id="paneSession" hidden>
+    <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>Song</h2></div>
+    <div id="sesBox" class="sesbox"></div>
   </div>
 
   <div class="pane" id="paneProfile" hidden>
@@ -5640,8 +5665,8 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
-  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
-   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
+   return `<button type="button" class="lrow" data-li="${i}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
@@ -5649,19 +5674,19 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{learnSt=b.dataset.ls;renderLearn()});
  if($('learnArt'))$('learnArt').onchange=e=>{learnArt=e.target.value;renderLearn()};
  box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
- $('learnList').onclick=e=>{const b=e.target.closest('[data-la]');
-  if(!b){const r=e.target.closest('[data-li]');if(r){const k=vlKey(G[+r.dataset.li].title);learnOpen=learnOpen===k?null:k;draw()}return}
-  const g=G[+b.dataset.g],a=b.dataset.la;
-  if(a==='st'){songTouch(g,{status:b.dataset.v});renderLearn();try{renderLibPage()}catch(e){}return}
-  if(a==='lib'){const ent=libGet(b.dataset.v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
-  else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
-  else if(a==='ana'){const d=loadSong(b.dataset.v);if(!d)return;vid.pause();A=d;fileKey=b.dataset.v;showSheet();window.scrollTo({top:0})}
-  else if(a==='mix'){mxView(true);mxOpen(b.dataset.v)}
-  else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
-  else if(a==='split'){$('mixNew').click()}
-  else if(a==='video'){$('vidIn').click()}
-  else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
+ // a song opens its song session
+ $('learnList').onclick=e=>{const r=e.target.closest('[data-li]');if(r)openSession(G[+r.dataset.li])};
 }
+// what the buttons next to a song's material do (song session; also the old inline details)
+function learnAct(g,a,v){
+ if(a==='lib'){const ent=libGet(v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
+ else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
+ else if(a==='ana'){const d=loadSong(v);if(!d)return;vid.pause();A=d;fileKey=v;showSheet();window.scrollTo({top:0})}
+ else if(a==='mix'){mxView(true);mxOpen(v)}
+ else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
+ else if(a==='split'){$('mixNew').click()}
+ else if(a==='video'){$('vidIn').click()}
+ else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));goSec('learn')}}
 // the language shown: the player's choice, else the profile's first song language, else the one with more songs
 function learnLang(nL){const c=store.get('learnLang','');if(c==='he'||c==='en')return c;let p='';try{p=(profGet().songLang||[])[0]||''}catch(e){}
  return (p==='he'||p==='en')&&nL[p]?p:nL.he>nL.en?'he':'en'}
@@ -5955,6 +5980,56 @@ async function v2MigM2(){const log=store.get('v2mig',{done:[]})||{done:[]};if((l
  if(recs.length){try{await safetyCopy('M2')}catch(e){}}
  if(store.get('songs2',null))return;
  store.set('songs2',recs);log.done=[...(log.done||[]),'M2'];log.at2=Date.now();log.report={...(log.report||{}),M2:{songs:recs.length,links:keys.length}};store.set('v2mig',log)}
+/* ===== Song session (V2 phase 3): one page per song, opened from My learning library ===== */
+// Top: title, artist, tuning and capo, status, what you have, one Practise button. Then the chords, quick jam buttons, everything
+// linked to the song (the same rows the learning list used to open inline), the chord finder and your notes (saved in the song record).
+let sesKey=null;// {title, artist} of the open song
+function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{});goSec('session')}
+// the open song's learning-list entry (built fresh, so it follows new sheets, lessons and jam tracks)
+function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
+// what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
+function sesFacts(g){const f={tun:'',capo:null,chords:[],bpm:0};const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
+ for(const x of g.r.sheet){
+  if(x.lib){const e=libGet(x.lib);const d=e&&e.data;if(d){if(d.play){if(!f.tun)f.tun=d.play.tun||'';if(f.capo==null)f.capo=+d.play.capo||0}addCh((d.lc||[]).flatMap(l=>Object.values(l.ch||{})))}}
+  else if(!x.draft){const e=(catalogAll()||[]).find(c=>vlMatch(c.title,g.title));if(e){if(!f.tun&&e.tuning)f.tun=tunFromName(e.tuning);if(f.capo==null&&e.capo!=null)f.capo=+e.capo||0;addCh(e.chords)}}}
+ for(const x of g.r.analysis){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if(f.capo==null&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
+  if(!f.chords.length){const prevA=A;try{A=d;addCh(d.segs.filter(s=>s.t1-s.t0>=.5).map(s=>nameOf(s)))}catch(e){}A=prevA}}
+ return f}
+// a chord's diagram from the chord library (fingers shown); unknown names just show the name
+const SES_ENH={'A#':'Bb','Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab'};
+function sesDiagram(name){try{const n=String(name).replace(/^([A-G][#b]?)/,m=>SES_ENH[m]||m);let sh=LIB[n]?{...parseLib(LIB[n]),name:n}:null;
+  if(!sh){for(let c=0;c<NS;c++)if(chordName(c)===n){sh=shapeFor(c);break}}
+  if(sh)return `<div class="sesdg dg">${diagram(sh,name)}</div>`}catch(e){}return `<div class="sesdg none"><b>${esc(name)}</b></div>`}
+// the Practise button: the best thing you have for playing the song now (guides join it in the next step)
+function sesPractise(g){if(g.r.analysis.length)return {a:'ana',v:g.r.analysis[0].key,l:'Practise with the play-along',s:'The song video with its chords, in time'};
+ if(g.r.mix.length)return {a:'mix',v:g.r.mix[0].mix,l:'Practise with the jam track',s:'Play along with the band, guitars down'};
+ const sh=g.r.sheet.find(x=>x.lib)||g.r.sheet.find(x=>x.draft)||g.r.sheet[0];
+ if(sh)return sh.lib?{a:'lib',v:sh.lib,l:'Practise from the chord sheet',s:'Open your sheet'}:sh.draft?{a:'draft',v:'',l:'Finish the chord sheet',s:'Your unfinished sheet'}:{u:sh.url,l:'Practise from the chord sheet',s:'Open it in Drive'};
+ if(g.r.lesson.length)return {u:g.r.lesson[0].url,l:'Practise with the video lesson',s:g.r.lesson[0].label||'Watch it'};
+ return null}
+function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
+ if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
+ const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
+ const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
+ const has=LKINDS.filter(([k])=>g.r[k].length);
+ box.innerHTML=`<section class="seshero">
+  <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}
+  ${info.length?`<div class="sesinfo">${info.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
+  <div class="sestags">${has.length?has.map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join(''):'<span class="ltag none">Nothing yet</span>'}</div>
+  ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
+  <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
+ </section>
+ ${f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
+ ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
+ <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}</section>
+ <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
+ <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
+ box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
+ box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();learnAct(g,b.dataset.la,b.dataset.v||'')});
+ const go=$('sesGo');if(go&&pr&&pr.u)go.onclick=()=>window.open(pr.u,'_blank','noopener');
+ box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
+ $('sesFind').onclick=()=>cfOpen('book');
+ let tm=null;$('sesNotes').addEventListener('input',e=>{clearTimeout(tm);const v=e.target.value;tm=setTimeout(()=>songTouch(g,{notes:v}),400)})}
 /* ================= Backup and restore: everything the app keeps on this phone, in one file ================= */
 // The file is a plain ZIP (stored, not compressed): manifest.json, local.json (the small data: tuner.* and guitaring.* keys)
 // and idb/<n>.json (+ idb/<n>-<i>.bin for files, photos and audio parts) for each item of the phone database.
@@ -6184,8 +6259,8 @@ window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,g
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
 var curSec='home',secBack='home';
-var V2P=['paneHome','paneJam','paneLib','paneProfile'],V1P=['paneTune','paneSong','paneChords','paneGear'];
-var PAGES=['tuner','library','profile','chords'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
+var V2P=['paneHome','paneJam','paneLib','paneProfile','paneSession'],V1P=['paneTune','paneSong','paneChords','paneGear'];
+var PAGES=['tuner','library','profile','chords','session'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
 function v2Hide(){V2P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
 function v1Hide(){try{if(listening)stopListening()}catch(e){}try{if(!vid.paused)vid.pause()}catch(e){}V1P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
 function v2Mark(s){curSec=s;document.body.dataset.cursec=s;
@@ -6201,8 +6276,8 @@ function goSec(s,opt){opt=opt||{};if(s===curSec&&!opt.force&&s!=='learn'&&s!=='w
  else if(s==='gear')setTab('gear');
  else if(s==='tuner')setTab('tune');
  else if(s==='chords')setTab('chords');
- else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile'}[s];if(!id)return goSec('home');$(id).hidden=false;
-  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile()}
+ else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile',session:'paneSession'}[s];if(!id)return goSec('home');$(id).hidden=false;
+  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile();else if(s==='session')renderSession()}
  v2Mark(s);window.scrollTo({top:0});
  // a header page can be closed with the phone's back button
  if(PAGES.includes(s)&&!opt.fromPop){try{if(history.state&&history.state.gpage)history.replaceState({gpage:s},'');else history.pushState({gpage:s},'')}catch(e){}}}
