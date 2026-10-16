@@ -5117,6 +5117,16 @@ function gdTokenFull(){return new Promise((res,rej)=>{if(gdFullTok&&Date.now()<g
   error_callback:e=>rej({code:e&&e.type==='popup_closed'?'gd_closed':'gd_popup'})});c.requestAccessToken({prompt:''})})}
 // the file id in a Drive link (…/file/d/<id>/…, ?id=<id>, or the id itself)
 function dsFileId(u){u=String(u||'').trim();const m=u.match(/\/file\/d\/([\w-]{10,})/)||u.match(/[?&]id=([\w-]{10,})/)||u.match(/^([\w-]{20,})$/);return m?m[1]:''}
+// a link to the song's folder (…/folders/<id>)
+function dsFolderId(u){const m=String(u||'').match(/\/folders\/([\w-]{10,})/);return m?m[1]:''}
+// the song's video and audio in its folder (the MP3s Guitaring made there before are left out)
+async function dsFolderFiles(fid){const q=encodeURIComponent(`'${fid}' in parents and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
+ const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+ if(!r.ok)throw {code:'gd_http',message:r.status===404?'Couldn’t open that folder. Use a folder in your own Drive.':'Couldn’t read that folder in your Drive (HTTP '+r.status+').'};
+ const fs=((await r.json()).files||[]).filter(f=>dsKind(f)&&!/\((full|guitars only)\)\.mp3$/i.test(f.name));
+ const vid=fs.find(f=>dsKind(f)==='video'),key=n=>vlKey(String(n||'').replace(/\.[a-z0-9]+$/i,'')),aus=fs.filter(f=>dsKind(f)==='audio');
+ const aud=(vid&&aus.find(f=>key(f.name)===key(vid.name)))||aus[0];
+ const out=[aud,vid].filter(Boolean);if(!out.length)throw {code:'gd_http',message:'There’s no video or audio file in that folder. Add the song’s MP4 or MP3 to it, or paste the file’s link.'};return out}
 const dsIsYT=u=>/(?:youtube\.com|youtu\.be)\//i.test(u);
 async function dsMeta(id){const r=await fetch(`${GD_API}/${encodeURIComponent(id)}?fields=id,name,mimeType,size,parents,webViewLink&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
  if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}throw {code:'gd_http',status:r.status,message:r.status===404?'That file wasn’t found in your Drive. Check the link (and that it’s your own Drive).':m||'HTTP '+r.status}}return r.json()}
@@ -5126,25 +5136,27 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
  const busy=!fresh&&mxIdx.find(x=>x.drive&&['up','wait','get'].includes(x.state));if(busy)return dsShowProgress(busy.id);
  d.hidden=false;document.body.classList.add('wopen');
  d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Add a song from Google Drive"><div class="dshead"><h3>Add a song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
- <p class="tip">Paste the link to the song’s <b>video (MP4)</b> or <b>audio (MP3)</b> in your Google Drive songs folder. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
- <label class="dslab">Link to the video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label>
+ <p class="tip">Paste the link to the song’s <b>folder</b> in your Google Drive, or to its <b>video (MP4)</b> or <b>audio (MP3)</b> there. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
+ <label class="dslab">Link to the song’s folder, video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label>
  <details class="dsmore"><summary>Have both the video and the audio? Add the other one</summary><label class="dslab">Second link (optional)<input id="dsL2" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label></details>
  <div id="dsMsg" class="tip" role="status"></div>
  <button type="button" class="btn wide" id="dsGo">Make the song’s session</button>
  <p class="tip dsnote">The first time, Google asks to let Guitaring see and save files in your Drive: it only reads the file you link and saves the two MP3s next to it.</p></section>`;
  const close=()=>{d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen')};
  $('dsX').onclick=close;d.onclick=e=>{if(e.target===d)close()};
- $('dsGo').onclick=async()=>{const msg=$('dsMsg'),go=$('dsGo'),l1=$('dsL1').value.trim(),l2=($('dsL2').value||'').trim();
+ // the message under the button stays in sight (the keyboard closes, the dialog scrolls to it)
+ {const m=$('dsMsg');new MutationObserver(()=>{if(m.textContent)try{m.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}}).observe(m,{childList:true,characterData:true,subtree:true})}
+ $('dsGo').onclick=async()=>{try{document.activeElement&&document.activeElement.blur()}catch(e){}const msg=$('dsMsg'),go=$('dsGo'),l1=$('dsL1').value.trim(),l2=($('dsL2').value||'').trim();
   // a YouTube link can't be turned into files (YouTube's rules): say so, and offer to keep it as a video lesson
   if(dsIsYT(l1)||dsIsYT(l2)){msg.innerHTML='YouTube links can’t be turned into song files (YouTube doesn’t allow downloading). Paste a link to the song’s video or audio in your Google Drive instead. <button type="button" class="tlink" id="dsAsLesson">Keep the YouTube link as a video lesson</button>';
    $('dsAsLesson').onclick=()=>{close();goSec('library');const v=$('vidBox');if(v){v.open=true;const i=v.querySelector('input[type=url],input');if(i){i.value=dsIsYT(l1)?l1:l2;i.dispatchEvent(new Event('input',{bubbles:true}))}}};return}
-  const ids=[l1,l2].filter(Boolean).map(dsFileId);
-  if(!l1||ids.some(x=>!x)){msg.textContent='That doesn’t look like a Google Drive file link. In Drive, tap ⋮ on the file › Share › Copy link, and paste it here.';return}
+  const fid=dsFolderId(l1),ids=fid?[]:[l1,l2].filter(Boolean).map(dsFileId);
+  if(!l1||(!fid&&ids.some(x=>!x))){msg.textContent='That doesn’t look like a Google Drive link. In Drive, tap ⋮ on the song’s folder (or its video or audio) › Share › Copy link, and paste it here.';return}
   if(!mxGh()){msg.innerHTML='First connect your GitHub (it does the splitting, free). <button type="button" class="tlink" id="dsGh">Connect GitHub</button>';$('dsGh').onclick=()=>{close();mxView(true);mxSetup()};return}
   const tp=gdTokenFull();// straight from the tap: the Google window must open now
   go.disabled=true;msg.textContent='Opening Google…';
   try{await tp;msg.textContent='Reading the files in your Drive…';
-   const files=[];for(const id of ids)files.push(await dsMeta(id));
+   const files=fid?await dsFolderFiles(fid):[];for(const id of ids)files.push(await dsMeta(id));
    const kinds=files.map(dsKind);if(kinds.some(k=>!k))throw {code:'gd_http',message:`“${files[kinds.indexOf('')].name}” isn’t a video or audio file.`};
    // the audio file is the cleaner source to split; the video stays as the song's video
    const src=files[kinds.indexOf('audio')]||files[0],vid=files[kinds.indexOf('video')]||null,folder=(src.parents||[])[0]||(vid&&(vid.parents||[])[0])||'';
