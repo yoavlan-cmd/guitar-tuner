@@ -225,7 +225,8 @@ function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&
 const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
 const mxFmt=n=>mmss(n/mxSR());
 function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;$('mxT').textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)}mxBarTime()}
-function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'⏸':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}})}
+function mxPlayUI(){[$('mxPlay'),$('mxBarPlay')].forEach(b=>{if(b){b.textContent=mxPlaying?'❚❚':'▶';b.setAttribute('aria-label',mxPlaying?'Pause':'Play')}});const k=$('mxBarK');if(k&&mxSong&&mxSong.tracks&&!mxBusy)k.textContent=mxBarWord()}
+const mxBarWord=()=>mxPlaying?'Now playing':mxPos>0?'Paused':'Ready to play';
 async function mxToggle(){if(!mxSong||!mxSong.tracks)return;await mxAudio();if(mxCtx.state==='suspended')await mxCtx.resume();if(!mxPlaying&&mxPos>=mxSong.len)mxPos=0;mxPlaying=!mxPlaying;mxNode.port.postMessage({seek:mxPos,play:mxPlaying,gains:mxGains()});mxPlayUI();mxBarTime()}
 function mxPause(){try{if(mxPlaying&&mxNode){mxPlaying=false;mxNode.port.postMessage({play:false});mxPlayUI();mxBarTime()}}catch(e){}}
 const MX_PRESETS=[['all','Everything'],['nogtr','No guitars'],['gtr','Guitars only'],['novox','No vocals']];
@@ -496,7 +497,7 @@ function mxBar(){const b=$('mxBar');if(!b)return;
  else if(mxSong&&mxSong.tracks){t=mxSong.name}
  else if(mxSong){t=mxSong.name;s='Opening…'}
  else{t=pend.length===1?pend[0].name:pend.length+' songs splitting';s=mxSub(pend[0])}
- $('mxBarT').textContent=t;$('mxBarPlay').hidden=!(mxSong&&mxSong.tracks&&!mxBusy);b.classList.toggle('work',!(mxSong&&mxSong.tracks)||mxBusy);
+ $('mxBarT').textContent=t;$('mxBarK').textContent=mxBusy||!mxSong?'Band breakdown':mxSong.tracks?mxBarWord():'Opening';$('mxBarPlay').hidden=!(mxSong&&mxSong.tracks&&!mxBusy);b.classList.toggle('work',!(mxSong&&mxSong.tracks)||mxBusy);
  if(mxSong&&mxSong.tracks&&!mxBusy){mxBarTime();mxPlayUI()}else{$('mxBarS').textContent=s;$('mxBarP').style.width=Math.round(p*100)+'%'}}
 $('mxBarOpen').onclick=()=>{mxView(true);if(!mxBusy)mxSheetUI2()};
 $('mxBarPlay').onclick=mxToggle;
