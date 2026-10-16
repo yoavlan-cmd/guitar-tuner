@@ -29,7 +29,7 @@ const V1=['sheetIndex','songIndex','vlinks','ideaOnIt','lib','userName'];
  const st=await p.evaluate(async()=>({recs:JSON.parse(localStorage.getItem('tuner.songs2')||'null'),log:JSON.parse(localStorage.getItem('tuner.v2mig')||'{}'),safe:(await window.__bk.keys()).filter(k=>/^backup:pre-M2:/.test(k)).length}));
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);
  const rows=()=>p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));
- const r0=await rows();
+ await p.tap('[data-lang=en]');const r0=(await rows()).concat(await p.tap('[data-lang=he]').then(rows));await p.tap('[data-lang=en]');
  ok(st.log.done&&st.log.done.includes('M2')&&!st.log.warn,'M2 ran and passed its check '+JSON.stringify(st.log.report&&st.log.report.M2||st.log.warn));
  ok(st.recs&&st.recs.length===r0.length&&r0.length===4,`one record per song in the list (${st.recs&&st.recs.length} records, ${r0.length} rows)`);
  const gr=(st.recs||[]).find(r=>/Good Riddance/.test(r.title));
@@ -47,11 +47,12 @@ const V1=['sheetIndex','songIndex','vlinks','ideaOnIt','lib','userName'];
  await p.tap('#learnList .lrow:has-text("Wonderwall")');await p.tap('.ldet [data-la=st][data-v=idea]');await p.waitForTimeout(150);
  await p.tap('[data-ls=learned]');let n=await rows();ok(n.length===1&&/Good Riddance/.test(n[0]),`filter Learned (${n})`);
  await p.tap('[data-ls=idea]');n=await rows();ok(n.length===1&&n[0]==='Wonderwall',`filter Ideas (${n})`);
- await p.tap('[data-ls=learning]');n=await rows();ok(n.length===2,`filter Learning (${n})`);
- await p.tap('[data-ls=""]');n=await rows();ok(n.length===4,'All shows every song');
- await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.screenshot({path:path.join(__dirname,'out','lib2.png'),fullPage:true});await p.tap('#learnList .lrow:has-text("Good Riddance")');
+ await p.tap('[data-ls=learning]');n=await rows();ok(n.length===0,`filter Learning: no English song left (${n})`);
+ await p.tap('[data-lang=he]');n=await rows();ok(n.length===2,`filter Learning in Hebrew (${n})`);
+ await p.tap('[data-ls=""]');n=await rows();ok(n.length===2,'All shows every Hebrew song');
+ await p.tap('[data-lang=en]');await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.screenshot({path:path.join(__dirname,'out','lib2.png'),fullPage:true});await p.tap('#learnList .lrow:has-text("Good Riddance")');
  // artist
- await p.selectOption('#learnArt',{label:'Tuna (1)'});n=await rows();ok(n.length===1&&n[0]==='יא',`filter by artist (${n})`);await p.selectOption('#learnArt','');
+ await p.selectOption('#learnArt',{label:'Oasis (1)'});n=await rows();ok(n.length===1&&n[0]==='Wonderwall',`filter by artist (${n})`);await p.selectOption('#learnArt','');await p.tap('[data-lang=en]');
  // a song added after M2: shows at once, gets a record when touched
  await p.evaluate(()=>{const v=JSON.parse(localStorage.getItem('tuner.vlinks'));v.push({id:'v2',url:'https://youtu.be/bbbbbbbbbbb',key:'yt:bbbbbbbbbbb',yt:'bbbbbbbbbbb',src:'YouTube',title:'Creep lesson',song:'Creep',artist:'Radiohead',at:Date.now()});localStorage.setItem('tuner.vlinks',JSON.stringify(v))});
  await p.tap('#bnav [data-sec=write]');await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);
