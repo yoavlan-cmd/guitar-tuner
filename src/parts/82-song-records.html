@@ -1,0 +1,37 @@
+/* ===== Song records (tuner.songs2, V2 phase 2): one record per song, pointing to the V1 data (nothing is moved) ===== */
+// A record keeps who the song is, its status and notes, and links to the sheets, videos, chord analyses and jam tracks found for it.
+// The learning list is still built by learnSongs() from the V1 stores; a song with no record yet gets one the first time you touch it.
+const SONG_ST=[['learning','Learning'],['learned','Learned'],['idea','Idea for later']];
+const songsGet=()=>store.get('songs2',[])||[];
+const sameSong=(a,b)=>{const heb=x=>/[֐-׿]/.test(x);
+ if(!vlMatch(a.title,b.title)&&!(a.aliases||[]).some(t=>vlMatch(t,b.title)))return false;
+ return !a.artist||!b.artist||vlMatch(a.artist,b.artist)||(vlKey(a.title)===vlKey(b.title)&&heb(a.artist)!==heb(b.artist))};
+const songRec=g=>songsGet().find(r=>sameSong(r,g))||null;
+const songStatus=g=>{const r=songRec(g);return r&&r.status||'learning'};
+// what a learning-list song points to, in the record's shape
+function songLinks(g){return {
+ sheets:g.r.sheet.map(x=>x.lib?{src:'phone',lib:x.lib}:x.draft?{src:'draft'}:{src:'drive',url:x.url||''}),
+ folder:g.r.folder.length?{a:g.artist,t:g.title}:null,
+ videos:g.r.lesson.map(x=>x.url),analysis:g.r.analysis.map(x=>x.key),jam:g.r.mix.map(x=>x.mix)}}
+const songNewId=()=>'s_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function songMake(g){const now=new Date().toISOString();return {id:songNewId(),title:g.title,artist:g.artist||'',aliases:[],status:'learning',createdAt:now,touchedAt:g.at?new Date(g.at).toISOString():now,links:songLinks(g),notes:''}}
+// touching a song: create its record if needed, refresh its links, apply the change
+function songTouch(g,patch){const all=songsGet();let r=all.find(x=>sameSong(x,g));
+ if(!r){r=songMake(g);all.unshift(r)}
+ Object.assign(r,patch||{},{links:songLinks(g),touchedAt:new Date().toISOString()});if(!r.artist&&g.artist)r.artist=g.artist;
+ store.set('songs2',all);return r}
+// every V1 item a song points to, as one key each (for the M2 check)
+const songItemKeys=l=>[...l.sheets.map(s=>s.src==='phone'?'lib:'+s.lib:s.src==='draft'?'draft':'drive:'+s.url),...(l.folder?['folder:'+vlKey(l.folder.a)+'|'+vlKey(l.folder.t)]:[]),...l.videos.map(u=>'vid:'+u),...l.analysis.map(k=>'ana:'+k),...l.jam.map(k=>'jam:'+k)];
+// M2: a record for every song in the learning list. Checked: as many records as list rows, every item linked to exactly one record.
+async function v2MigM2(){const log=store.get('v2mig',{done:[]})||{done:[]};if((log.done||[]).includes('M2'))return;
+ if(store.get('songs2',null)){log.done=[...(log.done||[]),'M2'];store.set('v2mig',log);return}// already there (restored from a backup)
+ const snap=()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(KP)&&!/\.(songs2|v2mig|profile)$/.test(k))o[k]=localStorage.getItem(k)}return JSON.stringify(o)};
+ const before=snap(),G=learnSongs(),recs=G.map(songMake);
+ const want=G.reduce((a,g)=>a+g.r.sheet.length+(g.r.folder.length?1:0)+g.r.lesson.length+g.r.analysis.length+g.r.mix.length,0);
+ const keys=recs.flatMap(r=>songItemKeys(r.links)),seen=new Map();keys.forEach(k=>seen.set(k,(seen.get(k)||0)+1));
+ const twice=[...seen].filter(([,n])=>n>1).map(([k])=>k);
+ const bad=recs.length!==G.length?'records ≠ songs':keys.length!==want?'links ≠ items':twice.length?'an item is linked to more than one song ('+twice.slice(0,3).join(', ')+')':snap()!==before?'V1 data changed while building':'';
+ if(bad){log.warn='M2: '+bad+'; song records not written';store.set('v2mig',log);return}
+ if(recs.length){try{await safetyCopy('M2')}catch(e){}}
+ if(store.get('songs2',null))return;
+ store.set('songs2',recs);log.done=[...(log.done||[]),'M2'];log.at2=Date.now();log.report={...(log.report||{}),M2:{songs:recs.length,links:keys.length}};store.set('v2mig',log)}

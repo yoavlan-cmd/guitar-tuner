@@ -21,7 +21,7 @@ const V1={userName:'Yoav',ideaPrefs:{lang:'both',bands:['Radiohead'],styles:['fo
  const pr=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.profile')));console.log('  prefilled:',JSON.stringify(pr&&pr.onboarding.prefilled));
  ok(pr&&pr.name==='Yoav'&&pr.songLang.join()==='he,en'&&pr.instruments.sort().join()==='acoustic,electric'&&pr.level==='intermediate'&&pr.artists[0]==='Tuna'&&pr.artists.includes('Radiohead')&&pr.skills.includes('barre'),'the profile is filled in from what the app knows (name, languages, instruments, level, artists, chords)');
  ok(JSON.stringify(await v1now())===JSON.stringify(V1),'V1 data is unchanged');
- const mig=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.v2mig')));ok(mig&&mig.done.join()==='M1'&&mig.report.M1.existing===true,'the migration is logged (M1)');
+ const mig=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.v2mig')));ok(mig&&mig.done[0]==='M1'&&mig.done.filter(x=>x==='M1').length===1&&mig.report.M1.existing===true,'the migration is logged (M1, then M2 for the song records)');
  ok(await p.evaluate(async()=>(await window.__bk.keys()).some(k=>/^backup:pre-M1/.test(k))),'a safety copy was kept before it');
  // only the screens with gaps
  const seen=[];await p.tap('#obNext');for(let i=0;i<10;i++){const h=await p.$eval('#onb h2',e=>e.textContent).catch(()=>'');if(!h)break;seen.push(h);if(/will do for you/.test(h))break;await p.tap('#obNext');await p.waitForTimeout(60)}
@@ -33,7 +33,7 @@ const V1={userName:'Yoav',ideaPrefs:{lang:'both',bands:['Radiohead'],styles:['fo
  ok(await p.$eval('#taste',e=>e.value)==='Acoustic covers','a taste the player wrote is kept');
  // runs once: reload doesn't redo it
  const prof1=await p.evaluate(()=>localStorage.getItem('tuner.profile'));await p.reload();await p.waitForTimeout(700);
- ok(await p.evaluate(()=>localStorage.getItem('tuner.profile'))===prof1&&await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.v2mig')).done.length)===1,'reopening the app doesn’t run the migration again');
+ ok(await p.evaluate(()=>localStorage.getItem('tuner.profile'))===prof1&&await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.v2mig')).done.filter(x=>x==='M1').length)===1,'reopening the app doesn’t run the migration again');
  // a first run that stopped before writing the profile: it simply runs again and gives the same profile
  const strip=s=>{const o=JSON.parse(s);delete o.updatedAt;o.onboarding={prefilled:o.onboarding.prefilled};return JSON.stringify(o)};
  const fresh=await p.evaluate(()=>JSON.stringify(window.__v2.prefill()));

@@ -516,7 +516,7 @@ $('mixNew').onclick=()=>{
  if(!mxIdx.length&&!mxSong&&!mxBusy&&mxGh()){mxPickLocal=false;$('mixIn').click();return}
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
 $('mixIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(mxPickLocal)mxStart(f);else{mxView(true);mxCloudSubmit(f)}};
-mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll();try{renderLearn()}catch(e){}});
+const mxReady=mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll();try{renderLearn()}catch(e){}});
 window.__mx={gains:()=>mxSong&&mxSong.tracks?mxGains():null,node:()=>!!mxNode,level:()=>{if(!mxNode)return -1;if(!mxNode._an){mxNode._an=mxCtx.createAnalyser();mxNode._an.fftSize=2048;mxNode.connect(mxNode._an)}const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);let e=0;for(const x of a)e+=x*x;return Math.sqrt(e/a.length)},render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
 
 

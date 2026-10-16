@@ -1,9 +1,10 @@
 /* ================= I'm learning: every song you have something for, and what kind of material it has ================= */
 // One row per song, gathered from: Guitaring sheets (Drive list + this phone), sheets saved on this phone, the Drive songs folder,
 // video lessons, practice-mixer splits, saved chord analyses, an unfinished sheet, and songs marked "On it" in the song ideas.
-const LKINDS=[['sheet','SHEET','Chord sheet'],['folder','DRIVE','Songs folder'],['lesson','LESSON','Video lesson'],['mix','MIX','Practice mixer'],['analysis','VIDEO','Chord analysis']];
-const LTAG={sheet:'Sheet',folder:'Folder',lesson:'Lesson',mix:'Mixer',analysis:'Chords'};// short words when the icons are off
-let learnF={},learnOpen=null,learnQ='';
+// the material chips, in the V2 order (song guides, riff guides and gear tips join them in later phases)
+const LKINDS=[['sheet','SHEET','Guitaring sheet'],['folder','DRIVE','Drive sheets'],['lesson','LESSON','Video lessons'],['analysis','VIDEO','Play-along'],['mix','MIX','Jam track']];
+const LTAG={sheet:'Sheet',folder:'Drive',lesson:'Lesson',analysis:'Play-along',mix:'Jam'};// short words when the icons are off
+let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='';
 const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
 function learnSongs(){
  const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
@@ -23,21 +24,29 @@ function learnSongs(){
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
+ // status from the song records; artists for the artist filter
+ const S=G.map(songStatus),am=new Map();G.forEach(g=>{if(!g.artist)return;const k=vlKey(g.artist),o=am.get(k);if(o)o[2]++;else am.set(k,[k,g.artist,1])});
+ const arts=[...am.values()].sort((a,b)=>a[1].localeCompare(b[1],'he'));if(learnArt&&!am.has(learnArt))learnArt='';
  box.innerHTML=G.length?`<input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${G.length} song${G.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
+ <div class="lstat" role="group" aria-label="Show songs by status">${[['','All',G.length],...SONG_ST.map(([k,l])=>[k,k==='idea'?'Ideas':l,S.filter(x=>x===k).length])].map(([k,l,n])=>`<button type="button" class="chip" data-ls="${k}" aria-pressed="${learnSt===k}">${l}<small>${n}</small></button>`).join('')}</div>
+ ${arts.length>1?`<select id="learnArt" class="textin lart" aria-label="Show one artist"><option value="">All artists (${arts.length})</option>${arts.map(([k,a,n])=>`<option value="${esc(k)}"${learnArt===k?' selected':''} dir="auto">${esc(a)} (${n})</option>`).join('')}</select>`:''}
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
  if(!G.length)return;
- const draw=()=>{const q=vlKey(learnQ),f=G.filter(g=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
+ const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
-   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span><span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
+ box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{learnSt=b.dataset.ls;renderLearn()});
+ if($('learnArt'))$('learnArt').onchange=e=>{learnArt=e.target.value;renderLearn()};
  box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
  $('learnList').onclick=e=>{const b=e.target.closest('[data-la]');
   if(!b){const r=e.target.closest('[data-li]');if(r){const k=vlKey(G[+r.dataset.li].title);learnOpen=learnOpen===k?null:k;draw()}return}
   const g=G[+b.dataset.g],a=b.dataset.la;
+  if(a==='st'){songTouch(g,{status:b.dataset.v});renderLearn();try{renderLibPage()}catch(e){}return}
   if(a==='lib'){const ent=libGet(b.dataset.v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
   else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
   else if(a==='ana'){const d=loadSong(b.dataset.v);if(!d)return;vid.pause();A=d;fileKey=b.dataset.v;showSheet();window.scrollTo({top:0})}
@@ -51,7 +60,7 @@ function learnDetail(g,i){
  const row=(t,title,sub,act)=>`<div class="lit">${SK(t)}<span class="ltt"><b dir="auto">${title}</b>${sub?`<small dir="auto">${sub}</small>`:''}</span>${act}</div>`;
  const miss=(t,title,act)=>`<div class="lit miss">${SKoff(t)}<span class="ltt"><b>${title}</b></span>${act}</div>`;
  const go=(a,v,l)=>`<button type="button" data-la="${a}" data-g="${i}" data-v="${esc(v||'')}">${l}</button>`,lnk=(u,l)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${l} ↗</a>`;
- const s={title:g.title,artist:g.artist};let h='';
+ const s={title:g.title,artist:g.artist},cur=songStatus(g);let h=`<div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-la="st" data-g="${i}" data-v="${k}" aria-pressed="${cur===k}">${l}</button>`).join('')}</div>`;
  h+=g.r.sheet.length?g.r.sheet.map(x=>row('SHEET',esc(x.label),esc(x.sub||''),x.lib?go('lib',x.lib,'Open'):x.draft?go('draft','','Continue'):lnk(x.url,'Open'))).join('')
   :miss('SHEET','No chord sheet yet',go('write','','Write it')+lnk(chordsLink(s),'Find'));
  h+=g.r.folder.map(x=>row('DRIVE',esc(x.label),'',lnk(x.url,'Open'))).join('');

@@ -314,7 +314,7 @@ These stay under Learn as **New songs to learn**, collapsed until opened. The da
     "folder":   {"a":"Tuna","t":"יא"},
     "videos":   ["<vlinks id>"],
     "analysis": ["<song.fileKey>"],
-    "jam":      "<mxIdx id>",
+    "jam":      ["<mxIdx id>"],
     "guides":   {"easy":"g_1","full":"g_2"},
     "riffs":    ["r_1"],
     "recordings": ["rec_1"],
