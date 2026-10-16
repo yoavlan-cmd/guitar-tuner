@@ -241,7 +241,7 @@ const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
 const mxFmt=n=>mmss(n/mxSR());
 function mxTimeUI(){if(!mxSong)return;const s=$('mxSeek');if(s){if(!s._drag)s.value=mxPos;mxSeekUI()}mxBarTime()}
 // the progress bar's fill and the two times (where you are · how long the song is)
-function mxSeekUI(){const s=$('mxSeek');if(!s||!mxSong)return;const v=+s.value;s.style.setProperty('--p',(mxSong.len?v/mxSong.len*100:0)+'%');$('mxT').textContent=mxFmt(v);const d=$('mxD');if(d)d.textContent=mxFmt(mxSong.len)}
+function mxSeekUI(){const s=$('mxSeek');if(!s||!mxSong)return;const v=+s.value,pp=(mxSong.len?v/mxSong.len*100:0)+'%';s.style.setProperty('--p',pp);const w=s.closest('.mixtime');if(w)w.style.setProperty('--p',pp);$('mxT').textContent=mxFmt(v);const d=$('mxD');if(d)d.textContent=mxFmt(mxSong.len)}
 // the level meters next to each fader: loudness in dB, falling back slowly like a desk's meters
 let mxLv=[];
 function mxMeters(lv){const els=document.querySelectorAll('#mxRows [data-lv]');els.forEach(el=>{const k=+el.dataset.lv,r=lv&&lv[k]||0,db=r>0?20*Math.log10(r):-99,t=Math.max(0,Math.min(1,(db+48)/45));
@@ -264,12 +264,25 @@ function mxRows(){const box=$('mxRows');if(!box)return;box.style.setProperty('--
  <output>${v}%</output><div class="fader"><i class="meter" aria-hidden="true"><i data-lv="${k}"></i></i><input type="range" min="0" max="150" step="5" value="${v}" data-vol="${k}" aria-label="${esc(t.name)} volume" style="--p:${(v/150*100).toFixed(1)}%"></div>
  <b title="${esc(t.name)}">${esc(MX_SHORT[t.id]||t.name)}</b>
  <div class="ms"><button type="button" data-mute="${k}" class="${t.mute?'on':''}" aria-pressed="${t.mute}" title="Mute ${esc(t.name)}">M</button><button type="button" data-solo="${k}" class="${mxSolo===t.id?'on':''}" aria-pressed="${mxSolo===t.id}" title="Solo ${esc(t.name)}">S</button></div></div>`}).join('');mxLv=[]}
+// the song's waveform for the seek bar (all its parts together; each part is 16-bit stereo, left/right interleaved), worked out once per song: a smooth mirrored shape,
+// drawn twice (unplayed grey, played mint; the played one is clipped at the position)
+const MX_WN=72;
+function mxWave(s){if(s._wave)return s._wave;const n=s.len||1,w=new Float32Array(MX_WN),per=n/MX_WN,step=Math.max(1,Math.floor(per/160));
+ for(let b=0;b<MX_WN;b++){const a0=Math.floor(b*per),a1=Math.min(n,Math.floor((b+1)*per));let m=0;for(let i=a0;i<a1;i+=step){let v=0;for(const t of s.tracks){const d=t.data;v+=Math.abs(d[2*i]||0)+Math.abs(d[2*i+1]||0)}if(v>m)m=v}w[b]=m}
+ const mx=Math.max(...w)||1,mn=Math.min(...w);for(let b=0;b<MX_WN;b++)w[b]=Math.pow((w[b]-mn)/(mx-mn||1),1.4);
+ // a light smoothing, so it reads as a flowing shape
+ const o=new Float32Array(MX_WN);for(let b=0;b<MX_WN;b++)o[b]=(w[Math.max(0,b-1)]+2*w[b]+w[Math.min(MX_WN-1,b+1)])/4;return s._wave=o}
+function mxWaveSVG(s,cls){let w;try{w=mxWave(s)}catch(e){w=new Float32Array(MX_WN).fill(.3)}const H=14,X=i=>+(i/(MX_WN-1)*200).toFixed(1),Y=(i,d)=>+(H+d*(1.2+w[i]*(H-2.5))).toFixed(1);
+ // smooth curves through the midpoints, along the top and back along the bottom
+ const run=(idx,d)=>{let p='';for(let k=1;k<idx.length;k++){const a=idx[k-1],c=idx[k];p+=` Q${X(a)} ${Y(a,d)} ${((X(a)+X(c))/2).toFixed(1)} ${((Y(a,d)+Y(c,d))/2).toFixed(1)}`}const z=idx[idx.length-1];return p+` L${X(z)} ${Y(z,d)}`};
+ const fw=[...Array(MX_WN).keys()],bw=[...fw].reverse();let top=`M0 ${Y(0,-1)}`+run(fw,-1),bot=` L${X(MX_WN-1)} ${Y(MX_WN-1,1)}`+run(bw,1);
+ return `<svg class="${cls}" viewBox="0 0 200 ${2*H}" preserveAspectRatio="none"><path d="${top}${bot} Z"/></svg>`}
 // the open song: transport, presets, one slider per part; the list of songs folds away underneath
 function mxMixer(){mxCreating=false;const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome();
  const gtrs=s.tracks.filter(t=>mxIsGtr(t.id)).length,n=mxIdx.length;
  let nm=null;try{nm=songFromName(s.name)}catch(e){}if(!nm||!nm.t)nm={t:s.name,a:''};
  v.innerHTML=`<div class="mixhead"><div class="mixttl"><small class="mixk"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Band breakdown</small><b dir="auto">${esc(nm.t)}</b>${nm.a?`<span dir="auto">${esc(nm.a)}</span>`:''}</div><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
- <div class="mixtrans"><div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
+ <div class="mixtrans"><div class="mixtime"><div class="mxwave" aria-hidden="true">${mxWaveSVG(s,'w0')}${mxWaveSVG(s,'w1')}<i class="mxorb"></i></div><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
  <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div>
  <div class="mixspeed seg" role="group" aria-label="Speed (the pitch stays the same)">${MX_SPEEDS.map(([r,l])=>`<button type="button" data-rate="${r}" aria-pressed="${mxRate===r}">${l}</button>`).join('')}</div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}" aria-pressed="${mxPre===k}">${l}</button>`).join('')}</div>
