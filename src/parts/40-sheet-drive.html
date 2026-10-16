@@ -207,7 +207,7 @@ async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(
 })}
 /* ---- Phone app: each person saves to their own Google Drive ---- */
 // Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off. (window.__GD_CLIENT: tests)
-const GDRIVE_CLIENT_ID=window.__GD_CLIENT||'';
+const GDRIVE_CLIENT_ID=window.__GD_CLIENT||'35692915820-mnvv6grqqb6526rvo27i436b3mvtfnd1.apps.googleusercontent.com';
 const GD_SCOPE='https://www.googleapis.com/auth/drive.file',GD_ROOT='Guitar sheets',GD_API='https://www.googleapis.com/drive/v3/files',FOLDER_MT='application/vnd.google-apps.folder';
 // the client ID is used for backups to Drive; saving sheets straight to Drive stays off unless turned on (gd.sheets), so sheets keep using the share menu
 const gdOn=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
