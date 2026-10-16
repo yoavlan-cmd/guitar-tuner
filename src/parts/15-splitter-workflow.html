@@ -1,0 +1,84 @@
+<script type="text/plain" id="mxWf">
+# Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v3
+# Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
+name: Split song
+run-name: split ${{ inputs.id }}
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: Job id (the app uploads the song to branch j-<id>)
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: split-${{ inputs.id }}
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      ID: ${{ inputs.id }}
+      REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+            ~/.cache/torch
+          key: guitaring-demucs-4.1.0-torch-2.5.1
+      - name: Install the separation model
+        run: |
+          set -o pipefail
+          {
+            pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+            pip install demucs==4.1.0 numpy
+            which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
+            python -c "import numpy, sphn, lameenc, torch, demucs.api; print('ready', torch.__version__)"
+          } 2>&1 | tee -a log.txt
+      - name: Get the song
+        run: |
+          git init -q job && cd job
+          git fetch -q --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "refs/heads/j-${ID}"
+          git checkout -q FETCH_HEAD
+          ls -la
+      - name: Split it
+        run: |
+          f=$(ls job/song.* | head -1)
+          set -o pipefail
+          python -m demucs -n htdemucs_6s --shifts 3 --overlap 0.5 --flac -o out --filename "{stem}.{ext}" "$f" 2>&1 | tee -a log.txt
+          mkdir res && cp out/htdemucs_6s/*.flac res/
+          dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" || echo 0)
+          echo "{\"ok\":true,\"format\":\"flac\",\"stems\":[\"drums\",\"bass\",\"other\",\"vocals\",\"guitar\",\"piano\"],\"duration\":${dur:-0}}" > res/done.json
+          ls -la res
+      - name: Report a failure to the app
+        if: failure()
+        run: |
+          rm -rf res && mkdir res
+          python - <<'PY'
+          import json, re
+          try:
+              lines = [l.strip() for l in open('log.txt', errors='replace') if l.strip()]
+          except Exception:
+              lines = []
+          lines = [l for l in lines if not re.match(r'^[\d.]+%|^\s*\|', l)]
+          tail = ' / '.join(lines[-3:])[-300:]
+          json.dump({"ok": False, "error": "The split failed on GitHub." + (" Last message: " + tail if tail else ""), "log": lines[-40:]}, open('res/done.json', 'w'))
+          PY
+      - name: Hand the parts back
+        if: always()
+        run: |
+          cd res
+          git init -q -b r
+          git add -A
+          git -c user.name=guitaring -c user.email=guitaring@users.noreply.github.com commit -qm "parts ${ID}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/r-${ID}"
+          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" --delete "j-${ID}" || true
+</script>
+

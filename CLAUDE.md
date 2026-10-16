@@ -6,20 +6,21 @@ Read `docs/PRD-Guitaring-V1.md` (§0 and the section for the feature you touch) 
 
 ## Repo layout
 The repo root **is** the GitHub Pages site (served from `main`): `index.html`, `sw.js`, `manifest.webmanifest`, icons, `ideas.json`, `ideas_build.py`.
-- `src/guitaring.html` — the single source file (CSS + HTML + JS). **Edit this, never `index.html`.**
+- `src/parts/NN-name.html` — the source, split into parts by feature (CSS, markup, then one app script that opens in `20-core-tuner` and closes in `99-startup`). The build joins them in name order into one `index.html`. **Edit the parts, never `index.html`.** A new part gets a number between its neighbours.
 - `tools/` — `build.sh`, `release.sh`, `get_test_samples.sh`, `daily-job-prompt.md`.
-- `tests/` — Playwright checks (see PRD §11). `docs/` — PRD.
+- `tests/` — Playwright checks (see PRD §11). `docs/` — PRD, V2 build plan and V2 deployment plan (follow them for V2 work).
 
 ## Workflow
-- Build: `bash tools/build.sh` (src/guitaring.html → index.html).
+- Build: `bash tools/build.sh` (src/parts/*.html → index.html; `OUT=path` writes elsewhere).
 - Release: `bash tools/release.sh` (build + bump `guitaring-vNN` in `sw.js` — required on every `index.html` change, or phones keep the old app).
-- Deploy: commit `src/guitaring.html`, `index.html`, `sw.js` together and get it onto `main` (Pages serves `main`).
-- Commit `src/guitaring.html` and the built `index.html` in the same commit so they never drift.
-- Beta preview: `bash tools/build.sh beta` writes `beta/index.html` (served at …/guitar-tuner/beta/, shares the main app's data, service worker and `ideas.json`; shows a BETA badge). Ship it on its own branch/PR to `main` so the live app is untouched.
+- Deploy (live release): commit `src/parts/`, `index.html`, `sw.js` together and get it onto `main` (Pages serves `main`). `LIVE=1 node tests/split_t.js` proves `index.html` is a fresh build.
+- Before a live release, keep the current live version as a branch `live-vNNN` (rollback point).
+- Beta: `bash tools/build.sh beta` writes `beta/index.html` (served at …/guitar-tuner/beta/, BETA badge, installs as its own "Guitaring beta" icon via `beta/manifest.webmanifest`). The beta keeps **its own data**: `tunerb.*` / `guitaringb.*` keys and the database `guitaring-beta`, copied from the live data on its first open; big items are read from the live database when needed and copied; it never writes the live app's data. In code always use `KP` / `KG` / `IDBN` (never a literal `'tuner.'`, `'guitaring.'` or `'guitaring'` database name). Beta PRs touch `src/`, `beta/`, `tests/`, `docs/` only; the live `index.html` and `sw.js` change only in a release PR.
 
 ## Rules
 - Find code by section banners (`/* ===== … ===== */`) and element ids; PRD §9 code map (line numbers are approximate). Make small exact edits.
-- Do not rename element ids, `localStorage` keys (`tuner.*`, a prefix kept from the app's first name) or data shapes (PRD §7) — users have data saved under them.
+- Do not rename element ids, `localStorage` keys (`tuner.*`, a prefix kept from the app's first name) or data shapes (PRD §7) — users have data saved under them. V2 only adds new keys (see `docs/V2-deployment-plan.md` §4).
+- Backup and restore (`85-backup`) must cover every new kind of data: small data under `KP`/`KG`, big data in the phone database (`mxPut`/`mxGet`).
 - Claude calls go through `sampleFn` only (works both with the phone API key and inside a Claude artifact).
 - UI: phone-first (test 390 px and 360 px wide), minimal, secondary sections collapsed until opened, plain language, `dir="auto"` for user text (Hebrew), chord names LTR.
 - Tuner changes: run the whole tuner suite in `tests/` (`tun_*.js`, `tun_auto.js`) — audio regressions are silent.

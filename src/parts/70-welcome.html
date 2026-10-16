@@ -1,0 +1,71 @@
+/* ================= Welcome screen ================= */
+const JOKES=[
+ "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
+ "Metallica paused their world tour when they heard {n} started practising. They might be available soon.",
+ "Breaking: guitar shops report a sudden shortage of picks. Sources point to {n}.",
+ "Your neighbours asked for a set list, {n}. Mostly so they know when to leave.",
+ "Slash heard about you, {n}. He's considering a second hat.",
+ "Eric Clapton wrote “Tears in Heaven”. Your F chord wrote “Tears in the Living Room”. Let's fix that, {n}.",
+ "The guitar has been waiting all day, {n}. It's not angry. Just out of tune.",
+ "Rumour has it Mashina are looking for a stand-in. Warm up, {n}.",
+ "Today's forecast: 90% chance of barre chords, light showers of G/B. Dress warmly, {n}.",
+ "Jimi Hendrix set his guitar on fire. Please just tune yours, {n}.",
+ "Fun fact: 10 minutes a day beats 2 hours on Saturday. Not-so-fun fact: you knew that, {n}.",
+ "Your fingertips called, {n}. They want calluses, and they want them now.",
+ "Pearl Jam's roadie asked if you're free next summer, {n}. Mostly to carry amps. But it's a start.",
+ "Somewhere, a capo is lying in a drawer wondering what it did wrong, {n}.",
+ "Aviv Gefen just sent a sad face emoji. He heard you skipped practice yesterday, {n}.",
+ "Good news, {n}: every great guitarist once played like you. Bad news: they practised.",
+ "Your guitar picked you, {n}. Return the favour.",
+ "Radiohead wrote “Creep” in four chords. You know at least three. Let's go, {n}.",
+ "Oasis broke up over less than a missed chord change. Stay together with your guitar, {n}.",
+ "Statistically, 7 out of 10 cats leave the room when you play, {n}. The other 3 are fans.",
+ "The strings are fresh, the coffee is hot and the excuses are out of stock, {n}.",
+ "The neighbour's dog has started howling in key. That's progress, {n}.",
+ "Keith Richards is still touring. What's your excuse, {n}?",
+ "Legend says if you play “Wonderwall” perfectly, a man in a bucket hat appears. Try it, {n}.",
+ "Your guitar just filed a missing-person report, {n}. Last seen: you, three days ago.",
+ "Fun fact, {n}: the G string is not a fashion statement. Tune it.",
+ "Studies show 100% of songs sound better in tune. The study was me, {n}. Tap Listen.",
+ "Your F barre chord has been buzzing since 2019, {n}. Today's the day.",
+ "Your amp misses you, {n}. It's been humming to itself just to stay busy.",
+ "Spotify Wrapped will never know you played “Knockin' on Heaven's Door” 400 times. I will, {n}.",
+ "Breaking: local guitarist {n} discovers there are more than four chords. Markets react calmly.",
+ "The metronome isn't judging you, {n}. Okay, it is. Practise anyway.",
+ "Berry Sakharof makes it look effortless. That's because he practised while you were scrolling, {n}.",
+ "Your picks have a group chat, {n}. They're planning an escape under the couch.",
+ "Somewhere in Tel Aviv a busker is getting better while you read this, {n}.",
+ "The capo is not a cheat code, {n}. Okay, it kind of is. Use it.",
+ "Your calluses are filing for unemployment, {n}. Give them some work.",
+ "B minor called. It knows you've been avoiding it, {n}.",
+ "Strings are like milk, {n}: they expire. When did you last change yours?",
+ "Mark Knopfler plays without a pick. You play without practising. Only one of those is a style, {n}.",
+ "The neighbours stopped complaining, {n}. Either it's respect or they moved.",
+ "One more “Wonderwall” and Oasis reunite just to stop you. Learn something new today, {n}.",
+ "Shalom Hanoch has been rocking for 50 years. You can manage 15 minutes, {n}.",
+ "Your strumming hand has rhythm, {n}. Your fretting hand is still negotiating.",
+ "Ehud Banai has a song for every mood. Pick one and learn it, {n}.",
+ "Your guitar is the only thing in the house that gets better when used, {n}. Unlike the couch."
+];
+function welcomeName(){return store.get('userName','')}
+// new jokes arrive every couple of days with the daily ideas file; a fresh one is shown first, once
+function allJokes(){const ex=(store.get('jokesExtra',[])||[]).map(x=>x&&x.text).filter(t=>t&&/\{n\}/.test(t));return [...new Set([...JOKES,...ex])]}
+function pickJoke(){const pool=allJokes(),seen=new Set(store.get('jokesSeen',[])),last=store.get('lastJokeTxt','');
+ const fresh=(store.get('jokesExtra',[])||[]).slice().reverse().map(x=>x&&x.text).find(t=>t&&/\{n\}/.test(t)&&!seen.has(t));
+ let j=fresh;if(!j){do{j=pool[Math.floor(Math.random()*pool.length)]}while(pool.length>1&&j===last)}
+ seen.add(j);store.set('jokesSeen',[...seen].slice(-200));store.set('lastJokeTxt',j);return j}
+function renderWelcome(){
+ const n=welcomeName(),w=$('welcome');
+ if(!n){w.querySelector('.wbody').innerHTML=`<h2>Welcome to Guitaring</h2><p>What should we call you?</p><form id="wName" class="wnameform"><input id="wNameIn" class="textin" type="text" dir="auto" maxlength="24" autocomplete="given-name" placeholder="Your first name" required><button class="btn cta">Let's go</button></form>`;
+  $('wName').onsubmit=e=>{e.preventDefault();const v=$('wNameIn').value.trim();if(!v)return;store.set('userName',v);try{syncDriveLinks()}catch(err){}renderWelcome()};return}
+ const j=esc(pickJoke()).replace(/\{n\}/g,esc(n));
+ w.querySelector('.wbody').innerHTML=`<p class="whey">Hey, <button type="button" class="wname" id="wRename" title="Change name">${esc(n)}</button>.</p><p class="wjoke" id="wJoke">${j}</p><button type="button" class="wmore" id="wMore">Another one ↻</button>
+ <div class="wgo"><button class="btn wmain" data-go="tune">${SK('TUNE')} Tune up</button><button class="btn wsec" data-go="song">${SK('LEARN')} Learn a song</button><div class="wlinks"><button class="btn wout" data-go="write">${SK('WRITE')} Write a song</button><button class="btn wout" data-go="gear">${SK('GEAR')} My gear</button></div></div>`;
+ $('wMore').onclick=()=>{$('wJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(n))};
+ $('wRename').onclick=()=>{store.set('userName','');renderWelcome()};
+}
+function closeWelcome(go){$('welcome').hidden=true;document.body.classList.remove('wopen');if(go==='write'||go==='song'){setTab('song');songsHome();if(go==='write'){const t=$('shotNew');if(t&&!t.hidden){setTimeout(()=>{t.scrollIntoView({behavior:'smooth',block:'center'});['shotNew','writeNew','draftCard'].forEach(k=>{const e=$(k);if(e&&!e.hidden){e.classList.add('pulse');setTimeout(()=>e.classList.remove('pulse'),1600)}})},80)}}}else if(go)setTab(go)}
+$('welcome').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){const g=b.dataset.go;closeWelcome(g);if(g==='song'||g==='write')setSongSeg('add')}});
+$('wSkip').onclick=()=>closeWelcome('');
+document.body.classList.add('wopen');renderWelcome();
+

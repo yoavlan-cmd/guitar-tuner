@@ -1,0 +1,299 @@
+/* ================= Chord sheet, My songs, Google Drive ================= */
+const LIBK='lib';
+const libAll=()=>store.get(LIBK,[]);
+const libGet=id=>libAll().find(e=>e.id===id);
+function libWrite(list){try{localStorage.setItem(KP+LIBK,JSON.stringify(list));return true}catch(e){return false}}
+function libSync(){if(!A||!A.libId)return;const l=libAll(),e=l.find(x=>x.id===A.libId);if(!e)return;e.data=compact({...A,libId:undefined,feat:undefined});e.saved=Date.now();libWrite(l)}
+const fmtDate=t=>new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+function renderLib(){
+ const l=libAll();
+ $('libList').innerHTML=l.length?l.map(e=>{const d=e.data||{},t=d.play?tName(d.play.tun)+(d.play.capo?' · capo '+d.play.capo:''):'';
+  const dr=e.drive?(e.drive.at>=e.saved?'<span class="badge">In Drive</span>':'<span class="badge old">Drive copy older</span>'):'';
+  return `<button class="libitem" data-id="${esc(e.id)}"><b dir="auto">${esc(e.name)}${dr}</b><span>${d.artist?`<span dir="auto">${esc(d.artist)}</span> · `:''}${esc(t)} · saved ${fmtDate(e.saved)}</span></button>`}).join('')
+  :'<p class="tip">Songs you finish and save appear here. Open one any time to practise from its chord sheet.</p>';
+ // with a Drive folder button the list stays tucked away; without one it's the main view
+ const hasFolder=!$('folderBtn').hidden;$('libCount').textContent=l.length?'('+l.length+')':'';
+ $('libSaved').hidden=hasFolder&&!l.length;const ls=$('libSaved');if(!hasFolder)ls.open=true;else if(!ls._mine)ls.open=false;$('libSaved').classList.toggle('flat',!hasFolder);
+}
+$('libSaved').querySelector('summary').addEventListener('click',()=>{$('libSaved')._mine=true});
+$('libList').addEventListener('click',e=>{const b=e.target.closest('.libitem');if(!b)return;const ent=libGet(b.dataset.id);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()});
+function showLanding(){$('writeView').hidden=true;$('writeNew').hidden=false;$('shotNew').hidden=false;$('readyCard').hidden=true;$('songView').hidden=true;$('sheetView').hidden=true;$('prog').hidden=true;$('drop').hidden=false;$('libCard').hidden=false;renderLib();try{renderDraft()}catch(e){}try{renderResume()}catch(e){}try{renderCatalog()}catch(e){}try{renderVids()}catch(e){}try{renderLearn()}catch(e){}}
+
+/* ---- sheet content ---- */
+function printify(svg){
+ const F="font-family=\"Arial Narrow, Arial, sans-serif\"";
+ return svg.replace(/class="dgLine"/g,'class="dgLine" stroke="#151A19" stroke-width="1.6"').replace(/class="dgNut"/g,'class="dgNut" fill="#151A19"')
+  .replace(/class="dgMute"/g,'class="dgMute" stroke="#151A19" stroke-width="2.6" stroke-linecap="round"').replace(/class="dgOpen"/g,'class="dgOpen" fill="#151A19"').replace(/class="dgDot"/g,'class="dgDot" fill="#151A19"')
+  .replace(/class="dgNum"/g,'class="dgNum" fill="#FFFFFF" font-size="10" font-weight="700" '+F).replace(/class="dgFret"/g,'class="dgFret" fill="#5D6964" font-size="10" font-weight="600" '+F)
+  .replace(/class="dgName"/g,'class="dgName" fill="#151A19" font-size="24" font-weight="800" '+F).replace(/class="dgNone"/g,'class="dgNone" fill="#5D6964" font-size="12" '+F);
+}
+function progression(){
+ const secs=(A.sections||[]).slice().sort((a,b)=>a.t-b.t);if(secs.length){const out=[];const idx=g=>{let k=-1;secs.forEach((x,j)=>{if(g.t0>=x.t-.05)k=j});return k};let cur=null,buf=[];const flush=()=>{if(buf.length){const ls=progressionOf(buf);if(cur!=null&&cur>=0)ls[0].sec=secs[cur].name;out.push(...ls)}buf=[]};A.segs.forEach((g,i)=>{const k=idx(g);if(k!==cur){flush();cur=k}buf.push(i)});flush();return out}
+ return progressionOf(A.segs.map((g,i)=>i));
+}
+function progressionOf(ids){
+ const it=ids.map(i=>({n:nameOf(A.segs[i]),t:A.segs[i].t0,i}));const same=(a,b,L)=>{for(let k=0;k<L;k++)if(it[a+k].n!==it[b+k].n)return false;return true};
+ const lines=[];let i=0;
+ while(i<it.length){let best=null;
+  for(let L=2;L<=8;L++){if(i+2*L>it.length)break;let k=1;while(i+(k+1)*L<=it.length&&same(i,i+k*L,L))k++;if(k>=2&&(!best||L*k>best.L*best.k||(L*k===best.L*best.k&&L<best.L)))best={L,k}}
+  if(best){lines.push({t:it[i].t,ch:it.slice(i,i+best.L).map(x=>x.n),x:best.k,from:it[i].i,to:it[i+best.L*best.k-1].i});i+=best.L*best.k}
+  else{const L=Math.min(4,it.length-i);lines.push({t:it[i].t,ch:it.slice(i,i+L).map(x=>x.n),x:1,from:it[i].i,to:it[i+L-1].i});i+=L}}
+ return lines;
+}
+function keyPoints(){
+ const pts=[],rep={};A.segs.forEach(g=>{if(g.c<NS){const k=nameOf(g);if(!rep[k])rep[k]=g}});const used=Object.keys(rep);
+ const barre=used.filter(k=>(shapeForSeg(rep[k])||{}).cost>=2);
+ if(barre.length)pts.push(`Barre chords: <b>${barre.map(esc).join(', ')}</b>. Practise these shapes on their own first.`);
+ const pairs={};for(let i=1;i<A.segs.length;i++){const a=A.segs[i-1],b=A.segs[i];if(a.c>=NS||b.c>=NS)continue;const k=nameOf(a)+' → '+nameOf(b);const d=a.t1-a.t0;(pairs[k]=pairs[k]||{n:0,min:1e9}).n++;pairs[k].min=Math.min(pairs[k].min,d)}
+ const top=Object.entries(pairs).filter(([k,v])=>v.n>=2).sort((a,b)=>b[1].n-a[1].n).slice(0,3);
+ if(top.length)pts.push('Most common changes: '+top.map(([k,v])=>`<b>${esc(k)}</b> (${v.n}×)`).join(', ')+'.');
+ const quick=Object.entries(pairs).filter(([k,v])=>A.bpm?v.min*A.bpm/60<=2.2:v.min<1.3).map(([k])=>k);
+ if(quick.length)pts.push(`Quick changes, about two beats or less: <b>${quick.slice(0,4).map(esc).join(', ')}</b>.`);
+ if(Math.abs(A.offset)>=10)pts.push(`The recording is ${Math.abs(Math.round(A.offset))} cents ${A.offset>0?'sharp':'flat'}. Set the tuner to A4 = ${Math.round(440*Math.pow(2,A.offset/1200))} Hz to play along.`);
+ return {pts,top:top.map(([k])=>k),used,barre,rep};
+}
+function sheetHTML(print){
+ if(A&&A.kind==='lyrics')return writtenSheetHTML(print);
+ const t=TUNINGS.find(x=>x.id===A.play.tun)||TUNINGS[0],name=(A.libId&&libGet(A.libId)?.name)||A.title||'Untitled song';
+ const meta=[`Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})`,`Capo <b>${A.play.capo?'fret '+A.play.capo:'none'}</b>`];
+ if(A.artist)meta.unshift(`Artist <b dir="auto">${esc(A.artist)}</b>`);
+ if(A.bpm)meta.push(`Tempo <b>≈${A.bpm} BPM</b>`);meta.push(`Length <b>${mmss(A.dur)}</b>`);
+ if(A.play.tun!==A.tuning.id)meta.push(`Recorded in <b>${esc(tName(A.tuning.id))}</b>`);
+ const dg=g=>{let svg=diagram(shapeForSeg(g),nameOf(g));return print?printify(svg):svg};
+ const kp=keyPoints(),lines=progression();
+ const notes=A.segs.map((g,i)=>({g,i})).filter(o=>o.g.note);
+ let h=`<h1 dir="auto">${esc(name)}</h1><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
+ h+=`<h3>Chords</h3><div class="pgrid">${kp.used.map(k=>dg(kp.rep[k])).join('')}</div>`;
+ h+=`<h3>Progression</h3><div class="prog">${lines.map(L=>{const ns=notes.filter(o=>o.i>=L.from&&o.i<=L.to);return `${L.sec?`<div class="sec">${esc(L.sec)}</div>`:''}<div class="pl"><time>${mmss(L.t)}</time><span class="ch">${L.ch.map(esc).join(' ')}</span><span class="x">${L.x>1?'×'+L.x:''}</span>${ns.map(o=>`<span class="pn" dir="auto">${mmss(o.g.t0)} · ${esc(nameOf(o.g))}: ${esc(o.g.note)}</span>`).join('')}</div>`}).join('')}</div>`;
+ if(kp.pts.length)h+=`<h3>Key points</h3><ul>${kp.pts.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+ if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
+ const plan=[`Tune to <b>${esc(t.name)}</b>${A.play.capo?` and put the capo on fret ${A.play.capo}`:''}.`,`Learn the shapes: <b>${kp.used.map(esc).join(', ')}</b>.`];
+ if(kp.top.length)plan.push(`Drill the changes for a minute each: <b>${kp.top.map(esc).join(', ')}</b>.`);
+ plan.push('Play along with the video at 0.75× speed, then at full speed.');
+ h+=`<h3>Practice plan</h3><ol>${plan.map(p=>`<li>${p}</li>`).join('')}</ol>`;
+ h+=`<div class="foot">Guitaring · ${fmtDate(Date.now())}</div>`;
+ return h;
+}
+function knownArtists(){return [...new Set(libAll().map(e=>e.data&&e.data.artist).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
+function showSheet(){
+ wFromWriter=false;$('writeView').hidden=true;$('songView').hidden=true;$('drop').hidden=true;$('writeNew').hidden=true;$('draftCard').hidden=true;$('resumeCard').hidden=true;$('shotNew').hidden=true;$('shotCard').hidden=true;$('libCard').hidden=true;$('prog').hidden=true;$('sheetView').hidden=false;
+ const ent=A.libId&&libGet(A.libId);$('shName').value=ent?ent.name:(A.title||'');$('artistAsk').hidden=true;
+ $('paper').innerHTML=sheetHTML(false);updateSheetButtons();shStatus('');try{renderSheetVid()}catch(e){}window.scrollTo({top:0});
+}
+function updateSheetButtons(){const ent=A.libId&&libGet(A.libId);$('shEdit').textContent=A.kind==='lyrics'?'Edit lyrics and chords':'Edit with the video';$('shSave').textContent=ent?'Update in My songs':'Save to My songs';$('shDel').hidden=!ent;$('delConfirm').hidden=true;
+ $('shStatus').innerHTML=ent&&ent.drive?`Drive copy: <a href="${esc(ent.drive.url)}" target="_blank" rel="noopener">open in Google Drive ↗</a>${ent.drive.at<ent.saved?' (older than your latest changes)':''}`:''}
+function shStatus(h){$('shStatus').innerHTML=h}
+$('shName').addEventListener('input',()=>{const h=$('paper').querySelector('h1');if(h)h.textContent=$('shName').value.trim()||A.title||'Untitled song'});
+$('shBack').onclick=()=>{if(A&&A.kind==='lyrics'&&wFromWriter){$('sheetView').hidden=true;openWriter(A,2);return}if(fileKey&&vid.src){$('sheetView').hidden=true;$('songView').hidden=false;curIdx=-1;syncSong(true)}else{A=null;showLanding()}};
+$('shEdit').onclick=()=>{if(A&&A.kind==='lyrics'){openWriter(A,2);return}if(fileKey&&vid.src){$('shBack').click();return}if(A.libId){pendingLib=A.libId;$('vidIn').click()}};
+function saveToLib(){
+ const name=$('shName').value.trim()||A.title||'Untitled song';let l=libAll();let ent=A.libId&&l.find(e=>e.id===A.libId);
+ if(!ent){ent={id:'s'+Date.now().toString(36),name,saved:Date.now()};l.unshift(ent);A.libId=ent.id}
+ ent.name=name;ent.saved=Date.now();ent.data=compact({...A,libId:undefined,feat:undefined});
+ if(!libWrite(l)){shStatus('Couldn’t save on this phone; storage is full or blocked. Save the PDF instead.');return null}
+ if(A.kind==='lyrics')store.set('writeDraft',null);
+ if(fileKey)try{localStorage.setItem(KP+'song.'+fileKey,JSON.stringify(compact(A)))}catch(e){}
+ $('paper').innerHTML=sheetHTML(false);updateSheetButtons();return ent;
+}
+$('shSave').onclick=()=>{const e=saveToLib();if(e)shStatus(`Saved “${esc(e.name)}” to My songs.`)};
+$('shDel').onclick=()=>{$('delConfirm').hidden=false};
+$('delNo').onclick=()=>{$('delConfirm').hidden=true};
+$('delYes').onclick=()=>{const id=A.libId;libWrite(libAll().filter(e=>e.id!==id));delete A.libId;if(fileKey)saveSong();updateSheetButtons();shStatus('Deleted from My songs.')};
+
+/* ---- PDF ---- */
+function loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(x=>x.src===src&&x.dataset.ok))return res();const el=document.createElement('script');el.src=src;el.onload=()=>{el.dataset.ok=1;res()};el.onerror=()=>rej(new Error('script'));document.head.appendChild(el)})}
+async function makePdf(){
+ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+ await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+ const host=document.createElement('div');host.className='paper print';host.style.cssText='position:absolute;left:-12000px;top:0';host.innerHTML=sheetHTML(true);document.body.appendChild(host);
+ try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+ const blocks=[...host.querySelectorAll('h1,.meta,h3,.pgrid svg,.pl,.ly,li,.notes-out,.foot')].map(el=>{const r=el.getBoundingClientRect(),o=host.getBoundingClientRect();return [r.top-o.top,r.bottom-o.top]});
+ const S=2,canvas=await window.html2canvas(host,{scale:S,backgroundColor:'#ffffff',logging:false});host.remove();
+ const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'pt',format:'a4'}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=24;
+ const k=(pw-2*m)/(canvas.width/S),pageCss=(ph-2*m)/k,total=canvas.height/S;let y=0,first=true;
+ while(y<total-1){let end=Math.min(total,y+pageCss);if(end<total){const fits=blocks.filter(([a,b])=>b<=end&&b>y).map(([a,b])=>b),cut=blocks.filter(([a,b])=>a<end&&b>end).map(([a])=>a);let brk=cut.length?Math.min(...cut):end;if(brk<=y+40)brk=end;end=brk}
+  const hpx=Math.ceil((end-y)*S),c=document.createElement('canvas');c.width=canvas.width;c.height=hpx;const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.drawImage(canvas,0,Math.floor(y*S),canvas.width,hpx,0,0,canvas.width,hpx);
+  if(!first)pdf.addPage();first=false;pdf.addImage(c.toDataURL('image/jpeg',.86),'JPEG',m,m,pw-2*m,(end-y)*k);y=end}
+ return pdf.output('blob');
+}
+const fileName=()=>(($('shName').value.trim()||A.title||'Chord sheet').replace(/[\\/:*?"<>|]+/g,' ').trim()||'Chord sheet')+'.pdf';
+let dlCap=null,mcpCap=null;
+(async()=>{try{if(window.claude&&window.claude.use){[dlCap,mcpCap]=await Promise.all([window.claude.use('downloads'),window.claude.use('mcp')])}}catch(e){}
+ if(mcpCap){$('shDrive').hidden=false;$('driveCfg').hidden=false;try{renderIdeas()}catch(e){}}
+ setTimeout(()=>{if(!mcpCap&&ownDrive()){$('shDrive').hidden=false;gdPreload()}syncDriveLinks();renderDriveIntro()},0);
+ if(!window.claude&&navigator.canShare){try{$('shShare').hidden=!navigator.canShare({files:[new File(['x'],'t.pdf',{type:'application/pdf'})]})}catch(e){}}})();
+const DEFAULT_FOLDER='https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe';
+const folderIdOf=v=>{const m=String(v||'').match(/folders\/([\w-]{10,})/)||String(v||'').trim().match(/^([\w-]{20,})$/);return m?m[1]:''};
+$('driveFolder').value=store.get('driveFolderLink',DEFAULT_FOLDER);
+function myFolderUrl(){const v=store.get('myFolder',null);if(v!==null)return v;if(/^yoav\b/i.test(store.get('userName','')))return DEFAULT_FOLDER;const r=store.get('gd.root','');return r?'https://drive.google.com/drive/folders/'+r:''}
+function syncDriveLinks(){const fb=$('folderBtn'),fu=window.claude?'https://drive.google.com/drive/folders/'+(folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER)):myFolderUrl();if(fb){fb.hidden=!fu;if(fu)fb.href=fu;try{renderLib()}catch(e){}}if($('folderIn')&&document.activeElement!==$('folderIn'))$('folderIn').value=fu||'';if(!window.claude){['driveLinkSheet'].forEach(k=>{const a=$(k);if(!a)return;a.hidden=!fu;if(fu){a.href=fu;a.textContent='My songs folder ↗'}});return}const id=folderIdOf($('driveFolder').value)||folderIdOf(DEFAULT_FOLDER);const u='https://drive.google.com/drive/folders/'+id;['driveLinkLib','driveLinkSheet'].forEach(k=>{const a=$(k);if(a)a.href=u})}
+syncDriveLinks();$('driveFolder').addEventListener('input',syncDriveLinks);
+$('folderSave').onclick=()=>{const v=$('folderIn').value.trim();if(v&&!/^https:\/\/(drive|docs)\.google\.com\//.test(v)){$('folderMsg').textContent='That doesn’t look like a Google Drive link. Open the folder in Drive, tap Share › Copy link, and paste it here.';return}
+ store.set('myFolder',v);if(window.claude&&v){$('driveFolder').value=v;store.set('driveFolderLink',v)}syncDriveLinks();$('folderMsg').textContent=v?'Saved. The button above opens this folder.':'Removed.'};
+$('folderClear').onclick=()=>{store.set('myFolder','');$('folderIn').value='';syncDriveLinks();$('folderMsg').textContent='Removed. The folder button is hidden until you add a link.'};$('driveFolder').addEventListener('change',e=>store.set('driveFolderLink',e.target.value.trim()||DEFAULT_FOLDER));
+async function withBusy(btn,fn){const all=[...document.querySelectorAll('.sheetactions .btn')];all.forEach(b=>b.disabled=true);try{await fn()}finally{all.forEach(b=>b.disabled=false)}}
+$('shPdf').onclick=()=>withBusy($('shPdf'),async()=>{
+ shStatus('Making the PDF…');let blob;try{blob=await makePdf()}catch(e){shStatus('Couldn’t make the PDF. Check your internet connection (the PDF maker loads once) and try again.');return}
+ if(dlCap){try{await dlCap.save({filename:fileName(),data:blob});shStatus('PDF saved.')}catch(e){shStatus(e&&e.code==='declined'?'Download cancelled.':'Couldn’t save the PDF here.')}}
+ else{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);shStatus('PDF saved to your downloads.')}
+});
+$('shShare').onclick=()=>withBusy($('shShare'),async()=>{
+ shStatus('Making the PDF…');try{const blob=await makePdf(),f=new File([blob],fileName(),{type:'application/pdf'});shStatus('');await navigator.share({files:[f],title:fileName().replace(/\.pdf$/,'')});clearAfterDrive(SK('OK')+' Shared.')}catch(e){shStatus(e&&e.name==='AbortError'?'':'Couldn’t share the PDF. Use Save PDF instead.')}
+});
+const blobToB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+const pickId=p=>p&&(p.id||(p.file&&p.file.id)||(p.files&&p.files[0]&&p.files[0].id))||'';
+const DRIVE='Google Drive';
+function driveErr(e){const c=e&&e.code;
+ if(c==='server_not_connected'||c==='server_not_found')return 'Google Drive isn’t connected to your Claude account. Connect it in Claude’s settings under Connectors, then try again.';
+ if(c==='needs_reauth')return 'Google Drive needs you to sign in again. Reconnect it in Claude’s settings under Connectors.';
+ if(c==='not_granted'||c==='consent_required')return 'Drive access wasn’t allowed for this page. Tap Save to Google Drive again and choose Allow.';
+ if(c==='rate_limited')return 'Google Drive is busy. Try again in a minute.';
+ return 'Couldn’t save to Google Drive'+(e&&e.message?': '+esc(e.message):'.')}
+const normArt=t=>String(t||'').toLowerCase().normalize('NFKC').replace(/\s+/g,' ').trim();
+let driveArtists=[];// [{id,title}] artist folders that already exist in the main folder
+async function listArtistFolders(fid){
+ try{const r=await mcpCap.callTool(DRIVE,'search_files',{query:`mimeType = 'application/vnd.google-apps.folder' and parentId = '${fid}'`,excludeContentSnippets:true,pageSize:100});
+  const fs=(r&&r.payload&&r.payload.files)||[];driveArtists=fs.filter(f=>f&&f.id&&f.title).map(f=>({id:f.id,title:f.title}));fs.forEach(f=>store.set('driveSub:'+fid+':'+normArt(f.title),f.id))}catch(e){}
+ return driveArtists;
+}
+function matchArtist(name){const n=normArt(name);if(!n)return null;return driveArtists.find(f=>normArt(f.title)===n)||null}
+function renderArtistChips(){
+ const names=[...new Map([...driveArtists.map(f=>f.title),...knownArtists()].map(t=>[normArt(t),t])).values()].sort((a,b)=>a.localeCompare(b));
+ const cur=normArt($('shArtist').value);
+ $('artistChips').innerHTML=names.map(t=>`<button type="button" data-a="${esc(t)}" class="${normArt(t)===cur?'on':''}" dir="auto">${esc(t)}</button>`).join('');
+ const m=matchArtist($('shArtist').value);
+ $('artistMatch').textContent=!cur?'':m?`Goes into the existing “${m.title}” folder.`:'A new folder with this name will be created.';
+}
+$('artistChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('shArtist').value=b.dataset.a;renderArtistChips()});
+$('shArtist').addEventListener('input',renderArtistChips);
+$('artistCancel').onclick=()=>{$('artistAsk').hidden=true;shStatus('')};
+$('artistNone').onclick=()=>{$('artistAsk').hidden=true;delete A.artist;saveSong();doDriveSave('')};
+$('artistOk').onclick=()=>{const raw=$('shArtist').value.trim().replace(/\s+/g,' ');if(!raw){$('artistMatch').textContent='Type the artist’s name, pick one above, or tap “No artist folder”.';return}
+ const m=matchArtist(raw);const artist=m?m.title:raw;$('artistAsk').hidden=true;A.artist=artist;saveSong();$('paper').innerHTML=sheetHTML(false);doDriveSave(artist)};
+$('shDrive').onclick=()=>withBusy($('shDrive'),async()=>{
+ if(!mcpCap&&ownDrive()){const tp=gdToken();shStatus('Connecting to your Google Drive…');try{await tp;const root=await gdRoot();await gdArtists(root);if(!store.get('gd.email',''))gdWho()}catch(e){shStatus(gdErr(e));return}shStatus('');$('shArtist').value=A.artist||'';renderArtistChips();$('artistAsk').hidden=false;$('shArtist').focus();return}
+ if(!mcpCap)return;const fid=folderIdOf(($('driveFolder').value||DEFAULT_FOLDER).trim());
+ if(!fid){shStatus('That Drive folder link doesn’t look right. Paste the folder’s link from Google Drive.');return}
+ shStatus('Checking your artist folders…');await listArtistFolders(fid);shStatus('');
+ $('shArtist').value=A.artist||'';renderArtistChips();$('artistAsk').hidden=false;$('shArtist').focus();
+});
+/* once a sheet is safely in Drive, the app lets go of it: the page clears and the phone copy is removed */
+function clearAfterDrive(msg,url){
+ try{catalogAdd(A,url)}catch(e){}
+ try{if(A&&A.libId){libWrite(libAll().filter(e=>e.id!==A.libId))}store.set('writeDraft',null);
+  if(fileKey){try{localStorage.removeItem(KP+'song.'+fileKey)}catch(e){}store.set('songs',store.get('songs',[]).filter(x=>x!==fileKey))}}catch(e){}
+ try{vid.pause()}catch(e){}A=null;fileKey='';showLanding();window.scrollTo({top:0});toast(msg+' The sheet was cleared from the app.','ok');
+}
+async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(artist);await withBusy($('shDrive'),async()=>{
+ const ent=saveToLib();if(!ent)return;
+ const link=($('driveFolder').value||DEFAULT_FOLDER).trim(),fid=folderIdOf(link);store.set('driveFolderLink',link);
+ try{
+  shStatus('Making the PDF…');const blob=await makePdf();const b64=await blobToB64(blob);
+  const subKey=a=>'driveSub:'+fid+':'+normArt(a);
+  const ensureSub=async()=>{if(!artist)return fid;const m=matchArtist(artist);if(m)return m.id;let sub=store.get(subKey(artist),'');if(sub)return sub;
+   shStatus(`Creating the “${esc(artist)}” folder…`);let c;try{c=await mcpCap.callTool(DRIVE,'create_file',{title:artist,mimeType:'application/vnd.google-apps.folder',parentId:fid})}catch(e){c=await mcpCap.callTool(DRIVE,'create_file',{title:artist,contentMimeType:'application/vnd.google-apps.folder',parentId:fid})}
+   sub=pickId(c&&c.payload);if(!sub)throw {message:`the “${artist}” folder couldn’t be created`};store.set(subKey(artist),sub);driveArtists.push({id:sub,title:artist});return sub};
+  let parent=await ensureSub();
+  // copies of this song already in the folder get replaced, never duplicated
+  const title=fileName(),q=title.replace(/\\/g,'\\\\').replace(/'/g,"\\'");let existing=[];
+  try{const r=await mcpCap.callTool(DRIVE,'search_files',{query:`title = '${q}' and parentId = '${parent}'`,excludeContentSnippets:true,pageSize:20});existing=((r&&r.payload&&r.payload.files)||[]).map(f=>f.id).filter(Boolean)}catch(e){}
+  shStatus('Uploading the chord sheet…');
+  const up=await mcpCap.callTool(DRIVE,'create_file',{title,parentId:parent,base64Content:b64,contentMimeType:'application/pdf',disableConversionToGoogleType:true});
+  const info=(up&&up.payload)||{},id=pickId(info),url=info.viewUrl||(info.file&&info.file.viewUrl)||(id?`https://drive.google.com/file/d/${id}/view`:'');
+  const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
+  if(e2){e2.drive={id,url,at:Date.now(),folder:artist||''};libWrite(l)}
+  const toTrash=[...new Set([...existing,old].filter(x=>x&&x!==id))];for(const t of toTrash){try{await mcpCap.callTool(DRIVE,'trash_file',{fileId:t})}catch(e){}}
+  clearAfterDrive(`${SK('OK')} Saved to Drive in Guitar sheets${artist?' › '+esc(artist):''}${toTrash.length?' (replaced the earlier copy)':''}. <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`,url);
+ }catch(e){shStatus(driveErr(e))}
+})}
+/* ---- Phone app: each person saves to their own Google Drive ---- */
+// Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off.
+const GDRIVE_CLIENT_ID='';
+const GD_SCOPE='https://www.googleapis.com/auth/drive.file',GD_ROOT='Guitar sheets',GD_API='https://www.googleapis.com/drive/v3/files',FOLDER_MT='application/vnd.google-apps.folder';
+const ownDrive=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
+let gdTok=null,gdExp=0;
+const gdReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
+function gdPreload(){if(ownDrive()&&!gdReady())loadScript('https://accounts.google.com/gsi/client').catch(()=>{})}
+// must be called straight from a tap so the Google sign-in window isn't blocked
+function gdToken(){return new Promise((res,rej)=>{
+ if(gdTok&&Date.now()<gdExp-60000)return res(gdTok);
+ if(!gdReady())return rej({code:'gd_load'});
+ const known=store.get('gd.email','');
+ const c=google.accounts.oauth2.initTokenClient({client_id:GDRIVE_CLIENT_ID,scope:GD_SCOPE,login_hint:known||undefined,
+  callback:r=>{if(!r||r.error)return rej({code:r&&r.error||'gd_denied'});gdTok=r.access_token;gdExp=Date.now()+(+r.expires_in||3600)*1000;res(gdTok)},
+  error_callback:e=>rej({code:e&&e.type==='popup_closed'?'gd_closed':'gd_popup'})});
+ c.requestAccessToken({prompt:store.get('gd.root','')?'':'consent'});
+})}
+async function gdFetch(url,opt={}){
+ const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+gdTok}});
+ if(r.status===401){gdTok=null;throw {code:'gd_auth'}}
+ if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}throw {code:'gd_http',message:m||('HTTP '+r.status)}}
+ return r.status===204?null:r.json();
+}
+const gdQ=s=>String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+async function gdList(q){const r=await gdFetch(`${GD_API}?q=${encodeURIComponent(q)}&fields=files(id,name,webViewLink)&pageSize=100&spaces=drive`);return (r&&r.files)||[]}
+async function gdFolder(name,parent){
+ const f=await gdList(`name='${gdQ(name)}' and mimeType='${FOLDER_MT}' and '${parent}' in parents and trashed=false`);if(f.length)return f[0].id;
+ const c=await gdFetch(GD_API+'?fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:FOLDER_MT,parents:[parent]})});return c.id;
+}
+async function gdRoot(){
+ const saved=store.get('gd.root','');
+ if(saved){try{const f=await gdFetch(`${GD_API}/${saved}?fields=id,trashed`);if(f&&!f.trashed)return saved}catch(e){if(e.code==='gd_auth')throw e}}
+ const id=await gdFolder(GD_ROOT,'root');store.set('gd.root',id);syncDriveLinks();return id;
+}
+async function gdWho(){try{const r=await gdFetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)');const e=r&&r.user&&r.user.emailAddress;if(e)store.set('gd.email',e);return e||''}catch(e){return ''}}
+async function gdArtists(root){const f=await gdList(`mimeType='${FOLDER_MT}' and '${root}' in parents and trashed=false`);driveArtists=f.map(x=>({id:x.id,title:x.name}));return driveArtists}
+async function gdUpload(blob,title,parent){
+ const same=await gdList(`name='${gdQ(title)}' and '${parent}' in parents and trashed=false and mimeType!='${FOLDER_MT}'`);
+ let out;
+ if(same.length){// replace the copy that's already there instead of adding a second one
+  out=await gdFetch(`https://www.googleapis.com/upload/drive/v3/files/${same[0].id}?uploadType=media&fields=id,webViewLink`,{method:'PATCH',headers:{'Content-Type':'application/pdf'},body:blob});
+  for(const x of same.slice(1)){try{await gdFetch(`${GD_API}/${x.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}
+ }else{
+  const fd=new FormData();fd.append('metadata',new Blob([JSON.stringify({name:title,parents:[parent],mimeType:'application/pdf'})],{type:'application/json'}));fd.append('file',blob);
+  out=await gdFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',body:fd});
+ }
+ return {id:out.id,url:out.webViewLink||`https://drive.google.com/file/d/${out.id}/view`,replaced:same.length>0};
+}
+function gdErr(e){const c=e&&e.code;
+ if(c==='gd_closed'||c==='access_denied'||c==='gd_denied')return 'Google sign-in was closed, so nothing was saved. Tap Save to Google Drive to try again.';
+ if(c==='gd_popup')return 'The Google sign-in window couldn’t open. Allow pop-ups for this site and try again.';
+ if(c==='gd_load')return 'Couldn’t reach Google. Check the internet connection and try again.';
+ if(c==='gd_auth')return 'Your Google sign-in expired. Tap Save to Google Drive again.';
+ return 'Couldn’t save to Google Drive'+(e&&e.message?': '+esc(e.message):'.')}
+async function gdConnect(){// first-use setup: sign in, make the Guitar sheets folder
+ const tp=gdToken();const msg=$('gdMsg');msg.textContent='Waiting for Google sign-in…';
+ try{await tp;msg.textContent='Creating your Guitar sheets folder…';await gdRoot();const who=await gdWho();store.set('gd.introDone',true);renderDriveIntro(who)}
+ catch(e){msg.innerHTML=gdErr(e)}
+}
+function renderDriveIntro(justConnected){
+ const card=$('driveIntro');if(window.claude){card.hidden=true;return}
+ const root=store.get('gd.root',''),email=store.get('gd.email','');
+ if(justConnected!==undefined&&root){card.hidden=false;card.innerHTML=`<h2>Google Drive connected</h2><p class="tip">${email?`Signed in as <b>${esc(email)}</b>. `:''}Sheets you save go to <b>Guitar sheets</b> in your Drive, one folder per artist.</p><div class="editrow"><a class="btn" href="https://drive.google.com/drive/folders/${esc(root)}" target="_blank" rel="noopener">Open my Guitar sheets ↗</a><button class="btn ghost" id="gdOk">Done</button></div>`;$('gdOk').onclick=()=>{card.hidden=true};return}
+ if(store.get('gd.introDone',false)){card.hidden=true;return}
+ card.hidden=false;
+ if(ownDrive()){
+  card.innerHTML=`<h2>Save sheets to your Google Drive</h2><p class="tip">Connect your Google account once. The app makes a <b>Guitar sheets</b> folder in <b>your</b> Drive and files each song by artist. It can only see the files it makes.</p><div class="editrow"><button class="btn cta" id="gdGo">Connect Google Drive</button><button class="btn ghost" id="gdLater">Not now</button></div><p class="tip" id="gdMsg" role="status"></p>`;
+  $('gdGo').onclick=gdConnect;$('gdLater').onclick=()=>{store.set('gd.introDone',true);card.hidden=true};
+ }else{
+  card.innerHTML=`<h2>Keep your sheets in Google Drive</h2><ol class="tip gdsteps"><li>Make a song’s chord sheet, then tap <b>Share / save to Drive…</b></li><li>Choose <b>Drive</b> from the share menu.</li><li>Pick a folder, for example a new one called <b>Guitar sheets</b>, and tap Save.</li></ol><div class="editrow"><button class="btn" id="gdLater">Got it</button></div>`;
+  $('gdLater').onclick=()=>{store.set('gd.introDone',true);card.hidden=true};
+ }
+}
+async function doOwnDriveSave(artist){await withBusy($('shDrive'),async()=>{
+ const ent=saveToLib();if(!ent)return;
+ try{
+  await gdToken();
+  shStatus('Making the PDF…');const blob=await makePdf();
+  const root=await gdRoot();let parent=root;
+  if(artist){const m=matchArtist(artist);parent=m?m.id:await gdFolder(artist,root);if(!m)driveArtists.push({id:parent,title:artist})}
+  shStatus('Uploading the chord sheet…');
+  const r=await gdUpload(blob,fileName(),parent);
+  const l=libAll(),e2=l.find(x=>x.id===ent.id),old=e2&&e2.drive&&e2.drive.id;
+  if(old&&old!==r.id){try{await gdFetch(`${GD_API}/${old}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}
+  if(e2){e2.drive={id:r.id,url:r.url,at:Date.now(),folder:artist||''};libWrite(l)}
+  clearAfterDrive(`${SK('OK')} Saved to your Drive in Guitar sheets${artist?' › '+esc(artist):''}${r.replaced||(old&&old!==r.id)?' (replaced the earlier copy)':''}. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open it ↗</a>`,r.url);
+ }catch(e){shStatus(gdErr(e))}
+})}
+renderLib();
+

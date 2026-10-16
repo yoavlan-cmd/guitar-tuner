@@ -1,0 +1,301 @@
+/* ================= I'm learning: every song you have something for, and what kind of material it has ================= */
+// One row per song, gathered from: Guitaring sheets (Drive list + this phone), sheets saved on this phone, the Drive songs folder,
+// video lessons, practice-mixer splits, saved chord analyses, an unfinished sheet, and songs marked "On it" in the song ideas.
+const LKINDS=[['sheet','SHEET','Chord sheet'],['folder','DRIVE','Songs folder'],['lesson','LESSON','Video lesson'],['mix','MIX','Practice mixer'],['analysis','VIDEO','Chord analysis']];
+let learnF={},learnOpen=null,learnQ='';
+const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
+function learnSongs(){
+ const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
+ const add=(t,a,kind,item)=>{t=cleanName(t);a=String(a||'').trim();if(!t)return;
+  // same song: titles match and the artists match, or the title is identical and the artist is just written in another script (עד מתי by אביתר בנאי = Eviatar Banai)
+  const heb=x=>/[\u0590-\u05FF]/.test(x);
+  let g=G.find(x=>vlMatch(x.title,t)&&(!a||!x.artist||vlMatch(x.artist,a)||(vlKey(x.title)===vlKey(t)&&heb(a)!==heb(x.artist))));
+  if(!g){g={title:t,artist:a,r:{sheet:[],folder:[],lesson:[],mix:[],analysis:[]},onit:null,at:0};G.push(g)}
+  if(!g.artist&&a)g.artist=a;if(kind==='onit')g.onit=item;else g.r[kind].push(item);g.at=Math.max(g.at,tm(item&&item.at))};
+ try{catalogAll().forEach(e=>add(e.title,e.artist,'sheet',{label:e.src==='phone'?'Guitaring sheet':'Guitaring sheet in Drive',sub:[e.capo?'Capo '+e.capo:'',e.tuning&&!/^standard/i.test(e.tuning)?e.tuning:''].filter(Boolean).join(' · '),url:e.url||'https://drive.google.com/drive/search?q='+encodeURIComponent(e.title),at:e.at}))}catch(e){}
+ try{libAll().forEach(e=>add(e.name||(e.data&&e.data.title),e.data&&e.data.artist,'sheet',{label:'Saved on this phone',lib:e.id,at:e.saved}))}catch(e){}
+ try{const d=store.get('writeDraft',null);if(d&&d.title)add(d.title,d.artist,'sheet',{label:'Unfinished sheet',draft:true,at:d.edited||d.at})}catch(e){}
+ try{((store.get('songIndex',{})||{}).songs||[]).forEach(x=>add(x.t,x.a,'folder',{label:'In your Drive songs folder',url:'https://drive.google.com/drive/search?q='+encodeURIComponent(x.t)}))}catch(e){}
+ try{vlAll().forEach(v=>add(v.song||v.title,v.artist,'lesson',{label:v.src||vlSource(v.url),sub:v.note||'',url:v.url,at:v.at}))}catch(e){}
+ try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=songFromName(x.name)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
+ try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
+ try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
+ return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
+ box.innerHTML=G.length?`<input id="learnQ" class="textin" type="search" dir="auto" placeholder="Search ${G.length} song${G.length===1?'':'s'}…" value="${esc(learnQ)}" autocomplete="off">
+ <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
+ <div class="llist" id="learnList"></div>`
+ :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
+ if(!G.length)return;
+ const draw=()=>{const q=vlKey(learnQ),f=G.filter(g=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
+  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
+   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span><span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join('')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
+ draw();
+ $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
+ box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
+ $('learnList').onclick=e=>{const b=e.target.closest('[data-la]');
+  if(!b){const r=e.target.closest('[data-li]');if(r){const k=vlKey(G[+r.dataset.li].title);learnOpen=learnOpen===k?null:k;draw()}return}
+  const g=G[+b.dataset.g],a=b.dataset.la;
+  if(a==='lib'){const ent=libGet(b.dataset.v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
+  else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
+  else if(a==='ana'){const d=loadSong(b.dataset.v);if(!d)return;vid.pause();A=d;fileKey=b.dataset.v;showSheet();window.scrollTo({top:0})}
+  else if(a==='mix'){mxView(true);mxOpen(b.dataset.v)}
+  else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
+  else if(a==='split'){$('mixNew').click()}
+  else if(a==='video'){$('vidIn').click()}
+  else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
+}
+function learnDetail(g,i){
+ const row=(t,title,sub,act)=>`<div class="lit">${SK(t)}<span class="ltt"><b dir="auto">${title}</b>${sub?`<small dir="auto">${sub}</small>`:''}</span>${act}</div>`;
+ const miss=(t,title,act)=>`<div class="lit miss">${SKoff(t)}<span class="ltt"><b>${title}</b></span>${act}</div>`;
+ const go=(a,v,l)=>`<button type="button" data-la="${a}" data-g="${i}" data-v="${esc(v||'')}">${l}</button>`,lnk=(u,l)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${l} ↗</a>`;
+ const s={title:g.title,artist:g.artist};let h='';
+ h+=g.r.sheet.length?g.r.sheet.map(x=>row('SHEET',esc(x.label),esc(x.sub||''),x.lib?go('lib',x.lib,'Open'):x.draft?go('draft','','Continue'):lnk(x.url,'Open'))).join('')
+  :miss('SHEET','No chord sheet yet',go('write','','Write it')+lnk(chordsLink(s),'Find'));
+ h+=g.r.folder.map(x=>row('DRIVE',esc(x.label),'',lnk(x.url,'Open'))).join('');
+ h+=g.r.lesson.length?g.r.lesson.map(x=>row('LESSON',esc(x.label),esc(x.sub||''),lnk(x.url,'Watch'))).join('')
+  :miss('LESSON','No video lesson yet',lnk('https://www.youtube.com/results?search_query='+encodeURIComponent(`${g.artist} ${g.title} guitar lesson`),'Find one'));
+ h+=g.r.mix.length?g.r.mix.map(x=>row('MIX',esc(x.label),'',go('mix',x.mix,'Open'))).join(''):miss('MIX','Not split in the mixer yet',go('split','','Split it'));
+ h+=g.r.analysis.length?g.r.analysis.map(x=>row('VIDEO',esc(x.label),'',go('ana',x.key,'Open'))).join(''):miss('VIDEO','No chords from a video yet',go('video','','Pick a video'));
+ if(!g.r.lesson.length)h+=`<p class="lmsg">Found a lesson on YouTube? Share it to Guitaring and it shows up here.</p>`;
+ if(g.onit)h+=`<p class="lmsg">You picked this from the song ideas. ${go('drop','','Not learning it any more')}</p>`;
+ return `<div class="ldet">${h}</div>`}
+
+/* ---- song ideas: scan the songs folder, then ask Claude for songs that fit the style, bands and level ---- */
+const IDEA_STYLES=[['folder','Like my folder'],['il-rock','Israeli rock'],['il-pop','Hebrew pop and ballads'],['acoustic','Acoustic singer-songwriter'],['funk','Funk rock'],['classic','Classic rock'],['alt','Indie and alternative'],['blues','Blues'],['reggae','Reggae and surf'],['campfire','Campfire singalongs'],['90s','90s and 2000s']];
+const IDEA_LEVELS=[['easier','Easier'],['same','My level'],['step','A step up'],['hard','Challenge me']];
+const IDEA_LANG=[['both','Both'],['he','Hebrew'],['en','English']];
+const CHORD_RE=/^[A-G](?:#|b)?(?:maj7|maj9|maj|m7b5|m7|m9|m6|m11|mmaj7|m|dim7|dim|aug|sus2|sus4|sus|add9|add11|7sus4|7b9|7#9|13|11|9|7|6|5)?(?:\/[A-G](?:#|b)?)?$/;
+function chordsInText(t){const out=new Map();String(t||'').replace(/\\#/g,'#').replace(/[‎‏‪-‮]/g,'').split(/\n/).forEach(l=>{const w=l.trim().split(/[\s|]+/).filter(Boolean);if(!w.length||w.length>14)return;const c=w.filter(x=>CHORD_RE.test(x));if(c.length&&c.length/w.length>=.75)c.forEach(x=>out.set(x,(out.get(x)||0)+1))});return [...out.keys()]}
+const cleanName=t=>String(t||'').replace(/[‎‏‪-‮]/g,'').replace(/\.(pdf|docx?|txt|rtf|odt|jpe?g|png|mp4|mov|m4a|mp3)$/i,'').replace(/^(copy of|עותק של)\s+/i,'').replace(/\s+/g,' ').trim();
+const junkName=t=>!t||/^(untitled( document)?|מסמך ללא שם|document\d*|img[_-]?\d+|vid[_-]?\d+|\d+)$/i.test(t);
+// "Artist - Title" (or the folder's artist)
+function songFromName(raw,folder){let t=cleanName(raw),a=folder||'';if(junkName(t))return null;
+ const m=t.match(/^(.+?)\s*[-–—]\s*(.+)$/);if(m){const L=m[1].trim(),R=m[2].trim(),heb=x=>/[\u0590-\u05FF]/.test(x);if((!a||normArt(L).includes(normArt(a))||normArt(a).includes(normArt(L))||heb(L)!==heb(a))&&!/^(acoustic|live|cover|demo|remix|lesson|tab|chords|אקוסטי|הופעה)$/i.test(R)){a=a||L;t=R}}
+ return {a,t}}
+const ideaKey=s=>normArt(s.a)+'|'+normArt(s.t);
+function mergeSongs(list){const m=new Map();list.forEach(s=>{if(!s||!s.t)return;const k=ideaKey(s),o=m.get(k);if(o){o.ch=[...new Set([...(o.ch||[]),...(s.ch||[])])]}else m.set(k,{a:s.a||'',t:s.t,ch:s.ch||[]})});return [...m.values()]}
+function localSongs(){return libAll().map(e=>({a:(e.data&&e.data.artist)||'',t:cleanName(e.name),ch:[]})).filter(s=>s.t)}
+function knownChords(ix){const set=new Set(Object.keys(store.get(BOOKK,{})||{}));(ix&&ix.songs||[]).forEach(s=>(s.ch||[]).forEach(c=>set.add(c)));return [...set]}
+// scan with Claude's Drive connector (Claude version)
+// read a Guitaring PDF's header from Drive's text snippet: "Artist X Tuning Standard (EADGBE) Capo fret 2 … CHORDS Am F … LYRICS & CHORDS"
+function sheetFromSnippet(f,folder){const sn=String(f.contentSnippet||'').replace(/\\#/g,'#').replace(/[‎‏]/g,'');const head=sn.split(/LYRICS\s*&\s*CHORDS|PROGRESSION/i)[0]||'';
+ let artist=(head.match(/([֐-׿][֐-׿ ."'׳״-]*?)[ \t]+Artist/)||[])[1]||(head.match(/Artist[ \t]+([^\n]+?)[ \t]+(?:Tuning|Capo|CHORDS)/)||[])[1]||(head.match(/Artist[ \t]+([^\n]+)$/m)||[])[1]||'';if(folder||!realText(artist)||/\d/.test(artist))artist=folder||artist;if(!realText(artist)||/\d/.test(artist))artist='';
+ const tuning=((head.match(/Tuning\s+([A-Za-z][A-Za-z ]*?)\s*\(/)||[])[1]||'Standard').trim(),cm=head.match(/Capo\s+(?:fret\s+)?(\d+|none)/i),capo=cm&&/\d/.test(cm[1])?+cm[1]:0;
+ const chs=[...new Set([...((head.split(/\bCHORDS\b/)[1]||'').match(/\S+/g)||[]).filter(t=>/^[A-G]/.test(t)&&parseChord(t)),...chordsInText(sn)])];
+ let title=String(f.title||'').replace(/\.pdf$/i,'').trim();if(artist&&normArt(title).startsWith(normArt(artist)+' '))title=title.slice(artist.length).replace(/^\s*[-–—]\s*/,'').trim();
+ return {title,artist:artist.trim(),capo,tuning,chords:chs.slice(0,24),level:chordLevel(chs),url:f.viewUrl||'',at:Date.parse(f.createdTime||'')||0,src:'drive'}}
+async function scanSheetsMcp(names){const out=[];let tok;for(let i=0;i<6;i++){const r=await mcpCap.callTool(DRIVE,'search_files',{query:"mimeType = 'application/pdf' and (fullText contains 'Guitaring' or fullText contains 'LYRICS & CHORDS' or fullText contains 'PROGRESSION')",pageSize:50,snippetVerbosity:'BRIEF',...(tok?{pageToken:tok}:{})});const pl=(r&&r.payload)||{};(pl.files||[]).forEach(f=>out.push(sheetFromSnippet(f,names.get(f.parentId))));tok=pl.nextPageToken;if(!tok)break}
+ if(out.length){store.set('sheetIndex',out);try{renderCatalog()}catch(e){}}return out}
+async function scanViaMcp(fid,onP){
+ const q=async(query,snip)=>{let all=[],tok;for(let i=0;i<4;i++){const r=await mcpCap.callTool(DRIVE,'search_files',{query,pageSize:100,...(snip?{snippetVerbosity:'BRIEF'}:{excludeContentSnippets:true}),...(tok?{pageToken:tok}:{})});const p=(r&&r.payload)||{};all=all.concat(p.files||[]);tok=p.nextPageToken;if(!tok)break}return all};
+ onP('Looking at your artist folders…');const top=await q(`parentId = '${fid}'`,false);
+ const folders=top.filter(f=>f.mimeType===FOLDER_MT),names=new Map(folders.map(f=>[f.id,f.title]));let songs=[];
+ top.filter(f=>f.mimeType!==FOLDER_MT).forEach(f=>{const s=songFromName(f.title,'');if(s)songs.push(s)});
+ for(let i=0;i<folders.length;i+=8){const grp=folders.slice(i,i+8);onP(`Reading songs… (${Math.min(i+8,folders.length)} of ${folders.length} artists)`);
+  const files=await q(grp.map(f=>`parentId = '${f.id}'`).join(' or '),true);
+  files.filter(f=>f.mimeType!==FOLDER_MT).forEach(f=>{const s=songFromName(f.title,names.get(f.parentId)||'');if(s){s.ch=chordsInText(f.contentSnippet);songs.push(s)}})}
+ try{onP('Finding your Guitaring sheets…');await scanSheetsMcp(names)}catch(e){}
+ return {songs,artists:folders.map(f=>f.title)};
+}
+// scan with the user's own Google sign-in (phone app). Reading existing files needs read access to Drive.
+let gdRoTok=null,gdRoExp=0;
+function gdTokenRO(){return new Promise((res,rej)=>{if(gdRoTok&&Date.now()<gdRoExp-60000)return res(gdRoTok);if(!gdReady())return rej({code:'gd_load'});
+ const c=google.accounts.oauth2.initTokenClient({client_id:GDRIVE_CLIENT_ID,scope:'https://www.googleapis.com/auth/drive.readonly',login_hint:store.get('gd.email','')||undefined,
+  callback:r=>{if(!r||r.error)return rej({code:r&&r.error||'gd_denied'});gdRoTok=r.access_token;gdRoExp=Date.now()+(+r.expires_in||3600)*1000;res(gdRoTok)},error_callback:e=>rej({code:e&&e.type==='popup_closed'?'gd_closed':'gd_popup'})});c.requestAccessToken({prompt:''})})}
+async function scanViaOwn(fid,onP){
+ const get=async u=>{const r=await fetch(u,{headers:{Authorization:'Bearer '+gdRoTok}});if(!r.ok)throw {code:r.status===401?'gd_auth':'gd_http',message:'HTTP '+r.status};return u.includes('/export')?r.text():r.json()};
+ const list=async qq=>{let all=[],tok='';for(let i=0;i<5;i++){const r=await get(`${GD_API}?q=${encodeURIComponent(qq)}&fields=nextPageToken,files(id,name,mimeType,parents)&pageSize=200${tok?'&pageToken='+tok:''}`);all=all.concat(r.files||[]);tok=r.nextPageToken;if(!tok)break}return all};
+ onP('Looking at your artist folders…');const top=await list(`'${fid}' in parents and trashed=false`);
+ const folders=top.filter(f=>f.mimeType===FOLDER_MT),names=new Map(folders.map(f=>[f.id,f.name]));let files=top.filter(f=>f.mimeType!==FOLDER_MT).map(f=>({...f,folder:''}));
+ for(let i=0;i<folders.length;i+=10){onP(`Reading songs… (${Math.min(i+10,folders.length)} of ${folders.length} artists)`);const grp=folders.slice(i,i+10);
+  (await list(`(${grp.map(f=>`'${f.id}' in parents`).join(' or ')}) and trashed=false and mimeType!='${FOLDER_MT}'`)).forEach(f=>files.push({...f,folder:names.get((f.parents||[])[0])||''}))}
+ const songs=[];let n=0;
+ for(const f of files){const s=songFromName(f.name,f.folder);if(!s)continue;
+  if(f.mimeType==='application/vnd.google-apps.document'&&n<40){n++;onP(`Reading chords… (${n})`);try{s.ch=chordsInText(await get(`${GD_API}/${f.id}/export?mimeType=text/plain`))}catch(e){}}
+  songs.push(s)}
+ return {songs,artists:folders.map(f=>f.name)};
+}
+function saveIndex(found,src){const old=store.get('songIndex',null);const songs=mergeSongs([...(src==='picker'&&old?old.songs:[]),...found.songs,...localSongs()]);
+ const artists=[...new Set([...(src==='picker'&&old?old.artists||[]:[]),...(found.artists||[]),...songs.map(s=>s.a).filter(Boolean)])];
+ const ix={at:Date.now(),src,songs,artists};store.set('songIndex',ix);return ix}
+async function ideaScan(silent){
+ const msg=$('idMsg')||{},btn=$('idScan'),onP=t=>{const m=$('idMsg');if(m)m.textContent=t};if(btn)btn.disabled=true;
+ try{let found;
+  if(mcpCap){const fid=folderIdOf(($('driveFolder').value||DEFAULT_FOLDER).trim())||folderIdOf(DEFAULT_FOLDER);found=await scanViaMcp(fid,onP);saveIndex(found,'drive')}
+  else if(ownDrive()){const fid=folderIdOf(myFolderUrl());if(!fid){msg.textContent='Add your songs folder link first (Songs folder link, below).';return}const tp=gdTokenRO();onP('Waiting for Google sign-in…');await tp;found=await scanViaOwn(fid,onP);saveIndex(found,'drive')}
+  else return;
+  renderIdeas();if(!silent&&$('idMsg'))$('idMsg').textContent='Scan done.';
+ }catch(e){if($('idMsg'))$('idMsg').innerHTML=mcpCap?driveErr(e).replace('save to','read'):gdErr(e).replace(/saved/,'read')}finally{if(btn)btn.disabled=false}
+}
+async function ideaPick(files){
+ const songs=[...files].map(f=>songFromName(f.name,'')).filter(Boolean);
+ for(const f of [...files].slice(0,30)){if(/^text\//.test(f.type)||/\.txt$/i.test(f.name)){try{const s=songFromName(f.name,'');const x=songs.find(y=>y.t===s.t);if(x)x.ch=chordsInText(await f.text())}catch(e){}}}
+ saveIndex({songs,artists:[]},'picker');renderIdeas();$('idMsg').textContent=`Added ${songs.length} song${songs.length===1?'':'s'}. Pick another artist folder to add more.`;
+}
+function ideaSummary(ix){const by=new Map();ix.songs.forEach(s=>{const k=s.a||'(artist not in the file name)';by.set(k,(by.get(k)||[]).concat(s))});return by}
+function ideaPrefs(){return {styles:['folder'],bands:[],other:'',level:'same',lang:'both',...(store.get('ideaPrefs',{})||{})}}
+let ideaAutoDone=false;
+function onItList(){let l=store.get('ideaOnIt',null);if(!l){l=(store.get('ideaWant',[])||[]).map(x=>({...x,at:Date.now()}));store.set('ideaOnIt',l)}return l}
+const onItKey=s=>normArt(s.artist)+'|'+normArt(s.title);
+function renderIdeas(){
+ try{renderLearn()}catch(e){}
+ const box=$('ideaBox');if(!box)return;const ix=store.get('songIndex',null),p=ideaPrefs(),res=store.get('ideas',null),want=onItList();
+ const daily=ix&&ix.src==='daily',canDrive=!!mcpCap||ownDrive(),auto=daily||!!mcpCap;
+ const scanBtns=daily?'':`${canDrive?`<button class="btn ghost" id="idScan" type="button">${ix?'Scan the folder now':'Scan my songs folder'}</button>`:''}
+  ${!mcpCap?`<label class="btn ghost idpick">${canDrive?'Or pick':'Pick'} song files from Drive<input type="file" id="idFiles" multiple hidden></label>${canDrive?'':'<span class="bhint">Open your songs folder in the picker (Google Drive › your folder › an artist), long-press to select all the songs, then tap Select. Repeat for each artist folder.</span>'}`:''}`;
+ const by=ix?ideaSummary(ix):new Map(),kc=ix?knownChords(ix):[];const nA=[...by.keys()].filter(k=>!k.startsWith('(')).length;
+ const chip=(grp,v,l,on)=>`<button type="button" class="chip" data-g="${grp}" data-v="${esc(v)}" aria-pressed="${on}" dir="auto">${esc(l)}</button>`;
+ const list=res&&res.list||[],when=t=>new Date(t).toLocaleString(undefined,{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+ box.innerHTML=`<summary><span class="sic">${SK('IDEAS')}</span><span class="stx"><b>${list.length?(res.src==='daily'?'Today’s song ideas':'Song ideas for you'):'Song ideas for you'}</b><small>${list.length?`${list.length} new song${list.length===1?'':'s'} picked for your taste and level`:'New songs that fit your style, favourite bands and level'}</small></span></summary>
+ ${ix?`<p class="tip idsum">${auto?'Updated automatically every morning from your Drive folder. ':''}Your folder: <b>${nA}</b> artist${nA===1?'':'s'}, <b>${ix.songs.length}</b> song${ix.songs.length===1?'':'s'}${kc.length?`, <b>${kc.length}</b> chords you already play`:''}. Last scan ${when(ix.at)}.</p>`
+  :auto?`<p class="tip">Looking at your songs folder…</p>`:`<p class="tip">First, let the app look at your songs folder: the artists, the songs, and the chords in them. That’s how it learns your taste and level.</p>`}
+ ${scanBtns.trim()?`<div class="idscan">${scanBtns}</div>`:''}
+ <p class="tip" id="idMsg" role="status"></p>
+ ${res&&res.level&&list.length?`<p class="tip idlevel"><b>Your level:</b> <span dir="auto">${esc(res.level)}</span></p>`:''}
+ <div class="idres">${list.map((s,i)=>ideaCardHTML(s,i,kc)).join('')}</div>
+ ${res&&res.list&&!list.length?`<p class="tip">You’ve gone through all of today’s ideas. New ones arrive tomorrow morning.</p>`:''}
+ ${ix?`<details class="idlist"><summary>What’s in your folder</summary>${[...by].map(([a,l])=>`<p dir="auto"><b>${esc(a)}</b> · ${l.map(s=>esc(s.t)).join(', ')}</p>`).join('')}</details>
+ <details class="idlist idtune"><summary>Fine-tune the ideas (optional)</summary>
+ <div class="idq"><b>Style</b><div class="idchips">${IDEA_STYLES.map(([v,l])=>chip('styles',v,l,p.styles.includes(v))).join('')}</div></div>
+ ${ix.artists.length?`<div class="idq"><b>More like these bands</b><div class="idchips">${ix.artists.map(a=>chip('bands',a,a,p.bands.includes(a))).join('')}</div></div>`:''}
+ <div class="idq"><b>Other bands you like</b><input class="textin" id="idOther" dir="auto" placeholder="e.g. Mashina, Coldplay" value="${esc(p.other)}"></div>
+ <div class="idq"><b>Difficulty</b><div class="idchips">${IDEA_LEVELS.map(([v,l])=>chip('level',v,l,p.level===v)).join('')}</div></div>
+ <div class="idq"><b>Language</b><div class="idchips">${IDEA_LANG.map(([v,l])=>chip('lang',v,l,p.lang===v)).join('')}</div></div>
+ ${sampleFn?`<button class="btn wide" id="idGo" type="button">Suggest again with these choices</button>`:`<p class="tip">Turn on Claude features (at the bottom of this card) to re-pick with your own choices.</p>`}
+ </details>`:''}`;
+ wireIdeas();ideaAuto();
+}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#ideaBox>summary'))$('ideaBox')._mine=true});
+// daily ideas: the scheduled scan writes ideas.json next to the app; the phone app just reads it
+let dailyAt=0,dailyTried=false;
+async function loadDailyIdeas(force){
+ if(window.claude||location.protocol==='file:'&&!force)return;if(!force&&Date.now()-dailyAt<3*3600e3)return;dailyAt=Date.now();
+ try{const r=await fetch('ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
+  if(Array.isArray(d.sheets)){store.set('sheetIndex',d.sheets);try{renderCatalog()}catch(e){}}
+  if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
+  store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
+  const cur=store.get('ideas',null),at=Date.parse(d.at)||0,no=new Set(store.get('ideaNo',[]));
+  if(!cur||(cur.src==='daily'&&(cur.date!==d.date||at>cur.at))||(cur.src!=='daily'&&at>cur.at))store.set('ideas',{at,src:'daily',date:d.date,level:d.level||'',list:(d.suggestions||[]).filter(s=>!no.has(s.artist+' – '+s.title)&&!onItList().some(x=>onItKey(x)===onItKey(s)))});
+  renderIdeas()}catch(e){dailyTried=true}
+}
+// Claude version (no daily file): scan and pick by itself once a day
+async function ideaAuto(){
+ if(ideaAutoDone||!sampleFn)return;const ix=store.get('songIndex',null),res=store.get('ideas',null),day=20*3600e3;
+ if(ix&&ix.src==='daily')return;if(!window.claude&&!dailyTried&&location.protocol!=='file:')return;
+ if(mcpCap&&(!ix||Date.now()-ix.at>day)){ideaAutoDone=true;await ideaScan(true);const ix2=store.get('songIndex',null);if(ix2&&ix2.songs.length)await ideaAsk(true);return}
+ if(ix&&ix.songs.length&&(!res||Date.now()-res.at>day)){ideaAutoDone=true;await ideaAsk(true)}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadDailyIdeas()});
+setTimeout(()=>loadDailyIdeas(),0);
+const isHeb=s=>/[֐-׿]/.test((s.title||'')+(s.artist||''));
+// Tab4u first: Google's “I'm feeling lucky” jumps straight to the song's Tab4u page when it has one
+const chordsLink=s=>'https://www.google.com/search?btnI=1&q='+encodeURIComponent(`site:tab4u.com "${s.title}" ${s.artist}`);
+const listenLink=s=>'https://www.youtube.com/results?search_query='+encodeURIComponent(s.artist+' '+s.title);
+function ideaCardHTML(s,i,kc){const d=Math.max(1,Math.min(5,+s.difficulty||3)),known=new Set(kc),ch=(s.chords||[]).slice(0,10);
+ return `<div class="idcard" data-i="${i}"><div class="idtop"><div><b dir="auto">${esc(s.title)}</b><span dir="auto">${esc(s.artist)}</span></div><span class="iddiff" title="Difficulty ${d} of 5">${'●'.repeat(d)}<i>${'●'.repeat(5-d)}</i><small>${['','Easy','Easy+','Medium','Harder','Hard'][d]}</small></span></div>
+ <p class="idwhy" dir="auto">${esc(s.why||'')}</p>
+ <div class="idmeta">${s.style?`<span class="badge">${esc(s.style)}</span>`:''}${s.capo?`<span class="badge">Capo ${esc(String(s.capo))}</span>`:''}${s.tuning&&!/^standard/i.test(s.tuning)?`<span class="badge">${esc(s.tuning)}</span>`:''}</div>
+ ${ch.length?`<div class="idch">${ch.map(c=>`<span class="${known.size&&!known.has(c)?'new':''}">${esc(c)}</span>`).join('')}${known.size&&ch.some(c=>!known.has(c))?'<small>Orange = a chord that’s new for you</small>':''}</div>`:''}
+ <div class="idact"><a class="btn ghost" href="${chordsLink(s)}" target="_blank" rel="noopener">Chords ↗</a><a class="btn ghost" href="${listenLink(s)}" target="_blank" rel="noopener">▶ Listen ↗</a><button type="button" class="btn ghost" data-want="${i}">On it</button><button type="button" class="linkbtn" data-no="${i}">Not for me</button></div></div>`}
+function wireIdeas(){
+ const box=$('ideaBox');if($('idScan'))$('idScan').onclick=ideaScan;
+ if($('idFiles'))$('idFiles').onchange=e=>{if(e.target.files.length)ideaPick(e.target.files);e.target.value=''};
+ box.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const p=ideaPrefs(),g=b.dataset.g,v=b.dataset.v;if(g==='styles'||g==='bands'){p[g]=p[g].includes(v)?p[g].filter(x=>x!==v):p[g].concat(v)}else p[g]=v;store.set('ideaPrefs',p);
+  box.querySelectorAll(`[data-g="${g}"]`).forEach(x=>x.setAttribute('aria-pressed',g==='styles'||g==='bands'?p[g].includes(x.dataset.v):x.dataset.v===v))});
+ if($('idOther'))$('idOther').onchange=e=>{const p=ideaPrefs();p.other=e.target.value.trim();store.set('ideaPrefs',p)};
+ if($('idGo'))$('idGo').onclick=ideaAsk;
+ const res=store.get('ideas',null);
+ box.querySelectorAll('[data-want]').forEach(b=>b.onclick=async()=>{const s=res.list[+b.dataset.want];const w=onItList();if(!w.some(x=>onItKey(x)===onItKey(s)))w.unshift({title:s.title,artist:s.artist,at:Date.now()});store.set('ideaOnIt',w.slice(0,40));
+  res.list=res.list.filter(x=>onItKey(x)!==onItKey(s));store.set('ideas',res);renderIdeas();
+  // started learning it: pick again, steered by this choice
+  if(sampleFn){const m=$('idMsg');if(m)m.textContent=`Nice! Finding more songs in the spirit of “${s.title}”…`;await ideaAsk(true,s)}
+  else{const m=$('idMsg');if(m)m.textContent=`Added “${s.title}” to the songs you’re learning.`}});
+ box.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{const s=res.list[+b.dataset.no];const no=store.get('ideaNo',[]);no.push(s.artist+' – '+s.title);store.set('ideaNo',no.slice(-80));res.list.splice(+b.dataset.no,1);store.set('ideas',res);renderIdeas()});
+ box.querySelectorAll('[data-unwant]').forEach(b=>b.onclick=()=>{const w=onItList();w.splice(+b.dataset.unwant,1);store.set('ideaOnIt',w);renderIdeas()});
+}
+async function ideaAsk(silent,picked){
+ const ix=store.get('songIndex',null);if(!ix||!sampleFn)return;const p=ideaPrefs();if($('idOther')){p.other=$('idOther').value.trim();store.set('ideaPrefs',p)}
+ const btn=$('idGo')||{},msg=()=>$('idMsg')||{};btn.disabled=true;btn.textContent='Claude is picking songs for you…';msg().textContent=picked?`Nice! Finding more songs in the spirit of “${picked.title}”…`:silent?'Claude is picking today’s songs for you…':'';
+ const by=ideaSummary(ix),kc=knownChords(ix);
+ const lib=[...by].map(([a,l])=>`${a}: ${l.slice(0,25).map(s=>s.t+(s.ch&&s.ch.length?` [${s.ch.slice(0,12).join(' ')}]`:'')).join('; ')}`).join('\n').slice(0,9000);
+ const gear=myGuitars().map(g=>`${g.name} (${GEAR[g.type].short})`).join(', ');
+ const styles=p.styles.map(v=>(IDEA_STYLES.find(x=>x[0]===v)||[,v])[1]);
+ const lv={easier:'easier than their current songs, to build confidence',same:'about the same level as their current songs',step:'a small step above their level: at most 1–2 new chords or one new technique per song',hard:'clearly harder, to challenge them (barre chords, faster changes, riffs)'}[p.level];
+ const onIt=onItList(),avoid=[...store.get('ideaNo',[]),...onIt.map(s=>s.artist+' – '+s.title),...((store.get('ideas',null)||{}).list||[]).map(s=>s.artist+' – '+s.title)].slice(-80).join('; ');
+ const prompt=`You recommend songs to learn on guitar. Here is what this guitarist already has in their songs folder (artist: songs [chords found in the sheet]):
+${lib}
+Chords they already play: ${kc.join(' ')||'unknown'}
+${gear?`Their guitars: ${gear}\n`:''}${onIt.length?`Songs they just started learning (the strongest signal of what they want now; suggest more in this direction, similar style and level${picked?`, especially like “${picked.title}” by ${picked.artist}, which they picked a moment ago`:''}): ${onIt.slice(0,10).map(s=>s.artist+' – '+s.title).join('; ')}\n`:''}What they want now:
+- Style: ${styles.join(', ')||'like their folder'}${p.styles.includes('folder')?' (match the overall taste of the folder)':''}
+${p.bands.length?`- More like these bands: ${p.bands.join(', ')}\n`:''}${p.other?`- Other bands they like: ${p.other}\n`:''}- Difficulty: ${lv}
+- Language: ${{both:'Hebrew and English songs, mixed',he:'Hebrew songs only',en:'English songs only'}[p.lang]}
+Rules: suggest 10 real, well-known songs you are confident exist, with the artist spelled the usual way (Hebrew songs with Hebrew titles and artist names). Do NOT suggest songs already in their folder${avoid?` or these: ${avoid}`:''}. Mix a few songs by bands they have with songs by similar artists they don't have yet. Judge difficulty from the chords they know: say which chords each song uses (the common, simple version of the chords, as most chord sites show it), and a capo position if the usual version uses one.
+Reply with JSON: {"level": one short sentence describing their current level based on the folder, "suggestions": [{"title": string, "artist": string, "style": short genre label, "difficulty": 1-5, "chords": [chord names], "capo": number or 0, "tuning": "Standard" or the tuning name, "why": one short sentence on why it fits them, mentioning what's new to learn if anything}]}`;
+ try{const r=await sampleFn.json(prompt,{modelTier:'default'});const list=(r&&r.suggestions||[]).filter(s=>s&&s.title&&s.artist).slice(0,12);if(!list.length)throw new Error('empty');
+  const have=new Set(ix.songs.map(s=>normArt(s.t))),no=new Set(store.get('ideaNo',[])),on=new Set(onItList().map(onItKey));const fresh=list.filter(s=>!have.has(normArt(s.title))&&!no.has(s.artist+' – '+s.title)&&!on.has(onItKey(s)));
+  store.set('ideas',{at:Date.now(),src:silent?'auto':'mine',level:r.level||'',list:fresh});renderIdeas();if(!silent){const f=$('ideaBox').querySelector('.idres');if(f)f.scrollIntoView({behavior:'smooth',block:'start'})}}
+ catch(e){btn.disabled=false;btn.textContent='Suggest again with these choices';msg().textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t get suggestions. Try again.'}
+}
+setTimeout(()=>{try{renderIdeas()}catch(e){}},0);
+
+/* ask Claude about this one piece of gear: it knows which item, its details and your earlier questions */
+const GQ={guitar:['Which strings should I use on it?','How do I lower the action myself?','It buzzes on one fret. What should I check?','How should I store it in summer with the air conditioner on?'],
+ amp:['What settings should I start with?','Is it loud enough for a small gig?','How do I stop feedback with my acoustic?','Which of my guitars sounds best through it?']};
+function fmtAnswer(t){const lines=String(t).trim().split(/\n+/);let h='',ul=false;for(const l of lines){const m=l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/);if(m){if(!ul){h+='<ul>';ul=true}h+=`<li>${esc(m[1]).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}</li>`}else{if(ul){h+='</ul>';ul=false}h+=`<p>${esc(l).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}</p>`}}if(ul)h+='</ul>';return h}
+let gcPend={id:null,imgs:[]};
+function renderGearChat(it){
+ const box=$('gChat');if(!box)return;const g=GEAR[it.type],hist=it.chat||[],qs=GQ[g.amp?'amp':'guitar'];
+ box.innerHTML=`<div class="gchead"><span class="sic">${SK('ASK')}</span><span class="stx"><b>Ask Claude about ${esc(it.name)}</b><small>Claude knows this is your ${esc([it.brand,it.model].filter(Boolean).join(' ')||g.short)} and what’s on this page.</small></span></div>
+ ${hist.map(h=>`<div class="gcq" dir="auto">${h.imgs&&h.imgs.length?`<div class="gcimgs">${h.imgs.map(u=>`<img src="${u}" alt="Your photo">`).join('')}</div>`:''}${esc(h.q)}</div><div class="gca" dir="auto">${fmtAnswer(h.a)}</div>`).join('')}
+ ${sampleFn?`${hist.length?'':`<div class="gcsugg">${qs.map(q=>`<button type="button" class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
+ ${gcPend.id===it.id&&gcPend.imgs.length?`<div class="gcimgs" id="gcPend">${gcPend.imgs.map((x,i)=>`<div class="gcth"><img src="${x.big}" alt="Photo to send"><button type="button" data-rm="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>`:''}
+ ${imgLimit>0?`<div class="gcadd"><label>${SK('PHOTO')} Take a photo<input type="file" accept="image/*" capture="environment" id="gcCam"></label><label>${SK('GALLERY')} From gallery<input type="file" accept="image/*" multiple id="gcGal"></label></div>`:''}
+ <div class="gcin"><textarea id="gcText" rows="2" dir="auto" placeholder="Ask anything about this ${g.amp?'amp':'guitar'}… (you can add a photo)"></textarea><button class="btn" id="gcSend" type="button">Ask</button></div>
+ <p class="tip" id="gcMsg" role="status"></p>${hist.length?'<button type="button" class="linkbtn" id="gcClear">Clear this conversation</button>':''}`
+ :'<p class="tip">Turn on Claude features (Songs › Claude features) to ask questions here.</p>'}`;
+ if(!sampleFn)return;
+ if(gcPend.id!==it.id)gcPend={id:it.id,imgs:[]};
+ const addFiles=async fl=>{const room=Math.max(0,Math.min(3,imgLimit-(it.photo?1:0))-gcPend.imgs.length);const files=[...fl].filter(f=>/^image\//.test(f.type)||!f.type).slice(0,room);
+  if(!room){$('gcMsg').textContent='Up to 3 photos per question.';return}$('gcMsg').textContent='Preparing photo…';
+  const keep=$('gcText').value;for(const f of files){try{gcPend.imgs.push({big:await shrinkPhoto(f,1280),small:await shrinkPhoto(f,200)})}catch(e){}}
+  renderGearChat(it);$('gcText').value=keep;$('gcMsg').textContent=gcPend.imgs.length?'Photo added. Type your question (or just tap Ask).':'Couldn’t read that image.'};
+ ['gcCam','gcGal'].forEach(id=>{const el=$(id);if(el)el.onchange=e=>{if(e.target.files.length)addFiles(e.target.files);e.target.value=''}});
+ box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const keep=$('gcText').value;gcPend.imgs.splice(+b.dataset.rm,1);renderGearChat(it);$('gcText').value=keep});
+ box.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{$('gcText').value=b.dataset.q;askGear(it)});
+ $('gcSend').onclick=()=>askGear(it);
+ $('gcText').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGear(it)}});
+ if($('gcClear'))$('gcClear').onclick=()=>{const l=instAll(),x=l.find(y=>y.id===it.id);if(x){delete x.chat;store.set('instruments',l)}it.chat=[];renderGearChat(it)};
+}
+async function askGear(it){
+ const pend=gcPend.id===it.id?gcPend.imgs.slice():[];let q=$('gcText').value.trim();if(!q&&!pend.length)return;if(!q)q='What do you see in this photo? Anything I should know or do?';const btn=$('gcSend');btn.disabled=true;$('gcMsg').textContent='Claude is thinking…';
+ const g=GEAR[it.type],sp=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown'&&SPEC_Q[k]).map(([k,v])=>`${SPEC_Q[k].label}: ${(SPEC_Q[k].opts.find(o=>o[0]===v)||[,v])[1]}`).join('; ');
+ const others=instAll().filter(x=>x.id!==it.id).map(x=>`${x.name} (${[x.brand,x.model].filter(Boolean).join(' ')||GEAR[x.type].short}, ${GEAR[x.type].short})`).join('; ');
+ const facts=[`Item: "${it.name}", a ${g.name}`,it.brand||it.model?`Brand/model: ${[it.brand,it.model].filter(Boolean).join(' ')}${it.year?' ('+it.year+')':''}`:'',sp?`Details: ${sp}`:'',
+  !g.amp&&it.strings?`Strings last changed: ${it.strings} (${daysSince(it.strings)} days ago)`:'',it.tuning?`Usual tuning: ${(TUNINGS.find(t=>t.id===it.tuning)||{}).name}`:'',it.lastTuned?`Last fully tuned: ${it.lastTuned}`:'',
+  it.photoNotes&&(it.photoNotes.observations||[]).length?`Seen in their photo: ${it.photoNotes.observations.concat(it.photoNotes.check||[]).join('; ')}`:'',it.ai&&it.ai.summary?`Model profile: ${it.ai.summary}`:'',
+  others?`Their other gear: ${others}`:''].filter(Boolean).join('\n');
+ const prev=(it.chat||[]).slice(-4).map(h=>`Q: ${h.q}\nA: ${h.a}`).join('\n\n');
+ const prompt=`You are a friendly, expert guitar technician and teacher inside a guitar app. The user is on the page for one specific piece of their gear and is asking about it. Answer about THIS item unless they clearly ask about something else.
+${facts}
+${prev?`Earlier in this conversation:\n${prev}\n`:''}
+${pend.length?`They attached ${pend.length} photo${pend.length>1?'s':''} with this question (the first image${pend.length>1?'s':''} attached). Look at ${pend.length>1?'them':'it'} carefully and refer to what you actually see.\n`:''}Their question: """${q}"""
+Answer practically and specifically for this item, in the language they wrote in. Keep it short: a few sentences or up to 6 bullet points. If something depends on details you don't have, say what to check. If the issue could damage the instrument or needs a technician, say so plainly. Plain text, bullets with "- " are fine, no headings.`;
+ try{const opt={},ims=pend.map(x=>dataUrlBlob(x.big));if(it.photo&&imgLimit>ims.length)ims.push(dataUrlBlob(it.photo));if(ims.length)opt.images=ims;
+  const r=await sampleFn(prompt+(it.photo&&ims.length>pend.length?'\nThe last image is their profile photo of this item, for reference.':''),opt);const a=(r&&r.text||'').trim();if(!a)throw new Error('empty');
+  const l=instAll(),x=l.find(y=>y.id===it.id);if(x){x.chat=(x.chat||[]).concat(pend.length?{q,a,t:Date.now(),imgs:pend.map(p=>p.small)}:{q,a,t:Date.now()}).slice(-12);store.set('instruments',l);it.chat=x.chat}
+  gcPend={id:it.id,imgs:[]};renderGearChat(it);const last=[...$('gChat').querySelectorAll('.gca')].pop();if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }catch(e){btn.disabled=false;$('gcMsg').textContent=e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':'Couldn’t reach Claude. Try again.'}
+}
+function aiHTML(it){const a=it.ai,L=x=>Array.isArray(x)&&x.length?`<ul>${x.map(y=>`<li>${esc(String(y))}</li>`).join('')}</ul>`:'';
+ return `<div class="aibox"><div class="gsech"><span class="sic">${SK('PROFILE')}</span><span class="stx"><b>From Claude: your ${esc([it.brand,it.model].filter(Boolean).join(' '))}</b><small>Specs, known issues, care and settings for this model</small></span></div>${a.summary?`<p>${esc(a.summary)}</p>`:''}${a.specs&&a.specs.length?`<b>Typical specs</b>${L(a.specs)}`:''}${a.strengths&&a.strengths.length?`<b>What it does best</b>${L(a.strengths)}`:''}${a.weaknesses&&a.weaknesses.length?`<b>Limits</b>${L(a.weaknesses)}`:''}${a.known_issues&&a.known_issues.length?`<b>Things to watch on this model</b>${L(a.known_issues)}`:''}${a.care&&a.care.length?`<b>Care for this model</b>${L(a.care)}`:''}${a.strings?`<b>${GEAR[it.type]&&GEAR[it.type].amp?'Starting settings':'Strings'}</b><p>${esc(a.strings)}</p>`:''}${a.setup&&a.setup.length?`<b>Setup tips</b>${L(a.setup)}`:''}<p class="tip">Claude’s general knowledge of this model. Details can differ by year and version.</p></div>`}
+async function askClaudeInst(it){
+ const b=$('iAsk');b.disabled=true;b.textContent='Claude is looking into your guitar…';
+ const sp=Object.entries(it.specs||{}).filter(([k,v])=>v&&v!=='unknown').map(([k,v])=>`${k}: ${v}`).join(', ');
+ const prompt=`A guitarist owns this ${GEAR[it.type].amp?"amplifier":"instrument"}: brand "${it.brand}", model "${it.model}"${it.year?`, year ${it.year}`:''}, type ${GEAR[it.type].name}${sp?`, they say: ${sp}`:''}.
+Give accurate, practical advice specific to this exact model. If you don't know this exact model, say so in the summary and base the advice on the closest model you do know, saying which. Don't invent specs you aren't confident about. Keep each item to one short sentence.
+Reply with only JSON: {"summary": string, "specs": [strings], "strengths": [strings], "weaknesses": [strings], "known_issues": [strings], "care": [strings], "strings": string (${GEAR[it.type].amp?'good starting settings for this amp (gain, EQ, effects) for this kind of guitar':'recommended string type and gauge'}), "setup": [strings]}`;
+ try{const opt={modelTier:'default'};if(imgLimit>0&&gpAll(it).some(p=>p.src))opt.images=gpBlobs(it);const r=await sampleFn.json(prompt+(opt.images?`\n${opt.images.length>1?opt.images.length+' photos':'A photo'} of this exact ${GEAR[it.type].amp?'amp':'guitar'} ${opt.images.length>1?'are':'is'} attached; use ${opt.images.length>1?'them':'it'} to confirm the version and to spot anything worth checking.`:''),opt);const l=instAll(),x=l.find(y=>y.id===it.id);if(x&&r){x.ai=r;x.aiAt=Date.now();instSave(l)}renderGear()}
+ catch(e){b.disabled=false;b.textContent=e&&e.code==='rate_limited'?'Too many requests. Try again in a little while.':'Couldn’t reach Claude. Tap to try again.'}
+}

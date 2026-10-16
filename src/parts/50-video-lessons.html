@@ -1,0 +1,208 @@
+/* ================= My video lessons: links you learn songs from, matched to your chord sheets ================= */
+const VLK='vlinks';
+const vlAll=()=>store.get(VLK,[])||[];
+function ytId(u){const m=String(u||'').match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/|v\/))([\w-]{11})/);return m?m[1]:''}
+function vlNormUrl(u){const id=ytId(u);if(id)return 'yt:'+id;try{const x=new URL(u);x.hash='';['si','utm_source','utm_medium','utm_campaign','igsh','fbclid','feature'].forEach(k=>x.searchParams.delete(k));return (x.host.replace(/^www\.|^m\./,'')+x.pathname.replace(/\/$/,'')+(x.search||'')).toLowerCase()}catch(e){return String(u||'').trim().toLowerCase()}}
+function vlSource(u){if(ytId(u))return 'YouTube';try{const h=new URL(u).host.replace(/^www\.|^m\./,'');return ({'instagram.com':'Instagram','facebook.com':'Facebook','fb.watch':'Facebook','tiktok.com':'TikTok','vimeo.com':'Vimeo','drive.google.com':'Google Drive','tab4u.com':'Tab4U','songsterr.com':'Songsterr','ultimate-guitar.com':'Ultimate Guitar'})[h]||h}catch(e){return 'Link'}}
+const firstUrl=t=>{const m=String(t||'').match(/https?:\/\/[^\s<>"']+/);return m?m[0].replace(/[).,]+$/,''):''};
+// "Artist - Song (Guitar Lesson)", "How to play Song by Artist", "Song | Artist | אקורדים" → song + artist
+function vlParse(title,author){
+ let t=String(title||'').replace(/[‎‏]/g,'').replace(/[\[(【][^\])】]*(lesson|tutorial|chords?|guitar|cover|official|video|lyrics?|tab|easy|acoustic|live|שיעור|אקורדים|גיטרה|לימוד|קאבר|מילים)[^\])】]*[\])】]/gi,' ');
+ t=t.replace(/\b(guitar\s+(lesson|tutorial|cover)|easy\s+guitar|chords?\s+tutorial|how to play|tutorial|lesson|chords|acoustic cover|cover|official (music )?video|with tabs?)\b/gi,' ').replace(/(שיעור\s*גיטרה|לימוד\s*גיטרה|איך\s*לנגן|אקורדים\s*ל?|גיטרה\s*קלאסית|לימוד\s*שיר|קאבר)/g,' ').replace(/#\S+/g,' ').replace(/\s{2,}/g,' ').trim();
+ let song=t,artist='';
+ let m=t.match(/^(.+?)\s+by\s+(.+)$/i);if(m){song=m[1];artist=m[2]}
+ else{const parts=t.split(/\s+[-–—|:]\s+|\s*\|\s*/).map(x=>x.trim()).filter(Boolean);if(parts.length>=2){artist=parts[0];song=parts[1]}}
+ const clean=x=>x.replace(/^[\s\-–—|:,.]+|[\s\-–—|:,.]+$/g,'').trim();song=clean(song);artist=clean(artist);
+ // which order is right? the one where the artist is someone you already have, or the song matches one of your sheets
+ const known=vlKnownArtists();const isA=x=>known.has(normArt(x));
+ if(artist&&!isA(artist)&&isA(song)){[song,artist]=[artist,song]}
+ else if(artist&&!isA(artist)&&!isA(song)&&!vlFindSheet(song,artist)&&vlFindSheet(artist,song)){[song,artist]=[artist,song]}
+ if(!artist&&author&&!/lesson|guitar|גיטרה|music school|academy/i.test(author))artist='';
+ return {song:song||String(title||'').trim(),artist};
+}
+function vlKnownArtists(){const s=new Set();try{(store.get('songIndex',{})||{}).artists?.forEach(a=>s.add(normArt(a)));catalogAll().forEach(e=>e.artist&&s.add(normArt(e.artist)));libAll().forEach(e=>e.data&&e.data.artist&&s.add(normArt(e.data.artist)))}catch(e){}return s}
+const vlKey=t=>normArt(t).replace(/[^\p{L}\p{N} ]/gu,' ').replace(/\s+/g,' ').trim();
+// every chord sheet you have: made in Guitaring (Drive list + this phone), saved in My songs, and the songs folder
+function vlSheets(){const out=[];
+ try{catalogAll().forEach(e=>out.push({title:e.title,artist:e.artist||'',url:e.url||('https://drive.google.com/drive/search?q='+encodeURIComponent(e.title)),kind:'Drive sheet'}))}catch(e){}
+ try{libAll().forEach(e=>out.push({title:e.name||(e.data&&e.data.title)||'',artist:(e.data&&e.data.artist)||'',lib:e.id,kind:'My songs'}))}catch(e){}
+ try{((store.get('songIndex',{})||{}).songs||[]).forEach(x=>out.push({title:x.t,artist:x.a||'',url:'https://drive.google.com/drive/search?q='+encodeURIComponent(x.t),kind:'Songs folder'}))}catch(e){}
+ return out.filter(x=>x.title)}
+function vlMatch(a,b){a=vlKey(a);b=vlKey(b);if(!a||!b)return false;if(a===b)return true;const sh=a.length<b.length?a:b,lg=a.length<b.length?b:a;return sh.length>=4&&(' '+lg+' ').includes(' '+sh+' ')}
+function vlFindSheet(song,artist){if(!song)return null;const all=vlSheets();let best=null,bs=0;
+ for(const x of all){if(!vlMatch(song,x.title))continue;let sc=vlKey(song)===vlKey(x.title)?2:1;if(artist&&x.artist){if(vlMatch(artist,x.artist))sc+=2;else sc-=1.5}if(x.lib)sc+=.3;if(sc>bs){bs=sc;best=x}}
+ return bs>0?best:null}
+function vlFindVideos(title,artist){return vlAll().filter(v=>vlMatch(v.song||v.title,title)&&(!artist||!v.artist||vlMatch(v.artist,artist)))}
+async function vlMeta(url){
+ const tryJ=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)return null;const j=await r.json();return j&&j.title?j:null}catch(e){return null}finally{clearTimeout(t)}};
+ const id=ytId(url);
+ return (id&&await tryJ('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id)))||await tryJ('https://noembed.com/embed?url='+encodeURIComponent(url))||null;
+}
+let vlDraft=null,vlQ='',vlMsg='';
+function renderVids(){const box=$('vidBox');if(!box)return;const l=vlAll(),wasOpen=box.open;
+ const withSheet=l.filter(v=>vlFindSheet(v.song||v.title,v.artist)).length;
+ box.innerHTML=`<summary><span class="sic">${SK('LESSON')}</span><span class="stx"><b>My video lessons</b><small>${l.length?`${l.length} saved link${l.length===1?'':'s'} · ${withSheet} with a chord sheet`:'Save the video links you learn songs from'}</small></span></summary>
+ <div class="vidadd"><input id="vlUrl" class="textin" type="url" inputmode="url" placeholder="Paste a YouTube or other video link" autocomplete="off" dir="ltr"><button class="btn" type="button" id="vlAdd">Add</button></div>
+ <p class="tip" style="margin:0">Tip: in the YouTube app tap <b>Share › Guitaring</b> to add a video straight here.</p>
+ <div id="vlMsg"></div><div id="vlForm"></div>
+ ${l.length>3?`<input id="vlQ" class="textin" type="search" dir="auto" placeholder="Search your video lessons…" value="${esc(vlQ)}" autocomplete="off">`:''}
+ <div class="vidlist" id="vlList"></div>`;
+ box.open=wasOpen||!!vlDraft||!!vlMsg;
+ $('vlAdd').onclick=()=>vlStart($('vlUrl').value);
+ $('vlUrl').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();vlStart($('vlUrl').value)}});
+ $('vlUrl').addEventListener('paste',()=>setTimeout(()=>{if(firstUrl($('vlUrl').value))vlStart($('vlUrl').value)},30));
+ if($('vlQ'))$('vlQ').addEventListener('input',e=>{vlQ=e.target.value;drawVids()});
+ drawVidMsg();drawVidForm();drawVids();
+}
+function drawVidMsg(){const m=$('vlMsg');if(m)m.innerHTML=vlMsg||''}
+function vlRowHTML(v){const sh=vlFindSheet(v.song||v.title,v.artist),th=v.thumb||(v.yt?`https://i.ytimg.com/vi/${v.yt}/mqdefault.jpg`:'');
+ const name=v.song||v.title||v.url;
+ return `<div class="vidrow" data-id="${esc(v.id)}"><a class="vidthumb" href="${esc(v.url)}" target="_blank" rel="noopener" style="${th?`background-image:url('${esc(th)}')`:''}" aria-label="Watch ${esc(name)}"><span>▶</span></a>
+ <div class="vidtx"><span class="vidsrc">${esc(v.src||vlSource(v.url))}</span><b dir="auto">${esc(name)}</b>${v.artist?`<small dir="auto">${esc(v.artist)}</small>`:''}${v.note?`<small dir="auto">${SK('NOTE')} ${esc(v.note)}</small>`:''}
+ <div class="vidacts"><a class="play" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Watch</a>${sh?(sh.lib?`<button type="button" class="sheet" data-lib="${esc(sh.lib)}">${SK('SHEET')} Chord sheet</button>`:`<a class="sheet" href="${esc(sh.url)}" target="_blank" rel="noopener" title="${esc(sh.kind)}">${SK('SHEET')} Chord sheet ↗</a>`):'<span class="nosheet vidacts-no" style="font:600 12px var(--body);color:var(--muted);padding:5px 4px">No chord sheet yet</span>'}<button type="button" data-edit="${esc(v.id)}">Edit</button></div></div></div>`}
+function drawVids(){const box=$('vlList');if(!box)return;const q=vlKey(vlQ);
+ const l=vlAll().filter(v=>!q||vlKey([v.song,v.artist,v.title,v.note].join(' ')).includes(q));
+ box.innerHTML=l.length?l.map(vlRowHTML).join(''):(vlAll().length?'<p class="tip">No video matches.</p>':'')}
+function drawVidForm(){const f=$('vlForm');if(!f)return;if(!vlDraft){f.innerHTML='';return}const d=vlDraft,sh=vlFindSheet(d.song,d.artist);
+ f.innerHTML=`<div class="vidform">${d.loading?'<p class="tip" style="margin:0">Getting the video’s title…</p>':''}
+ ${d.thumb||d.yt?`<a class="vidthumb" style="width:160px;background-image:url('${esc(d.thumb||`https://i.ytimg.com/vi/${d.yt}/mqdefault.jpg`)}')" href="${esc(d.url)}" target="_blank" rel="noopener"><span>▶</span></a>`:''}
+ ${d.title?`<small class="tip" dir="auto" style="margin:0">“${esc(d.title)}”</small>`:''}
+ <div class="two"><label>Song<input id="vlSong" class="textin" dir="auto" value="${esc(d.song||'')}" placeholder="Song name"></label><label>Artist<input id="vlArt" class="textin" dir="auto" value="${esc(d.artist||'')}" placeholder="Artist"></label></div>
+ <label>Note (optional)<input id="vlNote" class="textin" dir="auto" value="${esc(d.note||'')}" placeholder="e.g. intro riff at 2:10"></label>
+ <div class="vidmsg ${sh?'ok':''}" id="vlSheetHint">${sh?`${SK('SHEET')} You have a chord sheet for this: <b dir="auto">${esc(sh.title)}</b>${sh.artist?' · '+esc(sh.artist):''} <small>(${esc(sh.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'}</div>
+ <div class="editrow"><button class="btn" type="button" id="vlSave">${d.id?'Save changes':'Save video'}</button><button class="btn ghost" type="button" id="vlCancel">Cancel</button>${d.id?'<button class="btn ghost danger" type="button" id="vlDel">Delete</button>':''}</div></div>`;
+ const upd=()=>{d.song=$('vlSong').value.trim();d.artist=$('vlArt').value.trim();d.note=$('vlNote').value.trim();const s2=vlFindSheet(d.song,d.artist),h=$('vlSheetHint');h.className='vidmsg'+(s2?' ok':'');h.innerHTML=s2?`${SK('SHEET')} You have a chord sheet for this: <b dir="auto">${esc(s2.title)}</b>${s2.artist?' · '+esc(s2.artist):''} <small>(${esc(s2.kind)})</small>`:'No chord sheet for this song yet. You can make one from Songs › Write a song sheet.'};
+ ['vlSong','vlArt','vlNote'].forEach(id=>$(id).addEventListener('input',upd));
+ $('vlSave').onclick=()=>{upd();const l=vlAll(),e={id:d.id||('v'+Date.now().toString(36)),url:d.url,key:d.key,yt:d.yt||'',src:d.src,title:d.title||'',thumb:d.thumb||'',song:d.song||d.title||'',artist:d.artist||'',note:d.note||'',at:d.at||Date.now()};
+  const i=l.findIndex(x=>x.id===e.id);if(i>=0)l[i]=e;else l.unshift(e);store.set(VLK,l);
+  const sh=vlFindSheet(e.song,e.artist);vlMsg=`<div class="vidmsg ok">✓ Saved “${esc(e.song)}”.${sh?' '+SK('SHEET')+' It’s linked to your chord sheet.':''}</div>`;vlDraft=null;renderVids();try{renderCatalog()}catch(err){}};
+ $('vlCancel').onclick=()=>{vlDraft=null;vlMsg='';renderVids()};
+ if($('vlDel'))$('vlDel').onclick=()=>{store.set(VLK,vlAll().filter(x=>x.id!==d.id));vlDraft=null;vlMsg='<div class="vidmsg">Deleted.</div>';renderVids();try{renderCatalog()}catch(err){}};
+}
+async function vlStart(raw){
+ const url=firstUrl(raw)||(/^[\w-]+\.[\w.-]+\//.test(String(raw||'').trim())?'https://'+String(raw).trim():'');
+ if(!url){vlMsg='<div class="vidmsg dup">That doesn’t look like a link. Copy the video’s link (Share › Copy link) and paste it here.</div>';drawVidMsg();return}
+ const key=vlNormUrl(url),dup=vlAll().find(v=>(v.key||vlNormUrl(v.url))===key);
+ if(dup){vlDraft=null;vlMsg=`<div class="vidmsg dup">You already saved this video: <b dir="auto">${esc(dup.song||dup.title)}</b>${dup.artist?' · '+esc(dup.artist):''}. <a href="${esc(dup.url)}" target="_blank" rel="noopener">▶ Watch it</a></div>`;renderVids();$('vidBox').open=true;return}
+ vlMsg='';vlDraft={url,key,yt:ytId(url),src:vlSource(url),loading:true,song:'',artist:''};renderVids();$('vidBox').open=true;if($('vlUrl'))$('vlUrl').value='';
+ const m=await vlMeta(url);if(!vlDraft||vlDraft.url!==url)return;vlDraft.loading=false;
+ if(m){vlDraft.title=m.title;vlDraft.thumb=m.thumbnail_url||'';const p=vlParse(m.title,m.author_name);vlDraft.song=p.song;vlDraft.artist=p.artist}
+ drawVidForm();
+}
+$('vidBox')&&$('vidBox').addEventListener('click',e=>{const ed=e.target.closest('[data-edit]');if(ed){const v=vlAll().find(x=>x.id===ed.dataset.edit);if(v){vlDraft={...v};vlMsg='';drawVidMsg();drawVidForm();$('vlForm').scrollIntoView({behavior:'smooth',block:'center'})}return}
+ const lb=e.target.closest('[data-lib]');if(lb){const ent=libGet(lb.dataset.lib);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet()}});
+// a chord sheet you open shows its video lessons
+function renderSheetVid(){const box=$('shVid');if(!box)return;if(!A){box.hidden=true;return}const t=($('shName').value||A.title||'').trim();const vs=t?vlFindVideos(t,A.artist||''):[];
+ box.hidden=!vs.length;box.innerHTML=vs.map(v=>`<a class="shvid" href="${esc(v.url)}" target="_blank" rel="noopener"><i>${SK('LESSON')}</i><span><b>Your video lesson for this song</b><small dir="auto">${esc(v.song||v.title)}${v.artist?' · '+esc(v.artist):''} · ${esc(v.src||vlSource(v.url))} ↗</small></span></a>`).join('')}
+// shared from YouTube (Share › Guitaring) or opened with ?url=…
+(function vlShared(){try{const q=new URLSearchParams(location.search),u=firstUrl([q.get('url'),q.get('text'),q.get('title')].join(' '));if(!u)return;
+ history.replaceState(null,'',location.pathname);setTimeout(()=>{try{closeWelcome('song');songsHome();setSongSeg('lib')}catch(e){}renderVids();$('vidBox').open=true;vlStart(u);setTimeout(()=>$('vidBox').scrollIntoView({behavior:'smooth',block:'start'}),300)},50)}catch(e){}})();
+setTimeout(renderVids,0);
+// screenshots are lined up in order first (top of the song first), then read together
+let shotStage=[];const SHOT_MAX=8;
+// when was a screenshot taken? 1) the phone's file name (Screenshot_20261010-231512…), 2) the photo's EXIF date, 3) the file date
+function timeFromName(n){n=String(n||'');let m=n.match(/(20\d\d)[-_.]?(\d\d)[-_.]?(\d\d)[-_ T.]{0,3}(?:at[ _])?(\d\d)[-_.:]?(\d\d)[-_.:]?(\d\d)(?:[-_.]?(\d{1,3}))?/);
+ if(!m)return 0;const [_,Y,Mo,D,h,mi,se,ms]=m;const t=new Date(+Y,+Mo-1,+D,+h,+mi,+se,+(ms||0)).getTime();return t>946684800000&&t<Date.now()+864e5?t:0}
+async function timeFromExif(f){try{if(!/jpe?g/i.test(f.type||f.name))return 0;const b=new DataView(await f.slice(0,131072).arrayBuffer());if(b.getUint16(0)!==0xFFD8)return 0;let o=2;
+ while(o+4<b.byteLength){const mk=b.getUint16(o),len=b.getUint16(o+2);if(mk===0xFFE1&&b.getUint32(o+4)===0x45786966){const t0=o+10,le=b.getUint16(t0)===0x4949,u16=x=>b.getUint16(x,le),u32=x=>b.getUint32(x,le);
+   const readStr=(off,n)=>{let r='';for(let i=0;i<n-1;i++)r+=String.fromCharCode(b.getUint8(t0+off+i));return r};let found='';
+   const scan=ifd=>{const n=u16(t0+ifd);let sub=0;for(let i=0;i<n;i++){const e=t0+ifd+2+i*12,tag=u16(e),cnt=u32(e+4),val=u32(e+8);if(tag===0x9003||(tag===0x0132&&!found))found=readStr(val,cnt);if(tag===0x8769)sub=val}return sub};
+   const sub=scan(u32(t0+4));if(sub)scan(sub);const m=found.match(/(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)/);return m?new Date(+m[1],m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime():0}
+  if((mk&0xFF00)!==0xFF00)break;o+=2+len}}catch(e){}return 0}
+let shotManual=false;// once you move a screenshot yourself, new ones are added at the end instead of re-sorting
+async function shotAdd(files){
+ const pdf=[...files].find(f=>/pdf/i.test(f.type)||/\.pdf$/i.test(f.name));if(pdf){shotStage=[{pdf,small:'',big:'',t:0,name:pdf.name}];shotRead();return}
+ const room=Math.max(0,SHOT_MAX-shotStage.length),all=[...files].filter(f=>/^image\//.test(f.type)||!f.type);
+ const card=$('shotCard');card.hidden=false;if(!shotStage.length)card.innerHTML='<p class="tip">Opening the screenshots…</p>';
+ const items=[];let seq=0;
+ for(const f of all){let t=timeFromName(f.name),src='name';if(!t){t=await timeFromExif(f);src='exif'}if(!t){t=f.lastModified||0;src='file'}items.push({f,t,src,seq:seq++})}
+ items.sort((x,y)=>(x.t||Infinity)-(y.t||Infinity)||x.seq-y.seq);
+ const add=[];for(const it of items.slice(0,room)){try{add.push({big:await shrinkPhoto(it.f,1600),small:await shrinkPhoto(it.f,480),t:it.t,src:it.src})}catch(e){}}
+ if(shotManual)shotStage=shotStage.concat(add);else shotStage=shotStage.concat(add).sort((x,y)=>(x.t||Infinity)-(y.t||Infinity));
+ renderShotStage(all.length>room?`Up to ${SHOT_MAX} screenshots per song.`:'');
+}
+const shotWhen=t=>{if(!t)return '';const d=new Date(t),today=new Date().toDateString()===d.toDateString();return 'Taken '+(today?'':d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' ')+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'})};
+function renderShotStage(msg){
+ const card=$('shotCard'),n=shotStage.length;if(!n){card.hidden=true;card.innerHTML='';return}card.hidden=false;
+ const lab=i=>n===1?'':i===0?'Beginning':i===n-1?'End':'Middle';
+ card.innerHTML=`<div class="drafthead"><span class="sic">${SK('SCAN')}</span><span class="stx"><b>${n} screenshot${n===1?'':'s'} of one song</b><small>Sorted by the time each was taken, so the first one you took is the beginning. Tap a picture to see it full size. Overlaps are fine.</small></span></div>
+ <div class="shotlist">${shotStage.map((x,i)=>`<div class="shotrow"><img src="${x.small}" alt="Screenshot ${i+1}" data-big="${i}"><div class="shotinfo"><b>${i+1}</b><small>${lab(i)}</small><small>${shotWhen(x.t)}</small></div><div class="shotbtns"><button type="button" class="btn ghost" data-up="${i}" ${i?'':'disabled'} aria-label="Move up">↑</button><button type="button" class="btn ghost" data-dn="${i}" ${i<n-1?'':'disabled'} aria-label="Move down">↓</button><button type="button" class="btn ghost danger" data-rm="${i}" aria-label="Remove">✕</button></div></div>`).join('')}</div>
+ ${msg?`<p class="tip">${esc(msg)}</p>`:''}
+ <div class="editrow">${n<SHOT_MAX?`<button type="button" class="btn ghost" id="shotMore">＋ Add the next screenshot</button>`:''}<button type="button" class="btn cta" id="shotGoRead">Make the sheet from ${n===1?'it':'all '+n}</button></div>
+ <button type="button" class="linkbtn" id="shotCancel">Cancel</button>`;
+ card.querySelectorAll('[data-big]').forEach(im=>im.onclick=()=>showShots(shotStage.map(x=>x.big),+im.dataset.big));
+ card.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{shotManual=true;const i=+b.dataset.up;[shotStage[i-1],shotStage[i]]=[shotStage[i],shotStage[i-1]];renderShotStage()});
+ card.querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{shotManual=true;const i=+b.dataset.dn;[shotStage[i+1],shotStage[i]]=[shotStage[i],shotStage[i+1]];renderShotStage()});
+ card.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{shotStage.splice(+b.dataset.rm,1);renderShotStage()});
+ if($('shotMore'))$('shotMore').onclick=()=>$('shotIn').click();
+ $('shotGoRead').onclick=()=>shotRead();$('shotCancel').onclick=()=>{shotStage=[];shotManual=false;renderShotStage()};
+}
+// safety net: if the same lines show up at the bottom of one screenshot and the top of the next, keep them once
+const lineKey=L=>L.type+'|'+String(L.text||'').replace(/[\u200e\u200f\u202a-\u202e]/g,'').replace(L.type==='lyrics'?/\[[^\]]*\]/g:/$^/,'').replace(/[\s.,!?'"־-]+/g,' ').trim().toLowerCase()+'|'+(L.chords||[]).map(c=>typeof c==='string'?c:c&&c.chord).join(' ');
+function dropOverlaps(lines){
+ if(!lines.some(L=>L&&L.img!=null))return lines;
+ const groups=[];let cur=null;for(const L of lines){const im=L.img!=null?+L.img:(cur?cur.img:1);if(!cur||im!==cur.img){cur={img:im,lines:[]};groups.push(cur)}cur.lines.push(L)}
+ const out=[];
+ for(const g of groups){
+  const tail=out.filter(x=>x.type!=='blank'),head=g.lines.filter(x=>x.type!=='blank');let best=0;
+  if(out.length)for(let n=Math.min(head.length,tail.length,12);n>=1;n--){
+   const A1=tail.slice(-n).map(lineKey),B1=head.slice(0,n).map(lineKey);if(A1.every((k,q)=>k.split('|')[0]===B1[q].split('|')[0]&&simText(k,B1[q])>=.82)){const w=String(head[0].text||'').split(/\s+/).length;if(n>=2||w>=3||head[0].type==='chords'){best=n;break}}}
+  let skip=best;for(const L of g.lines){if(skip>0){if(L.type!=='blank')skip--;continue}out.push(L)}
+ }
+ return out;
+}
+async function shotRead(){
+ const card=$('shotCard'),stage=shotStage.slice(),n=stage.length;if(!n)return;
+  const say=t=>{card.innerHTML=`<div class="shotthumbs">${stage.map(x=>x.pdf?`<span class="badge">PDF · ${esc(x.name||'')}</span>`:`<img src="${x.small}" alt="">`).join('')}</div><p class="tip">${SK('TIP')} ${t}</p>`};
+ try{const r={title:'',artist:'',capo:0,tuning:'Standard',note:'',lines:[]};
+  if(stage[0]&&stage[0].pdf){const pages=await pdfWords(stage[0].pdf,say);pages.forEach((w,k)=>r.lines.push(...wordsToLines(w,k+1)));r._names=[pages.docTitle,String(stage[0].name||'').replace(/\.pdf$/i,'')]}
+  else{say('Getting the reader ready…');await ocrSheetReady(say);
+   for(let k=0;k<stage.length;k++){say(`Reading screenshot ${k+1} of ${stage.length} on your phone…`);const w=await ocrImageWords(stage[k].big);r.lines.push(...wordsToLines(w,k+1))}}
+  if(stage.length>1){const key=L=>String(L.text||'').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim();const seen={};
+   r.lines.forEach(L=>{if(L.type!=='lyrics'||L.yr==null)return;const k=key(L);(seen[k]=seen[k]||[]).push(L)});
+   const sticky=new Set();Object.values(seen).forEach(list=>{const imgs=new Set(list.map(x=>x.img));if(imgs.size<2)return;
+    const ys=list.map(x=>x.yr);if(Math.max(...ys)-Math.min(...ys)<.035)list.forEach(x=>sticky.add(x))});
+   r.lines=r.lines.filter(L=>!sticky.has(L))}
+  if(!r.lines.some(L=>L.type==='lyrics'||L.type==='chords'))throw {code:'empty'};
+  const lowConf=!stage[0].pdf;const meta=metaFromLines(r);if(!r.title||!r.artist){say('Finding the song name and artist…');const g=await guessTitle(r);if(g&&!meta.includes('song name and artist'))meta.unshift(g)}
+  r.note=(meta.length?`Filled in from the sheet: ${meta.join(', ')}. `:'')+(r._capo||r._tun?'':'No capo or tuning was written on the sheet, so fill those in if needed. ')+(r.title&&r.artist?'':'Add the song name and artist at the top. ')+(lowConf?'Read from the picture, so a few letters or chords may be misread; compare with the screenshot.':'');
+  r.lines=dropOverlaps(r.lines.filter(Boolean));
+  const a=sheetFromShot(r);if(!a.lc.some(L=>L.t.trim()))throw {code:'empty'};
+  a.fromImport=true;a.shots=stage.filter(x=>!x.pdf).map(x=>x.small);shotBigMem=stage.filter(x=>!x.pdf).map(x=>x.big);shotStage=[];shotManual=false;card.hidden=true;card.innerHTML='';
+  try{store.set('writeDraft',a)}catch(e){a.shots=a.shots.slice(0,2);try{store.set('writeDraft',a)}catch(e2){delete a.shots}}
+  openWriter(a,2);
+ }catch(e){renderShotStage(e&&e.code==='ocr_load'?'Couldn’t download the text reader. Check the internet connection and try again.':e&&e.code==='pdf_load'?'Couldn’t open the PDF reader. Check the internet connection and try again.':e&&e.code==='nolyrics'?'Claude found only chords and no lyrics. Try again; if it keeps happening, use clearer screenshots with the lyrics fully visible.':e&&e.code==='rate_limited'?'Claude is busy. Try again in a minute.':e&&e.code==='empty'?'No chords or lyrics were found in these pictures. Try clearer screenshots that show the chords above the lyrics, or a PDF from the site.':'Couldn’t reach Claude. Check the connection and try again.')}
+}
+$('shotNew').onclick=()=>{const d=draftNow(),card=$('shotCard');if(!d||shotStage.length){$('shotIn').click();return}
+ card.hidden=false;card.innerHTML=`<div class="confirm"><span>Reading screenshots replaces your unfinished sheet “${esc(d.title||'Untitled song')}”.</span><button class="btn" type="button" id="shotGo">Continue</button><button class="btn ghost" type="button" id="shotNo">Cancel</button></div>`;
+ $('shotGo').onclick=()=>{card.hidden=true;$('shotIn').click()};$('shotNo').onclick=()=>{card.hidden=true}};
+$('shotIn').onchange=e=>{if(e.target.files.length)shotAdd(e.target.files);e.target.value=''};
+$('writeNew').onclick=()=>{const d=store.get('writeDraft',null);openWriter(d&&d.kind==='lyrics'?d:newWritten())};
+$('wBlank').onclick=()=>{store.set('writeDraft',null);openWriter(newWritten(),1)};
+$('wBack').onclick=()=>{saveDraft();$('writeView').hidden=true;A=null;showLanding()};
+$('wDone').onclick=()=>{
+ A.lyrics=$('wLyrics').value;if(!A.lc||!A.lc.length)A.lc=remapLines(A.lyrics,[]);
+ if(!A.title)A.title=(wordsOf((A.lc.find(L=>L.t.trim()&&!isSecLine(L.t))||{t:''}).t).slice(0,5).join(' '))||'My song';
+ try{bookAdd(lyricChords(A),A.title)}catch(e){}
+ A.made=true;delete A.shots;delete A.fromImport;saveDraft();$('writeView').hidden=true;showSheet();wFromWriter=true;
+ $('shStatus').textContent='Check the sheet, then save it to My songs, as a PDF or to Google Drive.';
+};
+function writtenSheetHTML(print){
+ const t=TUNINGS.find(x=>x.id===A.play.tun)||TUNINGS[0],name=$('shName')&&$('shName').value.trim()||(A.libId&&libGet(A.libId)?.name)||A.title||'Untitled song';
+ const meta=[`Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})`,`Capo <b>${A.play.capo?'fret '+A.play.capo:'none'}</b>`];
+ if(A.artist)meta.unshift(`Artist <b dir="auto">${esc(A.artist)}</b>`);
+ const used=lyricChords(A);
+ const dg=n=>{const mf=A.fing&&A.fing[canon(n)];const g=segFromName(n,A.play.tun,A.play.capo);let svg=diagram(mf?shapeFromFrets(mf.f,mf.capo):g&&shapeForSeg(g,A.play.tun,A.play.capo),n);return print?printify(svg):svg};
+ let h=`<h1 dir="auto">${esc(name)}</h1><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
+ if(used.length)h+=`<h3>Chords</h3><div class="pgrid">${used.map(dg).join('')}</div>`;
+ h+=`<h3>Lyrics &amp; chords</h3><div class="lyr">${(A.lc||[]).map(L=>{
+  if(!L.t.trim())return '<div class="ly blank"></div>';
+  if(isSecLine(L.t))return `<div class="ly sec" dir="auto">${esc(L.t.trim().slice(1,-1))}</div>`;
+  const ws=wordsOf(L.t),has=ws.some((_,j)=>L.ch[j]),sl=ws.length>0&&ws.every(isSlot);
+  if(sl&&!has)return '';
+  return `<div class="ly${has?'':' nochords'}${sl?' slots':''}${sl&&/[\u0590-\u05FF]/.test(A.lyrics||'')?' rtlrow':''}" dir="auto">${ws.map((w,j)=>isSlot(w)?(L.ch[j]?`<span class="lw${sl?'':' sl'}"><b dir="ltr">${esc(L.ch[j])}</b><span>${ws.every(isSlot)?'':'&nbsp;'}</span></span>`:''):`<span class="lw"><b dir="ltr">${esc(L.ch[j]||'')}</b><span>${esc(w)}</span></span>`).join('')}</div>`}).join('')}</div>`;
+ if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
+ h+=`<div class="foot">Guitaring · ${fmtDate(Date.now())}</div>`;
+ return h;
+}
+

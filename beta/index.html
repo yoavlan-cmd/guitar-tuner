@@ -1,3 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<script>window.__GUITARING_BETA=1</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15100E">
+<link rel="manifest" href="beta/manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}*{box-sizing:border-box}[hidden]{display:none!important}</style>
+</head>
+<body>
 <title>Guitaring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -885,6 +900,12 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 .mixrow .ms button.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .mixrow.off{opacity:.5}
 .mixacts{display:flex;flex-direction:column;gap:8px}
+/* backup and restore */
+#bkBox .btn{margin-top:8px}#bkBox label.btn{display:flex;justify-content:center;align-items:center;width:100%;box-sizing:border-box}
+.bkout{font-size:14px;line-height:1.45;margin-top:8px}.bkout:empty{display:none}
+.bkout .check{margin-top:8px;align-items:flex-start}.bkout .check span{display:block}
+.bkerr{color:#E0675F;font-weight:600}
+.bkbeta{border:1px dashed #FF6A1A;border-radius:12px;padding:8px 10px}.bkbeta .btn{display:block;margin-top:6px}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -1057,6 +1078,7 @@ body.hasbar .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
       <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
       <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
       <details class="apibox" id="apiCard" hidden></details>
+      <details class="apibox" id="bkBox"></details>
     </section>
     <section class="card" id="suggCard">
       <div class="cardhead"><h2>New songs to learn</h2></div>
@@ -1371,10 +1393,19 @@ const TUNINGS=[
 ];
 const $=id=>document.getElementById(id);
 let gearRemoving=null;// id the person is deliberately removing
-const store={get(k,d){try{const v=localStorage.getItem('tuner.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{
- if(k==='instruments'&&Array.isArray(v)){try{const old=JSON.parse(localStorage.getItem('tuner.instruments')||'[]')||[],ids=new Set(v.map(x=>x&&x.id)),lost=old.filter(x=>x&&x.id&&!ids.has(x.id)&&x.id!==gearRemoving);
-  if(lost.length){const keep=JSON.parse(localStorage.getItem('tuner.gearLost')||'[]').filter(x=>!lost.some(y=>y.id===x.id));localStorage.setItem('tuner.gearLost',JSON.stringify(keep.concat(lost).slice(-10)))}}catch(e){}}
- localStorage.setItem('tuner.'+k,JSON.stringify(v))}catch(e){}}};
+// ---- storage names: the live app keeps its data under tuner.* / guitaring.* and in the database "guitaring";
+// the beta (…/beta/) keeps its own copy under tunerb.* / guitaringb.* and "guitaring-beta", so trying the beta never changes the live app's data
+const BETA=!!window.__GUITARING_BETA,KP=BETA?'tunerb.':'tuner.',KG=BETA?'guitaringb.':'guitaring.',IDBN=BETA?'guitaring-beta':'guitaring';
+// beta: copy the live app's small data (songs, sheets, gear, settings) once, on its first open, and when asked again
+function betaCopyLive(){try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+ ks.forEach(k=>{if(k&&(k.startsWith('tunerb.')||k.startsWith('guitaringb.')))localStorage.removeItem(k)});
+ ks.forEach(k=>{if(!k)return;if(k.startsWith('tuner.'))localStorage.setItem('tunerb.'+k.slice(6),localStorage.getItem(k));else if(k.startsWith('guitaring.'))localStorage.setItem('guitaringb.'+k.slice(10),localStorage.getItem(k))});
+ localStorage.setItem('guitaringb.copiedAt',String(Date.now()))}catch(e){}}
+if(BETA){try{if(!localStorage.getItem('guitaringb.copiedAt'))betaCopyLive()}catch(e){}}
+const store={get(k,d){try{const v=localStorage.getItem(KP+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{
+ if(k==='instruments'&&Array.isArray(v)){try{const old=JSON.parse(localStorage.getItem(KP+'instruments')||'[]')||[],ids=new Set(v.map(x=>x&&x.id)),lost=old.filter(x=>x&&x.id&&!ids.has(x.id)&&x.id!==gearRemoving);
+  if(lost.length){const keep=JSON.parse(localStorage.getItem(KP+'gearLost')||'[]').filter(x=>!lost.some(y=>y.id===x.id));localStorage.setItem(KP+'gearLost',JSON.stringify(keep.concat(lost).slice(-10)))}}catch(e){}}
+ localStorage.setItem(KP+k,JSON.stringify(v))}catch(e){}}};
 
 let a4=store.get('a4',440), inst=store.get('inst','acoustic');
 let tuning=TUNINGS.find(t=>t.id===store.get('tuning','std'))||TUNINGS[0];
@@ -2024,8 +2055,8 @@ function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
 const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
 const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
-function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k='tuner.song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem('tuner.song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
-function loadSong(k){try{const v=JSON.parse(localStorage.getItem('tuner.song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
+function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function loadSong(k){try{const v=JSON.parse(localStorage.getItem(KP+'song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
@@ -2667,7 +2698,7 @@ Reply with only JSON in this shape:
 const LIBK='lib';
 const libAll=()=>store.get(LIBK,[]);
 const libGet=id=>libAll().find(e=>e.id===id);
-function libWrite(list){try{localStorage.setItem('tuner.'+LIBK,JSON.stringify(list));return true}catch(e){return false}}
+function libWrite(list){try{localStorage.setItem(KP+LIBK,JSON.stringify(list));return true}catch(e){return false}}
 function libSync(){if(!A||!A.libId)return;const l=libAll(),e=l.find(x=>x.id===A.libId);if(!e)return;e.data=compact({...A,libId:undefined,feat:undefined});e.saved=Date.now();libWrite(l)}
 const fmtDate=t=>new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
 function renderLib(){
@@ -2757,7 +2788,7 @@ function saveToLib(){
  ent.name=name;ent.saved=Date.now();ent.data=compact({...A,libId:undefined,feat:undefined});
  if(!libWrite(l)){shStatus('Couldn’t save on this phone; storage is full or blocked. Save the PDF instead.');return null}
  if(A.kind==='lyrics')store.set('writeDraft',null);
- if(fileKey)try{localStorage.setItem('tuner.song.'+fileKey,JSON.stringify(compact(A)))}catch(e){}
+ if(fileKey)try{localStorage.setItem(KP+'song.'+fileKey,JSON.stringify(compact(A)))}catch(e){}
  $('paper').innerHTML=sheetHTML(false);updateSheetButtons();return ent;
 }
 $('shSave').onclick=()=>{const e=saveToLib();if(e)shStatus(`Saved “${esc(e.name)}” to My songs.`)};
@@ -2846,7 +2877,7 @@ $('shDrive').onclick=()=>withBusy($('shDrive'),async()=>{
 function clearAfterDrive(msg,url){
  try{catalogAdd(A,url)}catch(e){}
  try{if(A&&A.libId){libWrite(libAll().filter(e=>e.id!==A.libId))}store.set('writeDraft',null);
-  if(fileKey){try{localStorage.removeItem('tuner.song.'+fileKey)}catch(e){}store.set('songs',store.get('songs',[]).filter(x=>x!==fileKey))}}catch(e){}
+  if(fileKey){try{localStorage.removeItem(KP+'song.'+fileKey)}catch(e){}store.set('songs',store.get('songs',[]).filter(x=>x!==fileKey))}}catch(e){}
  try{vid.pause()}catch(e){}A=null;fileKey='';showLanding();window.scrollTo({top:0});toast(msg+' The sheet was cleared from the app.','ok');
 }
 async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(artist);await withBusy($('shDrive'),async()=>{
@@ -3723,7 +3754,7 @@ function bookAdd(names,song){
 }
 function rememberChords(a){if(a&&a.kind==='lyrics'){bookAdd(lyricChords(a),a.title||'');return}if(!a||!a.segs)return;const names=[...new Set(a.segs.filter(g=>g.c<NS).map(g=>nameOf(g,a.play?a.play.tun:'std',a.play?a.play.capo:0)))];bookAdd(names,a.title||'')}
 function seedBook(){if(store.get('bookSeeded',false))return;try{
- for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith('tuner.song.'))continue;const d=loadSong(k.slice(11));if(d)rememberChords(d)}
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith(KP+'song.'))continue;const d=loadSong(k.slice((KP+'song.').length));if(d)rememberChords(d)}
  libAll().forEach(e=>{try{rememberChords(expand(e.data))}catch(err){}})}catch(e){}store.set('bookSeeded',true)}
 
 /* fingering: barre on the lowest fret when it can lie flat, then one finger per remaining note */
@@ -3992,9 +4023,16 @@ const MX_ICON={drums:'DRM',bass:'BASS',other:'OTHER',vocals:'VOX',guitar:'GTR',p
 let mxSess=null,mxSessKind='',mxBusy=false,mxCancel=false,mxSong=null,mxCtx=null,mxNode=null,mxPos=0,mxPlaying=false,mxSolo=null,mxWake=null;
 const mxIsGtr=id=>id==='guitar'||id==='gL'||id==='gC'||id==='gR';
 // ---- small IndexedDB store: the last separated song stays on the phone, so reopening it is instant ----
-function mxDB(){return new Promise((res,rej)=>{const r=indexedDB.open('guitaring',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+function mxDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDBN,1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function mxGet(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readonly'),q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}
+async function mxGet(k){const db=await mxDB();const v=await new Promise((res,rej)=>{const t=db.transaction('kv','readonly'),q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)});
+ if(v&&v.__gone)return null;if(v!=null||!BETA)return v;
+ // beta: not copied yet → read it from the live app's database (never written to) and keep a copy here
+ const lv=await idbLiveGet(k);if(lv!=null){try{await mxPut(k,lv)}catch(e){}}return lv}
+// the live app's database, read-only (used by the beta); if it doesn't exist it is not created
+function idbLiveGet(k){return new Promise(res=>{let r;try{r=indexedDB.open('guitaring')}catch(e){return res(null)}
+ r.onupgradeneeded=e=>{try{e.target.transaction.abort()}catch(_){}};r.onerror=()=>res(null);r.onblocked=()=>res(null);
+ r.onsuccess=()=>{const db=r.result;try{const q=db.transaction('kv','readonly').objectStore('kv').get(k);q.onsuccess=()=>{db.close();res(q.result==null?null:q.result)};q.onerror=()=>{db.close();res(null)}}catch(e){db.close();res(null)}}})}
 // ---- model: downloaded once, then kept in the browser's cache ----
 async function mxModelBytes(url,onp){
  let c=null;try{c=await caches.open('guitaring-models');const hit=await c.match(url);if(hit){onp(1,1,true);return new Uint8Array(await hit.arrayBuffer())}}catch(e){c=null}
@@ -4038,7 +4076,7 @@ async function mxCpu(onp){
  await mxBoot('wasm',MX.MODEL_CPU,onp)}
 async function mxSession(onp){
  if(mxW&&mxSess)return;
- let gpu=false,noGpu=false;try{noGpu=localStorage.getItem('guitaring.mxNoGpu')==='1'}catch(e){}
+ let gpu=false,noGpu=false;try{noGpu=localStorage.getItem(KG+'mxNoGpu')==='1'}catch(e){}
  if(window.__mxFakeGpu)gpu=true;else try{gpu=!!(navigator.gpu&&await navigator.gpu.requestAdapter())}catch(e){}
  if(gpu&&!noGpu){try{await mxBoot('webgpu',MX.MODEL_GPU,onp);return}catch(e){if(e&&e.cancel)throw e}}
  await mxCpu(onp)}
@@ -4081,7 +4119,7 @@ async function mxSeparate(L,R,onp,onSwitch,sr){
     if(e&&e.cancel)throw e;if(!gpu)throw e;
     // the graphics chip got stuck or failed: stop it and carry on from this part on the processor
     try{console.error('mixer gpu',e&&e.stall?'stall':(e&&e.message||e))}catch(_){}
-    try{localStorage.setItem('guitaring.mxNoGpu','1')}catch(_){}
+    try{localStorage.setItem(KG+'mxNoGpu','1')}catch(_){}
     switching=true;status();onSwitch&&onSwitch();try{await mxCpu(()=>{})}finally{switching=false}times=[]}
   }
   times.push((performance.now()-t1)/1000);
@@ -4243,7 +4281,9 @@ async function mxRender(gains,what,done){const s=mxSong;if(!s||!s.tracks)return;
 
 // ---------- my mixes: every split song stays on the phone (cloud splits as their FLAC or older MP3 parts) ----------
 let mxIdx=[];
-async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');
+ // beta: leave a "deleted" mark, so it isn't read again from the live app's database
+ if(BETA)t.objectStore('kv').put({__gone:1},k);else t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
 async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt})=>({id,name,at,src,state,err,errKind,sent,run,runAt})))}catch(e){}}
 async function mxIdxLoad(){
  try{mxIdx=(await mxGet('mixIndex'))||[]}catch(e){mxIdx=[]}
@@ -4303,7 +4343,7 @@ async function mxOpen(id){
 // ---------- splitting on GitHub (free, runs while the phone is locked) ----------
 // The app uploads the song to its own branch of the user's private repository, starts the "Split song" workflow,
 // then later picks up the six parts (lossless FLAC; MP3 from splitter v2) from a result branch and deletes both branches.
-const MX_GH_KEY='guitaring.gh';let mxPickLocal=false;
+const MX_GH_KEY=KG+'gh';let mxPickLocal=false;
 function mxGh(){try{const c=JSON.parse(localStorage.getItem(MX_GH_KEY)||'null');return c&&c.repo&&c.token?c:null}catch(e){return null}}
 async function gh(path,opt={},cfg=mxGh()){
  if(!cfg)throw new Error('GitHub isn’t connected');
@@ -4336,7 +4376,7 @@ async function mxConnect(repo,token){
  if(have.trim()!==wf.trim()){
   try{await gh('/contents/.github/workflows/split.yml',{method:'PUT',body:JSON.stringify({message:'Guitaring: install the song splitter',content:mxB64(wf),branch:cfg.branch,...(cur&&cur.sha?{sha:cur.sha}:{})})},cfg)}
   catch(e){throw {msg:mxGhErr(e,'wf')}}}
- try{localStorage.setItem(MX_GH_KEY,JSON.stringify(cfg));localStorage.setItem('guitaring.wfv',(wf.match(/guitaring-split (v\d+)/)||[])[1]||'')}catch(e){}
+ try{localStorage.setItem(MX_GH_KEY,JSON.stringify(cfg));localStorage.setItem(KG+'wfv',(wf.match(/guitaring-split (v\d+)/)||[])[1]||'')}catch(e){}
  return {cfg,isPrivate:!!info.private}}
 function mxSetup(){const v=$('mixView'),cfg=mxGh();
  v.innerHTML=`<div class="mixhead"><b>Split songs on GitHub</b><button type="button" class="pickx" id="mxSetX" aria-label="Back">✕</button></div>
@@ -4361,11 +4401,11 @@ function mxSheetUI2(){if(mxSong&&mxSong.tracks)mxMixer();else mxHome()}
 // keep the splitter in the repository up to date (the app carries the current version)
 async function mxEnsureWf(cfg){
  const wf=$('mxWf').textContent.trim()+'\n',ver=(wf.match(/guitaring-split (v\d+)/)||[])[1]||'';
- try{if(localStorage.getItem('guitaring.wfv')===ver)return}catch(e){}
+ try{if(localStorage.getItem(KG+'wfv')===ver)return}catch(e){}
  let cur=null;try{cur=await gh('/contents/.github/workflows/split.yml',{ok404:true},cfg)}catch(e){if(e.status!==404)throw e}
  let have='';try{have=cur&&cur.content?decodeURIComponent(escape(atob(cur.content.replace(/\s/g,'')))):''}catch(e){}
  let changed=false;if(have.trim()!==wf.trim()){try{await gh('/contents/.github/workflows/split.yml',{method:'PUT',body:JSON.stringify({message:'Guitaring: update the song splitter ('+ver+')',content:mxB64(wf),branch:cfg.branch||'main',...(cur&&cur.sha?{sha:cur.sha}:{})})},cfg);changed=true}catch(e){e.wf=true;throw e}}
- try{localStorage.setItem('guitaring.wfv',ver)}catch(e){}return changed}
+ try{localStorage.setItem(KG+'wfv',ver)}catch(e){}return changed}
 // a file with no sound in it (for example a silent mix saved by an older version) is stopped before it is sent: there is nothing to split
 const MX_SILENT_MSG='This file has no sound in it: it’s silent from start to end, so there’s nothing to split. Pick the original song instead.';
 const mxPeak=au=>{let pk=0;for(let c=0;c<au.numberOfChannels;c++){const d=au.getChannelData(c);for(let i=0;i<d.length;i+=3){const v=d[i]<0?-d[i]:d[i];if(v>pk)pk=v}}return pk};
@@ -5278,7 +5318,7 @@ function learnSongs(){
  try{((store.get('songIndex',{})||{}).songs||[]).forEach(x=>add(x.t,x.a,'folder',{label:'In your Drive songs folder',url:'https://drive.google.com/drive/search?q='+encodeURIComponent(x.t)}))}catch(e){}
  try{vlAll().forEach(v=>add(v.song||v.title,v.artist,'lesson',{label:v.src||vlSource(v.url),sub:v.note||'',url:v.url,at:v.at}))}catch(e){}
  try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=songFromName(x.name)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
- try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem('tuner.song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
+ try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'',cnt=k=>G.filter(g=>g.r[k].length).length;
@@ -5559,6 +5599,175 @@ Reply with only JSON: {"summary": string, "specs": [strings], "strengths": [stri
  try{const opt={modelTier:'default'};if(imgLimit>0&&gpAll(it).some(p=>p.src))opt.images=gpBlobs(it);const r=await sampleFn.json(prompt+(opt.images?`\n${opt.images.length>1?opt.images.length+' photos':'A photo'} of this exact ${GEAR[it.type].amp?'amp':'guitar'} ${opt.images.length>1?'are':'is'} attached; use ${opt.images.length>1?'them':'it'} to confirm the version and to spot anything worth checking.`:''),opt);const l=instAll(),x=l.find(y=>y.id===it.id);if(x&&r){x.ai=r;x.aiAt=Date.now();instSave(l)}renderGear()}
  catch(e){b.disabled=false;b.textContent=e&&e.code==='rate_limited'?'Too many requests. Try again in a little while.':'Couldn’t reach Claude. Tap to try again.'}
 }
+/* ================= Backup and restore: everything the app keeps on this phone, in one file ================= */
+// The file is a plain ZIP (stored, not compressed): manifest.json, local.json (the small data: tuner.* and guitaring.* keys)
+// and idb/<n>.json (+ idb/<n>-<i>.bin for files, photos and audio parts) for each item of the phone database.
+// Restore: "Add what's missing" (default) never overwrites anything; "Replace everything" replaces only the kinds the file has.
+// Before restoring, a safety copy of the small data is kept in the database (backup:pre-*, 30 days).
+const BK_SECRET=[KP+'apiKey',KG+'gh'];// the Claude key and the GitHub key (left out unless asked)
+const bkIsPart=k=>/^mix(data|src):/.test(k);// Band breakdown audio parts (big; can be split again)
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crcAdd(c,u8){for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return c}
+async function crcBlob(b){let c=0xFFFFFFFF;const S=1<<23;for(let o=0;o<b.size;o+=S){c=crcAdd(c,new Uint8Array(await b.slice(o,o+S).arrayBuffer()));await tick()}return (c^0xFFFFFFFF)>>>0}
+const bkU8=s=>new TextEncoder().encode(s);
+// entries: [{name, blob}] → one ZIP blob (no copies of the big parts: the ZIP is a list of the original blobs)
+async function zipMake(entries,onp){const parts=[],cd=[];let off=0;
+ for(let i=0;i<entries.length;i++){const e=entries[i],nm=bkU8(e.name),b=e.blob,crc=await crcBlob(b),sz=b.size;
+  const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint32(14,crc,true);h.setUint32(18,sz,true);h.setUint32(22,sz,true);h.setUint16(26,nm.length,true);
+  parts.push(h.buffer,nm,b);
+  const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+  cd.push(c.buffer,nm);off+=30+nm.length+sz;if(onp)onp(i+1,entries.length)}
+ const cdSize=cd.reduce((a,x)=>a+(x.byteLength||x.length),0),e=new DataView(new ArrayBuffer(22));
+ e.setUint32(0,0x06054b50,true);e.setUint16(8,entries.length,true);e.setUint16(10,entries.length,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+ return new Blob([...parts,...cd,e.buffer],{type:'application/zip'})}
+// a ZIP made by zipMake → Map(name → blob); anything else (compressed, damaged) is refused
+async function zipRead(file){const err=m=>Object.assign(new Error(m),{bk:true});
+ const tail=new DataView(await file.slice(Math.max(0,file.size-65557)).arrayBuffer());let p=-1;
+ for(let i=tail.byteLength-22;i>=0;i--)if(tail.getUint32(i,true)===0x06054b50){p=i;break}
+ if(p<0){const h=new Uint8Array(await file.slice(0,4).arrayBuffer());throw err(h[0]===0x50&&h[1]===0x4b&&h[2]===3&&h[3]===4?'This backup file is incomplete (it may not have finished downloading or uploading).':'This isn’t a Guitaring backup file.')}
+ const n=tail.getUint16(p+10,true),cdSize=tail.getUint32(p+12,true),cdOff=tail.getUint32(p+16,true);
+ if(cdOff+cdSize>file.size)throw err('This backup file is incomplete (it may not have finished downloading).');
+ const cd=new DataView(await file.slice(cdOff,cdOff+cdSize).arrayBuffer()),out=new Map();let q=0;
+ for(let i=0;i<n;i++){if(cd.getUint32(q,true)!==0x02014b50)throw err('This backup file is damaged.');
+  const method=cd.getUint16(q+10,true),crc=cd.getUint32(q+16,true),size=cd.getUint32(q+20,true),nl=cd.getUint16(q+28,true),xl=cd.getUint16(q+30,true),cl=cd.getUint16(q+32,true),lo=cd.getUint32(q+42,true);
+  const name=new TextDecoder().decode(new Uint8Array(cd.buffer,cd.byteOffset+q+46,nl));q+=46+nl+xl+cl;
+  if(method!==0)throw err('This backup file was changed by another app (it is compressed). Use the file exactly as Guitaring saved it.');
+  const lh=new DataView(await file.slice(lo,lo+30).arrayBuffer());if(lh.getUint32(0,true)!==0x04034b50)throw err('This backup file is damaged.');
+  const start=lo+30+lh.getUint16(26,true)+lh.getUint16(28,true);if(start+size>file.size)throw err('This backup file is incomplete.');
+  out.set(name,{blob:file.slice(start,start+size),crc})}
+ if(!out.has('manifest.json'))throw err('This isn’t a Guitaring backup file.');
+ return out}
+// database values can hold files, photos and typed arrays: these go to their own .bin entries
+const TA={Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array};
+function bkEnc(v,bins){if(v instanceof Blob){bins.push(v);return {$b:bins.length-1,type:v.type||'',name:v instanceof File?v.name:undefined,lm:v instanceof File?v.lastModified:undefined}}
+ if(v instanceof ArrayBuffer){bins.push(new Blob([v]));return {$b:bins.length-1,ab:1}}
+ if(ArrayBuffer.isView(v)){bins.push(new Blob([v]));return {$b:bins.length-1,ta:v.constructor.name}}
+ if(v instanceof Date)return {$d:v.toISOString()};
+ if(Array.isArray(v))return v.map(x=>bkEnc(x,bins));
+ if(v&&typeof v==='object'){const o={};for(const k in v)o[k]=bkEnc(v[k],bins);return o}return v}
+async function bkDec(v,bin){if(Array.isArray(v)){const o=[];for(const x of v)o.push(await bkDec(x,bin));return o}
+ if(v&&typeof v==='object'){if('$b' in v){const b=bin(v.$b);if(!b)throw bkErr('This backup file is incomplete.');
+   if(v.ab)return await b.arrayBuffer();if(v.ta)return new (TA[v.ta]||Uint8Array)(await b.arrayBuffer());
+   return v.name!=null?new File([b],v.name,{type:v.type,lastModified:v.lm||Date.now()}):new Blob([b],{type:v.type})}
+  if('$d' in v)return new Date(v.$d);const o={};for(const k in v)o[k]=await bkDec(v[k],bin);return o}return v}
+// the phone database: every key / every item
+async function idbKeys(){const db=await mxDB();return new Promise((res,rej)=>{const q=db.transaction('kv','readonly').objectStore('kv').getAllKeys();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)})}
+async function idbRaw(k){const db=await mxDB();return new Promise((res,rej)=>{const q=db.transaction('kv','readonly').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+async function idbClear(keep){const ks=await idbKeys();for(const k of ks)if(!keep(k))await mxDel(k)}
+// empty the database completely (the beta's "copy my live data again": no deletion marks, so everything is read from the live app again)
+async function idbWipe(){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').clear();t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+const bkLocalKeys=()=>{const o=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.startsWith(KP)||k.startsWith(KG)))o.push(k)}return o};
+// what the file holds, in words people know
+function bkCounts(local,idbNames){const J=k=>{try{return JSON.parse(local[KP+k]||'null')}catch(e){return null}},n=x=>Array.isArray(x)?x.length:x&&typeof x==='object'?Object.keys(x).length:0;
+ return {sheets:n(J('lib'))+n(J('sheetCat')),lessons:n(J('vlinks')),gear:n(J('instruments')),chords:n(J('chordbook')),analyses:n(J('songs')),
+  photos:idbNames.filter(k=>k.startsWith('gearphoto:')).length,songs:idbNames.filter(k=>k.startsWith('mixdata:')).length}}
+function bkCountText(c){const p=(n,one,many)=>n?`${n} ${n===1?one:many}`:'';
+ return [p(c.sheets,'sheet','sheets'),p(c.lessons,'video lesson','video lessons'),p(c.gear,'gear item','gear items'),p(c.photos,'gear photo','gear photos'),p(c.chords,'chord in the book','chords in the book'),p(c.analyses,'chord analysis','chord analyses'),p(c.songs,'Band breakdown song','Band breakdown songs')].filter(Boolean).join(' · ')||'settings only'}
+// a safety copy of the small data inside the phone database, before anything replaces it (kept 30 days)
+async function safetyCopy(tag){const local={};bkLocalKeys().forEach(k=>local[k]=localStorage.getItem(k));
+ await mxPut('backup:pre-'+tag+':'+Date.now(),{at:Date.now(),tag,local});
+ try{for(const k of await idbKeys())if(/^backup:pre-/.test(k)){const t=+String(k).split(':').pop();if(t&&Date.now()-t>30*864e5)await mxDel(k)}}catch(e){}}
+// make the backup file
+async function bkMake(opt,onp){
+ const local={};bkLocalKeys().forEach(k=>{if(!opt.keys&&BK_SECRET.includes(k))return;local[k]=localStorage.getItem(k)});
+ const entries=[],names=[];let ks=[];try{ks=await idbKeys()}catch(e){}
+ ks=ks.filter(k=>typeof k==='string'&&!/^backup:pre-/.test(k)&&(opt.parts||!bkIsPart(k)));
+ let i=0;for(const k of ks){const v=await idbRaw(k);if(v==null||(v&&v.__gone))continue;
+  let val=v;// without the audio parts, the list keeps only songs that can still be opened (or are still being split)
+  if(k==='mixIndex'&&!opt.parts&&Array.isArray(v))val=v.filter(x=>x&&x.state!=='ready');
+  const bins=[],enc=bkEnc(val,bins),n=i++;names.push(k);
+  entries.push({name:`idb/${n}.json`,blob:new Blob([JSON.stringify({key:k,v:enc,bins:bins.length})],{type:'application/json'})});
+  bins.forEach((b,j)=>entries.push({name:`idb/${n}-${j}.bin`,blob:b}));if(onp)onp('read',i,ks.length)}
+ const counts=bkCounts(local,names);
+ const man={app:'Guitaring',kind:'backup',v:1,at:new Date().toISOString(),beta:BETA,opt:{parts:!!opt.parts,keys:!!opt.keys},counts,idb:names.length};
+ entries.unshift({name:'local.json',blob:new Blob([JSON.stringify(local)],{type:'application/json'})});
+ entries.unshift({name:'manifest.json',blob:new Blob([JSON.stringify(man)],{type:'application/json'})});
+ const zip=await zipMake(entries,(a,b)=>onp&&onp('pack',a,b));
+ return {zip,man}}
+// read a backup file: what's in it (nothing is changed yet)
+const bkErr=m=>Object.assign(new Error(m),{bk:true});
+async function bkOpen(file){const z=await zipRead(file);
+ // every part is checked against its checksum before it is used
+ const bin=async n=>{const e=z.get(n);if(!e)throw bkErr('This backup file is incomplete.');if(await crcBlob(e.blob)!==e.crc)throw bkErr('This backup file is damaged (a part of it doesn’t match).');return e.blob};
+ const txt=async n=>(await bin(n)).text();
+ let man;try{man=JSON.parse(await txt('manifest.json'))}catch(e){throw e&&e.bk?e:bkErr('This isn’t a Guitaring backup file.')}
+ if(!man||man.app!=='Guitaring'||man.kind!=='backup')throw bkErr('This isn’t a Guitaring backup file.');
+ if(man.v>1)throw bkErr('This backup was made by a newer Guitaring. Update the app first, then restore.');
+ // check every part now, so a damaged file is refused before anything changes
+ for(const n of z.keys())await bin(n);
+ return {z,man,txt}}
+// merge for "Add what's missing": lists gain the items they don't have (by id, else by content), objects gain missing entries; anything else stays as it is
+function bkMerge(cur,add){if(Array.isArray(cur)&&Array.isArray(add)){const key=x=>x&&typeof x==='object'&&x.id!=null?'id:'+x.id:'j:'+JSON.stringify(x),have=new Set(cur.map(key));return cur.concat(add.filter(x=>!have.has(key(x))))}
+ if(cur&&add&&typeof cur==='object'&&typeof add==='object'&&!Array.isArray(cur)&&!Array.isArray(add)){const o={...cur};for(const k in add)if(!(k in o))o[k]=add[k];return o}return cur}
+// restore; mode 'add' (default) or 'replace'
+async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept:0};
+ await safetyCopy('restore');
+ // the file's own names: a backup from the beta can go into the live app and the other way round
+ const fix=k=>k.replace(/^tunerb?\./,KP).replace(/^guitaringb?\./,KG);
+ const local=JSON.parse(await txt('local.json'));
+ if(mode==='replace'){bkLocalKeys().forEach(k=>{if(BK_SECRET.includes(k)&&!Object.keys(local).some(x=>fix(x)===k))return;localStorage.removeItem(k)})}
+ for(const k0 in local){const k=fix(k0),cur=localStorage.getItem(k);
+  if(cur==null||mode==='replace'){localStorage.setItem(k,local[k0]);rep.local++;continue}
+  let a,c;try{a=JSON.parse(local[k0]);c=JSON.parse(cur)}catch(e){rep.kept++;continue}
+  const m=bkMerge(c,a);if(JSON.stringify(m)!==cur){localStorage.setItem(k,JSON.stringify(m));rep.local++}else rep.kept++}
+ if(mode==='replace')await idbClear(k=>/^backup:pre-/.test(k)||(!man.opt.parts&&bkIsPart(k)));
+ for(let n=0;n<man.idb;n++){const meta=JSON.parse(await txt(`idb/${n}.json`)),k=meta.key;
+  const v=await bkDec(meta.v,j=>{const e=z.get(`idb/${n}-${j}.bin`);return e&&e.blob});
+  const cur=mode==='replace'?null:await mxGet(k);
+  if(cur==null){await mxPut(k,v);rep.idb++}else if(k==='mixIndex'){const m=bkMerge(cur,v);if(m.length!==cur.length){await mxPut(k,m);rep.idb++}else rep.kept++}else rep.kept++;
+  if(onp)onp(n+1,man.idb)}
+ store.set('lastRestore',{at:Date.now(),from:man.at,mode});return rep}
+// ---- the Backup box (Songs › My library, under "Sheets, lessons and settings"; moves to My profile in V2) ----
+function bkDate(t){try{return new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
+function bkSize(n){return n>1048576?(n/1048576).toFixed(n>1e8?0:1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
+function renderBackup(){const box=$('bkBox');if(!box)return;const last=store.get('lastBackup',null);
+ box.innerHTML=`<summary>Backup and restore${last?` <span class="libcount">${esc(bkDate(last.at))}</span>`:''}</summary>
+ ${BETA?`<p class="tip bkbeta">This is the <b>beta</b>. It works on its own copy of your data, so nothing here changes the live app. <button type="button" class="btn ghost" id="bkCopy">Copy my live data again</button></p>`:''}
+ <p class="tip">One file with everything Guitaring keeps on this phone: sheets, video lessons, chord book, gear and its photos, settings and Band breakdown songs. Keep it in Google Drive. <span id="bkLast">${bkLastTxt()}</span></p>
+ <label class="check"><input type="checkbox" id="bkParts" checked> Include Band breakdown songs (big: about 20–60 MB each; without them they need splitting again)</label>
+ <label class="check"><input type="checkbox" id="bkKeys"> Include my Claude and GitHub keys (only if the file stays private)</label>
+ <button type="button" class="btn wide" id="bkGo">${SK('DRIVE')} Back up everything</button>
+ <div id="bkOut" class="bkout" role="status"></div>
+ <label class="btn ghost wide">Restore from a backup file<input type="file" id="bkIn" accept=".zip,application/zip,application/x-zip-compressed" hidden></label>
+ <div id="bkRes" class="bkout" role="status"></div>`;
+ wireBackup()}
+function wireBackup(){
+ const go=$('bkGo'),out=$('bkOut');
+ if(go)go.onclick=async()=>{go.disabled=true;out.textContent='Collecting your data…';
+  try{const opt={parts:$('bkParts').checked,keys:$('bkKeys').checked};
+   const {zip,man}=await bkMake(opt,(st,a,b)=>{out.textContent=st==='read'?`Collecting your data… ${a} of ${b}`:`Packing the file… ${Math.round(a/b*100)}%`});
+   const d=new Date(),nm=`guitaring-${BETA?'beta-':''}backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.zip`,file=new File([zip],nm,{type:'application/zip'});
+   const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=nm;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+   store.set('lastBackup',{at:Date.now(),size:file.size,parts:opt.parts});
+   let canShare=false;try{canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
+   out.innerHTML=`<b>Saved: ${esc(nm)}</b> (${bkSize(file.size)}) in your Downloads.<br>It holds: ${esc(bkCountText(man.counts))}.<br>Upload it to Google Drive to keep it safe${canShare?':':' (Drive app › + › Upload).'}${canShare?` <button type="button" class="btn ghost" id="bkShare">${SK('DRIVE')} Share to Drive</button>`:''}`;
+   const sh=$('bkShare');if(sh)sh.onclick=()=>navigator.share({files:[file],title:nm}).catch(()=>{});
+   toast('Backup saved: '+esc(nm),'ok');renderBackupDate()}
+  catch(e){out.textContent='Couldn’t make the backup: '+(e&&e.message||e)+'. Try again, or untick Band breakdown songs for a smaller file.';toast('The backup didn’t finish.','err')}
+  finally{go.disabled=false}};
+ const inp=$('bkIn'),res=$('bkRes');
+ if(inp)inp.onchange=async()=>{const f=inp.files&&inp.files[0];inp.value='';if(!f)return;res.textContent='Checking the file…';
+  let b;try{b=await bkOpen(f)}catch(e){res.innerHTML=`<span class="bkerr">${esc(e&&e.bk?e.message:'This isn’t a Guitaring backup file.')}</span>`;toast('That file can’t be restored.','err');return}
+  const m=b.man;
+  res.innerHTML=`<b>Backup from ${esc(bkDate(m.at))}${m.beta?' (beta)':''}</b><br>It holds: ${esc(bkCountText(m.counts||{}))}${m.opt&&!m.opt.parts?'<br>Band breakdown songs aren’t in this file.':''}
+  <label class="check"><input type="radio" name="bkMode" value="add" checked> <span><b>Add what’s missing</b>: keeps everything on this phone and adds what the file has that the phone doesn’t (safe)</span></label>
+  <label class="check"><input type="radio" name="bkMode" value="replace"> <span><b>Replace everything</b>: the phone becomes exactly the backup${m.opt&&!m.opt.parts?' (your Band breakdown songs on the phone are kept)':''}</span></label>
+  <button type="button" class="btn wide" id="bkDo">Restore</button>`;
+  $('bkDo').onclick=async()=>{const mode=(document.querySelector('input[name=bkMode]:checked')||{}).value||'add';
+   if(mode==='replace'&&!$('bkDo').dataset.sure){$('bkDo').dataset.sure='1';$('bkDo').textContent='Tap again to replace everything';return}
+   $('bkDo').disabled=true;res.querySelectorAll('input').forEach(x=>x.disabled=true);
+   try{const r=await bkRestore(b,mode,(a,n)=>{$('bkDo').textContent=`Restoring… ${a} of ${n}`});
+    res.innerHTML=`<b>Restored.</b> ${r.local+r.idb} item${r.local+r.idb===1?'':'s'} added or updated, ${r.kept} already here and kept. The app reloads now.`;
+    toast('Backup restored.','ok');setTimeout(()=>location.reload(),1800)}
+   catch(e){res.innerHTML=`<span class="bkerr">The restore stopped: ${esc(e&&e.message||String(e))}. Your data from before is kept as a safety copy.</span>`;toast('The restore didn’t finish.','err')}}};
+ const cp=$('bkCopy');if(cp)cp.onclick=async()=>{if(!cp.dataset.sure){cp.dataset.sure='1';cp.textContent='Tap again: the beta’s own changes are replaced';return}
+  cp.disabled=true;betaCopyLive();try{await idbWipe()}catch(e){}toast('Copied your live data into the beta.','ok');setTimeout(()=>location.reload(),900)};
+}
+function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last backup: ${esc(bkDate(last.at))}${last.size?`, ${bkSize(last.size)}`:''}.`:'No backup yet.'}
+function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`;const l=$('bkLast');if(l)l.innerHTML=bkLastTxt()}
+renderBackup();
+window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,get:mxGet,put:mxPut,del:mxDel,safety:safetyCopy,beta:BETA};// test hooks
+// ---- start the app ----
 renderGear();
 
 
@@ -5570,3 +5779,8 @@ setTab(store.get('tab','tune'));
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
 })();
 </script>
+
+<div style="position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:10px;z-index:200;background:#FF6A1A;color:#fff;font:700 11px/1 system-ui,sans-serif;letter-spacing:.08em;padding:5px 8px;border-radius:999px;pointer-events:none">BETA</div><script>document.title="Guitaring beta"</script>
+<script>if("serviceWorker" in navigator){const hadSW=!!navigator.serviceWorker.controller;let reloaded=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(reloaded||!hadSW)return;reloaded=true;location.reload()});addEventListener("load",()=>{navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{})})}</script>
+</body>
+</html>
