@@ -3024,13 +3024,15 @@ async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(
  }catch(e){shStatus(driveErr(e))}
 })}
 /* ---- Phone app: each person saves to their own Google Drive ---- */
-// Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off.
-const GDRIVE_CLIENT_ID='';
+// Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off. (window.__GD_CLIENT: tests)
+const GDRIVE_CLIENT_ID=window.__GD_CLIENT||'35692915820-mnvv6grqqb6526rvo27i436b3mvtfnd1.apps.googleusercontent.com';
 const GD_SCOPE='https://www.googleapis.com/auth/drive.file',GD_ROOT='Guitar sheets',GD_API='https://www.googleapis.com/drive/v3/files',FOLDER_MT='application/vnd.google-apps.folder';
-const ownDrive=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
+// the client ID is used for backups to Drive; saving sheets straight to Drive stays off unless turned on (gd.sheets), so sheets keep using the share menu
+const gdOn=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
+const ownDrive=()=>gdOn()&&!!store.get('gd.sheets',false);
 let gdTok=null,gdExp=0;
 const gdReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
-function gdPreload(){if(ownDrive()&&!gdReady())loadScript('https://accounts.google.com/gsi/client').catch(()=>{})}
+function gdPreload(force){if((force?gdOn():ownDrive())&&!gdReady())loadScript('https://accounts.google.com/gsi/client').catch(()=>{})}
 // must be called straight from a tap so the Google sign-in window isn't blocked
 function gdToken(){return new Promise((res,rej)=>{
  if(gdTok&&Date.now()<gdExp-60000)return res(gdTok);
@@ -5849,6 +5851,52 @@ async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept
   if(cur==null){await mxPut(k,v);rep.idb++}else if(k==='mixIndex'){const m=bkMerge(cur,v);if(m.length!==cur.length){await mxPut(k,m);rep.idb++}else rep.kept++}else rep.kept++;
   if(onp)onp(n+1,man.idb)}
  store.set('lastRestore',{at:Date.now(),from:man.at,mode});return rep}
+// ---- backup straight to Google Drive: one tap, a "Guitaring backups" folder in your Drive, the last 5 kept ----
+const GD_BKDIR='Guitaring backups',GD_KEEP=5,GD_CHUNK=8*1024*1024;// chunks are a multiple of 256 KB (Drive's rule)
+// big files go up in pieces (resumable upload): a dropped connection only repeats the piece that failed
+async function gdResumable(blob,name,parent,onp){
+ const init=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+gdTok,'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':'application/zip','X-Upload-Content-Length':String(blob.size)},body:JSON.stringify({name,parents:[parent],mimeType:'application/zip'})});
+ if(init.status===401){gdTok=null;throw {code:'gd_auth'}}
+ if(!init.ok){let m='';try{m=(await init.json()).error.message}catch(e){}throw {code:'gd_http',message:m||('HTTP '+init.status)}}
+ const loc=init.headers.get('Location');if(!loc)throw {code:'gd_http',message:'Drive didn’t start the upload'};
+ let off=0,tries=0;
+ while(true){const end=Math.min(blob.size,off+GD_CHUNK);let r;
+  try{r=await fetch(loc,{method:'PUT',headers:{'Content-Range':blob.size?`bytes ${off}-${end-1}/${blob.size}`:'bytes */0'},body:blob.slice(off,end)})}catch(e){r=null}
+  if(r&&(r.status===200||r.status===201))return await r.json();
+  if(r&&r.status===308){const rg=r.headers.get('Range');off=rg?+rg.split('-')[1]+1:end;tries=0;if(onp)onp(off,blob.size);continue}
+  // a failed piece: ask Drive how much arrived, then go on from there (3 tries per piece)
+  if(++tries>3)throw {code:'gd_http',message:r?('HTTP '+r.status):'the connection dropped'};
+  await new Promise(x=>setTimeout(x,1500*tries*(window.__gdWaitScale||1)));
+  try{const q=await fetch(loc,{method:'PUT',headers:{'Content-Range':`bytes */${blob.size}`}});if(q.status===200||q.status===201)return await q.json();if(q.status===308){const rg=q.headers.get('Range');off=rg?+rg.split('-')[1]+1:0}}catch(e){}}}
+async function gdBackupFolder(){const id=store.get('gd.bkdir','');
+ if(id){try{const f=await gdFetch(`${GD_API}/${id}?fields=id,trashed`);if(f&&!f.trashed)return id}catch(e){if(e.code==='gd_auth')throw e}}
+ const n=await gdFolder(GD_BKDIR,'root');store.set('gd.bkdir',n);return n}
+// keep the newest few backups (the app can only see files it made itself)
+async function gdPrune(dir){try{const r=await gdFetch(`${GD_API}?q=${encodeURIComponent(`'${dir}' in parents and trashed=false and name contains 'guitaring-'`)}&orderBy=createdTime desc&fields=files(id,name)&pageSize=50&spaces=drive`);
+ const old=((r&&r.files)||[]).slice(GD_KEEP);for(const f of old){try{await gdFetch(`${GD_API}/${f.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}return old.length}catch(e){return 0}}
+// a phone notification when it's done (the upload can take a while; you can use other apps meanwhile)
+async function bkNotify(title,body){try{if(!('Notification' in window)||Notification.permission!=='granted')return;
+ const reg=navigator.serviceWorker&&await Promise.race([navigator.serviceWorker.getRegistration(),new Promise(r=>setTimeout(()=>r(null),1500))]);
+ if(reg&&reg.showNotification)await reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'guitaring-backup'});else new Notification(title,{body,icon:'icon-192.png'})}catch(e){}}
+async function bkToDrive(){const btn=$('bkDrive'),out=$('bkOut');if(!btn||btn.disabled)return;
+ // the Google window must open straight from the tap
+ const tp=gdToken();btn.disabled=true;out.textContent='Connecting to your Google Drive…';
+ try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{})}catch(e){}
+ try{await tp;
+  const opt={parts:$('bkParts').checked,keys:$('bkKeys').checked};
+  const {zip,man}=await bkMake(opt,(st,a,b)=>{out.textContent=st==='read'?`Collecting your data… ${a} of ${b}`:`Packing the file… ${Math.round(a/b*100)}%`});
+  const dir=await gdBackupFolder(),d=new Date(),p2=x=>String(x).padStart(2,'0');
+  const nm=`guitaring-${BETA?'beta-':''}backup-${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}.zip`;
+  out.textContent=`Uploading to Google Drive… 0 of ${bkSize(zip.size)}`;
+  const f=await gdResumable(zip,nm,dir,(a,b)=>{out.textContent=`Uploading to Google Drive… ${bkSize(a)} of ${bkSize(b)} (${Math.round(a/b*100)}%)`});
+  const url=f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`;
+  const gone=await gdPrune(dir);
+  store.set('lastBackup',{at:Date.now(),size:zip.size,parts:opt.parts,drive:true,url});
+  out.innerHTML=`<b>Saved to Google Drive</b> › ${esc(GD_BKDIR)} › ${esc(nm)} (${bkSize(zip.size)}).<br>It holds: ${esc(bkCountText(man.counts))}.${gone?` Older backups trashed: ${gone} (the last ${GD_KEEP} are kept).`:''} <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`;
+  toast('Backup saved to Google Drive.','ok');renderBackupDate();
+  bkNotify('Guitaring backup saved',`${nm} (${bkSize(zip.size)}) is in Google Drive › ${GD_BKDIR}.`)}
+ catch(e){out.innerHTML=gdErr(e).replace('Save to Google Drive','Back up to Google Drive');toast('The backup wasn’t saved to Drive.','err');bkNotify('Guitaring backup didn’t finish','Open Guitaring to try again.')}
+ finally{btn.disabled=false}}
 // ---- the Backup box (Songs › My library, under "Sheets, lessons and settings"; moves to My profile in V2) ----
 function bkDate(t){try{return new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
 function bkSize(n){return n>1048576?(n/1048576).toFixed(n>1e8?0:1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
@@ -5858,13 +5906,13 @@ function renderBackup(){const box=$('bkBox');if(!box)return;const last=store.get
  <p class="tip">One file with everything Guitaring keeps on this phone: sheets, video lessons, chord book, gear and its photos, settings and Band breakdown songs. Keep it in Google Drive. <span id="bkLast">${bkLastTxt()}</span></p>
  <label class="check"><input type="checkbox" id="bkParts" checked> Include Band breakdown songs (big: about 20–60 MB each; without them they need splitting again)</label>
  <label class="check"><input type="checkbox" id="bkKeys"> Include my Claude and GitHub keys (only if the file stays private)</label>
- <button type="button" class="btn wide" id="bkGo">${SK('DRIVE')} Back up everything</button>
+ ${gdOn()?`<button type="button" class="btn wide" id="bkDrive">${SK('DRIVE')} Back up to Google Drive</button><p class="tip">One tap: the backup goes to <b>${esc(GD_BKDIR)}</b> in your Drive and you get a notification when it’s done. The app can only see the files it makes.</p><button type="button" class="btn ghost wide" id="bkGo">Save the backup file on this phone instead</button>`:`<button type="button" class="btn wide" id="bkGo">${SK('DRIVE')} Back up everything</button>`}
  <div id="bkOut" class="bkout" role="status"></div>
  <label class="btn ghost wide">Restore from a backup file<input type="file" id="bkIn" accept=".zip,application/zip,application/x-zip-compressed" hidden></label>
  <div id="bkRes" class="bkout" role="status"></div>`;
  wireBackup()}
 function wireBackup(){
- const go=$('bkGo'),out=$('bkOut');
+ const go=$('bkGo'),out=$('bkOut'),dr=$('bkDrive');if(dr){gdPreload(true);dr.onclick=bkToDrive}
  if(go)go.onclick=async()=>{go.disabled=true;out.textContent='Collecting your data…';
   try{const opt={parts:$('bkParts').checked,keys:$('bkKeys').checked};
    const {zip,man}=await bkMake(opt,(st,a,b)=>{out.textContent=st==='read'?`Collecting your data… ${a} of ${b}`:`Packing the file… ${Math.round(a/b*100)}%`});
@@ -5895,7 +5943,7 @@ function wireBackup(){
  const cp=$('bkCopy');if(cp)cp.onclick=async()=>{if(!cp.dataset.sure){cp.dataset.sure='1';cp.textContent='Tap again: the beta’s own changes are replaced';return}
   cp.disabled=true;betaCopyLive();try{await idbWipe()}catch(e){}toast('Copied your live data into the beta.','ok');setTimeout(()=>location.reload(),900)};
 }
-function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last backup: ${esc(bkDate(last.at))}${last.size?`, ${bkSize(last.size)}`:''}.`:'No backup yet.'}
+function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last backup: ${esc(bkDate(last.at))}${last.size?`, ${bkSize(last.size)}`:''}${last.drive?', in Google Drive':''}.`:'No backup yet.'}
 function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`;const l=$('bkLast');if(l)l.innerHTML=bkLastTxt()}
 renderBackup();
 window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,get:mxGet,put:mxPut,del:mxDel,safety:safetyCopy,beta:BETA};// test hooks

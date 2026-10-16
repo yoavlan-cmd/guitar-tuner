@@ -206,13 +206,15 @@ async function doDriveSave(artist){if(!mcpCap&&ownDrive())return doOwnDriveSave(
  }catch(e){shStatus(driveErr(e))}
 })}
 /* ---- Phone app: each person saves to their own Google Drive ---- */
-// Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off.
-const GDRIVE_CLIENT_ID='';
+// Web OAuth client ID for https://yoavlan-cmd.github.io (public, not a secret). Empty = Drive sign-in off. (window.__GD_CLIENT: tests)
+const GDRIVE_CLIENT_ID=window.__GD_CLIENT||'35692915820-mnvv6grqqb6526rvo27i436b3mvtfnd1.apps.googleusercontent.com';
 const GD_SCOPE='https://www.googleapis.com/auth/drive.file',GD_ROOT='Guitar sheets',GD_API='https://www.googleapis.com/drive/v3/files',FOLDER_MT='application/vnd.google-apps.folder';
-const ownDrive=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
+// the client ID is used for backups to Drive; saving sheets straight to Drive stays off unless turned on (gd.sheets), so sheets keep using the share menu
+const gdOn=()=>!window.claude&&!!GDRIVE_CLIENT_ID;
+const ownDrive=()=>gdOn()&&!!store.get('gd.sheets',false);
 let gdTok=null,gdExp=0;
 const gdReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
-function gdPreload(){if(ownDrive()&&!gdReady())loadScript('https://accounts.google.com/gsi/client').catch(()=>{})}
+function gdPreload(force){if((force?gdOn():ownDrive())&&!gdReady())loadScript('https://accounts.google.com/gsi/client').catch(()=>{})}
 // must be called straight from a tap so the Google sign-in window isn't blocked
 function gdToken(){return new Promise((res,rej)=>{
  if(gdTok&&Date.now()<gdExp-60000)return res(gdTok);
