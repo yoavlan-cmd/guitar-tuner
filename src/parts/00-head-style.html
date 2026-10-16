@@ -786,7 +786,7 @@ body.wopen{overflow:hidden}
 #paneSong[data-seg="learn"] #shotNew,#paneSong[data-seg="learn"] #writeNew,#paneSong[data-seg="learn"] #draftCard,#paneSong[data-seg="learn"] #shotCard{display:none!important}
 /* Learn: Song video and Chord finder side by side (the finder is in Write too) */
 #paneSong[data-seg="learn"] #driveIntro{display:none!important}
-#paneSong[data-seg="write"] #drop,#paneSong[data-seg="write"] #libCard,#paneSong[data-seg="write"] #suggCard{display:none!important}
+#paneSong[data-seg="write"] #drop,#paneSong[data-seg="write"] #addSong,#paneSong[data-seg="write"] #libCard,#paneSong[data-seg="write"] #suggCard{display:none!important}
 #libCard[hidden]~#suggCard{display:none}
 /* I'm learning: one row per song, five tiles show what you have for it (lit) and what's missing (dim) */
 .learn{display:flex;flex-direction:column;gap:8px}
@@ -1162,4 +1162,25 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 .gdplay{margin-top:4px}
 .gdch em{font-style:normal;color:var(--muted);margin-left:4px}
 .mixspeed{grid-template-columns:repeat(3,1fr);margin-top:2px}.mixspeed button{font-size:13px;padding:7px 4px}
+/* ===== add a song from Google Drive ===== */
+.dsdlg{position:fixed;inset:0;z-index:66;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+.dsdlg[hidden]{display:none}
+.dsbox{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.dshead{display:flex;align-items:center;justify-content:space-between}.dshead h3{margin:0;font:800 24px var(--display);letter-spacing:.04em;text-transform:uppercase}
+.dslab{display:flex;flex-direction:column;gap:6px;font:600 13px var(--body);color:var(--muted)}.dslab .textin{font:400 14px var(--body)}
+.dsmore summary{cursor:pointer;color:var(--accent);font:600 13px var(--body);padding:4px 0}
+.dsnote{font-size:12px;margin:0}
+#paneSong[data-seg="learn"] #addSong{--tex:var(--tex-learn);grid-column:1/-1;min-height:132px}
+#paneSong[data-seg="learn"] #addSong b{word-spacing:normal}
+.dsname{margin:-4px 0 0;font:600 15px var(--body);color:var(--muted)}
+.dsbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.dsbar i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),#8AF0D2);transition:width .6s}
+.dseta{margin:0;font:500 14px var(--body);color:var(--muted)}.dseta b{color:var(--ink);font-family:var(--mono)}
+.dssteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dssteps li{display:flex;gap:10px;align-items:flex-start;font:500 14px var(--body);color:var(--muted)}
+.dssteps li i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 11px var(--body);font-style:normal;color:var(--bg)}
+.dssteps li.done{color:var(--ink);background:none;border:0;padding:0;border-radius:0;justify-content:flex-start}.dssteps li.done i{background:var(--accent);border-color:var(--accent)}
+.dssteps li.now{color:var(--ink);font-weight:700}.dssteps li.now i{border-color:var(--accent);animation:dspulse 1.2s ease-in-out infinite}
+.dssteps li small{display:block;font:500 12px var(--body);color:var(--muted)}
+@keyframes dspulse{0%,100%{box-shadow:0 0 0 0 rgba(78,226,183,.5)}50%{box-shadow:0 0 0 6px rgba(78,226,183,0)}}
+.dsacts{display:flex;gap:8px}.dsacts .btn{flex:1}
 </style>
