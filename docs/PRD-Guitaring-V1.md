@@ -195,6 +195,13 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - Below the list, "Sheets, lessons and settings" keeps the catalog, video lessons, saved-on-phone list and settings.
 - Test: `tests/learn_t.js`.
 
+### 5.5c Song session (V2 phase 3, `#paneSession`, part `83-song-session`)
+- Tapping a song in My learning library opens its **song session** page (`openSession` → `goSec('session')`, a page like My Library: ‹ and the phone's back button return to Learn). It follows the song by title/artist (`sesKey`), so new material shows up.
+- **Top (fretboard card):** title, artist, tuning · capo · BPM (`sesFacts`: phone sheet `play`, then the Drive sheet list, then a chord analysis), what it has, one **Practise** button (`sesPractise`: play-along › jam track › sheet › video lesson; the Easy/Full guide takes it over next), status Learning / Learned / Idea for later.
+- **Chords in this song:** diagrams with finger numbers (`sesDiagram`: the chord library, else built from root and type with `shapeFor`).
+- **Jam along** (when it has a jam track): Guitars only · Without the guitars · The whole band (opens the player with that preset).
+- **Everything for this song:** the material rows with Open / Watch and next steps for what's missing (`learnDetail`, actions in `learnAct`); the chord finder; **My notes** (saved in the song record's `notes`).
+
 ### 5.6 My chord sheets (catalog) (`#catBox`)
 - Lists every sheet made with Guitaring: from Drive (`sheetIndex`, written daily into `ideas.json.sheets`) + this phone (`sheetCat`). Search by song/artist; filters: artist, capo (none/with), tuning, level (Easy/Medium/Hard from `chordLevel`, an open-vs-barre heuristic). Rows open the Drive file. Rows with a saved video lesson show 🎬.
 
@@ -424,6 +431,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `gcover_t.js` | My gear preview picture: amp picture without photos, first photo by default, pick another (visible in the list, after a reload), editing keeps photos and choice, removing the chosen photo falls back |
 | `home_fit_t.js` | Home doesn't scroll and all four tiles are fully visible above the bottom bar and the player, from 360×560 to 412×860, with Continue cards; other sections still scroll |
 | `mx_ui_t.js` | the player as a mixing desk: title / artist, one coloured strip per part with fader, meter and M / S, times, ±5s, meters move while playing and drop on pause, a fader changes only its part |
+| `ses_t.js` | song session: opens from Learn, title/artist/tuning/capo, what it has, Practise picks the best material and opens it, chord diagrams (incl. built ones), status and notes saved, jam buttons set the player, chord finder, ‹ and back return to Learn |
 | `beta_t.js` | beta: copies live data on first open, reads big items through and keeps its copy, deletes stick, live data and database untouched, reopening keeps beta changes, "Copy my live data again", own manifest |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 
