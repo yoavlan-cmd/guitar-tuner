@@ -1,8 +1,6 @@
 # Guitaring V2: build plan
 
-Step 2 of the V2 brief: this needs your approval before any code. The deployment plan (step 3) comes after you approve this.
-
-**Decisions I need from you** are marked **❓** and collected in §10.
+Step 2 of the V2 brief. **Approved on 16 Oct 2026** with the decisions in §10. The deployment plan is in `docs/V2-deployment-plan.md`.
 
 ---
 
@@ -73,16 +71,16 @@ Around these:
 | Songs › Add › Song video | Learn › Upload song materials (video → chord analysis) |
 | Songs › Add › Screenshots or PDF | Learn › Upload (as the song's sheet) and Write › "Sheet from screenshots" |
 | Songs › Add › Write a sheet | Write › Write a sheet |
-| Songs › Add › Practice mixer | Jam › Make a jam track (name ❓) |
+| Songs › Add › Practice mixer | Jam › **Band breakdown** |
 | Mixer sheet + mini-player | Jam › Jamming player; the mini-player stays on every screen |
 | Song ideas | Learn › New songs to learn (collapsed) |
 | Sheet catalog, video lessons, saved on phone | My Library › Sheets / Videos (also reachable from each song) |
-| Chords tab (chord book + finder) | ❓ Proposal: **My Library › My chords** (the book). The **finder** sits in Write and inside every song session |
+| Chords tab (chord book + finder) | **My Library › My chords** (the book). The **finder** sits in Write and inside every song session |
 | Claude settings (Songs › Claude features) | My profile › Connections (Claude key, GitHub split repository, Drive folder) |
 | My gear tab | Gear › Checking my gear (same pages, plus per-song suggestions) |
 | Android share target (video links) | Same, and also accepts **files** (audio/video/PDF/images) straight into Upload |
 
-**Why a bottom bar on top of the Home tiles:** your brief puts the four sections on the welcome page. The bottom bar keeps every section one tap away from anywhere, as the tuner icon is. It's 5 slim buttons; I'd keep it. ❓
+**Why a bottom bar on top of the Home tiles:** your brief puts the four sections on the welcome page. The bottom bar keeps every section one tap away from anywhere, as the tuner icon is. It's 5 slim buttons (approved).
 
 ---
 
@@ -104,7 +102,7 @@ The flow takes about 2–3 minutes. It shows a progress bar, uses big tap target
 | 8 | **How you learn** | Videos · chord sheets · tabs · by ear (multi) · Time: 10 / 20 / 30 / 60 min a day · days a week 1–7 · Playing context: alone / friends and family / on stage | No |
 | 9 | **Summary** | "Here's what Guitaring will do for you": 3–5 lines generated from the answers (no Claude needed) · Edit · Done | — |
 
-❓ **Interface language.** The whole interface is in English today. Translating it into Hebrew, with right-to-left screens, is a large separate job. In V2 I propose the language answer controls *song suggestions and guide language*, and a Hebrew interface becomes a later phase (§9, phase 9).
+**Interface language** (approved). The whole interface is in English today. Translating it into Hebrew, with right-to-left screens, is a large separate job. In V2 I propose the language answer controls *song suggestions and guide language*, and a Hebrew interface becomes a later phase (§9, phase 9).
 
 ### 3.2 Existing users
 
@@ -174,7 +172,7 @@ Lit chips mean you have it; dim chips mean it's missing.
 - **Linked material:** video lessons (Watch) · sheets (Open) · jam track parts (guitars only / no guitars, opening the player) · **gear tip for this song**.
 - **Built from uploads:** "Add material" (§4.3) is at the bottom of every session.
 
-❓ **Reference guides.** I don't have the two guides from testing (Tuna's "יא" riff guide and Amir Dadon's "שאריות של החיים" guide). They're not in the repo or in what you've sent here. Please send them as files or screenshots; they become the quality bar and test fixtures for phase 3.
+**Reference guides:** received; they are the quality bar and test fixtures for phase 3 (see §10, item 6).
 
 ### 4.3 Upload song materials (proposed definition)
 
@@ -276,7 +274,7 @@ These stay under Learn as **New songs to learn**, collapsed until opened. The da
   - mute/solo and presets;
   - **plus** loop a section (A–B, or tap a section from the song map) and **speed 50–100% without changing pitch**;
   - the mini-player bar with ✕ stays.
-- **❓ Name for "Create split".** I suggest **"Make a jam track"** (says what you get). Alternatives: "Split into parts", "Band breakdown". GitHub stays first and the phone stays the fallback, as today.
+- **Band breakdown** (the name for "Create split", your choice): GitHub stays first and the phone stays the fallback, as today.
 
 **Checking my gear:**
 - **The existing pages:** guitars, amps, photos, controls on photos, care, Claude chat.
@@ -337,9 +335,9 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 | Song records, guides, riffs | ✓ | backup file (optional) | — | — |
 | Uploads, recordings, jam parts | ✓ | via share/backup | split jobs only (deleted after) | — |
 | Sheets (PDF) | catalog | ✓ (as today) | — | — |
-| Song ideas, jokes, sheet list | cached | — | — | `ideas.json` (as today) ❓ |
+| Song ideas, jokes, sheet list | cached | — | `ideas.json` (moves here, approved) | `ideas.json` until the move is done |
 
-**❓ Privacy note.** `guitar-tuner` is a **public** repository. The profile must not go there, so I propose the profile file lives in your private `guitaring-split`. Today's `ideas.json` is already public: it holds your Drive song list and links to your Guitaring sheets. If you'd rather keep that private, the app can read it from `guitaring-split` with the GitHub key you already gave it. That would be its own small step.
+**Privacy note** (approved: profile and `ideas.json` go private). `guitar-tuner` is a **public** repository. The profile must not go there, so I propose the profile file lives in your private `guitaring-split`. Today's `ideas.json` is already public: it holds your Drive song list and links to your Guitaring sheets. If you'd rather keep that private, the app can read it from `guitaring-split` with the GitHub key you already gave it. That would be its own small step.
 
 ---
 
@@ -348,7 +346,7 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 1. **Onboarding:** §3: 9 screens, all optional (name recommended), with consumers listed in §3.4.
 2. **Basic guitar material:** §4.4: 4 tracks, about 22 lessons; level from profile + "I can do it" + chords in your sheets.
 3. **Upload song materials:** §4.3: inputs, one-song grouping, best-audio score, automatic split + analysis + guide + gear tip.
-4. **Name for Create split:** "Make a jam track" (§6).
+4. **Name for Create split:** **Band breakdown** (your choice).
 5. **Data model:** §7.
 6. **How guides and riff guides are made:**
    - **Easy and Full guides** come from the existing on-phone analysis:
@@ -404,7 +402,7 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 | 6 | **Riff guides** | Pick a range → fretboard steps, tab, compare by ear, confidence | L |
 | 7 | **Basic guitar material** | 4 tracks of lessons, today's lesson on Home, level suggestions | L (mostly content) |
 | 8 | **Record myself** | Record, name, play, delete, attach to a song, My Music | S |
-| 9 | *(later, ❓)* Hebrew interface | Full Hebrew UI with right-to-left layout | L |
+| 9 | *(later)* Hebrew interface | Full Hebrew UI with right-to-left layout | L |
 
 **Notes on the order:**
 - Phases 0–2 are mostly reorganisation, so they come first: low risk, and everything after builds on them.
@@ -413,13 +411,20 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 
 ---
 
-## 10. Decisions I need from you
+## 10. Decisions (answered 16 Oct 2026)
 
-1. **Bottom bar:** keep a 5-button bottom bar (Home · Learn · Write · Jam · Gear) in addition to the Home tiles? *(I recommend yes.)*
-2. **Chords tab:** the chord book goes to **My Library › My chords** and the finder into Write and song sessions. OK?
-3. **Interface language:** English UI in V2, the language answer used for songs and guides, and a Hebrew UI as a later phase. OK?
-4. **Split name:** "Make a jam track"? Or "Split into parts" / "Band breakdown" / your own.
-5. **Profile location:** in your **private** `guitaring-split` repository (for the daily job), never the public one. And should `ideas.json` move to private too?
-6. **Reference guides:** please send the Tuna "יא" riff guide and the Amir Dadon "שאריות של החיים" guide.
-7. **Phase order:** as in §9, or something else first (for example Upload before song sessions)?
-8. **Phase 0 source split:** OK to split the source into a few files joined by the build? It doesn't change the app; it makes the big V2 changes safer.
+1. **Bottom bar:** yes, Home · Learn · Write · Jam · Gear, in addition to the Home tiles.
+2. **Chords tab:** the chord book goes to My Library › My chords; the finder goes into Write and song sessions.
+3. **Interface language:** English UI in V2; the language answer drives songs and guides; a Hebrew UI is a later phase.
+4. **Split name:** **Band breakdown**.
+5. **Privacy:**
+   - the profile lives in the private `guitaring-split` repository, never the public one;
+   - `ideas.json` moves to the private repository too.
+6. **Reference guides:** received (Tuna "יא" riff guide, Amir Dadon "שאריות של החיים" guide). What they set as the bar:
+   - "how sure is this" per item (chords/order, capo/shapes, voicings, strumming);
+   - a "before you play" block with capo, BPM and the reasoning behind tuning/capo;
+   - an easier alternative (e.g. the riff all on one string);
+   - steps that say where the hand moves;
+   - times measured on the guitar-only file, with the offset to the video stated.
+7. **Phase order:** as listed in §9.
+8. **Phase 0 source split:** yes.
