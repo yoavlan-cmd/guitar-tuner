@@ -6,12 +6,15 @@ function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{
 // the open song's learning-list entry (built fresh, so it follows new sheets, lessons and jam tracks)
 function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
 // what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
-function sesFacts(g){const f={tun:'',capo:null,chords:[],bpm:0};const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
+function sesFacts(g){const f=sesSheet(g);f.bpm=0;const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
+ for(const x of g.r.analysis){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
+  if(!f.chords.length){const prevA=A;try{A=d;addCh(d.segs.filter(s=>s.t1-s.t0>=.5).map(s=>nameOf(s)))}catch(e){}A=prevA}}
+ return f}
+// what the song's chord sheets say (tuning, capo, chords as written): the guide follows a sheet over what was heard
+function sesSheet(g){const f={tun:'',capo:null,chords:[]};const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
  for(const x of g.r.sheet){
   if(x.lib){const e=libGet(x.lib);const d=e&&e.data;if(d){if(d.play){if(!f.tun)f.tun=d.play.tun||'';if(f.capo==null)f.capo=+d.play.capo||0}addCh((d.lc||[]).flatMap(l=>Object.values(l.ch||{})))}}
   else if(!x.draft){const e=(catalogAll()||[]).find(c=>vlMatch(c.title,g.title));if(e){if(!f.tun&&e.tuning)f.tun=tunFromName(e.tuning);if(f.capo==null&&e.capo!=null)f.capo=+e.capo||0;addCh(e.chords)}}}
- for(const x of g.r.analysis){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if(f.capo==null&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
-  if(!f.chords.length){const prevA=A;try{A=d;addCh(d.segs.filter(s=>s.t1-s.t0>=.5).map(s=>nameOf(s)))}catch(e){}A=prevA}}
  return f}
 // a chord's diagram from the chord library (fingers shown); unknown names just show the name
 const SES_ENH={'A#':'Bb','Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab'};
@@ -28,7 +31,7 @@ function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practis
 function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
  if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
  const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
- let G=null;if(g.r.analysis.length){try{const d=loadSong(g.r.analysis[0].key);if(d&&d.segs&&d.segs.length)G=gdBuild(d)}catch(e){try{console.error('guide',e)}catch(x){}}}
+ let G=null;if(g.r.analysis.length){try{const k=g.r.analysis[0].key,d=loadSong(k);if(d&&d.segs&&d.segs.length){const sh=sesSheet(g);G=gdBuild(gdFit(d,sh.chords.length||sh.capo!=null?sh:null,k))}}catch(e){try{console.error('guide',e)}catch(x){}}}
  if(!gdMode||sesKey._g!==g.title){gdMode=gdDefault();sesKey._g=g.title}
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
@@ -49,7 +52,8 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
  const mk=$('sesMake');if(mk)mk.onclick=()=>{asStart(g.r.mix[0].mix);renderSession()};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
- const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;gb.innerHTML=gdHTML(G,gdMode)});
+ const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}
+  const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;gb.innerHTML=gdHTML(G,gdMode)});
  const go=$('sesGo');if(go&&pr&&pr.u)go.onclick=()=>window.open(pr.u,'_blank','noopener');
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  box.querySelectorAll('[data-dssave]').forEach(b=>b.onclick=()=>dsSaveLater(b.dataset.dssave));

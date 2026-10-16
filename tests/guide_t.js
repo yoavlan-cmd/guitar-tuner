@@ -22,6 +22,7 @@ function song(o){const bpm=o.bpm,b=60/bpm,beats=[],segs=[];let t=1.0;
  return {title:o.title,dur,bpm,offset:0,tuning:{id:'std',conf:o.conf||'high',why:''},segs,play:{tun:'std',capo:o.capo},beats,ons:{h,d:Buffer.from(e).toString('base64')},v:2,at:Date.now()}}
 const REF=song({title:'שאריות של החיים - אמיר דדון',bpm:108,capo:2,pat:'D·DU·UDU',
  prog:{V:[['C','add9',4],['A','sus2',4],['F','maj7',4],['G','',4]],C:[['F','maj7',4],['G','',4],['C','add9',4],['A','sus2',4]]},form:['V','V','V','V','C','C','C','C','V','V','V','V','C','C','C','C']});
+REF.play.capoBy='you';// capo 2 as set from the video (a capo can't be heard; without it the guide says no capo)
 // a messy one: chords that never repeat, no beat detail
 const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:'D·D·D·D·',prog:{X:[['C','',1],['E','m7',1],['Bb','sus4',2],['F','m',1],['D','7',3],['Ab','',1],['B','m',2]]},form:['X','X']});delete s.beats;delete s.ons;return s})();
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
@@ -40,7 +41,7 @@ const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:
  const full=await p.$eval('#gdBody',e=>e.innerText.replace(/\s+/g,' '));console.log('  FULL: '+full.slice(0,700));
  ok(/Capo 2/.test(full)&&/108/.test(full)&&/walking pace/.test(full),'Before you play: capo 2, 108 BPM, a walking pace (as the reference)');
  const lv=await p.$$eval('.gdsure li',l=>Object.fromEntries(l.map(x=>[x.querySelector('span').textContent,x.querySelector('.gdlv').className.split(' ')[1]])));console.log('  sure:',JSON.stringify(lv));
- ok(lv['Chords and order']==='solid'&&lv['Capo and shapes']==='solid'&&lv['Exact voicings']==='likely'&&lv['Strumming']==='solid'&&lv['Tempo']==='solid','How sure is this: chords, capo, strumming and tempo solid; exact voicings likely (as the reference)');
+ ok(lv['Chords and order']==='solid'&&lv['Capo and shapes']==='solid'&&lv['Exact voicings']==='likely'&&lv['Strumming']==='solid'&&lv['Tempo']==='solid','How sure is this: chords, capo (set from the video), strumming and tempo solid; exact voicings likely (as the reference)');
  const fch=await p.$$eval('#gdBody .seschords .sesdg',l=>l.map(x=>x.textContent.trim()||x.querySelector('svg')?.getAttribute('aria-label')||''));
  const fnames=await p.$$eval('#gdBody .seschords svg .dgName',l=>l.map(x=>x.textContent));console.log('  full chords:',fnames.join(' '));
  ok(['Cadd9','Asus2','Fmaj7','G'].every(n=>fnames.includes(n)),'Full shows the recording’s shapes: Cadd9 · Asus2 · Fmaj7 · G');

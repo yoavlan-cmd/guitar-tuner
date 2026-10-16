@@ -12,8 +12,7 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
   const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
-  // the capo with the easiest shapes, as the song-video analysis does
-  let b=null;for(let c=0;c<=7;c++){const sc=ease(a.segs,TSHIFT[tuning.id]??0,c)+.08*c;if(!b||sc<b.s)b={c,s:sc}}a.play.capo=b.c;
+  // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
