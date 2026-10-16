@@ -68,7 +68,7 @@ function sheetHTML(print){
  if(A.notes)h+=`<h3>My notes</h3><div class="notes-out" dir="auto">${esc(A.notes)}</div>`;
  const plan=[`Tune to <b>${esc(t.name)}</b>${A.play.capo?` and put the capo on fret ${A.play.capo}`:''}.`,`Learn the shapes: <b>${kp.used.map(esc).join(', ')}</b>.`];
  if(kp.top.length)plan.push(`Drill the changes for a minute each: <b>${kp.top.map(esc).join(', ')}</b>.`);
- plan.push('Play along with the video at 0.75× speed, then at full speed.');
+ plan.push('Play along with the video at Medium speed, then at Full.');
  h+=`<h3>Practice plan</h3><ol>${plan.map(p=>`<li>${p}</li>`).join('')}</ol>`;
  h+=`<div class="foot">Guitaring · ${fmtDate(Date.now())}</div>`;
  return h;

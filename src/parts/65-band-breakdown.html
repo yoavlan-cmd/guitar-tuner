@@ -206,12 +206,27 @@ async function mxStart(file){
  }finally{mxBusy=false;try{mxWake&&mxWake.release()}catch(e){}mxWake=null;mxBar();renderMixNew()}
 }
 // ---- live mixing: an audio worklet mixes all parts with the slider volumes ----
-const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;
-this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice();this.acc=new Float64Array(m.tracks.length);this.cnt=0}if(m.gains)this.tg=m.gains;if(m.seek!=null)this.p=Math.max(0,Math.min(this.n,m.seek|0));if(m.play!=null)this.on=m.play;}}
+const MX_WORKLET=`class M extends AudioWorkletProcessor{constructor(){super();this.t=[];this.g=[];this.tg=[];this.p=0;this.on=false;this.n=0;this.r=1;this.ws=null;this.oc=0;
+this.port.onmessage=e=>{const m=e.data;if(m.tracks){this.t=m.tracks;this.n=m.len;this.g=m.gains.slice();this.tg=m.gains.slice();this.acc=new Float64Array(m.tracks.length);this.cnt=0;this.ws=null}if(m.gains)this.tg=m.gains;if(m.seek!=null){this.p=Math.max(0,Math.min(this.n,m.seek|0));this.ws=null}if(m.rate!=null){this.r=m.rate;this.ws=null;this.g=this.tg.slice()}if(m.play!=null)this.on=m.play;}}
+mx(q,c){if(q<0||q>=this.n)return 0;let s=0;const t=this.t,g=this.tg;for(let k=0;k<t.length;k++)if(g[k])s+=t[k][2*q+c]*g[k];return s/32768}
+wsInit(){const N=Math.max(512,Math.round(sampleRate*.046/2)*2),H=N/2,w=new Float32Array(N);for(let i=0;i<N;i++)w[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+this.ws={N,H,w,tol:Math.round(N/4),aL:new Float32Array(N),aR:new Float32Array(N),qL:new Float32Array(H),qR:new Float32Array(H),qi:H,pa:this.p,prev:-1}}
+grain(){const W=this.ws,N=W.N,H=W.H,w=W.w,tol=W.tol,D=4;let st=Math.round(W.pa);
+if(W.prev>=0){const nat=W.prev+H,tg=[],reg=[],r0=st-tol;for(let i=0;i<H;i+=D)tg.push(this.mx(nat+i,0)+this.mx(nat+i,1));for(let i=0;i<H+2*tol;i+=D)reg.push(this.mx(r0+i,0)+this.mx(r0+i,1));
+let best=tol,bv=-1e30;for(let d=0;d<=2*tol;d+=D){const j0=d/D;let c=0,e=1e-9;for(let i=0;i<tg.length;i++){const x=reg[j0+i];c+=tg[i]*x;e+=x*x}const v=c/Math.sqrt(e);if(v>bv){bv=v;best=d}}st=r0+best}
+for(let i=0;i<N;i++){W.aL[i]+=this.mx(st+i,0)*w[i];W.aR[i]+=this.mx(st+i,1)*w[i]}
+for(let i=0;i<H;i++){W.qL[i]=W.aL[i];W.qR[i]=W.aR[i]}W.aL.copyWithin(0,H);W.aR.copyWithin(0,H);W.aL.fill(0,N-H);W.aR.fill(0,N-H);
+for(let k=0;k<this.t.length;k++){const a=this.t[k],g=this.tg[k];let e=0;if(g)for(let i=0;i<H;i+=4){const q=st+i;if(q<0||q>=this.n)continue;const l=a[2*q]*g/32768,r=a[2*q+1]*g/32768;e+=l*l+r*r}this.acc[k]+=e}this.cnt+=H/4;
+W.prev=st;W.pa+=H*this.r;W.qi=0}
 process(_,outs){const o=outs[0],L=o[0],R=o[1]||o[0],n=L.length;L.fill(0);if(R!==L)R.fill(0);if(!this.on||!this.t.length)return true;
+if(this.r!==1){if(!this.ws)this.wsInit();const W=this.ws;for(let i=0;i<n;i++){if(W.qi>=W.H){if(W.pa>=this.n){this.on=false;this.p=this.n;this.ws=null;this.port.postMessage({ended:true,pos:this.p});return true}this.grain()}L[i]=W.qL[W.qi];if(R!==L)R[i]=W.qR[W.qi];W.qi++}
+this.p=Math.min(this.n,Math.round(W.pa));this.oc+=n;if(this.oc>=4096){this.oc=0;this.port.postMessage({pos:this.p,lv:Array.from(this.acc,x=>Math.sqrt(x/(2*this.cnt||1)))});this.acc.fill(0);this.cnt=0}return true}
 for(let k=0;k<this.t.length;k++){let g=this.g[k],e=0;const tg=this.tg[k],st=(tg-g)/n,a=this.t[k];for(let i=0;i<n;i++){const q=this.p+i;if(q>=this.n)break;g+=st;const l=a[2*q]*g/32768,r=a[2*q+1]*g/32768;L[i]+=l;R[i]+=r;e+=l*l+r*r}this.g[k]=tg;this.acc[k]+=e}this.cnt+=n;
 this.p+=n;if(this.p>=this.n){this.on=false;this.p=this.n;this.port.postMessage({ended:true,pos:this.p})}else if((this.p&4095)<n){this.port.postMessage({pos:this.p,lv:Array.from(this.acc,x=>Math.sqrt(x/(2*this.cnt||1)))});this.acc.fill(0);this.cnt=0}return true}}
 registerProcessor('gmix',M);`;
+// practice speed: Slow / Medium / Full, the pitch stays (the worklet stretches the time, WSOLA)
+let mxRate=1;const MX_SPEEDS=[[.6,'Slow 60%'],[.8,'Medium 80%'],[1,'Full']];
+function mxSetRate(r){mxRate=r;if(mxNode)mxNode.port.postMessage({rate:r,seek:mxPos});document.querySelectorAll('#mixView [data-rate]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.rate===r));mxBarTime()}
 const mxGains=()=>{const t=mxSong.tracks;return t.map(x=>{const on=mxSolo?mxSolo===x.id:!x.mute;return on?x.gain:0})};
 async function mxAudio(){
  if(mxNode)return;mxCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:mxSR()});
@@ -219,7 +234,7 @@ async function mxAudio(){
  mxNode=new AudioWorkletNode(mxCtx,'gmix',{numberOfOutputs:1,outputChannelCount:[2]});mxNode.connect(mxCtx.destination);
  mxNode.port.onmessage=e=>{const m=e.data;if(m.pos!=null){mxPos=m.pos;mxTimeUI()}if(m.lv)mxMeters(m.lv);if(m.ended){mxPlaying=false;mxPlayUI();mxMeters(null)}};
  // the worklet keeps its own copy of the parts; the phone keeps the saved copy for next time
- const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));
+ const copies=mxSong.tracks.map(t=>t.data.slice());mxNode.port.postMessage({tracks:copies,len:mxSong.len,gains:mxGains()},copies.map(c=>c.buffer));if(mxRate!==1)mxNode.port.postMessage({rate:mxRate});
 }
 function mxStopAudio(){try{mxNode&&mxNode.port.postMessage({play:false});mxCtx&&mxCtx.close()}catch(e){}mxNode=null;mxCtx=null;mxPlaying=false}
 const mxSR=()=>mxSong&&mxSong.sr||MX.OUT_SR;
@@ -255,7 +270,8 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  let nm=null;try{nm=songFromName(s.name)}catch(e){}if(!nm||!nm.t)nm={t:s.name,a:''};
  v.innerHTML=`<div class="mixhead"><div class="mixttl"><small class="mixk"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Band breakdown</small><b dir="auto">${esc(nm.t)}</b>${nm.a?`<span dir="auto">${esc(nm.a)}</span>`:''}</div><button type="button" class="pickx" id="mxClose" aria-label="Hide the mixer">✕</button></div>
  <div class="mixtrans"><div class="mixtime"><input type="range" id="mxSeek" min="0" max="${s.len}" step="${mxSR()/10}" value="${mxPos}" aria-label="Position"><div class="mixtimes"><small id="mxT"></small><small id="mxD"></small></div></div>
- <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div></div>
+ <div class="mixbtns"><button type="button" class="mixback" id="mxBack" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay" id="mxPlay" aria-label="Play">▶</button><button type="button" class="mixback" id="mxFwd" aria-label="Forward 5 seconds">+5s</button></div>
+ <div class="mixspeed seg" role="group" aria-label="Speed (the pitch stays the same)">${MX_SPEEDS.map(([r,l])=>`<button type="button" data-rate="${r}" aria-pressed="${mxRate===r}">${l}</button>`).join('')}</div></div>
  <div class="mixpre">${MX_PRESETS.map(([k,l])=>`<button type="button" class="chip" data-pre="${k}" aria-pressed="${mxPre===k}">${l}</button>`).join('')}</div>
  <div class="mixrows" id="mxRows"></div>
  <p class="tip" style="margin:0">${gtrs>1?'The guitars were told apart by where they sit (left, centre, right). ':''}The split isn’t perfect: a little of one part can be heard in another.</p>
@@ -265,6 +281,7 @@ function mxMixer(){const v=$('mixView'),s=mxSong;if(!s||!s.tracks)return mxHome(
  $('mxClose').onclick=()=>mxView(false);
  $('mxPlay').onclick=mxToggle;
  $('mxBack').onclick=()=>{mxPos=Math.max(0,mxPos-5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
+ v.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>mxSetRate(+b.dataset.rate));
  $('mxFwd').onclick=()=>{mxPos=Math.min(s.len,mxPos+5*mxSR());if(mxNode)mxNode.port.postMessage({seek:mxPos});mxTimeUI()};
  const sk=$('mxSeek');sk.addEventListener('input',()=>{sk._drag=true;mxPos=+sk.value;mxSeekUI()});sk.addEventListener('change',()=>{sk._drag=false;mxPos=+sk.value;if(mxNode)mxNode.port.postMessage({seek:mxPos});mxBarTime()});
  v.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>mxPreset(b.dataset.pre));
@@ -501,7 +518,7 @@ window.addEventListener('online',()=>mxPoll());
 
 // ---------- the mini player bar ----------
 function mxBarTime(){if(!mxSong||!mxSong.tracks)return;const s=$('mxBarS'),p=$('mxBarP');if(!s)return;const pend=mxIdx.filter(x=>MX_PEND.includes(x.state)).length;
- s.textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)+(pend?` · ${pend} splitting`:'');p.style.width=(mxSong.len?mxPos/mxSong.len*100:0)+'%'}
+ s.textContent=mxFmt(mxPos)+' / '+mxFmt(mxSong.len)+(mxRate!==1?` · ${Math.round(mxRate*100)}% speed`:'')+(pend?` · ${pend} splitting`:'');p.style.width=(mxSong.len?mxPos/mxSong.len*100:0)+'%'}
 let mxBarOff=false;// closed with ✕: stays away until a song is opened or a split starts or finishes
 function mxBar(){const b=$('mxBar');if(!b)return;
  const pend=mxIdx.filter(x=>MX_PEND.includes(x.state));
@@ -532,6 +549,6 @@ $('mixNew').onclick=()=>{
  mxView(true);if(mxBusy)return;if(!mxGh()&&!mxIdx.length)mxSetup();else mxSheetUI2()};
 $('mixIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(mxPickLocal)mxStart(f);else{mxView(true);mxCloudSubmit(f)}};
 const mxReady=mxIdxLoad().then(()=>{mxBar();renderMixNew();mxPoll();try{renderLearn()}catch(e){}});
-window.__mx={gains:()=>mxSong&&mxSong.tracks?mxGains():null,node:()=>!!mxNode,level:()=>{if(!mxNode)return -1;if(!mxNode._an){mxNode._an=mxCtx.createAnalyser();mxNode._an.fftSize=2048;mxNode.connect(mxNode._an)}const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);let e=0;for(const x of a)e+=x*x;return Math.sqrt(e/a.length)},render:(g,cb)=>mxRender(g,'t',cb),song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
+window.__mx={gains:()=>mxSong&&mxSong.tracks?mxGains():null,node:()=>!!mxNode,level:()=>{if(!mxNode)return -1;if(!mxNode._an){mxNode._an=mxCtx.createAnalyser();mxNode._an.fftSize=2048;mxNode.connect(mxNode._an)}const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);let e=0;for(const x of a)e+=x*x;return Math.sqrt(e/a.length)},render:(g,cb)=>mxRender(g,'t',cb),rate:r=>mxSetRate(r),pos:()=>mxPos,ctxTime:()=>mxCtx?mxCtx.currentTime:0,freq:()=>{if(!mxNode||!mxNode._an)return 0;const a=new Float32Array(2048);mxNode._an.getFloatTimeDomainData(a);const x=[];for(let i=1;i<a.length;i++)if(a[i-1]<0&&a[i]>=0)x.push(i-1+a[i-1]/(a[i-1]-a[i]));return x.length>2?(x.length-1)*mxCtx.sampleRate/(x[x.length-1]-x[0]):0},song:()=>mxSong,playing:()=>mxPlaying,isG:mxIsGtr,idx:()=>mxIdx,poll:()=>mxPoll(),open:id=>mxOpen(id)};
 
 

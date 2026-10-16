@@ -544,7 +544,7 @@ document.addEventListener('fullscreenchange',()=>{const on=!!document.fullscreen
 new MutationObserver(()=>{const on=!!document.fullscreenElement||$('stage').classList.contains('kfs');$('kFull').textContent=on?'✕ Exit karaoke':'⛶ Karaoke view'}).observe($('stage'),{attributes:true,attributeFilter:['class']});
 addEventListener('resize',()=>{if(A&&!$('songView').hidden){buildLane();syncSong(true)}});
 ['seeked','timeupdate','pause'].forEach(ev=>vid.addEventListener(ev,()=>{if(vid.paused)syncSong(false)}));
-$('speed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vid.playbackRate=+b.dataset.r;[...$('speed').children].forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('speed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vid.playbackRate=+b.dataset.r;try{vid.preservesPitch=true}catch(err){}[...$('speed').children].forEach(x=>x.setAttribute('aria-pressed',x===b))});
 /* edit */
 $('edRoot').innerHTML=CH.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
 $('edType').innerHTML=TYPES.map((t,i)=>`<option value="${i}">${t.label}</option>`).join('')+`<option value="nc">no chord</option>`;
