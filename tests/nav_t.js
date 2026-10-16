@@ -52,6 +52,12 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // a feature actually works from its new place
  await go('write');await p.tap('#findNew');await p.waitForTimeout(200);ok(await vis('#cfWrap'),'the chord finder opens from Write');await p.evaluate(()=>{const c=document.getElementById('cfClose')||document.querySelector('#cfWrap [aria-label=Close]');if(c)c.click()});
  await go('library');await p.evaluate(()=>{const d=document.getElementById('libSaved');d.open=true});ok(await vis('#libList'),'Saved on this phone opens in My Library');
+ // every open list can be closed: ✕ on its title (stays on top) and Close at the bottom
+ await p.tap('#vidBox>summary');await p.waitForTimeout(150);ok(await vis('#vidBox>.foldx'),'an open list has a Close button at the bottom');
+ await p.tap('#vidBox>.foldx');await p.waitForTimeout(150);ok(!(await p.$eval('#vidBox',e=>e.open)),'Close closes it');
+ await p.tap('#vidBox>summary');await p.evaluate(()=>window.scrollBy(0,400));await p.waitForTimeout(100);
+ ok(await p.$eval('#vidBox>summary',e=>getComputedStyle(e).position==='sticky'&&getComputedStyle(e,'::after').content.includes('✕')),'its title stays at the top with a ✕');
+ await p.tap('#vidBox>summary');ok(!(await p.$eval('#vidBox',e=>e.open)),'tapping the title (✕) closes it');
  // the tuner: one tap from every section; closing stops listening
  for(const s of ['home','learn','write','jam','gear']){await p.evaluate(x=>window.__v2.goSec(x),s);await p.tap('#hTuner');await p.waitForTimeout(100);
   const shown=await vis('#screen');await p.tap('#paneTune [data-back]');await p.waitForTimeout(250);ok(shown&&await sec()===s,`tuner opens in one tap from ${s} and ✕ goes back to ${s}`)}
