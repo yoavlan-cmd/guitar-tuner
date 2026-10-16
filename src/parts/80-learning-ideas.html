@@ -2,6 +2,7 @@
 // One row per song, gathered from: Guitaring sheets (Drive list + this phone), sheets saved on this phone, the Drive songs folder,
 // video lessons, practice-mixer splits, saved chord analyses, an unfinished sheet, and songs marked "On it" in the song ideas.
 const LKINDS=[['sheet','SHEET','Chord sheet'],['folder','DRIVE','Songs folder'],['lesson','LESSON','Video lesson'],['mix','MIX','Practice mixer'],['analysis','VIDEO','Chord analysis']];
+const LTAG={sheet:'Sheet',folder:'Folder',lesson:'Lesson',mix:'Mixer',analysis:'Chords'};// short words when the icons are off
 let learnF={},learnOpen=null,learnQ='';
 const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
 function learnSongs(){
@@ -29,7 +30,7 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter(g=>(!q||vlKey(g.title+' '+g.artist).includes(q))&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
-   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span><span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join('')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span><span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});

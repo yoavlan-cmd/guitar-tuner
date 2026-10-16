@@ -21,7 +21,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // a practice-mixer split named the way files usually are: "Artist - Song"
  await p.evaluate(async()=>{const M=window.__mxTest;await M.put('mixdata:m1',{len:10,sr:44100,tracks:[]});M.add({id:'m1',name:'Green Day - Good Riddance',at:Date.now(),src:'cloud',state:'ready'})});
  await p.tap('[data-tab=song]');await p.waitForTimeout(300);
- const rows=await p.$$eval('#learnList .lrow',l=>l.map(r=>({t:r.querySelector('b').textContent,a:r.querySelector('small').textContent,lit:r.querySelectorAll('.lres .pd:not(.off)').length,label:r.querySelector('.lres').getAttribute('aria-label')})));
+ const rows=await p.$$eval('#learnList .lrow',l=>l.map(r=>({t:r.querySelector('b').textContent,a:r.querySelector('small').textContent,lit:r.querySelectorAll('.lres .pd:not(.off),.lres .ltag:not(.none)').length,label:r.querySelector('.lres').getAttribute('aria-label')})));
  console.log(JSON.stringify(rows));
  const gr=rows.filter(r=>/good riddance/i.test(r.t));
  ok(rows.length===4,`four songs in I'm learning (${rows.map(r=>r.t).join(' / ')})`);
