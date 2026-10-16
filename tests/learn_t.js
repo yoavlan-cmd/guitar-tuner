@@ -41,16 +41,16 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('[data-lf=lesson]');n=await p.$$eval('#learnList .lrow',l=>l.length);ok(n===2,'third tap clears the filter');
  // search
  await p.fill('#learnQ','oasis');n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));ok(n.length===1&&n[0]==='Wonderwall','search finds by artist');await p.fill('#learnQ','');
- // details
- await p.tap('#learnList .lrow:has-text("Good Riddance")');
- const det=await p.$eval('.ldet',d=>d.innerText.replace(/\s+/g,' '));console.log('detail:',det);
+ // details: a song opens its song session, which lists what it has and what's missing
+ await p.tap('#learnList .lrow:has-text("Good Riddance")');await p.waitForTimeout(200);
+ const det=await p.$eval('#sesBox .ldet',d=>d.innerText.replace(/\s+/g,' '));console.log('detail:',det);
  ok(/Guitaring sheet in Drive/.test(det)&&/Watch/.test(det)&&/Split on GitHub/.test(det)&&/No chords from a video yet/.test(det),'details list what it has and what is missing');
- await p.tap('#learnList .lrow:has-text("Wonderwall")');
- const det2=await p.$eval('.ldet',d=>d.innerText.replace(/\s+/g,' '));
+ await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("Wonderwall")');await p.waitForTimeout(200);
+ const det2=await p.$eval('#sesBox .ldet',d=>d.innerText.replace(/\s+/g,' '));
  ok(/No chord sheet yet/.test(det2)&&/Write it/.test(det2)&&/Not learning it any more/.test(det2),'an "On it" song offers to write the sheet, find a lesson, or drop it');
- await p.tap('.ldet [data-la=drop]');n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));ok(!n.includes('Wonderwall'),'"Not learning it any more" removes it');
+ await p.tap('#sesBox [data-la=drop]');await p.waitForTimeout(200);n=await p.$$eval('#learnList .lrow',l=>l.map(r=>r.querySelector('b').textContent));ok(!n.includes('Wonderwall'),'"Not learning it any more" removes it');
  // opening a phone sheet from the list
- await p.tap('[data-lang=he]');await p.tap('#learnList .lrow:has-text("עד מתי")');await p.tap('.ldet [data-la=lib]');await p.waitForTimeout(300);
+ await p.tap('[data-lang=he]');await p.tap('#learnList .lrow:has-text("עד מתי")');await p.waitForTimeout(200);await p.tap('#sesBox .ldet [data-la=lib]');await p.waitForTimeout(300);
  ok(await p.$eval('#sheetView',e=>!e.hidden),'Open on a phone sheet shows the chord sheet');
  await p.tap('[data-tab=tune]');await p.tap('[data-tab=song]');await p.waitForTimeout(200);
  // suggestions sit in their own card, closed; the Add part hides both

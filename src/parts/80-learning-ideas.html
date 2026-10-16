@@ -39,8 +39,8 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
-  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g),open=learnOpen===vlKey(g.title);
-   return `<button type="button" class="lrow" data-li="${i}" aria-expanded="${open}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span></button>${open?learnDetail(g,i):''}`}).join('')
+  $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
+   return `<button type="button" class="lrow" data-li="${i}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
@@ -48,19 +48,19 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  box.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{learnSt=b.dataset.ls;renderLearn()});
  if($('learnArt'))$('learnArt').onchange=e=>{learnArt=e.target.value;renderLearn()};
  box.querySelectorAll('[data-lf]').forEach(b=>b.onclick=()=>{const k=b.dataset.lf;learnF[k]=!st(k)?'has':st(k)==='has'?'miss':'';renderLearn()});
- $('learnList').onclick=e=>{const b=e.target.closest('[data-la]');
-  if(!b){const r=e.target.closest('[data-li]');if(r){const k=vlKey(G[+r.dataset.li].title);learnOpen=learnOpen===k?null:k;draw()}return}
-  const g=G[+b.dataset.g],a=b.dataset.la;
-  if(a==='st'){songTouch(g,{status:b.dataset.v});renderLearn();try{renderLibPage()}catch(e){}return}
-  if(a==='lib'){const ent=libGet(b.dataset.v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
-  else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
-  else if(a==='ana'){const d=loadSong(b.dataset.v);if(!d)return;vid.pause();A=d;fileKey=b.dataset.v;showSheet();window.scrollTo({top:0})}
-  else if(a==='mix'){mxView(true);mxOpen(b.dataset.v)}
-  else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
-  else if(a==='split'){$('mixNew').click()}
-  else if(a==='video'){$('vidIn').click()}
-  else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));learnOpen=null;renderLearn()}};
+ // a song opens its song session
+ $('learnList').onclick=e=>{const r=e.target.closest('[data-li]');if(r)openSession(G[+r.dataset.li])};
 }
+// what the buttons next to a song's material do (song session; also the old inline details)
+function learnAct(g,a,v){
+ if(a==='lib'){const ent=libGet(v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
+ else if(a==='draft'){const d=store.get('writeDraft',null);if(d)openWriter(d)}
+ else if(a==='ana'){const d=loadSong(v);if(!d)return;vid.pause();A=d;fileKey=v;showSheet();window.scrollTo({top:0})}
+ else if(a==='mix'){mxView(true);mxOpen(v)}
+ else if(a==='write'){openWriter({...newWritten(),title:g.title,artist:g.artist})}
+ else if(a==='split'){$('mixNew').click()}
+ else if(a==='video'){$('vidIn').click()}
+ else if(a==='drop'){store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));goSec('learn')}}
 // the language shown: the player's choice, else the profile's first song language, else the one with more songs
 function learnLang(nL){const c=store.get('learnLang','');if(c==='he'||c==='en')return c;let p='';try{p=(profGet().songLang||[])[0]||''}catch(e){}
  return (p==='he'||p==='en')&&nL[p]?p:nL.he>nL.en?'he':'en'}

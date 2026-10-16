@@ -2,8 +2,8 @@
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
 var curSec='home',secBack='home';
-var V2P=['paneHome','paneJam','paneLib','paneProfile'],V1P=['paneTune','paneSong','paneChords','paneGear'];
-var PAGES=['tuner','library','profile','chords'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
+var V2P=['paneHome','paneJam','paneLib','paneProfile','paneSession'],V1P=['paneTune','paneSong','paneChords','paneGear'];
+var PAGES=['tuner','library','profile','chords','session'];// pages you open from the header (or Library) and close with ✕ / ‹ / the phone's back button
 function v2Hide(){V2P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
 function v1Hide(){try{if(listening)stopListening()}catch(e){}try{if(!vid.paused)vid.pause()}catch(e){}V1P.forEach(id=>{const e=$(id);if(e)e.hidden=true})}
 function v2Mark(s){curSec=s;document.body.dataset.cursec=s;
@@ -19,8 +19,8 @@ function goSec(s,opt){opt=opt||{};if(s===curSec&&!opt.force&&s!=='learn'&&s!=='w
  else if(s==='gear')setTab('gear');
  else if(s==='tuner')setTab('tune');
  else if(s==='chords')setTab('chords');
- else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile'}[s];if(!id)return goSec('home');$(id).hidden=false;
-  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile()}
+ else{v1Hide();v2Hide();const id={home:'paneHome',jam:'paneJam',library:'paneLib',profile:'paneProfile',session:'paneSession'}[s];if(!id)return goSec('home');$(id).hidden=false;
+  if(s==='home')renderHome();else if(s==='jam')renderJam();else if(s==='library')renderLibPage();else if(s==='profile')renderProfile();else if(s==='session')renderSession()}
  v2Mark(s);window.scrollTo({top:0});
  // a header page can be closed with the phone's back button
  if(PAGES.includes(s)&&!opt.fromPop){try{if(history.state&&history.state.gpage)history.replaceState({gpage:s},'');else history.pushState({gpage:s},'')}catch(e){}}}
