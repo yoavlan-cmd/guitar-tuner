@@ -57,7 +57,7 @@ async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
  return it}
 // ---- the progress while GitHub works: real steps from GitHub (its job's steps), the long split estimated from the time it takes ----
 const DS_ST=[['sent','Sent to your GitHub',2],['queue','Waiting for a free GitHub computer',3],['setup','Setting up the splitter',10],['get','Getting the song from your Drive',3],
- ['split','Splitting it into parts (the long step)',70],['mp3','Saving the full and guitars-only MP3s to your Drive',6],['back','Bringing the parts back to Guitaring',6]];
+ ['split','Splitting it into parts (the long step)',70],['mp3','Saving the full and guitars-only MP3s to your Drive',6],['back','Bringing the parts back to Guitaring',4],['sess','Building the song’s session: its chords and guide',2]];
 let dsTimer=0,dsShown='';
 // which step the job is on, from GitHub's own step names
 async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_dispatch&per_page=30')).workflow_runs||[];// can't reach GitHub: the caller says so
@@ -70,10 +70,10 @@ async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_
  if(sp&&sp.status==='completed'&&sp.started_at&&sp.completed_at&&!it.splitMin){it.splitMin=(Date.parse(sp.completed_at)-Date.parse(sp.started_at))/60000;const a=store.get('dsSplitMin',0);store.set('dsSplitMin',a?a*.6+it.splitMin*.4:it.splitMin)}
  return {stage,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
 // where a song being made stands: stage, %, minutes left, and a plain warning when something is slow (never silent)
-function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
+function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='ready'?'sess':it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
  const sm=k===4&&i.splitAt?(now-i.splitAt)/60000:0,inSplit=Math.min(.95,sm/exp);
  let pct=0;DS_ST.forEach(([,,w],j)=>{if(j<k)pct+=w;else if(j===k)pct+=w*(j===4?inSplit:.3)});pct=Math.min(99,Math.round(pct));
- const left=k<=3?exp+4-(k===3?2:0):k===4?Math.max(1,exp*(1-inSplit))+2:k===5?2:1;
+ const left=k<=3?exp+4-(k===3?2:0):k===4?Math.max(1,exp*(1-inSplit))+2:k===5?2:1;if(k===7)pct=99;
  const since=it.sent?(now-it.sent)/60000:0;let warn='';
  if(it._err&&(!it._chk||it._err>it._chk)&&now-(it._chk||it.sent||now)>120000)warn='Guitaring can’t reach GitHub right now. Check the internet connection: the work goes on there, and Guitaring catches up when it can.';
  else if(k<=1&&since>8)warn='GitHub hasn’t started yet. It usually takes under a minute; its free computers may be busy. Guitaring keeps checking, nothing is lost.';
@@ -95,15 +95,16 @@ async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false
  const close=()=>{dsShown='';clearInterval(dsTimer);d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen');dsStatusUI()};
  const draw=async(fetchInfo)=>{if(dsShown!==id)return;const it=mxIdx.find(x=>x.id===id);if(!it)return close();
   let html;
-  if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
-   <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', and the MP3s are in your Drive folder':''}.</p><button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
+  if(it.state==='ready'&&AS_ON.includes(it.sess))html=dsProgHTML(it);
+  else if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
+   <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', the MP3s are in your Drive folder':''}${it.sess==='done'?', and its session is built: chords, guide and jam track':''}.</p>${it.sess==='failed'?'<p class="dswarn">The chords couldn’t be found automatically. The jam track is ready; on the song’s page, tap Pick a video or Find the chords from the guitars only.</p>':''}<button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
   else if(it.state==='failed')html=`<div class="dshead"><h3>Didn’t finish</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><p class="msg">${esc(it.err||'The split stopped on GitHub.')}</p><div class="dsacts"><button type="button" class="btn" id="dsRetry">Try again</button><button type="button" class="btn ghost" id="dsHide">Close</button></div>`;
   else{if(fetchInfo&&it.state==='wait')await dsCheck(it);if(dsShown!==id)return;html=dsProgHTML(it)}
   d.innerHTML=`<section class="dsbox dsprog" role="dialog" aria-label="Making the song">${html}</section>`;
   $('dsX').onclick=close;const h=$('dsHide');if(h)h.onclick=close;const a=$('dsAnother');if(a)a.onclick=()=>{clearInterval(dsTimer);dsShown='';openAddSong(true)};
   const r=$('dsRetry');if(r)r.onclick=async()=>{await mxRetry(id);draw(true)};
   const o=$('dsOpen');if(o)o.onclick=()=>{close();const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')};
-  if(it.state==='ready'||it.state==='failed')clearInterval(dsTimer)};
+  if((it.state==='ready'&&!AS_ON.includes(it.sess))||it.state==='failed')clearInterval(dsTimer)};
  d.onclick=e=>{if(e.target===d)close()};
  await draw(true);
  // every few seconds: what GitHub says, and a look for the finished parts
@@ -112,7 +113,7 @@ async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false
 async function dsCheck(it){try{const info=await dsRunInfo(it);it._info=info;it._chk=Date.now()}catch(e){it._err=Date.now()}}
 async function dsTrack(){const pend=mxIdx.filter(x=>x.src==='cloud'&&x.state==='wait');for(const it of pend.slice(0,2))await dsCheck(it);dsStatusUI()}
 // everywhere it shows: the bottom bar (mxBar), the % badge when the bar is closed or playing a song, and Home
-function dsStatusUI(){try{mxBar()}catch(e){}const pill=$('mkPill');const pend=mxIdx.filter(x=>x.src==='cloud'&&MX_PEND.includes(x.state));
+function dsStatusUI(){try{mxBar()}catch(e){}const pill=$('mkPill');const pend=mkList().filter(x=>x.src==='cloud');
  if(pill){const barShowsIt=!$('mxBar').hidden&&!(mxSong&&mxSong.tracks)&&!mxBusy;pill.hidden=!pend.length||barShowsIt||!$('dsDlg').hidden;
   if(pend.length){const c=dsCalc(pend[0]);pill.style.setProperty('--p',c.pct);pill.querySelector('b').textContent=c.pct+'%';pill.classList.toggle('warn',!!c.warn);pill.setAttribute('aria-label',`Making “${pend[0].name}”: ${c.label}, ${c.pct}%. Tap for the progress.`);pill.onclick=()=>dsShowProgress(pend[0].id)}}
  try{if(curSec==='home')renderHomeCont()}catch(e){}}
