@@ -27,7 +27,7 @@ function goSec(s,opt){opt=opt||{};if(s===curSec&&!opt.force&&s!=='learn'&&s!=='w
 function pageClose(){if(history.state&&history.state.gpage===curSec)history.back();else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})}
 addEventListener('popstate',e=>{if(!PAGES.includes(curSec))return;const st=e.state||{};if(st.gpage===curSec)return;
  if(st.gpage&&PAGES.includes(st.gpage))goSec(st.gpage,{fromPop:true});else goSec(curSec==='chords'?'library':secBack||'home',{fromPop:true})});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(b&&!b.closest('#onb')){e.preventDefault();goSec(b.dataset.sec,{force:b.closest('#bnav')&&b.dataset.sec==='home'})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(b&&!b.closest('#onb')){e.preventDefault();goSec(b.dataset.sec,{force:b.closest('#bnav')&&b.dataset.sec==='home'});if(b.dataset.player){mxView(true);mxCreating=false;mxSheetUI2()}}
  else if(e.target.closest('[data-back]'))pageClose()});
 // ---- Home ----
 function homeName(){const p=profGet();return p.name||store.get('userName','')}
@@ -44,20 +44,15 @@ function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=es
  box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}
 // ---- Jam: Band breakdown + the jam tracks list ----
 function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mixNew')){const m=$('mixNew');if(m)g.appendChild(m);
-  const o=document.createElement('button');o.type='button';o.className='drop write addtile';o.id='jamOpen';o.innerHTML=`<i aria-hidden="true">${SK('MIX')}</i><b>Jamming player</b><span class="sub">Open the player with your parts</span>`;o.onclick=()=>{mxView(true);if(!mxBusy)mxSheetUI2()};g.appendChild(o)}
+  const o=document.createElement('button');o.type='button';o.className='drop write addtile';o.id='jamOpen';o.innerHTML=`<i aria-hidden="true">${SK('MIX')}</i><b>Jamming player</b><span class="sub">Your split songs wait here</span>`;o.onclick=()=>{mxView(true);if(!mxBusy){mxCreating=false;mxSheetUI2()}};g.appendChild(o)}
  try{renderMixNew()}catch(e){}
- const l=$('jamList');if(!l)return;const L=(mxIdx||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
- const st=x=>x.state==='ready'?'Ready':x.state==='failed'?'Didn’t work':'Splitting…';
- // the jam tracks are a list you open and close (closed until opened, like every secondary list)
- const was=$('jamBox')&&$('jamBox').open;
- l.innerHTML=L.length?`<details class="apibox" id="jamBox"${was?' open':''}><summary>My jam tracks <span class="libcount">${L.length}</span></summary>${L.map(x=>`<button type="button" class="jrow ${x.state}" data-jid="${esc(x.id)}"><b dir="auto">${esc(x.name||'Song')}</b><small>${st(x)}</small></button>`).join('')}</details>`:'<p class="tip">No songs yet. Tap Band breakdown to split your first song into its parts.</p>';
- v2Folds();
- l.querySelectorAll('[data-jid]').forEach(b=>b.onclick=()=>{const it=mxIdx.find(x=>x.id===b.dataset.jid);mxView(true);if(it&&it.state==='ready')mxOpen(it.id);else if(!mxBusy)mxSheetUI2()})}
+ // picking a split song happens only in the player: no list on the Jam page
+ const l=$('jamList');if(l)l.innerHTML=''}
 // ---- open lists can always be closed: ✕ on the title (which stays at the top while you scroll) and "Close" at the bottom ----
 function v2Fold(d){if(!d||d._fold)return;d._fold=true;d.classList.add('v2fold');
  const add=()=>{if(d.open&&!d.querySelector(':scope>.foldx')){const b=document.createElement('button');b.type='button';b.className='btn ghost foldx';b.textContent='Close ✕';b.onclick=()=>{d.open=false;d.scrollIntoView({block:'nearest',behavior:'smooth'})};d.appendChild(b)}};
  d.addEventListener('toggle',add);new MutationObserver(add).observe(d,{childList:true});add()}
-function v2Folds(){['catBox','vidBox','libSaved','jamBox','apiCard','folderCfg','ghCfg','bkBox','v2Box'].forEach(id=>v2Fold($(id)))}
+function v2Folds(){['catBox','vidBox','libSaved','apiCard','folderCfg','ghCfg','bkBox','v2Box'].forEach(id=>v2Fold($(id)))}
 // ---- My Library: the V1 lists, gathered ----
 function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox','vidBox','libSaved'].forEach(id=>{const e=$(id);if(e)h.appendChild(e)});h.dataset.moved='1'}
  const ls=$('libLearnSub');if(ls){try{const G=learnSongs(),S=G.map(songStatus),n=k=>S.filter(x=>x===k).length;ls.textContent=G.length?`${G.length} song${G.length>1?'s':''} · ${n('learned')} learned`:'Songs you’re learning'}catch(e){}}
