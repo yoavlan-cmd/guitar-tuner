@@ -82,32 +82,31 @@ function gdBuild(d){const keep=A;A=d;try{
   const bc=bars.map(b=>{const w={};b.slots.forEach(x=>{const n=gdSlot(x);if(n)w[n]=(w[n]||0)+1});const top=Object.entries(w).sort((a,b)=>b[1]-a[1])[0];return top?top[0]:''});
   const ch=[];bc.slice(0,4).forEach(n=>{if(n&&ch[ch.length-1]!==n)ch.push(n)});const times=Math.max(1,Math.round(bars.length/4));
   // the strumming pattern of this part: the most common bar, in eighth notes (D on the beat, U between)
-  const pats=new Map();bars.forEach(b=>{if(!b.slots.some(x=>x.g))return;const p=b.slots.map((x,j)=>x.strum?(j%2?'U':'D'):'·').join('');pats.set(p,(pats.get(p)||0)+1)});
-  const top=[...pats].sort((a,b)=>b[1]-a[1])[0],n=[...pats.values()].reduce((a,b)=>a+b,0);
-  return {name:s.name,t:Math.max(0,s.t),bars:bars.length,times,chords:ch,pat:top?top[0]:'',patShare:top&&n?top[1]/n:0,patBars:n}}).filter(s=>s.bars>0&&!(s.name==='No guitar'&&s.bars<2));
+  const P=gdPatOf(bars);
+  return {name:s.name,t:Math.max(0,s.t),bars:bars.length,times,chords:ch,pat:P.pat,patShare:P.share,patBars:P.n}}).filter(s=>s.bars>0&&!(s.name==='No guitar'&&s.bars<2));
  // the song's main strumming pattern (over every bar with guitar)
- const allP=new Map();M.bars.forEach(b=>{if(!b.slots.some(x=>x.g))return;const p=b.slots.map((x,j)=>x.strum?(j%2?'U':'D'):'·').join('');allP.set(p,(allP.get(p)||0)+1)});
- const pTop=[...allP].sort((a,b)=>b[1]-a[1])[0],pN=[...allP.values()].reduce((a,b)=>a+b,0);
+  const PA=gdPatOf(M.bars);
  // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
  const V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
  const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||(V&&vSeen>=2&&!vDiff.length)||(d.fit&&d.fit.match>=.9&&!(d.fit.clash||[]).length&&rep>=.6)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
  const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':sc===capo?'likely':'guess';
- const share=pTop&&pN?pTop[1]/pN:0,strumLv=!d.ons?'guess':share>=.6?'solid':share>=.35?'likely':'guess';
+ const share=PA.share,strumLv=!d.ons||!PA.n?'guess':share>=.85?'solid':share>=.72?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
  const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
   {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
-  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':strumLv==='solid'?`The same pattern is heard in ${Math.round(share*100)}% of the bars.`:`The pattern changes between parts (the most common one is in ${Math.round(share*100)}% of the bars).`},
-  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?'Measured from the beat of the recording.':'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
+  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
+ return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
 function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
  o.push([1,d.from==='guitars'?'The guitars-only part: the chords, their timing and the strumming':'The recording you analysed: the chords, their timing and the strumming']);
  if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
- o.push(V&&!V.skip?[1,`The video: ${V.frames.length?`the hand was clear at ${V.frames.length} of ${V.asked} moments`:'the hand wasn’t clear in the stills'}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
+ // the video helps only when the hand (or the capo) was seen: looked at but nothing clear is shown as not helping
+ o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`the hand was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} stills, but the guitarist’s hand wasn’t clear in any`}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
   [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time')]);
  o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
  return o}
@@ -117,6 +116,11 @@ function gdSheetWhy(f){if(!f||f.by!=='sheet')return '';if(f.legacy)return ' This
  if(f.clash.length)o.push(`Your chord sheet has ${f.clash.map(x=>x.sheet).join(', ')}, but this recording clearly plays ${f.clash.map(x=>x.heard).join(', ')} (sheets don’t always match this version).`);
  if(f.extra.length)o.push(`Heard but not on your sheet: ${f.extra.join(', ')}.`);if(f.missing.length)o.push(`On your sheet but not heard: ${f.missing.join(', ')}.`);
  if(!o.length)o.push(`Your chord sheet agrees (${f.chords.join(' · ')}).`);return ' '+o.join(' ')}
+// the strumming of some bars: each eighth note is a strum if it is strummed in most of the bars (with guitar), and how well the bars
+// fit that pattern (the share of the eighth notes that agree with it): strums that vary a little no longer hide the pattern
+function gdPatOf(bars){const B=bars.filter(b=>b.slots.some(x=>x.g));if(!B.length)return {pat:'',share:0,n:0};const f=new Array(8).fill(0);
+ B.forEach(b=>b.slots.forEach((x,j)=>{if(x.strum)f[j]++}));const pat=f.map((v,j)=>v/B.length>=.5?(j%2?'U':'D'):'·').join('');
+ let ag=0;B.forEach(b=>b.slots.forEach((x,j)=>{if(!!x.strum===(pat[j]!=='·'))ag++}));return {pat,share:ag/(B.length*8),n:B.length}}
 // eight boxes for one bar: 1 & 2 & 3 & 4 &, with D / U where you strum
 function gdPat(p){const lab=['1','&','2','&','3','&','4','&'];return `<div class="gdpat" role="img" aria-label="Strumming: ${esc(p.split('').map((c,i)=>c==='·'?'':(c==='D'?'down':'up')+' on '+lab[i]).filter(Boolean).join(', '))}">${[...p].map((c,i)=>`<span class="${c==='·'?'rest':c==='D'?'dn':'up'}"><b>${c==='·'?'':c==='D'?'↓':'↑'}</b><small>${lab[i]}</small></span>`).join('')}</div>`}
 let gdMode=null;// 'easy' | 'full', per visit; the profile picks the first one
@@ -134,7 +138,7 @@ function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tNa
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
  <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
- <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">The pattern heard in most bars${G.share<.6?'; it changes between parts (see the song map)':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
+ <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">Each box: strummed in most bars or not${G.share<.85?'; it varies between parts (see the song map)':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
  <div class="gdblock"><h4>Song map</h4><ol class="gdmap">${G.secs.map(s=>`<li><span class="gdt">${mmss(s.t)}</span><b>${esc(s.name)}</b><span class="gdch">${mapCh(s).map(esc).join(' · ')||'no guitar'}${s.times>1&&mapCh(s).length?` <em>×${s.times}</em>`:''}</span>${!easy&&s.pat&&/[DU]/.test(s.pat)&&s.patBars>=2?`<span class="gdsp">${s.pat.replace(/·/g,' ').replace(/(..)/g,'$1 ').trim()}</span>`:''}<small>${s.bars} bar${s.bars>1?'s':''}</small></li>`).join('')}</ol>
   <p class="tip">Parts, times and chords only: lyrics are never shown.</p></div>`}
 window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null},fit:(k,ref)=>{const d=loadSong(k);return d?gdBuild(gdFit(d,ref,k)):null},bars:k=>{const keep=A;A=loadSong(k);try{const M=lessonModel();return M.bars.map(b=>({t0:+b.t0.toFixed(2),ch:b.slots.map(x=>x.g?nameOf(x.g):'-').join(' ')}))}finally{A=keep}}};// test hooks

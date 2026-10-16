@@ -259,14 +259,17 @@ function songKey(chroma,rms,thr){const tot=new Float64Array(12);for(let f=0;f<ch
  const T=best.minor?(best.t+3)%12:best.t,MJ=TYPES.findIndex(x=>x.id===''),MN=TYPES.findIndex(x=>x.id==='m');
  const dia=new Set([[0,MJ],[2,MN],[4,MN],[5,MJ],[7,MJ],[9,MN]].map(([d,q])=>((T+d)%12)*NT+q));if(best.minor)dia.add(((best.t+7)%12)*NT+MJ);
  return {tonic:best.t,minor:best.minor,dia}}
-function keyFit(segs,chroma,rms,thr,ft){const K=songKey(chroma,rms,thr),MJ=TYPES.findIndex(x=>x.id===''),MN=TYPES.findIndex(x=>x.id==='m'),D7=TYPES.findIndex(x=>x.id==='7'),M7=TYPES.findIndex(x=>x.id==='m7');
- const swap={[MJ]:MN,[MN]:MJ,[D7]:M7,[M7]:D7},nF=chroma.length,f0=t=>Math.max(0,Math.round((t*SR-(FN-HOP)/2)/HOP));
+function keyFit(segs,chroma,rms,thr,ft){const K=songKey(chroma,rms,thr),T=id=>TYPES.findIndex(x=>x.id===id),MJ=T(''),MN=T('m'),D7=T('7'),M7=T('m7'),A9=T('add9'),J7=T('maj7');
+ // the other quality of each chord: major ↔ minor, 7 ↔ m7, and a major chord with a 9th or a major 7th (add9, maj7: there is no
+ // minor add9 to name) ↔ the plain minor / m7 (an F#m with the 9th on top was heard as F#add9)
+ const swap={[MJ]:MN,[MN]:MJ,[D7]:M7,[M7]:D7,[A9]:MN,[J7]:M7},nF=chroma.length,f0=t=>Math.max(0,Math.round((t*SR-(FN-HOP)/2)/HOP));
+ const isMaj=q=>q===MJ||q===D7||q===A9||q===J7;
  for(const g of segs){if(g.c>=NS)continue;const r=Math.floor(g.c/NT),q=g.c%NT;if(!(q in swap))continue;
-  const triad=c=>Math.floor(c/NT)*NT+(c%NT===D7?MJ:c%NT===M7?MN:c%NT),alt=r*NT+swap[q];
+  const triad=c=>Math.floor(c/NT)*NT+(isMaj(c%NT)?MJ:MN),alt=r*NT+swap[q];
   if(K.dia.has(triad(g.c))||!K.dia.has(triad(alt)))continue;
   // how strong each 3rd is over the chord's time
   let maj=0,min=0;for(let f=f0(g.t0);f<Math.min(nF,f0(g.t1));f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;maj+=c[(r+4)%12]/m;min+=c[(r+3)%12]/m}
-  const isMaj=q===MJ||q===D7,mine=isMaj?maj:min,other=isMaj?min:maj;
+  const mj=isMaj(q),mine=mj?maj:min,other=mj?min:maj;
   if(mine>0&&other/mine>=TUNE.keyFix)g.c=alt}}
 const sameChord=(a,b)=>a.c===b.c&&(a.q??null)===(b.q??null)&&(a.b??null)===(b.b??null);
 function cleanSegs(segs){
