@@ -14,11 +14,13 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // ---- Google ----
  let scopes=[],uploads=[];
  await ctx.route('https://accounts.google.com/gsi/client',r=>r.fulfill({contentType:'text/javascript',headers:H,body:`window.google={accounts:{oauth2:{initTokenClient:c=>({requestAccessToken(){window.__scopes=(window.__scopes||[]).concat(c.scope);setTimeout(()=>c.callback({access_token:'drivetok',expires_in:3600}),20)}})}}};`}));
- const FILES={vid1XyZ12345abcDEF:{id:'vid1XyZ12345abcDEF',name:'Amir Dadon - Leftovers.mp4',mimeType:'video/mp4',parents:['folderA'],webViewLink:'https://drive.google.com/file/d/vid1XyZ12345abcDEF/view'},
+ const FILES={aud3XyZ12345abcDEF:{id:'aud3XyZ12345abcDEF',name:'Band C - Song C.mp3',mimeType:'audio/mpeg',parents:['folderC'],webViewLink:'https://drive.google.com/file/d/aud3XyZ12345abcDEF/view'},vid1XyZ12345abcDEF:{id:'vid1XyZ12345abcDEF',name:'Amir Dadon - Leftovers.mp4',mimeType:'video/mp4',parents:['folderA'],webViewLink:'https://drive.google.com/file/d/vid1XyZ12345abcDEF/view'},
   aud1XyZ12345abcDEF:{id:'aud1XyZ12345abcDEF',name:'Amir Dadon - Leftovers.mp3',mimeType:'audio/mpeg',parents:['folderA'],webViewLink:'https://drive.google.com/file/d/aud1XyZ12345abcDEF/view'},
   vid2XyZ12345abcDEF:{id:'vid2XyZ12345abcDEF',name:'Tuna - Ya.mp4',mimeType:'video/mp4',parents:['folderB'],webViewLink:'https://drive.google.com/file/d/vid2XyZ12345abcDEF/view'},
   doc1XyZ12345abcDEF:{id:'doc1XyZ12345abcDEF',name:'Notes.docx',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',parents:['folderA']}};
  await ctx.route(/^https:\/\/www\.googleapis\.com\//,async r=>{const q=r.request(),u=q.url();if(q.method()==='OPTIONS')return r.fulfill({status:204,headers:H});
+  // a folder's videos (an MP3 given alone: its video is looked for next to it)
+  if(/drive\/v3\/files\?q=/.test(u)){const q=decodeURIComponent(u);return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({files:/folderC/.test(q)?[{id:'vid3XyZ12345abcDEF',name:'Band C - Song C.mp4',webViewLink:'https://drive.google.com/file/d/vid3XyZ12345abcDEF/view'}]:[]})})}
   const m=u.match(/drive\/v3\/files\/([\w-]+)\?fields/);if(m){const f=FILES[m[1]];return r.fulfill({status:f?200:404,headers:{...H,'content-type':'application/json'},body:JSON.stringify(f||{error:{message:'File not found'}})})}
   if(/upload\/drive\/v3\/files\?uploadType=multipart/.test(u)){const body=q.postData()||'';const name=(body.match(/"name":"([^"]+)"/)||[])[1];uploads.push({name,parents:(body.match(/"parents":\["([^"]+)"/)||[])[1],auth:q.headers()['authorization']});return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({id:'up'+uploads.length,name,webViewLink:'https://drive.google.com/file/d/up'+uploads.length+'/view'})})}
   return r.fulfill({status:404,headers:H,body:'{}'})});
@@ -63,6 +65,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const ids=Object.keys(jobs);const job=JSON.parse(jobs[ids[0]].body||'{}');console.log('  job:',jobs[ids[0]].path,JSON.stringify({...job,token:job.token&&'…'}));
  ok(jobs[ids[0]].path==='drive.json'&&job.file==='aud1XyZ12345abcDEF'&&job.ext==='mp3'&&job.full===false&&job.folder==='folderA'&&job.base==='Amir Dadon - Leftovers'&&job.token==='drivetok'&&dispatches===1,
   'GitHub gets a job, not the song: the audio as the source, no MP3 made of an MP3, the folder, the name, the sign-in; the split is started');
+ ok(job.video==='vid1XyZ12345abcDEF'&&job.vext==='mp4','the job names the song’s video too (GitHub takes stills from it for the chord check)');
  const it1=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it1.state==='wait'&&it1.drive&&it1.drive.video&&it1.drive.video.id==='vid1XyZ12345abcDEF','the song waits for its parts and remembers the video');
  // the progress follows GitHub's own steps
  const now=()=>p.$eval('.dssteps li.now',e=>e.textContent).catch(()=>'');const eta=()=>p.$eval('.dseta',e=>e.textContent).catch(()=>'');const pct=()=>p.$eval('.dsbar',e=>+e.getAttribute('aria-valuenow')).catch(()=>-1);
@@ -82,10 +85,13 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.tap('#dsAnother');await p.waitForTimeout(150);ok(!!await p.$('#dsL1'),'"Add another song" opens the form');await p.tap('#dsX');await p.tap('#addSong');await p.waitForTimeout(300);
  // the parts come back, MP3s saved by GitHub
  const flac=Buffer.from([0x66,0x4c,0x61,0x43,0,0,0,0]);const stems=Object.fromEntries(['drums','bass','other','vocals','guitar','piano'].map(s=>[s+'.flac',flac]));
- done[it1.id]={'done.json':JSON.stringify({ok:true,format:'flac',stems:['drums','bass','other','vocals','guitar','piano']}),...stems,'drive.json':JSON.stringify({ok:true,files:{guitars:{id:'g9',name:'Amir Dadon - Leftovers (guitars only).mp3',url:'https://drive.google.com/file/d/g9/view'}}})};
+ done[it1.id]={'done.json':JSON.stringify({ok:true,format:'flac',stems:['drums','bass','other','vocals','guitar','piano']}),...stems,'drive.json':JSON.stringify({ok:true,files:{guitars:{id:'g9',name:'Amir Dadon - Leftovers (guitars only).mp3',url:'https://drive.google.com/file/d/g9/view'}}}),
+  'stills.json':JSON.stringify({every:2,n:3,idx:[[0,0,4],[2,4,4],[4,8,4]]}),'stills.bin':Buffer.from('JPG1JPG2JPG3')};
  await p.waitForTimeout(900);
  ok(/Ready/.test(await p.$eval('#dsDlg',e=>e.textContent))&&!!await p.$('#dsOpen'),'when it’s done the progress says Ready with “Open the song”');
  const it2=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it2.state==='ready'&&it2.drive.ok&&it2.drive.out.guitars.id==='g9','the parts are back and the guitars-only MP3 GitHub saved in Drive is linked');
+ const sti=await p.evaluate(async id=>{const v=await window.__bk.get('mixstills:'+id);return v&&{n:v.idx.length,size:v.bin.size}},it1.id);
+ ok(sti&&sti.n===3&&sti.size===12,'the video stills come back with the parts and are kept on the phone '+JSON.stringify(sti));
  ok((await p.evaluate(()=>window.__notes)).some(t=>/is split|is ready/.test(t)),'a phone notification says it’s split (its session follows)');
  // the song's page, from "Open the song"
  await p.tap('#dsOpen');await p.waitForTimeout(400);ok(await p.evaluate(()=>window.__v2.cur())==='session','“Open the song” opens its page');
@@ -94,6 +100,11 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // a second song: Google's sign-in ran out on GitHub → the phone saves the MP3s with one tap
  await p.tap('#paneSession [data-back]');await p.tap('#addSong');await p.waitForTimeout(100);await go('https://drive.google.com/file/d/vid2XyZ12345abcDEF/view');await p.tap('#dsHide').catch(()=>{});
  const it3=await p.evaluate(()=>window.__mxTest.idx()[0]);const job2=JSON.parse(jobs[it3.id].body);ok(job2.file==='vid2XyZ12345abcDEF'&&job2.ext==='mp4'&&job2.full===true&&job2.folder==='folderB','a video alone: a full MP3 is made from it');
+ ok(!('video' in job2),'a video alone: no separate video (GitHub takes the stills from the song itself)');
+ // an MP3 alone: the song's video is found in the same folder and named in the job
+ await p.tap('#addSong').catch(()=>{});await p.waitForTimeout(150);if(await p.$('#dsAnother'))await p.tap('#dsAnother');await p.waitForTimeout(100);await go('https://drive.google.com/file/d/aud3XyZ12345abcDEF/view');await p.tap('#dsHide').catch(()=>{});
+ {const it5=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.drive&&x.drive.file==='aud3XyZ12345abcDEF'));const job5=it5&&jobs[it5.id]?JSON.parse(jobs[it5.id].body):{};
+  ok(job5.video==='vid3XyZ12345abcDEF'&&it5.drive.video&&it5.drive.video.id==='vid3XyZ12345abcDEF','an MP3 alone: its video in the same folder is found and named in the job');}
  done[it3.id]={'done.json':JSON.stringify({ok:true,format:'flac'}),...stems,'drive.json':JSON.stringify({ok:false,error:'401 Unauthorized',files:{}}),'full.mp3':Buffer.from('ID3full'),'guitars.mp3':Buffer.from('ID3gtr')};
  for(let k=0;k<3;k++){await p.evaluate(()=>window.__mxTest.poll());await p.waitForTimeout(400)}
   await p.tap('#bnav [data-sec=home]');await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("Ya")');await p.waitForTimeout(300);

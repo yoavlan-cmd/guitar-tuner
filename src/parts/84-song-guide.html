@@ -44,13 +44,15 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoB
  if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0),S=[];
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
    const r=(p.root+d0)%12;if(!S.some(x=>x.r===r&&x.t===t))S.push({r,t,name:CH[r]+TYPES[t].id})});
-  const ev=gdThirds(v),seen=new Set(((v.video&&v.video.frames)||[]).map(f=>{const p=parseChord(f.seen||'');return p?p.root:-1}));
+  const ev=gdThirds(v),wv=v.mfeat?gdThirds({feat:v.mfeat}):null,seen=new Set(((v.video&&v.video.frames)||[]).map(f=>{const p=parseChord(f.seen||'');return p?p.root:-1}));
   const tuned=new Map(),clash=new Map(),dur=new Map();let tot=0,inSheet=0;
   v.segs=v.segs.map(g=>{if(g.c>=NS)return g;const l=g.t1-g.t0,r=Math.floor(g.c/NT),q=g.c%NT,h3=gd3(q);tot+=l;dur.set(r,(dur.get(r)||0)+l);
    const same=S.filter(x=>x.r===r);if(!same.length)return g;inSheet+=l;
    // the sheet only speaks to a 3rd: same root, the other 3rd
    const o=same.find(x=>gd3(x.t)&&h3&&gd3(x.t)!==h3);if(!o||same.some(x=>gd3(x.t)===h3))return g;
-   const e=ev?ev(g):null,mine=e?(h3==='M'?e.M:e.m):0,other=e?(h3==='M'?e.m:e.M):0,faint=e&&(mine===0||other/mine>=.6);
+   // faint: in the guitars-only part, and in the whole song too when it was listened to
+   const fz=x=>{if(!x)return false;const mine=h3==='M'?x.M:x.m,other=h3==='M'?x.m:x.M;return mine===0||other/mine>=.6};
+   const e=ev?ev(g):null,we=wv?wv(g):null,faint=fz(e)&&(!we||fz(we));
    const k=chordName(g.c)+' → '+o.name;
    if(faint&&!seen.has(r)){tuned.set(k,(tuned.get(k)||0)+l);return {...g,c:r*NT+o.t}}
    clash.set(chordName(g.c),o.name);return g});
@@ -99,8 +101,16 @@ function gdBuild(d){const keep=A;A=d;try{
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':strumLv==='solid'?`The same pattern is heard in ${Math.round(share*100)}% of the bars.`:`The pattern changes between parts (the most common one is in ${Math.round(share*100)}% of the bars).`},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?'Measured from the beat of the recording.':'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+ return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons&&pTop?pTop[0]:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
+// what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
+function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
+ o.push([1,d.from==='guitars'?'The guitars-only part: the chords, their timing and the strumming':'The recording you analysed: the chords, their timing and the strumming']);
+ if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
+ o.push(V&&!V.skip?[1,`The video: ${V.frames.length?`the hand was clear at ${V.frames.length} of ${V.asked} moments`:'the hand wasn’t clear in the stills'}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
+  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time')]);
+ o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
+ return o}
 // what the chord sheet check found, in plain words
 function gdSheetWhy(f){if(!f||f.by!=='sheet')return '';if(f.legacy)return ' This guide was matched to your chord sheet by an earlier version of Guitaring: rebuild it to hear it from the recording again.';
  const o=[];if(f.tuned.length)o.push(`Where the 3rd was too faint to hear, your chord sheet settled it: ${f.tuned.join(', ')}.`);
@@ -120,6 +130,7 @@ function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tNa
   ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo&&G.capoBy!=='you'?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. <button type="button" class="tlink" data-gdcapo="${G.sheetCapo}">Use ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}</button></p>`:''}
   ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
   ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; capo ${G.eCapo} gives the same song with easier shapes. Full shows it as played.</p>`:''}</div>
+ <div class="gdblock"><h4>Built from</h4><ul class="gdsrc">${G.sources.map(([y,t])=>`<li class="${y?'y':'n'}"><span aria-hidden="true">${y?'✓':'–'}</span>${esc(t)}</li>`).join('')}</ul></div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
  <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
