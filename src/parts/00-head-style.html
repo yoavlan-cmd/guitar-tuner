@@ -1184,4 +1184,15 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 @keyframes dspulse{0%,100%{box-shadow:0 0 0 0 rgba(78,226,183,.5)}50%{box-shadow:0 0 0 6px rgba(78,226,183,0)}}
 .dsacts{display:flex;gap:8px}.dsacts .btn{flex:1}
 .mxcreate{display:flex;flex-direction:column;gap:8px}.mxcpend h4{margin:4px 0 6px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}.mxcpend .mxit-main{display:flex;flex-direction:column;flex:1;min-width:0}.mxsetnote{margin:0;color:var(--amber)}.mxempty{margin:0}
+/* a song being made: never out of sight */
+.mkpill{position:fixed;right:14px;bottom:calc(var(--bnh) + 14px + env(safe-area-inset-bottom,0px));z-index:58;width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+ background:conic-gradient(var(--accent) calc(var(--p,0)*1%),rgba(255,255,255,.12) 0);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.mkpill::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--surface)}
+.mkpill b{position:relative;font:700 13px var(--mono);color:var(--ink)}
+.mkpill::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--accent);animation:dspulse 1.2s ease-in-out infinite}
+.mkpill.warn{background:conic-gradient(var(--amber) calc(var(--p,0)*1%),rgba(255,255,255,.12) 0)}.mkpill.warn::after{background:var(--amber)}
+.mkpill[hidden]{display:none}
+body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0px))}
+.dswarn{margin:0;padding:10px 12px;border-radius:12px;border:1px solid var(--amber);color:#FFC48A;font:500 13.5px/1.4 var(--body);background:rgba(255,140,50,.08)}
+.dsbeat{margin:0;font:500 12px var(--body);color:var(--muted)}.dsbeat::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;animation:dspulse 1.6s ease-in-out infinite}
 </style>
