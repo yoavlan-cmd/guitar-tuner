@@ -1,0 +1,163 @@
+/* ================= Lesson view: video + animated fretboard + tab, like a guitar lesson ================= */
+function rhythmOf(r){if(!r||!r.beats||!r.env)return {};let mx=0;const e=r.env,s=[...e].sort((a,b)=>a-b),p=s[Math.floor(s.length*.995)]||1;const q=new Uint8Array(e.length);for(let i=0;i<e.length;i++)q[i]=Math.min(255,Math.round(e[i]/p*220));
+ return {beats:r.beats.map(v=>Math.round(v*100)/100),ons:{h:256,d:u8b64(q)}}}
+async function ensureRhythm(msg){
+ if(A.beats&&A.beats.length>8&&A.ons)return true;if(!curFile)return false;
+ msg('Getting the beat of the song…');const x=await decodeFile(curFile);const bt=beatTimes(x);Object.assign(A,rhythmOf(bt));saveSong();return !!A.beats;
+}
+let LS=null;// lesson state
+function lessonModel(){
+ const segs=A.segs;let beats=(A.beats&&A.beats.length>8)?A.beats.slice():[];
+ if(!beats.length){const b=60/(A.bpm||90);for(let t=0;t<A.dur;t+=b)beats.push(t)}
+ const dif=beats.slice(1).map((v,i)=>v-beats[i]).sort((a,b)=>a-b),bp=dif[Math.floor(dif.length/2)]||.6;
+ let added=0;while(beats[0]>bp*.5){beats.unshift(beats[0]-bp);added++}
+ while(beats[beats.length-1]<A.dur+bp)beats.push(beats[beats.length-1]+bp);
+ const near=t=>{let lo=0,hi=beats.length-1;while(lo<hi){const m=(lo+hi)>>1;if(beats[m]<t)lo=m+1;else hi=m}return lo>0&&Math.abs(beats[lo-1]-t)<Math.abs(beats[lo]-t)?lo-1:lo};
+ // bars start where most chord changes land
+ const cnt=[0,0,0,0];for(let i=1;i<segs.length;i++){const t=segs[i].t0,j=near(t);if(Math.abs(beats[j]-t)<bp*.35)cnt[j%4]+=Math.min(3,segs[i].t1-segs[i].t0)}
+ let k=cnt.indexOf(Math.max(...cnt));
+ while(k>0&&beats[k]>bp*.25)k-=4;if(k<0){for(let z=0;z<-k;z++)beats.unshift(beats[0]-bp);k=0}
+ const ons=A.ons?b64u8(A.ons.d):null,oh=A.ons?A.ons.h/SR:0;
+ const strength=(t,w)=>{if(!ons)return 0;const a=Math.max(0,Math.floor((t-w)/oh)),b=Math.min(ons.length-1,Math.ceil((t+w)/oh));let m=0;for(let i=a;i<=b;i++)if(ons[i]>m)m=ons[i];return m};
+ const bars=[];
+ for(let j=k;j+4<beats.length&&beats[j]<A.dur;j+=4){const bar={t0:beats[j],t1:beats[j+4],slots:[]};
+  for(let q=0;q<4;q++){const b0=beats[j+q],b1=beats[j+q+1];for(const h of [0,1]){const t=h?(b0+b1)/2:b0;const gi=segAt(t+.02),g=A.segs[gi];bar.slots.push({t,dn:!h,g:g&&g.c<NS?g:null,s:strength(t,Math.min(.07,(b1-b0)*.22))})}}
+  bars.push(bar)}
+ const all=bars.flatMap(b=>b.slots.filter(s=>s.g).map(s=>s.s)).sort((a,b)=>a-b),p90=all[Math.floor(all.length*.9)]||0,thr=p90*.32;
+ let prev='';for(const b of bars)for(const s of b.slots){s.strum=!!s.g&&(ons?s.s>=thr&&s.s>0:s.dn);const n=s.g?nameOf(s.g):'';s.label=n&&n!==prev?n:'';prev=n}
+ // sections: yours if set in feedback, otherwise parts found from repeating chord patterns
+ let secs=(A.sections||[]).slice().sort((a,b)=>a.t-b.t).map(x=>({t:x.t,name:x.name}));
+ if(!secs.length)secs=autoSections(bars);
+ if(!secs.length)secs=[{t:0,name:A.title||'Song'}];secs[0].t=Math.min(secs[0].t,0);
+ secs.forEach((x,i)=>{x.t1=secs[i+1]?secs[i+1].t:A.dur+1});
+ bars.forEach(b=>{const m=b.t0+.1;b.sec=Math.max(0,secs.findIndex(x=>m>=x.t&&m<x.t1))});
+ // start each section on a bar line
+ secs.forEach((x,i)=>{const bi=bars.findIndex(b=>b.sec===i);if(bi>=0){x.t=bars[bi].t0;if(i>0)secs[i-1].t1=x.t}});
+ return {bars,secs,bp};
+}
+// parts of the song found by which chords each 4-bar block uses (verse-like blocks match each other)
+function autoSections(bars){
+ const blocks=[];for(let i=0;i<bars.length;i+=4){const w={};let tot=0;bars.slice(i,i+4).forEach(b=>b.slots.forEach(s=>{if(!s.g)return;const k=canon(nameOf(s.g))||nameOf(s.g);w[k]=(w[k]||0)+1;tot++}));blocks.push({t:bars[i].t0,w,tot})}
+ const cos=(a,b)=>{let d=0,na=0,nb=0;for(const k in a){na+=a[k]*a[k];if(b[k])d+=a[k]*b[k]}for(const k in b)nb+=b[k]*b[k];return na&&nb?d/Math.sqrt(na*nb):0};
+ let lab,cents;
+ for(const th of [.62,.5,.4,.3]){lab=[];cents=[];
+  for(const bl of blocks){if(bl.tot<3){lab.push(-1);continue}let best=-1,bs=0;cents.forEach((c,j)=>{const v=cos(bl.w,c);if(v>bs){bs=v;best=j}});
+   if(best>=0&&bs>=th){lab.push(best);for(const k in bl.w)cents[best][k]=(cents[best][k]||0)+bl.w[k]}else{lab.push(cents.length);cents.push({...bl.w})}}
+  if(cents.length<=5)break}
+ const out=[];blocks.forEach((bl,i)=>{const name=lab[i]<0?'No guitar':'Part '+String.fromCharCode(65+lab[i]);if(!out.length||out[out.length-1].name!==name)out.push({t:bl.t,name})});
+ return out;
+}
+/* vertical fretboard */
+const NK={sx:i=>26+i*18,fy:k=>44+k*54,top:44,frets:5};
+function neckBase(sh){const fr=sh?sh.f.filter(x=>x>0):[];const mx=Math.max(0,...fr);return mx>5?(sh.barre||Math.min(...fr)):1}
+function buildNeck(){
+ let s=`<defs><linearGradient id="lsWood" x1="0" x2="1"><stop offset="0" stop-color="#B98149"/><stop offset=".5" stop-color="#CF9A5E"/><stop offset="1" stop-color="#B07A44"/></linearGradient></defs>`;
+ s+=`<rect x="14" y="${NK.top}" width="114" height="${NK.fy(5)-NK.top+14}" fill="url(#lsWood)" rx="3"/><g id="lsInlay"></g>`;
+ s+=`<rect id="lsNut" x="14" y="${NK.top-6}" width="114" height="7" fill="#EFE6D6"/>`;
+ for(let k=1;k<=5;k++)s+=`<line x1="14" x2="128" y1="${NK.fy(k)}" y2="${NK.fy(k)}" stroke="#D9D3C8" stroke-width="2.4"/>`;
+ for(let i=0;i<6;i++)s+=`<line x1="${NK.sx(i)}" x2="${NK.sx(i)}" y1="${NK.top-6}" y2="${NK.fy(5)+14}" stroke="#F3EEE6" stroke-width="${(2.6-i*.32).toFixed(2)}"/>`;
+ s+=`<text id="lsBaseFr" x="6" y="${NK.fy(0)+32}" fill="#FFE7A3" font-size="13" font-weight="700" text-anchor="middle"></text><g id="lsOpen"></g><g id="lsGhost"></g>`;
+ for(let f=1;f<=4;f++)s+=`<g class="lsf" id="lsf${f}" style="opacity:0"><rect class="lsfr" x="-11" y="-11" width="22" height="22" rx="11"/><text class="lsft" y="4.5" text-anchor="middle">${f}</text></g>`;
+ $('lsNeckSvg').innerHTML=s;
+}
+function fingerGroups(sh){// one entry per finger: strings it holds down (more than one = barre)
+ const out={};if(!sh)return out;let auto=1;
+ sh.f.forEach((f,i)=>{if(f<=0)return;let fi=sh.fi[i]||0;if(!fi){fi=Math.min(4,auto++)}const o=out[fi]||(out[fi]={f,str:[]});if(o.f===f)o.str.push(i)});
+ return out;
+}
+function setNeck(g,ghost){
+ const sh=g?shapeForSeg(g):null,base=neckBase(sh);LS.base=base;
+ $('lsNut').style.opacity=base===1?1:0;$('lsBaseFr').textContent=base>1?base+'fr':'';
+ let inl='';for(let k=0;k<5;k++){const fr=base+k,y=(NK.fy(k)+NK.fy(k+1))/2;if([3,5,7,9,15,17].includes(fr))inl+=`<circle cx="71" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/>`;if(fr===12)inl+=`<circle cx="53" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/><circle cx="89" cy="${y}" r="5" fill="#F3EEE6" opacity=".8"/>`}
+ $('lsInlay').innerHTML=inl;
+ let op='';if(sh)sh.f.forEach((f,i)=>{const x=NK.sx(i);if(f===0)op+=`<circle cx="${x}" cy="26" r="6" fill="none" stroke="#F3EEE6" stroke-width="2.2"/>`;else if(f<0)op+=`<path d="M${x-5} 21 L${x+5} 31 M${x+5} 21 L${x-5} 31" stroke="#FF8A7A" stroke-width="2.6" stroke-linecap="round"/>`});
+ $('lsOpen').innerHTML=op;
+ const grp=fingerGroups(sh);
+ for(let f=1;f<=4;f++){const el=$('lsf'+f),o=grp[f];if(!o){el.style.opacity=0;continue}
+  const y=NK.fy(o.f-base)+27,x0=NK.sx(Math.min(...o.str)),x1=NK.sx(Math.max(...o.str)),cx=(x0+x1)/2,w=x1-x0+22;
+  el.style.opacity=1;el.style.transform=`translate(${cx}px,${y}px)`;const r=el.firstChild;r.setAttribute('x',-w/2);r.setAttribute('width',w);el.lastChild.setAttribute('x',o.str.length>1?-w/2+11:0)}
+ setGhost(ghost);
+}
+function setGhost(g){
+ if(!g){$('lsGhost').innerHTML='';return}
+ const sh=shapeForSeg(g),base=LS.base;let s='';
+ if(sh)sh.f.forEach((f,i)=>{if(f<=0)return;const k=f-base;if(k<0||k>4)return;s+=`<circle cx="${NK.sx(i)}" cy="${NK.fy(k)+27}" r="9" fill="none" stroke="#FFE27A" stroke-width="2" stroke-dasharray="3 2.5"/>`});
+ $('lsGhost').innerHTML=s;
+}
+/* tab rows */
+const BW=232;
+function slotX(q){return 20+q*26.5}
+function rowSVG(r){
+ const per=LS.per,b0=r*per,bars=LS.m.bars.slice(b0,b0+per);if(!bars.length)return '';
+ let s='';
+ bars.forEach((bar,bi)=>{const X=bi*BW;
+  for(let l=0;l<6;l++)s+=`<line x1="${X}" x2="${X+BW}" y1="${48+l*11}" y2="${48+l*11}" stroke="#9AA19E" stroke-width=".8"/>`;
+  s+=`<line x1="${X}" x2="${X}" y1="48" y2="103" stroke="#2A2F2D" stroke-width="1.2"/><text x="${X+3}" y="44" font-size="8" fill="#7A817E">${b0+bi+1}</text>`;
+  if(bar.sec!==(LS.m.bars[b0+bi-1]||{}).sec)s+=`<text x="${X+3}" y="10" font-size="8.5" font-weight="700" fill="#B3261E">${esc(LS.m.secs[bar.sec].name.toUpperCase())}</text>`;
+  if(!bar.slots.some(x=>x.g))s+=`<text x="${X+BW/2}" y="80" font-size="11" fill="#7A817E" text-anchor="middle">no guitar</text>`;
+  bar.slots.forEach((sl,q)=>{const x=X+slotX(q);
+   if(sl.label)s+=`<text x="${x-4}" y="22" font-size="11" font-weight="700" fill="#151A19">${esc(sl.label)}</text>`;
+   if(!sl.strum||!sl.g)return;const sh=shapeForSeg(sl.g);if(!sh)return;
+   const played=sh.f.map((f,i)=>({f,i})).filter(o=>o.f>=0);if(!played.length)return;
+   const yTop=48+(5-Math.max(...played.map(o=>o.i)))*11,yBot=48+(5-Math.min(...played.map(o=>o.i)))*11;
+   s+=sl.dn?`<path d="M${x+9} ${yTop-6} V${yBot+2} M${x+6} ${yBot-2} L${x+9} ${yBot+3} L${x+12} ${yBot-2}" stroke="#2A2F2D" stroke-width="1.1" fill="none"/>`:`<path d="M${x+9} ${yBot+2} V${yTop-6} M${x+6} ${yTop-2} L${x+9} ${yTop-7} L${x+12} ${yTop-2}" stroke="#2A2F2D" stroke-width="1.1" fill="none"/>`;
+   played.forEach(o=>{s+=`<text x="${x}" y="${48+(5-o.i)*11+3.6}" font-size="10" font-weight="600" text-anchor="middle" fill="#151A19" stroke="#fff" stroke-width="3" paint-order="stroke">${o.f}</text>`})});
+ });
+ const end=bars.length*BW;s+=`<line x1="${end-.6}" x2="${end-.6}" y1="48" y2="103" stroke="#2A2F2D" stroke-width="1.2"/>`;
+ s+=`<rect class="hlBar" x="0" y="28" width="${BW}" height="82" rx="7" fill="none" stroke="#E0607A" stroke-width="2" opacity="0"/><rect class="hlSlot" x="0" y="40" width="18" height="70" rx="3" fill="#22C55E" opacity="0"/>`;
+ return `<svg viewBox="0 0 ${per*BW} 112" data-row="${r}" preserveAspectRatio="xMinYMin meet">${s}</svg>`;
+}
+function renderRows(r){LS.row=r;$('lsTab').innerHTML=rowSVG(r)+(lessonTwo()?rowSVG(r+1):'')}
+function lessonPer(){return innerWidth>innerHeight?4:2}
+function lessonTwo(){return !(innerWidth>innerHeight&&innerHeight<600)}
+/* open / close / loop */
+async function openLesson(){
+ if(!A||!A.segs||!vid.src){songMsg('Open the song’s video first.');return}
+ const msg=t=>{$('lessonBtn').textContent=t};
+ try{await ensureRhythm(msg)}catch(e){}
+ msg('▶ Open lesson view');
+ LS={m:lessonModel(),per:lessonPer(),row:-1,bar:-1,slot:-1,chord:null,sec:-1,loop:false,raf:0,base:1};
+ LS.home={parent:vid.parentNode,next:vid.nextSibling,controls:vid.controls};
+ $('lsVidHost').appendChild(vid);vid.controls=false;
+ $('lsTitle').textContent=(A.title||'Lesson').toUpperCase();$('lsArtist').textContent=A.artist||tName(A.play.tun)+(A.play.capo?' · capo '+A.play.capo:'');
+ buildNeck();$('lesson').hidden=false;document.body.classList.add('wopen');
+ [...$('lsSpeed').children].forEach(b=>b.setAttribute('aria-pressed',+b.dataset.r===(vid.playbackRate||1)));
+ $('lsLoop').setAttribute('aria-pressed','false');
+ LS.raf=requestAnimationFrame(lessonTick);
+}
+function closeLesson(){
+ if(!LS)return;cancelAnimationFrame(LS.raf);vid.pause();
+ LS.home.parent.insertBefore(vid,LS.home.next);vid.controls=LS.home.controls;
+ $('lesson').hidden=true;document.body.classList.remove('wopen');LS=null;
+}
+function barAt(t){const B=LS.m.bars;let lo=0,hi=B.length-1;if(t<B[0].t0)return 0;while(lo<hi){const m=(lo+hi+1)>>1;if(B[m].t0<=t)lo=m;else hi=m-1}return lo}
+function lessonTick(){
+ if(!LS)return;const t=vid.currentTime,B=LS.m.bars,bi=barAt(t),bar=B[bi];
+ const secI=bar.sec,sec=LS.m.secs[secI];
+ if(LS.loop&&t>=sec.t1-.03&&!vid.paused){vid.currentTime=sec.t;}
+ const per=lessonPer(),two=lessonTwo();if(per!==LS.per||two!==LS.two){LS.per=per;LS.two=two;LS.row=-1;LS.bar=-1}
+ const row=Math.floor(bi/LS.per);if(row!==LS.row)renderRows(row);
+ let q=0;bar.slots.forEach((s,i)=>{if(s.t<=t+.03)q=i});
+ if(bi!==LS.bar||q!==LS.slot){LS.bar=bi;LS.slot=q;const svg=$('lsTab').firstChild;if(svg){const pos=bi-row*LS.per,hb=svg.querySelector('.hlBar'),hs=svg.querySelector('.hlSlot');hb.setAttribute('x',pos*BW+1);hb.setAttribute('opacity',1);hs.setAttribute('x',pos*BW+slotX(q)-9);hs.setAttribute('opacity',bar.slots[q].g?.28:0)}}
+ if(secI!==LS.sec){LS.sec=secI;$('lsBanner').textContent=sec.name.toUpperCase()}
+ // chord now / next
+ const gi=segAt(t),g=A.segs[gi],cur=g&&g.c<NS?g:null,name=cur?nameOf(cur):'';
+ let ni=gi+1;while(A.segs[ni]&&A.segs[ni].c>=NS)ni++;const ng=A.segs[ni],nextIn=ng?ng.t0-t:Infinity;
+ const ghost=ng&&nextIn<LS.m.bp*1.5&&cur?ng:null;
+ if(name!==LS.chord||(!!ghost)!==LS.gh){const changed=name!==LS.chord;LS.chord=name;LS.gh=!!ghost;if(changed)setNeck(cur,ghost);else setGhost(ghost);$('lsNow').textContent=name||'—'}
+ const beatsLeft=ng?Math.max(0,Math.ceil(nextIn/LS.m.bp)):0;
+ $('lsNext').innerHTML=ng?`Next <b>${esc(nameOf(ng))}</b>${nextIn<8?` in ${beatsLeft} beat${beatsLeft===1?'':'s'}`:''}`:'';
+ $('lsPlay').textContent=vid.paused?'▶':'❚❚';
+ LS.raf=requestAnimationFrame(lessonTick);
+}
+$('lessonBtn').onclick=openLesson;
+$('lsClose').onclick=closeLesson;
+$('lsPlay').onclick=()=>{if(vid.paused)vid.play().catch(()=>{});else vid.pause()};
+$('lsVidHost').addEventListener('click',()=>$('lsPlay').click());
+$('lsPrev').onclick=()=>{const t=vid.currentTime,S=LS.m.secs;let i=S.findIndex(x=>t>=x.t&&t<x.t1);if(i>0&&t-S[i].t<1.5)i--;vid.currentTime=Math.max(0,S[Math.max(0,i)].t)};
+$('lsNextBtn').onclick=()=>{const t=vid.currentTime,S=LS.m.secs,i=S.findIndex(x=>x.t>t+.1);if(i>=0)vid.currentTime=S[i].t};
+$('lsSpeed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vid.playbackRate=+b.dataset.r;try{vid.preservesPitch=true}catch(err){}[...$('lsSpeed').children].forEach(x=>x.setAttribute('aria-pressed',x===b))});
+$('lsLoop').onclick=()=>{LS.loop=!LS.loop;$('lsLoop').setAttribute('aria-pressed',LS.loop)};
+$('lsTab').addEventListener('click',e=>{const svg=e.target.closest('svg');if(!svg)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*LS.per*BW,bi=+svg.dataset.row*LS.per+Math.floor(x/BW),bar=LS.m.bars[bi];if(bar)vid.currentTime=bar.t0+.01});
+addEventListener('keydown',e=>{if(!LS)return;if(e.key==='Escape')closeLesson();else if(e.key===' '){e.preventDefault();$('lsPlay').click()}});
+

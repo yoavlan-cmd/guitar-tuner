@@ -1,0 +1,17 @@
+{
+  "name": "Guitaring beta",
+  "short_name": "Guitaring β",
+  "description": "Preview of the next Guitaring version. It keeps its own copy of your data.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15100E",
+  "theme_color": "#15100E",
+  "icons": [
+    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

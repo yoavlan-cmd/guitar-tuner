@@ -1,0 +1,377 @@
+
+<div class="lesson" id="lesson" hidden>
+  <div class="lsTop"><button type="button" class="lsX" id="lsClose" aria-label="Close lesson">✕</button><div class="lsHead"><b id="lsTitle"></b><span id="lsArtist"></span></div></div>
+  <div class="lsVid" id="lsVidHost"></div>
+  <div class="lsNeck"><div class="lsNow" id="lsNow">—</div><svg id="lsNeckSvg" viewBox="0 0 140 330" preserveAspectRatio="xMidYMin meet"></svg><div class="lsNextC" id="lsNext"></div></div>
+  <div class="lsCtl">
+    <div class="lsRow"><button type="button" class="lsB" id="lsPrev" aria-label="Previous part">⏮</button><button type="button" class="lsB lsPlay" id="lsPlay" aria-label="Play or pause">▶</button><button type="button" class="lsB" id="lsNextBtn" aria-label="Next part">⏭</button></div>
+    <div class="lsRow lsSpeed" id="lsSpeed"><button type="button" data-r=".5">50%</button><button type="button" data-r=".75">75%</button><button type="button" data-r="1" aria-pressed="true">100%</button></div>
+    <button type="button" class="lsLoop" id="lsLoop" aria-pressed="false">↻ Loop this part</button>
+  </div>
+  <div class="lsBanner" id="lsBanner"></div>
+  <div class="lsTab" id="lsTab"></div>
+</div>
+<div class="picker cfwrap" id="cfWrap" hidden>
+  <div class="pickbox cfbox" role="dialog" aria-label="Name a chord from your fingering">
+    <div class="pickhead"><span><b>What chord am I playing?</b></span><button type="button" class="pickx" id="cfClose" aria-label="Close">✕</button></div>
+    <div class="cfset">
+      <label class="cftun"><span>Tuning</span><select id="cfTun" class="textin"></select></label>
+      <div class="cfstep"><span>Capo</span><button type="button" data-cs="capo" data-d="-1" aria-label="Capo down">−</button><b id="cfCapo">0</b><button type="button" data-cs="capo" data-d="1" aria-label="Capo up">+</button></div>
+      <div class="cfstep"><span>From fret</span><button type="button" data-cs="pos" data-d="-1" aria-label="Show lower frets">−</button><b id="cfPos">1</b><button type="button" data-cs="pos" data-d="1" aria-label="Show higher frets">+</button></div>
+    </div>
+    <p class="tip cfhelp">Tap where each finger presses, as many as you use (tap again to lift). <b>Barre:</b> tap a fret number on the left. Above a string: open ○ or not played ✕.</p>
+    <div id="cfBoard" class="cfboard"></div>
+    <div id="cfOut" class="cfout" aria-live="polite"></div>
+    <div class="editrow cfbtns"><button type="button" class="btn" id="cfUse"></button><button type="button" class="btn ghost" id="cfClear">Clear</button></div>
+  </div>
+</div>
+<div class="welcome" id="welcome" role="dialog" aria-label="Welcome">
+  <div class="wcard">
+    <svg class="wlogo" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg>
+    <div class="wtitle">Guitaring</div>
+    <div class="wbody"></div>
+    <button type="button" class="wskip" id="wSkip">Skip ›</button>
+  </div>
+</div>
+<div class="wrap">
+  <header>
+    <div class="brand"><svg class="logo" id="appLogoSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 512 512"><g id="appLogo"><defs>
+<radialGradient id="lg-fbg" cx="50%" cy="72%" r="78%"><stop offset="0" stop-color="#FFD54A"/><stop offset=".28" stop-color="#FFA126"/><stop offset=".6" stop-color="#FF6A1A"/><stop offset=".85" stop-color="#E4391A"/><stop offset="1" stop-color="#B21E10"/></radialGradient>
+<linearGradient id="lg-t1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#D2260F"/><stop offset="1" stop-color="#F0531A" stop-opacity=".0"/></linearGradient>
+<linearGradient id="lg-t2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFB02E" stop-opacity=".0"/></linearGradient>
+<linearGradient id="lg-t3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#FFD54A" stop-opacity=".0"/></linearGradient>
+<linearGradient id="lg-yfire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E0331A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFD54A"/></linearGradient>
+<linearGradient id="lg-pickO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#D9301A"/></linearGradient>
+<filter id="lg-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#5A0E05" flood-opacity=".55"/></filter>
+</defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg><h1>Guitaring</h1></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="tune" aria-pressed="true">Tuner</button>
+    <button data-tab="song" aria-pressed="false">Songs</button>
+    <button data-tab="chords" aria-pressed="false">Chords</button>
+    <button data-tab="gear" aria-pressed="false">My gear</button>
+  </nav>
+
+  <div class="pane" id="paneTune">
+  <button type="button" class="gtrline" id="gtrLine" hidden aria-expanded="false"></button>
+  <div class="gtrpick" id="gtrPick" hidden></div>
+  <div class="chips" id="tunings" aria-label="Tuning"></div>
+
+  <section class="screen" id="screen" aria-live="polite">
+    <div class="fs" aria-hidden="true"><span id="flatInd">♭</span><span id="sharpInd">♯</span></div>
+    <svg class="gauge" viewBox="0 0 320 184" aria-hidden="true">
+      <defs>
+        <linearGradient id="gTrack" gradientUnits="userSpaceOnUse" x1="28" y1="0" x2="292" y2="0">
+          <stop offset="0" stop-color="#FFB74D"/><stop offset=".34" stop-color="#FFB74D"/><stop offset=".47" stop-color="#66BB6A"/><stop offset=".53" stop-color="#66BB6A"/><stop offset=".66" stop-color="#4FC3F7"/><stop offset="1" stop-color="#4FC3F7"/>
+        </linearGradient>
+        <linearGradient id="gNeedle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C9CED6"/><stop offset=".5" stop-color="#FFFFFF"/><stop offset="1" stop-color="#9AA0AA"/></linearGradient>
+        <radialGradient id="gJewel" cx="38%" cy="34%" r="70%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".25" stop-color="#B9F6CA"/><stop offset=".6" stop-color="#43A047"/><stop offset="1" stop-color="#1B3D1E"/></radialGradient>
+        <radialGradient id="gBezel" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#5A5F68"/><stop offset=".6" stop-color="#2A2D33"/><stop offset="1" stop-color="#121316"/></radialGradient>
+        <filter id="gGlow" filterUnits="userSpaceOnUse" x="0" y="0" width="320" height="184"><feGaussianBlur stdDeviation="3.2"/></filter>
+      </defs>
+      <path class="track" id="track"></path>
+      <path class="zone" id="zone"></path>
+      <g id="ticks"></g>
+      <g class="needlewrap" id="needle"><path class="nshadow" d="M156.6 172 L160 52 L163.4 172 Z" transform="translate(2 3)"/><path class="nbody" d="M156.6 172 L160 52 L163.4 172 Z"/><path class="ntail" d="M157.4 172 L160 192 L162.6 172 Z"/></g>
+      <circle class="bezel" cx="160" cy="172" r="11"/><circle class="jewel" cx="160" cy="172" r="6.5"/><circle class="jewelhi" cx="157.8" cy="169.8" r="1.8"/>
+    </svg>
+    <div class="note" id="note">E<sub>2</sub></div>
+    <div class="status" id="status">Tap Listen to start</div>
+    <div class="fine" id="fine" aria-hidden="true"><span class="fzone"></span><span class="fmid"></span><i id="fineDot"></i><em class="fl">−15¢</em><em class="fr">+15¢</em></div>
+    <div class="lockbadge" id="lockBadge" aria-hidden="true">✓</div>
+    <span class="live" id="live" hidden><i></i>Live</span>
+    <button class="mode" id="modeChip" type="button">Auto</button>
+    <div hidden><b id="hz">—</b><b id="tgt">82.41</b><b id="cents">—</b><div class="meter"><i id="lvl"></i><s id="gate"></s></div></div>
+  </section>
+
+  <div class="strings" id="strings" aria-label="Strings — tap a peg to tune that string, tap again for automatic"></div>
+
+  <button class="listen" id="listen"><span class="dot"></span><span id="listenTxt">Listen</span></button>
+  <p class="msg" id="msg" hidden></p>
+
+  <details class="settings" id="tuneSettings">
+    <summary>Settings</summary>
+    <div class="setrow"><span class="label">Guitar</span>
+      <div class="instpick" id="inst"></div></div>
+    <div class="setrow"><span class="label">Noise filter</span>
+      <div class="seg seg3" id="nf">
+        <button data-nf="normal" aria-pressed="false">Normal</button>
+        <button data-nf="strong" aria-pressed="false">Strong</button>
+        <button data-nf="max" aria-pressed="false">Noisy room</button>
+      </div></div>
+    <div class="setrow inline"><span class="label">Reference pitch</span>
+      <div class="cal">
+        <button id="calDown" aria-label="Lower A4">−</button>
+        <output id="calOut">A4 440</output>
+        <button id="calUp" aria-label="Raise A4">+</button>
+      </div></div>
+    <div class="setrow inline"><span class="label">Reference note</span>
+      <button class="repeat" id="repeat" aria-pressed="false">Repeat tone</button></div>
+  </details>
+  </div>
+
+  <div class="pane" id="paneGear" hidden>
+    <div id="gearOut" class="gearout"></div>
+  </div>
+  <div class="pane" id="paneChords" hidden>
+    <div class="searchrow" id="chSearchRow">
+      <input id="chSearch" class="textin" type="search" placeholder="Search chords, e.g. Am7, G/B, sus2" aria-label="Search chords" autocapitalize="off" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="seg" id="chTun">
+      <button data-t="std" aria-pressed="true">Standard</button>
+      <button data-t="dropd" aria-pressed="false">Drop D</button>
+    </div>
+    <button type="button" class="btn ghost cffind" id="chFind"><span data-pd="FINDER"></span> What chord am I playing? Show it on the fretboard</button>
+    <p class="tip" id="chCount"></p>
+    <div class="chordbook" id="chGrid"></div>
+    <div id="chDetail" class="chdetail" hidden></div>
+  </div>
+
+  <div class="pane" id="paneSong" hidden>
+    <div class="seg songseg" id="songSeg" role="tablist">
+      <button data-s="lib" aria-pressed="true"><span data-pd="LIB"></span> My library</button>
+      <button data-s="add" aria-pressed="false"><span data-pd="ADD"></span> Add a song</button>
+    </div>
+    <section class="card" id="driveIntro" hidden></section>
+    <div id="resumeCard" hidden></div>
+    <section class="card draftcard" id="draftCard" hidden></section>
+    <div class="addgrid" id="addGrid">
+      <label class="drop addtile" for="vidIn" id="drop">
+        <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Song video</b>
+        <span class="sub">Get the chords from a video</span>
+      </label>
+      <button class="drop write addtile" id="shotNew" type="button">
+        <i aria-hidden="true"><span data-pd="SCAN"></span></i><b>Screenshots or PDF</b>
+        <span class="sub">Turn them into a chord sheet</span>
+      </button>
+      <button class="drop write addtile" id="writeNew" type="button">
+        <i aria-hidden="true"><span data-pd="WRITE"></span></i><b>Write a sheet</b>
+        <span class="sub">Type lyrics, tap to add chords</span>
+      </button>
+      <button class="drop write addtile" id="mixNew" type="button">
+        <i aria-hidden="true"><span data-pd="MIX"></span></i><b>Practice mixer</b>
+        <span class="sub">Turn parts of a song up or down</span>
+      </button>
+      <p class="tip addnote">Everything is read on this phone. Nothing is uploaded, and you check it before it’s saved.</p>
+    </div>
+    <input id="shotIn" type="file" accept="image/*,application/pdf,.pdf" multiple hidden>
+    <section class="card" id="shotCard" hidden></section>
+    <input id="mixIn" type="file" accept="audio/*,video/*" hidden>
+    <input id="vidIn" type="file" accept="video/*,audio/*" hidden>
+    <section class="card" id="libCard">
+      <div class="cardhead"><h2>I’m learning</h2><a class="drivelink" id="driveLinkLib" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener" hidden>Open in Google Drive ↗</a></div>
+      <a class="btn wide folderbtn" id="folderBtn" href="#" target="_blank" rel="noopener" hidden><span data-pd="DRIVE"></span> My songs folder in Google Drive <span>↗</span></a>
+      <div id="learnBox" class="learn"></div>
+      <p class="libsub">Sheets, lessons and settings</p>
+      <details class="ideabox catbox" id="catBox" hidden></details>
+      <details class="ideabox vidbox" id="vidBox"></details>
+      <details class="apibox" id="libSaved"><summary>Saved on this phone <span class="libcount" id="libCount"></span></summary><div class="liblist" id="libList"></div></details>
+      <details class="apibox" id="folderCfg"><summary>Songs folder link</summary><p class="tip">The Google Drive folder where you keep your song videos and sheets. Paste its link from Drive.</p><input id="folderIn" class="textin" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…"><div class="editrow"><button class="btn" id="folderSave" type="button">Save</button><button class="btn ghost" id="folderClear" type="button">Remove</button></div><p class="tip" id="folderMsg" role="status"></p></details>
+      <details class="apibox" id="apiCard" hidden></details>
+      <details class="apibox" id="bkBox"></details>
+    </section>
+    <section class="card" id="suggCard">
+      <div class="cardhead"><h2>New songs to learn</h2></div>
+      <details class="ideabox" id="ideaBox"></details>
+    </section>
+    <section class="card" id="readyCard" hidden>
+      <h2>Ready to analyse</h2>
+      <p class="tip" id="readyFile" dir="auto"></p>
+      <label class="tunepick">Tuning <select id="preTun"><option value="auto">Detect from the sound</option></select></label>
+      <label class="check"><input type="checkbox" id="preListen" checked> Detailed listening: an AI model on this phone hears every note (more accurate, takes a bit longer)</label>
+      <label class="check" id="preReadWrap" hidden><input type="checkbox" id="preRead" checked> <span id="preReadTxt">Also read chord names shown in the video</span></label>
+      <p class="tip" id="readySaved" hidden></p>
+      <button class="btn wide cta" id="analyseBtn">Analyse chords</button>
+      <button class="btn ghost wide" id="openSaved" hidden>Open my saved analysis</button>
+      <button class="btn ghost wide" id="readyCancel">Choose a different video</button>
+    </section>
+    <div class="prog" id="prog" hidden><div class="pbar"><i id="progBar"></i></div><span id="progTxt">Reading the sound…</span><ol class="steps" id="steps"></ol></div>
+    <p class="msg" id="songMsg" hidden></p>
+
+    <div id="songView" class="songview" hidden>
+      <div class="done" id="doneBanner" role="status" hidden><div><b id="doneTitle">Analysis finished</b><span id="doneText"></span></div><button class="btn ghost" id="doneClose" aria-label="Dismiss">OK</button></div>
+      <div class="stage" id="stage">
+        <video id="vid" playsinline controls preload="metadata"></video>
+        <div class="kara" id="kara" aria-live="off">
+          <div class="klane" id="klane"><div class="ktrack" id="ktrack"></div><div class="kline"></div></div>
+          <div class="kbar">
+            <div class="kdia" id="kDia"></div>
+            <div class="kcur"><span class="klabel">Now</span><b id="kNow">–</b></div>
+            <div class="knext"><span class="klabel">Next <em id="kIn"></em></span><b id="kNext">–</b><div class="kprog"><i id="kProg"></i></div></div>
+          </div>
+          <div class="kup" id="kUp"></div>
+          <div class="kctl"><button class="kbtn" id="kPlay" type="button">▶ Play</button><button class="kbtn" id="kFull" type="button">⛶ Karaoke view</button></div>
+        </div>
+      </div>
+      <button class="btn cta wide lessonbtn" id="lessonBtn" type="button">▶ Open lesson view</button>
+      <div class="titlerow">
+        <input id="songTitle" type="text" placeholder="Song – artist" aria-label="Song title">
+        <span class="chip2" id="tempoChip"></span>
+      </div>
+
+      <div class="nowrow">
+        <div class="nowcard"><span class="label">Now</span><div id="dNow" class="dgBig"></div><span class="sounds" id="nowSounds"></span><p class="nownote" id="nowNote" dir="auto" hidden></p></div>
+        <div class="nowcard next"><span class="label">Next <b id="nextIn"></b></span><div id="dNext"></div><div class="nbar"><i id="nextBar"></i></div></div>
+      </div>
+
+      <div class="confbox" id="confBox" hidden></div>
+      <div class="timeline" id="timeline" aria-label="Chord timeline"></div>
+      <div class="ctlrow">
+        <div class="seg seg3 speed" id="speed">
+          <button data-r="0.5" aria-pressed="false">0.5×</button>
+          <button data-r="0.75" aria-pressed="false">0.75×</button>
+          <button data-r="1" aria-pressed="true">1×</button>
+        </div>
+      </div>
+      <div class="editbox" id="editBox" hidden>
+        <span class="label" id="editLabel">Fix this chord</span>
+        <div class="editrow">
+          <select id="edRoot" aria-label="Root"></select>
+          <select id="edType" aria-label="Chord type"></select>
+        </div>
+        <input id="edName" class="textin" type="text" placeholder="…or type any chord, e.g. G/B or Dsus2/F" aria-label="Chord name" autocapitalize="off" autocomplete="off" spellcheck="false">
+        <textarea id="edNote" rows="2" dir="auto" placeholder="Comment for this spot, e.g. “palm mute” or “strum down only”" aria-label="Comment"></textarea>
+        <div class="editrow">
+          <button class="btn" id="edApply">Save</button>
+          <button class="btn ghost" id="edSplit">Split at playhead</button>
+          <button class="btn ghost" id="edMerge">Merge with previous</button>
+          <button class="btn ghost" id="edClose">Done</button>
+        </div>
+      </div>
+
+      <section class="card" id="tuneCard"></section>
+
+      <section class="card" id="knownCard">
+        <h2>Your feedback</h2>
+        <p class="tip">Tell the analysis what you know. It re-runs using your input and keeps every chord you fixed by hand.</p>
+        <div class="fbgrid">
+          <label>Tuning <select id="fbTun"></select></label>
+          <label>Capo <select id="fbCapo"></select></label>
+          <label>Tempo <input id="fbBpm" class="textin" type="number" min="40" max="240" inputmode="numeric" placeholder="BPM"></label>
+        </div>
+        <label class="fblabel">Chords in the song, as written for this tuning and capo
+          <input id="knownIn" class="textin" type="text" placeholder="e.g. Dsus2 Dsus2/F G/B Cadd9 C Asus2" autocapitalize="off" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="fblabel">Sections, one per line (optional)
+          <textarea id="fbSecs" class="textin" rows="3" placeholder="0:00 Verse: Dsus2 Dsus2/F G/B Cadd9&#10;1:10 Chorus: C Asus2 Aadd9" autocapitalize="off" spellcheck="false"></textarea>
+          <span class="hint2">Start time, a name, then the chords in the order they repeat. The analysis follows that order.</span>
+        </label>
+        <label class="check"><input type="checkbox" id="fbPins" checked> Keep the chords I fixed by hand (<span id="fbPinCount">0</span>)</label>
+        <label class="fblabel" id="fbFreeWrap" hidden>Or tell Claude in your own words
+          <textarea id="fbFree" class="textin" rows="2" dir="auto" placeholder="e.g. It’s Drop D. The chorus starts at 1:10 and goes C, Asus2, Aadd9. At 0:45 it’s Cadd9, not Asus2."></textarea>
+        </label>
+        <div class="editrow">
+          <button class="btn cta" id="knownGo">Re-run with my feedback</button>
+          <button class="btn ghost" id="readVid" hidden>Read chords from the video</button>
+          <button class="btn ghost" id="undoFit" hidden>Undo</button>
+        </div>
+        <p class="tip" id="knownMsg" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>How to play it</h2>
+        <div class="playrow">
+          <label>Tuning <select id="plTun"></select></label>
+          <label>Capo <select id="plCapo"></select></label>
+        </div>
+        <p class="tip" id="plTip"></p>
+      </section>
+
+      <section class="card">
+        <h2>Chords in this song</h2>
+        <div class="chordgrid" id="chordGrid"></div>
+        <p class="legend">— don’t play this string · ● play it open · numbers are fingers (1 index … 4 pinky)</p>
+      </section>
+
+      <section class="card">
+        <h2>Song notes</h2>
+        <textarea id="songNotes" class="notes" rows="3" dir="auto" placeholder="Strumming pattern, intro riff, anything to remember" aria-label="Song notes"></textarea>
+      </section>
+
+      <section class="card" id="aiCard">
+        <h2>Better versions &amp; Claude’s check</h2>
+        <label class="taste">Your taste <textarea id="taste" rows="2"></textarea></label>
+        <div class="links" id="links"></div>
+        <button class="btn" id="aiAsk" hidden>Ask Claude to check this song</button>
+        <p class="tip" id="aiNote">Claude’s check works when you open Guitaring inside Claude. The search links work everywhere.</p>
+        <div id="aiOut"></div>
+      </section>
+
+      <button class="btn wide" id="finish">Finish &amp; make chord sheet</button>
+      <button class="btn ghost wide" id="newSong">Analyse another video</button>
+    </div>
+
+    <div id="writeView" class="writeview" hidden>
+      <div class="editrow sheettop"><button class="btn ghost" id="wBack">← Back</button><button class="btn ghost" id="wBlank">New blank song</button></div>
+      <section class="card wmeta">
+        <label class="namefield">Song name <input id="wTitle" type="text" dir="auto" autocomplete="off"></label>
+        <label class="namefield">Artist <input id="wArtist" type="text" dir="auto" list="wArtists" autocomplete="off"></label>
+        <datalist id="wArtists"></datalist>
+        <div class="wrow">
+          <label class="namefield">Tuning <select id="wTun"></select></label>
+          <label class="namefield">Capo <select id="wCapo"></select></label>
+        </div>
+      </section>
+      <div class="seg" id="wSteps"><button type="button" data-s="1" aria-pressed="true">1 · Lyrics</button><button type="button" data-s="2" aria-pressed="false">2 · Chords</button></div>
+      <section class="card" id="wStep1">
+        <textarea id="wLyrics" class="lyricsin" dir="auto" rows="14" placeholder="Type or paste the lyrics, English or Hebrew.
+
+[Chorus] on its own line marks a section.
+For a chords-only part (intro, solo, ending), use the buttons below."></textarea>
+        <div class="wslot"><span>Add a chords-only part where the cursor is:</span><div class="idchips"><button type="button" class="chip" data-part="Intro">Intro</button><button type="button" class="chip" data-part="Instrumental">Instrumental</button><button type="button" class="chip" data-part="Solo">Solo</button><button type="button" class="chip" data-part="Ending">Ending</button><button type="button" class="chip" data-part="">No label</button></div></div>
+        <button class="btn cta wide" id="wNext">Next: add chords</button>
+      </section>
+      <section class="card" id="wStep2" hidden>
+        <div class="shotnote" id="wShotNote" hidden></div>
+        <div class="seg" id="wMode"><button type="button" data-m="ch" aria-pressed="true">Chords</button><button type="button" data-m="tx" aria-pressed="false">Text &amp; lines</button></div>
+        <p class="tip" id="wModeTip">Tap a word to put, change, move or remove its chord. In a chords-only line, each ♪ is a spot for one chord.</p>
+        <button type="button" class="btn ghost" id="wIns">＋ Add a chords-only line</button>
+        <div class="wlines" id="wLines"></div>
+        <button class="btn cta wide" id="wDone">Make the chord sheet</button>
+      </section>
+      <div class="wundo" id="wUndoBar"><button type="button" class="btn" id="wUndo" disabled>↶ Undo</button><button type="button" class="btn ghost" id="wRedo" disabled>↷ Redo</button><span id="wUndoMsg"></span></div>
+      <div class="picker" id="wPick" hidden>
+        <div class="pickbox" role="dialog" aria-label="Choose a chord">
+          <div class="pickhead"><span>Chord above <b id="wPickWord" dir="auto"></b></span><button type="button" class="pickx" id="wPickClose" aria-label="Close">✕</button></div>
+          <input id="wPickQ" class="textin" type="search" placeholder="Search chords: Am, G/B, Cadd9…" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
+          <div class="picklist" id="wPickList"></div>
+          <button type="button" class="btn ghost cffind" id="wPickFind"><span data-pd="FINDER"></span> Don’t know its name? Show it on the fretboard</button>
+          <div class="editrow" id="wPickMove" hidden><button type="button" class="btn ghost" id="wPickPrev">◀ Previous word</button><button type="button" class="btn ghost" id="wPickNext">Next word ▶</button></div>
+          <button type="button" class="btn ghost" id="wPickDel" hidden>Remove chord</button>
+        </div>
+      </div>
+    </div>
+    <div id="sheetView" class="sheetview" hidden>
+      <div class="editrow sheettop"><button class="btn ghost" id="shBack">← Back</button><a class="drivelink" id="driveLinkSheet" href="https://drive.google.com/drive/folders/1oQhXOTPCngexgTdH8WuG4RLikLSs6XMe" target="_blank" rel="noopener">Open in Google Drive ↗</a></div>
+      <div id="shVid" hidden></div>
+      <label class="namefield">Sheet name <input id="shName" type="text" dir="auto"></label>
+
+      <div class="sheetactions">
+        <button class="btn" id="shSave">Save to My songs</button>
+        <button class="btn ghost" id="shPdf">Save PDF</button>
+        <button class="btn ghost" id="shShare" hidden>Share / save to Drive…</button>
+        <button class="btn ghost" id="shDrive" hidden>Save to Google Drive</button>
+      </div>
+      <div class="askcard" id="artistAsk" hidden>
+        <b>Which artist is this song by?</b>
+        <span class="hint2">The sheet goes into that artist’s folder in Guitar sheets. Pick an existing folder or type a new name.</span>
+        <input id="shArtist" class="textin" type="text" dir="auto" placeholder="e.g. Pearl Jam" autocomplete="off">
+        <div class="artchips" id="artistChips"></div>
+        <span class="hint2" id="artistMatch"></span>
+        <div class="editrow"><button class="btn" id="artistOk">Save to Drive</button><button class="btn ghost" id="artistNone">No artist folder</button><button class="btn ghost" id="artistCancel">Cancel</button></div>
+      </div>
+      <p class="tip" id="shStatus" role="status"></p>
+      <div class="paperwrap"><div class="paper" id="paper"></div></div>
+      <div class="editrow">
+        <button class="btn ghost" id="shEdit">Edit with the video</button>
+        <button class="btn ghost danger" id="shDel" hidden>Delete from My songs</button>
+      </div>
+      <div class="confirm" id="delConfirm" hidden><span>Delete this sheet from My songs? Your Drive copy stays.</span><button class="btn danger" id="delYes">Delete</button><button class="btn ghost" id="delNo">Keep</button></div>
+      <label class="namefield" id="driveCfg" hidden>Google Drive folder (link or ID) <input id="driveFolder" type="text" autocapitalize="off" spellcheck="false"></label>
+    </div>
+  </div>
+</div>
+
+<div class="mxbar" id="mxBar" hidden><button type="button" class="mxbar-main" id="mxBarOpen" aria-label="Open the practice mixer"><span class="mxbar-ic" aria-hidden="true"><span data-pd="MIX"></span></span><span class="mxbar-tx"><b id="mxBarT" dir="auto"></b><small id="mxBarS"></small></span></button><button type="button" class="mxbar-play" id="mxBarPlay" aria-label="Play">▶</button><button type="button" class="mxbar-x" id="mxBarX" aria-label="Close the player">✕</button><i class="mxbar-prog" id="mxBarP"></i></div>
+<div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>

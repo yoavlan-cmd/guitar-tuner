@@ -1,0 +1,346 @@
+<script>
+(()=>{
+// pedal icons: line drawings of guitar things on small dark metal tiles with a status LED (used instead of emoji)
+const PDI={sheet:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',ctrl:'<rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2.3" fill="currentColor"/>',  tune:'<path d="M4 9.5c0-2.6 2-4.5 4.6-4.5H10v9H8.6C6 14 4 12.1 4 9.5z"/><path d="M10 9.5h5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17.5 12v8.5"/>',  learn:'<path d="M5 4.5h14"/><path d="M5 4.5V20M7.8 4.5V20M10.6 4.5V20M13.4 4.5V20M16.2 4.5V20M19 4.5V20"/><path d="M5 9h14M5 13.5h14M5 18h14" opacity=".55"/><circle cx="10.6" cy="11.2" r="1.5" fill="currentColor"/><circle cx="13.4" cy="15.7" r="1.5" fill="currentColor"/><circle cx="16.2" cy="11.2" r="1.5" fill="currentColor"/>',  write:'<path d="M3.5 7h9M3.5 11h6.5M3.5 15h4"/><path d="M12.5 20.5l.9-3.6 6.2-6.2 2.7 2.7-6.2 6.2z"/>',  gear:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V5h6v2"/><circle cx="8" cy="11" r="1.3"/><circle cx="12" cy="11" r="1.3"/><circle cx="16" cy="11" r="1.3"/><path d="M6.5 15.5h11"/>',  library:'<path d="M3 14h18v6.5H3z"/><path d="M5.5 14a5 5 0 0 1 9.5-2"/><path d="M9 14a5 5 0 0 1 9.8-1.6"/><path d="M8 17.2h8"/>',  add:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 8.6v6M9 11.6h6"/>',  video:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 8.5h18M3 15.5h18" opacity=".5"/><path d="M10.3 10v4l3.5-2z" fill="currentColor"/>',  shots:'<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M9.5 8h5M9.5 11.5h5M9.5 15h3"/><path d="M10 6.3h.01M13.5 6.3h.01M10 9.8h.01"/>',  mixer:'<path d="M6 4v16M12 4v16M18 4v16" opacity=".55"/><rect x="4.3" y="13" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="10.3" y="6.5" width="3.4" height="3" rx=".8" fill="currentColor"/><rect x="16.3" y="10.5" width="3.4" height="3" rx=".8" fill="currentColor"/>',  draft:'<path d="M6 3h8l4 4v6"/><path d="M6 3v18h6"/><path d="M14 3v4h4"/><path d="M14 21l.6-2.6 4.6-4.6 2 2-4.6 4.6z"/><path d="M8.5 11h6M8.5 14.5h3"/>',  search:'<circle cx="10" cy="10" r="6.2"/><path d="M14.6 14.6L20.5 20.5"/><path d="M7.3 8.4h5.4M7.3 11.6h5.4M8.9 7v6.2M11.1 7v6.2" opacity=".6"/>',  lessons:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M10.6 9v5.4l4.3-2.7z" fill="currentColor"/>',  ideas:'<path d="M12 21c-4-2.9-7-7.3-7-11.3C5 6.3 8 4 12 4s7 2.3 7 5.7c0 4-3 8.4-7 11.3z"/><path d="M12 7.6l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z" fill="currentColor" stroke="none"/>',  folder:'<path d="M3 7.2A2 2 0 0 1 5 5.2h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13.5h8" opacity=".55"/>',  guitar:'<path d="M13.5 10.5L20 4"/><path d="M18.6 2.8l2.6 2.6"/><path d="M11.8 9.6c-1.6-1.4-4-1.2-5.2.5-.6.9-.5 1.9-1.5 2.5-1.6 1-2.4 3.2-1 4.8l1 1c1.6 1.4 3.8.6 4.8-1 .6-1 1.6-.9 2.5-1.5 1.7-1.2 1.9-3.6.5-5.2z"/><circle cx="9.4" cy="14.6" r="1.3"/>',  vocals:'<rect x="9" y="3" width="6" height="10.5" rx="3"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/>',  drums:'<ellipse cx="12" cy="9" rx="8" ry="2.6"/><path d="M4 9v7.5c0 1.4 3.6 2.6 8 2.6s8-1.2 8-2.6V9"/><path d="M7 3.5l3.6 4.6M17 3.5l-3.6 4.6"/>',  bass:'<path d="M5.5 9.2a4.6 4.6 0 1 1 6.8 4.1c-2 1.4-4.4 2.9-6.8 4"/><circle cx="7.6" cy="9.4" r="1.3" fill="currentColor"/><circle cx="17" cy="8" r=".9" fill="currentColor" stroke="none"/><circle cx="17" cy="12.2" r=".9" fill="currentColor" stroke="none"/>',  piano:'<rect x="3" y="5" width="18" height="14" rx="1.6"/><path d="M8.4 12.5V19M13.7 12.5V19M18 12.5V19" opacity=".55"/><rect x="6.6" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/><rect x="12" y="5" width="3.4" height="7.5" fill="currentColor" stroke="none"/>',  other:'<path d="M3 12h2.2l2-5 3 10 3-12.5 3 9.5 2-2H21"/>',  amp:'<rect x="4" y="3.5" width="16" height="17" rx="2"/><circle cx="12" cy="13.5" r="4.2"/><circle cx="12" cy="13.5" r="1.2" fill="currentColor"/><path d="M7.5 6.8h.01M10.5 6.8h.01M13.5 6.8h.01"/>',  model:'<path d="M9 21.5V12.5L7 5l5-3 5 3-2 7.5v9"/><path d="M6.6 7.5h1M6.6 10.5h1.4M16.4 7.5h1M16 10.5h1.4"/>',  photo:'<rect x="3" y="7" width="18" height="12.5" rx="2"/><path d="M8.5 7l1.4-2.5h4.2L15.5 7"/><circle cx="12" cy="13.2" r="3.4"/>',  strengths:'<circle cx="12" cy="13.5" r="6.2"/><path d="M12 13.5l3.6-3.6"/><path d="M3.5 13.5H5M19 13.5h1.5M12 4.5V6M5.8 7.3l1 1M18.2 7.3l-1 1"/>',  tips:'<path d="M3 7.5h18M3 16.5h18"/><path d="M8 7.5v9M16 7.5v9" opacity=".55"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/>',  cleaning:'<path d="M9 9.5h6V21H9z"/><path d="M10.2 9.5V6.5h3.6v3"/><path d="M13.8 6.5h3l1.2 1.4"/><path d="M20 5.5h.01M21 8h.01M20 10.5h.01"/><path d="M10.8 14h2.4" opacity=".6"/>',  care:'<path d="M12 3c3.2 4 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.8-7 6-11z"/><path d="M10 17l4-4.5"/><path d="M10.2 12.8h.01M13.8 16.8h.01"/>',  repair:'<path d="M4.5 19.5L13.8 10.2h4.7"/><path d="M17.6 3.8l2.6 1.5v3l-2.6 1.5-2.6-1.5v-3z"/>',  strings:'<path d="M12 12.4a1.4 1.4 0 1 0-1.4-1.4"/><path d="M10.6 11a3.4 3.4 0 1 0 3.4-3.4"/><path d="M14 7.6A5.4 5.4 0 1 0 19.4 13"/><path d="M19.4 13c0 3.5-1.4 6.2-3.6 8"/>',  ask:'<path d="M4 5h16v11.5H10.5L6.5 20v-3.5H4z"/><path d="M8.5 10.8h.01M12 10.8h.01M15.5 10.8h.01"/>',  profile:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 12.5h6M9 16h3.5"/><path d="M17 15.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" stroke="none"/>',  finder:'<path d="M3 6h18M3 18h18" /><path d="M3 9h18M3 12h18M3 15h18" opacity=".4"/><path d="M8 6v12M14 6v12M20 6v12" opacity=".7"/><circle cx="11" cy="9" r="1.6" fill="currentColor"/><circle cx="17" cy="12" r="1.6" fill="currentColor"/><circle cx="11" cy="15" r="1.6" fill="currentColor"/>',  gallery:'<rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 16.5l5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="9" r="1.3"/>',  trash:'<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5" opacity=".6"/>',  lock:'<rect x="5.5" y="10.5" width="13" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><path d="M12 14.5v2.5"/>',  done:'<circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/>'};
+const PDM={'TUNE':['tune','#66BB6A'],'LEARN':['learn','#66BB6A'],'WRITE':['write','#FFB74D'],'GEAR':['gear','#4FC3F7'],'LIB':['library','#66BB6A'],'ADD':['add','#FFB74D'],'VIDEO':['video','#FFB74D'],'SCAN':['shots','#FFB74D'],'MIX':['mixer','#4FC3F7'],'DRAFT':['draft','#FFB74D'],'SHEETS':['search','#66BB6A'],'SHEET':['sheet','#66BB6A'],'LESSON':['lessons','#66BB6A'],'IDEAS':['ideas','#FFB74D'],'DRIVE':['folder','#4FC3F7'],'NOTE':['draft','#8E9A95'],'GTR':['guitar','#FFB74D'],'GTR L':['guitar','#FFB74D'],'GTR C':['guitar','#FFB74D'],'GTR R':['guitar','#FFB74D'],'VOX':['vocals','#66BB6A'],'DRM':['drums','#4FC3F7'],'BASS':['bass','#4FC3F7'],'KEYS':['piano','#66BB6A'],'OTHER':['other','#8E9A95'],'PART':['other','#8E9A95'],'AMP':['amp','#4FC3F7'],'MODEL':['model','#FFB74D'],'PHOTO':['photo','#66BB6A'],'RANGE':['strengths','#66BB6A'],'TIP':['tips','#FFB74D'],'CLEAN':['cleaning','#4FC3F7'],'HUMID':['care','#4FC3F7'],'REPAIR':['repair','#FF6A1A'],'STRINGS':['strings','#66BB6A'],'ASK':['ask','#66BB6A'],'PROFILE':['profile','#66BB6A'],'GALLERY':['gallery','#8E9A95'],'CTRL':['ctrl','#4FC3F7'],'CHORDS':['learn','#66BB6A'],'FINDER':['finder','#66BB6A'],'DEL':['trash','#FF6A1A'],'OK':['done','#66BB6A']};
+const SK=t=>{const m=PDM[t]||['other','#8E9A95'];return `<span class="pd" style="--led:${m[1]}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${PDI[m[0]]}</svg></span>`};
+// static markup carries <span data-pd="LABEL"></span>; drawn once at start
+document.querySelectorAll('[data-pd]').forEach(e=>{e.outerHTML=SK(e.dataset.pd)});
+const NAMES=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const TUNINGS=[
+ {id:'std',name:'Standard',n:[40,45,50,55,59,64]},
+ {id:'dropd',name:'Drop D',n:[38,45,50,55,59,64]},
+ {id:'half',name:'Half step down',n:[39,44,49,54,58,63]},
+ {id:'whole',name:'D Standard',n:[38,43,48,53,57,62]},
+ {id:'dropcs',name:'Drop C♯',n:[37,44,49,54,58,63]},
+ {id:'dropc',name:'Drop C',n:[36,43,48,53,57,62]},
+ {id:'dropb',name:'Drop B',n:[35,42,47,52,56,61]},
+ {id:'dadgad',name:'DADGAD',n:[38,45,50,55,57,62]},
+ {id:'opend',name:'Open D',n:[38,45,50,54,57,62]},
+ {id:'openg',name:'Open G',n:[38,43,50,55,59,62]},
+ {id:'opene',name:'Open E',n:[40,47,52,56,59,64]},
+ {id:'openc',name:'Open C',n:[36,43,48,55,60,64]},
+];
+const $=id=>document.getElementById(id);
+let gearRemoving=null;// id the person is deliberately removing
+// ---- storage names: the live app keeps its data under tuner.* / guitaring.* and in the database "guitaring";
+// the beta (…/beta/) keeps its own copy under tunerb.* / guitaringb.* and "guitaring-beta", so trying the beta never changes the live app's data
+const BETA=!!window.__GUITARING_BETA,KP=BETA?'tunerb.':'tuner.',KG=BETA?'guitaringb.':'guitaring.',IDBN=BETA?'guitaring-beta':'guitaring';
+// beta: copy the live app's small data (songs, sheets, gear, settings) once, on its first open, and when asked again
+function betaCopyLive(){try{const ks=[];for(let i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+ ks.forEach(k=>{if(k&&(k.startsWith('tunerb.')||k.startsWith('guitaringb.')))localStorage.removeItem(k)});
+ ks.forEach(k=>{if(!k)return;if(k.startsWith('tuner.'))localStorage.setItem('tunerb.'+k.slice(6),localStorage.getItem(k));else if(k.startsWith('guitaring.'))localStorage.setItem('guitaringb.'+k.slice(10),localStorage.getItem(k))});
+ localStorage.setItem('guitaringb.copiedAt',String(Date.now()))}catch(e){}}
+if(BETA){try{if(!localStorage.getItem('guitaringb.copiedAt'))betaCopyLive()}catch(e){}}
+const store={get(k,d){try{const v=localStorage.getItem(KP+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{
+ if(k==='instruments'&&Array.isArray(v)){try{const old=JSON.parse(localStorage.getItem(KP+'instruments')||'[]')||[],ids=new Set(v.map(x=>x&&x.id)),lost=old.filter(x=>x&&x.id&&!ids.has(x.id)&&x.id!==gearRemoving);
+  if(lost.length){const keep=JSON.parse(localStorage.getItem(KP+'gearLost')||'[]').filter(x=>!lost.some(y=>y.id===x.id));localStorage.setItem(KP+'gearLost',JSON.stringify(keep.concat(lost).slice(-10)))}}catch(e){}}
+ localStorage.setItem(KP+k,JSON.stringify(v))}catch(e){}}};
+
+let a4=store.get('a4',440), inst=store.get('inst','acoustic');
+let tuning=TUNINGS.find(t=>t.id===store.get('tuning','std'))||TUNINGS[0];
+let locked=null, target=0, done=new Set();
+const nm=m=>NAMES[((m%12)+12)%12], oc=m=>Math.floor(m/12)-1, fq=m=>a4*Math.pow(2,(m-69)/12);
+const shortName=t=>t.n.map(nm).map(s=>s.replace('♯','#').replace('♭','b')).join('');
+
+/* gauge */
+/* ±15¢ fills most of the arc (fine tuning); 15–50¢ is squeezed into the ends so far-off strings still show */
+const CX=160,CY=172,R=132,SPAN=62,FINE=.6;
+const pt=(deg,r)=>{const a=(deg-90)*Math.PI/180;return [CX+r*Math.cos(a),CY+r*Math.sin(a)]};
+const centsAng=c=>{const a=Math.min(50,Math.abs(c)),f=a<=15?a/15*FINE:FINE+(a-15)/35*(1-FINE);return Math.sign(c)*f*SPAN};
+const arcD=(c1,c2,r)=>{const [a,b]=pt(centsAng(c1),r),[x,y]=pt(centsAng(c2),r);return `M${a.toFixed(1)} ${b.toFixed(1)} A${r} ${r} 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}`};
+(()=>{let s='';const T=(c,cls,i,o)=>{const d=centsAng(c),[x1,y1]=pt(d,R-i),[x2,y2]=pt(d,R-o);return `<line class="tick${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`};
+ for(let c=-15;c<=15;c++){if(c%5===0)s+=T(c,c?' major':' major zero',10,c?26:30);else s+=T(c,'',10,18)}
+ [-50,-30,30,50].forEach(c=>s+=T(c,' far',10,20));
+ const L=(c,t)=>{const [x,y]=pt(centsAng(c),R-40);return `<text class="tlab" x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle">${t}</text>`};
+ s+=L(-15,'−15')+L(15,'+15')+L(-50,'−50')+L(50,'+50');
+ $('ticks').innerHTML=s;$('track').setAttribute('d',arcD(-50,50,R));$('zone').setAttribute('d',arcD(-5,5,R))})();
+// spring-damped needle: a little overshoot and settle, like a real meter movement
+let needleNow=0,needleGoal=0,needleVel=0,needleRaf=0,needleT=0;
+const needleCalm=matchMedia('(prefers-reduced-motion: reduce)');
+function needleStep(ts){
+ const goal=centsAng(needleGoal);let dt=needleT?(ts-needleT)/1000:1/60;needleT=ts;dt=Math.min(dt,1/30);
+ if(needleCalm.matches){needleNow=goal;needleVel=0}
+ else for(let k=0;k<2;k++){const h=dt/2,acc=140*(goal-needleNow)-24*needleVel;needleVel+=acc*h;needleNow+=needleVel*h}
+ $('needle').setAttribute('transform',`rotate(${needleNow.toFixed(2)} ${CX} ${CY})`);
+ if(Math.abs(goal-needleNow)<.02&&Math.abs(needleVel)<.05){needleNow=goal;needleVel=0;needleRaf=0;needleT=0;$('needle').setAttribute('transform',`rotate(${needleNow.toFixed(2)} ${CX} ${CY})`);return}
+ needleRaf=requestAnimationFrame(needleStep)}
+function drawNeedle(){if(!needleRaf){needleT=0;needleRaf=requestAnimationFrame(needleStep)}}
+window.__tunerTest={state:()=>({goal:needleGoal,ang:needleNow,cents:$('cents').textContent,st:$('status').textContent}),needle(c){needleGoal=c;drawNeedle()},angle:c=>centsAng(c),head:st=>setHeadState(st),done(i){done.add(i);renderStrings()}};
+
+/* UI build */
+function renderTunings(){
+ $('tunings').innerHTML=TUNINGS.map(t=>`<button class="chip" data-id="${t.id}" aria-pressed="${t===tuning}">${t.name}<small>${shortName(t)}</small></button>`).join('');
+}
+/* headstock: 3 pegs per side, strings fan to the nut; i=0 is the low string (string 6) */
+// laid out like a 3+3 headstock seen from the front, nut on the right: top G B E (3 2 1), bottom D A E (4 5 6)
+const HS={top:[3,4,5].map((k,j)=>({str:k,x:66+j*76})),bot:[2,1,0].map((k,j)=>({str:k,x:66+j*76}))};
+const NUTY=[64,73,82,92,101,110];// y at the nut for string 1..6
+const HSW=360,HSH=174,PEGY={top:40,bot:134};
+const SUP={1:'¹',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶'};
+function renderStrings(){
+ const all=[...HS.top.map(o=>({...o,top:true})),...HS.bot.map(o=>({...o,top:false}))];
+ const peg=o=>{const i=o.str,m=tuning.n[i],sn=6-i,on=i===target,cls=`str peg${o.top?' up':' down'}${on?' target':''}${i===locked?' locked':''}${done.has(i)?' tuned':''}`;
+  return `<button type="button" class="${cls}" data-i="${i}" style="left:${(o.x/HSW*100).toFixed(2)}%;top:${(PEGY[o.top?'top':'bot']/HSH*100).toFixed(2)}%" aria-pressed="${on}" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}${done.has(i)?', in tune':''}"><b>${nm(m)}<sup>${SUP[sn]}</sup></b><i class="ok" aria-hidden="true">✓</i><span class="turn" aria-hidden="true"></span></button>`};
+ const post=o=>{const y=PEGY[o.top?'top':'bot'];return `<circle class="post" cx="${o.x}" cy="${y}" r="7"/>`};
+ const strLine=o=>{const i=o.str,y=PEGY[o.top?'top':'bot'],ny=NUTY[5-i];return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${o.x} ${y} L296 ${ny} L360 ${ny}"/>`};
+ $('strings').innerHTML=`<div class="hs" role="group" aria-label="Guitar headstock — tap a peg to tune that string, tap it again for automatic">
+  <svg class="hsart" viewBox="0 0 ${HSW} ${HSH}" aria-hidden="true">
+   <defs><linearGradient id="hsWood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C2E34"/><stop offset=".5" stop-color="#202227"/><stop offset="1" stop-color="#17181C"/></linearGradient>
+   <linearGradient id="hsNut" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9E4D6"/><stop offset="1" stop-color="#B8B2A2"/></linearGradient></defs>
+   <path class="hsbody" d="M12 87 C12 40 26 14 58 12 L262 20 Q282 22 296 52 L296 122 Q282 152 262 154 L58 162 C26 160 12 134 12 87 Z"/>
+   <path class="hsedge" d="M58 12 L262 20 Q282 22 296 52"/>
+   <rect class="board" x="302" y="56" width="58" height="62"/><line class="fret" x1="334" y1="56" x2="334" y2="118"/>
+   <rect class="nut" x="296" y="54" width="6" height="66" rx="1.5" fill="url(#hsNut)"/>
+   ${all.map(strLine).join('')}${all.map(post).join('')}
+  </svg>${all.map(peg).join('')}</div>`;
+ setHeadState($('strings').dataset.state||'');updateModeChip();
+}
+function updateModeChip(){const c=$('modeChip');if(!c)return;c.textContent=locked!=null?`String ${6-locked} · ${nm(tuning.n[locked])}  ✕`:'Auto';c.classList.toggle('on',locked!=null);c.setAttribute('aria-label',locked!=null?'Tuning one string. Tap to go back to automatic':'Automatic string detection')}
+function setHeadState(state,cents){
+ const el=$('strings');el.dataset.state=state||'';
+ const fi=$('flatInd'),si=$('sharpInd');if(fi){fi.classList.toggle('on',state==='flat');si.classList.toggle('on',state==='sharp')}
+ el.querySelectorAll('.turn').forEach(t=>t.textContent='');
+ const tg=el.querySelector('.str.target .turn');if(tg&&(state==='flat'||state==='sharp'))tg.textContent=state==='flat'?'↻ tighten':'↺ loosen';
+}
+$('strings').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('.str')&&e.target.tagName!=='BUTTON'){e.preventDefault();e.target.closest('.str').dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+function showTarget(){
+ const m=tuning.n[target];$('note').innerHTML=`${nm(m)}<sub>${oc(m)}</sub>`;$('tgt').textContent=fq(m).toFixed(2);
+}
+function setTuning(t){tuning=t;store.set('tuning',t.id);locked=null;target=0;done.clear();renderTunings();renderStrings();showTarget();stopRepeat();try{gtrUpdate(g=>g.tuning=t.id);renderInstPick()}catch(e){}}
+$('tunings').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)setTuning(TUNINGS.find(t=>t.id===b.dataset.id))});
+/* which guitar you're tuning: one of yours from My gear (or a generic acoustic/electric) */
+const myGuitars=()=>(store.get('instruments',null)||[]).filter(g=>!/amp$/.test(g.type));
+let tuneGtr=store.get('tuneInst','');
+function curGtr(){return myGuitars().find(g=>g.id===tuneGtr)||null}
+function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst)}
+function renderInstPick(){
+ const l=myGuitars();if(l.length&&!curGtr()&&tuneGtr!=='acoustic'&&tuneGtr!=='electric'){tuneGtr=l[0].id;store.set('tuneInst',tuneGtr)}
+ const opts=l.length?l.map(g=>[g.id,g.name]):[['acoustic','Acoustic'],['electric','Electric']];
+ $('inst').innerHTML=opts.map(([id,n])=>`<button type="button" class="chip" data-g="${esc(id)}" aria-pressed="${id===tuneGtr||(!l.length&&!tuneGtr&&id==='acoustic')}" dir="auto">${esc(n)}</button>`).join('')+(l.length?'':'<span class="tip">Add your guitars in <b>My gear</b> to pick them here.</span>');
+ const g=curGtr(),line=$('gtrLine');line.hidden=!g;if(g)line.innerHTML=`<span>Tuning</span> <b dir="auto">${esc(g.name)}</b>${g.tuning&&g.tuning!==tuning.id?` · usually ${esc((TUNINGS.find(t=>t.id===g.tuning)||{}).name||'')}`:''} <i>▾</i>`;
+ applyGtr();
+}
+$('inst').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;tuneGtr=b.dataset.g;store.set('tuneInst',tuneGtr);
+ const g=curGtr();if(g&&g.tuning&&g.tuning!==tuning.id){const t=TUNINGS.find(x=>x.id===g.tuning);if(t)setTuning(t)}renderInstPick()});
+$('gtrLine').onclick=()=>{const p=$('gtrPick'),open=p.hidden;p.hidden=!open;$('gtrLine').setAttribute('aria-expanded',open);if(open)p.innerHTML=$('inst').innerHTML.replace(/<span class="tip">.*<\/span>/,'')};
+$('gtrPick').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const twin=$('inst').querySelector(`[data-g="${CSS.escape(b.dataset.g)}"]`);if(twin)twin.click();$('gtrPick').hidden=true;$('gtrLine').setAttribute('aria-expanded','false')});
+// remember the guitar's tuning, and when all its strings were last in tune
+function gtrUpdate(f){const l=store.get('instruments',null)||[],g=l.find(x=>x.id===tuneGtr&&!/amp$/.test(x.type));if(!g)return;f(g);store.set('instruments',l)}
+function noteAllTuned(){if(done.size<tuning.n.length)return;gtrUpdate(g=>{g.tuning=tuning.id;g.lastTuned=new Date().toISOString().slice(0,10)});renderInstPick()}
+setTimeout(renderInstPick,0);
+function setA4(v){a4=Math.max(430,Math.min(450,v));store.set('a4',a4);$('calOut').textContent='A4 '+a4;showTarget()}
+$('calDown').onclick=()=>setA4(a4-1);$('calUp').onclick=()=>setA4(a4+1);
+
+$('strings').addEventListener('click',e=>{const b=e.target.closest('.str');if(!b)return;const i=+b.dataset.i;
+ // tap = tune this string (silent); tap the same string again = back to automatic
+ if(locked===i)locked=null;else{locked=i;target=i}
+ lastTap=i;hist=[];lastCents=null;holdUntil=0;renderStrings();showTarget();modeNote();if(repeatOn)startRepeat()});
+function modeNote(){const st=$('status');if(listening&&performance.now()<holdUntil)return;st.className='status';
+ st.textContent=locked!=null?`Tuning string ${6-locked} (${nm(tuning.n[locked])})${listening?'':' · tap Listen'}`:(listening?`Play any string`:'Tap Listen to start')}
+let lastTap=null;
+$('modeChip').onclick=()=>{if(locked==null)return;locked=null;hist=[];renderStrings();modeNote()};
+
+/* reference tone: Karplus-Strong pluck */
+let ctx;
+const getCtx=()=>{if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();return ctx};
+function pluck(f){
+ const c=getCtx(),sr=c.sampleRate,N=Math.round(sr/f),len=Math.floor(sr*(inst==='electric'?3.6:2.6));
+ const buf=c.createBuffer(1,len,sr),out=buf.getChannelData(0),d=new Float32Array(N);
+ for(let i=0;i<N;i++)d[i]=Math.random()*2-1;
+ const passes=inst==='electric'?3:1;for(let p=0;p<passes;p++)for(let i=1;i<N;i++)d[i]=(d[i]+d[i-1])*.5;
+ const damp=inst==='electric'?0.9985:0.9955;let p=0;
+ for(let i=0;i<len;i++){out[i]=d[p];const n=(p+1)%N;d[p]=damp*.5*(d[p]+d[n]);p=n}
+ const src=c.createBufferSource();src.buffer=buf;src.playbackRate.value=f/(sr/(N+0.5));
+ const g=c.createGain();g.gain.setValueAtTime(inst==='electric'?0.55:0.75,c.currentTime);g.gain.setTargetAtTime(0,c.currentTime+len/sr-0.4,0.12);
+ let node=src;
+ if(inst==='electric'){const ws=c.createWaveShaper(),k=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;k[i]=Math.tanh(2.2*x)}ws.curve=k;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;src.connect(ws);ws.connect(lp);node=lp}
+ node.connect(g);g.connect(c.destination);src.start();
+}
+let repeatOn=false,repTimer=null;
+function startRepeat(){clearInterval(repTimer);repTimer=setInterval(()=>pluck(fq(tuning.n[target])),2400)}
+function stopRepeat(){clearInterval(repTimer);repTimer=null}
+$('repeat').onclick=()=>{repeatOn=!repeatOn;$('repeat').setAttribute('aria-pressed',repeatOn);if(repeatOn){pluck(fq(tuning.n[target]));startRepeat()}else stopRepeat()};
+
+/* pitch detection — band-pass filter, adaptive noise gate, McLeod (NSDF) pitch with clarity check, multi-frame agreement */
+const NF={normal:{clar:.78,gate:2,need:2},strong:{clar:.85,gate:3,need:2},max:{clar:.9,gate:4.5,need:3}};
+let nfMode=store.get('nf','strong');if(!NF[nfMode])nfMode='strong';
+function setNF(m){nfMode=m;store.set('nf',m);[...$('nf').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.nf===m))}
+$('nf').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setNF(b.dataset.nf)});setNF(nfMode);
+let listening=false,stream,analyser,data,raf,hist=[],lastHeard=0,okSince=0,wake=null,floor=null,dec=null,nsdf=null;
+function searchRange(){
+ if(locked!=null){const f=fq(tuning.n[locked]);return [f*0.75,f*1.34]}
+ const fs=tuning.n.map(fq);return [Math.min(...fs)*0.75,Math.max(...fs)*1.34];
+}
+function detect(b,sr,lo,hi){
+ const n=b.length>>1,fs=sr/2;if(!dec||dec.length!==n)dec=new Float32Array(n);
+ for(let i=0;i<n;i++)dec[i]=(b[2*i]+b[2*i+1])*.5;
+ const minLag=Math.max(2,Math.floor(fs/hi)),maxLag=Math.min(Math.ceil(fs/lo),(n>>1)-2);
+ if(!nsdf||nsdf.length<maxLag+2)nsdf=new Float32Array(maxLag+2);
+ for(let t=0;t<=maxLag+1;t++){let ac=0,m=0;for(let i=0,e=n-t;i<e;i++){const p=dec[i],q=dec[i+t];ac+=p*q;m+=p*p+q*q}nsdf[t]=m?2*ac/m:0}
+ const peaks=[];let pos=false,cur=-1;
+ for(let t=1;t<=maxLag;t++){
+  if(nsdf[t-1]<0&&nsdf[t]>=0){pos=true;cur=-1}
+  else if(nsdf[t-1]>=0&&nsdf[t]<0){if(pos&&cur>0)peaks.push(cur);pos=false}
+  if(pos&&(cur<0||nsdf[t]>nsdf[cur]))cur=t;
+ }
+ if(pos&&cur>0)peaks.push(cur);
+ const ok=peaks.filter(t=>t>=minLag);if(!ok.length)return null;
+ let mx=0;ok.forEach(t=>{if(nsdf[t]>mx)mx=nsdf[t]});
+ const p=ok.find(t=>nsdf[t]>=0.9*mx);
+ const y1=nsdf[p-1],y2=nsdf[p],y3=nsdf[p+1],a=(y1+y3-2*y2)/2,bb=(y3-y1)/2,T=a?p-bb/(2*a):p;
+ return {f:fs/T,clarity:y2};
+}
+function meter(rms,gate){
+ const pct=v=>Math.max(0,Math.min(100,(20*Math.log10(Math.max(v,1e-5))+60)/60*100));
+ const l=$('lvl');l.style.width=pct(rms)+'%';l.classList.toggle('hot',rms>=gate);$('gate').style.left=pct(gate)+'%';
+}
+function idle(now){
+ if(now-lastHeard<700)return;
+ hist=[];needleGoal=0;$('screen').classList.remove('ok','locked');setFine(null);$('hz').textContent='—';$('cents').textContent='—';okSince=0;
+ const st=$('status');st.className='status';st.textContent=locked!=null?`Play string ${6-locked} (${nm(tuning.n[locked])})`:'Play any string';showTarget();
+}
+let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,rawC=[],lastGoodAt=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
+// phone mics barely pick up a low string's fundamental, so the tuner can lock onto its 2nd/3rd harmonic
+// (an in-tune A2 read as A3 = "way too high"). In automatic mode, if a reading is far from every string but
+// half/a third of it lands on a string, or it's an exact multiple of the string just played, use that instead.
+function octaveFix(f,now){
+ if(locked!=null)return f;
+ const off=x=>Math.min(...tuning.n.map(m=>Math.abs(1200*Math.log2(x/fq(m)))));
+ // a string that's merely out of tune (up to a semitone either way) is never re-read as another string's overtone:
+ // the high E is exactly 2 octaves above the low E, so a flat high E used to be shown as the low E
+ const d=off(f);if(d<=100)return f;
+ // only for readings far from every string: a high string that's merely out of tune (E4 = 4 × low E) must stay itself
+ if(d>60&&lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<40)return f/k}
+ for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
+ return f}
+function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
+/* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off.
+   Only guitar-like sound counts: plucked attacks + a spectrum made of clear note peaks. Wind, traffic and people
+   talking are loud and pitch-less too, but they don't have that shape. */
+let playLog=[],lastLoud=0,listenStart=0,lastPlayCheck=0,quietLvl=null,envF=0,envSl=0,lastOn=0,playHits=0,spec=null;
+function tonalPeaks(f0){
+ if(!spec||spec.length!==analyser.frequencyBinCount)spec=new Float32Array(analyser.frequencyBinCount);
+ analyser.getFloatFrequencyData(spec);const bw=ctx.sampleRate/analyser.fftSize,k0=Math.ceil(70/bw),k1=Math.floor(1100/bw);
+ const band=Array.from(spec.subarray(k0,k1+1)).filter(isFinite);if(band.length<10)return {n:0,frac:0};
+ const med=band.slice().sort((x,y)=>x-y)[band.length>>1];let n=0,pk=0,tot=0,off=0;
+ for(let k=k0;k<=k1;k++){const p=Math.pow(10,spec[k]/10);tot+=p;
+  if(spec[k]>=med+12&&spec[k]>=spec[k-1]&&spec[k]>=spec[k+1]&&spec[k]>=spec[k-2]&&spec[k]>=spec[k+2]){n++;for(let j=-1;j<=1;j++)pk+=Math.pow(10,spec[k+j]/10);
+   // a peak that isn't a harmonic of the note we hear = a second note sounding = a chord
+   if(f0){const h=k*bw/f0,dh=Math.abs(h-Math.round(h));if(h>.8&&dh*f0>Math.max(bw*1.2,f0*.04))off++}}}
+ return {n,frac:tot?pk/tot:0,off}}
+function autoStopCheck(now,rms,gate,r,clear){
+ // the room's quiet level: follows dips at once, creeps up slowly (constant strumming must not become "the room")
+ quietLvl=quietLvl==null||rms<quietLvl?Math.max(rms,.0004):quietLvl*1.0004;
+ const loud=rms>=Math.max(.003,quietLvl*4);if(loud)lastLoud=now;
+ envF=envF*.55+rms*.45;envSl=envSl*.97+rms*.03;
+ const onset=loud&&envF>envSl*1.9&&now-lastOn>140;if(onset)lastOn=now;
+ let chord=false;if(loud&&(playLog.length&1)){const unclear=!r||r.clarity<.75,t=tonalPeaks(unclear?0:r.f);chord=unclear?t.n>=5&&t.frac>=.65:t.off>=2&&t.frac>=.65;if(window.__alog)window.__alog.push([now|0,t.n,t.off,+t.frac.toFixed(2)])}
+ playLog.push({t:now,loud,chord,onset,semi:clear?Math.round(12*Math.log2(r.f/a4)):null});
+ while(playLog.length&&playLog[0].t<now-5000)playLog.shift();
+ if(now-lastPlayCheck<250)return false;lastPlayCheck=now;
+ // nothing guitar-like (no clear string note) for 12 s: background noise alone doesn't keep it on
+ if(now-Math.max(lastHeard,listenStart)>12000){stopListening('quiet');return true}
+ if(now-listenStart<4000)return false;
+ const n=playLog.length,loudN=playLog.filter(x=>x.loud).length,chordN=playLog.filter(x=>x.chord).length,ons=playLog.filter(x=>x.onset).length;
+ // notes held steady for ~130 ms (a voice glides, a fretted note doesn't), repeats merged
+ const seq=[];let run=null,len=0;for(const x of playLog){if(x.semi==null){run=null;continue}if(x.semi===run)len++;else{run=x.semi;len=1}if(len===8&&seq[seq.length-1]!==run)seq.push(run)}
+ const strum=loudN/n>=.5&&chordN/n>=.2&&ons>=7,tune=new Set(seq).size>=4&&seq.length>=9;
+ if(window.__plog)window.__plog.push([(now-listenStart)/1000|0,+(loudN/n).toFixed(2),+(chordN/n).toFixed(2),ons,seq.length,new Set(seq).size]);
+ playHits=strum||tune?playHits+1:0;
+ if(playHits>=6&&!window.__nostop){stopListening('playing');return true}
+ return false}
+function loop(){
+ raf=requestAnimationFrame(loop);analyser.getFloatTimeDomainData(data);
+ const now=performance.now(),cfg=NF[nfMode];
+ let rms=0;for(let i=0;i<data.length;i++)rms+=data[i]*data[i];rms=Math.sqrt(rms/data.length);
+ // look for a pitch whenever there is any sound at all
+ let r=null;if(rms>=.0015){const [lo,hi]=searchRange();r=detect(data,ctx.sampleRate,lo,hi)}
+ // learn the room's background level only from moments with no clear note, so a ringing string never raises it
+ // …and never while a plucked string is still ringing (re-plucking, other strings ringing along), and only slowly upwards,
+ // or steady tuning would teach it that the guitar is the background and it would stop hearing the strings
+ if((!r||r.clarity<.6)&&(floor==null||now-onsetAt>1800)){floor=floor==null?rms:(rms<floor?floor*.9+rms*.1:floor*.985+Math.min(rms,floor*1.5)*.015)}
+ const gate=Math.max(.002,(floor??0)*cfg.gate);meter(rms,gate);
+ // a very clean pitch counts even when it's quieter than the noise gate: a thin high E is soft on a phone mic, room noise is never this clean
+ const clear=r&&r.clarity>=cfg.clar&&(rms>=gate||(r.clarity>=.95&&rms>=Math.max(.0012,gate*.35)));
+ if(autoStopCheck(now,rms,gate,r,clear))return;
+ if(window.__tlog)window.__tlog.push([now|0,+rms.toFixed(4),+gate.toFixed(4),r&&+r.f.toFixed(2),r&&+r.clarity.toFixed(3)]);
+ // the pick attack is briefly sharp and harmonic-heavy: skip the first moments of a new pluck
+ envS=envS==null?rms:envS*.94+rms*.06;if(rms>=gate&&rms>envS*2.2){onsetAt=now;notePeak=rms}notePeak=Math.max(notePeak*.993,rms);
+ if(clear&&now-onsetAt>=110)hist.push({f:octaveFix(r.f,now),t:now,q:r.clarity});
+ hist=hist.filter(h=>now-h.t<300).slice(-6);
+ let med=0,agree=0;
+ if(hist.length){const s2=hist.map(h=>h.f).sort((a,b)=>a-b);med=s2[s2.length>>1];agree=s2.filter(f=>Math.abs(1200*Math.log2(f/med))<30).length}
+ const st=$('status');
+ if(agree>=cfg.need){
+  const close=hist.filter(h=>Math.abs(1200*Math.log2(h.f/med))<30).map(h=>h.f);
+  med=close.reduce((a,b)=>a+b,0)/close.length;lastHeard=now;holdUntil=now+1200;
+  let i=locked;if(i==null){let best=1e9;tuning.n.forEach((m,k)=>{const cc=Math.abs(1200*Math.log2(med/fq(m)));if(cc<best){best=cc;i=k}})}
+  if(i!==target){target=i;renderStrings()}
+  lastStr=i;lastStrAt=now;
+  const m=tuning.n[i];let cents=1200*Math.log2(med/fq(m));
+  // smooth small wobbles, follow real peg turns quickly
+  // steady reading: median of the last ~0.45 s, then a slow glide for tiny wobbles; real peg turns still follow fast
+  // a fading or noisy note (low clarity) scatters by ±10¢: keep showing the last good reading instead of chasing it
+  // hold the last steady reading only while the note is noisy (low clarity), and never for long: the moment
+  // three readings in a row agree, they win. A quiet string (thin high E on a phone mic) must still move the needle.
+  rawC.push({t:now,c:cents});rawC=rawC.filter(x=>now-x.t<400);
+  const q=(hist[hist.length-1]||{}).q||0,agree=rawC.length>=3&&Math.max(...rawC.map(x=>x.c))-Math.min(...rawC.map(x=>x.c))<3;
+  const good=(q>=.93&&rms>gate*2.5)||(agree&&rms>gate*1.5);
+  if(good)lastGoodAt=now;
+  if(!good&&lastCents!=null&&cStr===i)cents=lastCents;
+  else{
+   if(cStr!==i)cHist=[];cStr=i;cHist.push({t:now,c:cents});cHist=cHist.filter(x=>now-x.t<280);
+   {const ss=cHist.map(x=>x.c).sort((a,b)=>a-b);if(ss.length>=3&&Math.abs(cents-ss[ss.length>>1])<8)cents=ss[ss.length>>1]}
+   const dt=Math.min(.1,(now-(lastCT||now))/1000||1/60);
+   if(lastCents==null||Math.abs(lastCents-cents)>15)lastCents=cents;else{const d=Math.abs(lastCents-cents),tau=d<1.5?.4:d<4?.14:.07,a=1-Math.exp(-dt/tau);lastCents=lastCents*(1-a)+cents*a}
+   cents=lastCents}
+  lastCT=now;
+  trend.push({t:now,c:Math.abs(cents)});trend=trend.filter(x=>now-x.t<700);
+  const heard=Math.round(69+12*Math.log2(med/a4));
+  $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
+  // the needle ignores the last ±1¢ (nobody can hear it, and it stops the centre flicker); the number only moves on a whole-cent change
+  if(shownC==null||Math.abs(cents-shownC)>=.8)shownC=Math.round(cents);
+  $('cents').textContent=shownC?(shownC>0?'+':'')+shownC:'0';const nc=Math.sign(cents)*Math.max(0,Math.abs(cents)-1);needleGoal=Math.max(-50,Math.min(50,nc));
+  // in the zone: enter at ±3¢, stay until ±5¢ (no flicker at the edge); hold it for half a second to lock in
+  const ac=Math.abs(cents),inZone=zoneStr===i&&okSince?ac<=5:ac<=3;
+  const scr=$('screen');scr.classList.remove('hold');setFine(cents,inZone);
+  if(inZone){if(!okSince||zoneStr!==i){okSince=now;zoneStr=i}
+   const held=now-okSince;scr.classList.toggle('ok',true);setHeadState('ok');
+   if(held>=450){if(!scr.classList.contains('locked')){scr.classList.add('locked');try{navigator.vibrate&&navigator.vibrate([45,70,45])}catch(e){}}
+    st.className='status ok';st.textContent=`${nm(m)} in tune ✓`;if(!done.has(i)){done.add(i);renderStrings();noteAllTuned()}}
+   else{scr.classList.remove('locked');st.className='status ok';st.textContent='Right there · hold it…'}}
+  else{okSince=0;zoneStr=null;scr.classList.remove('ok','locked');setHeadState(cents<0?'flat':'sharp');
+   const c=Math.abs(shownC??Math.round(ac)),far=ac>50;st.className='status '+(cents<0?'flat':'sharp');
+   let hint='';if(!far&&trend.length>4&&now-trend[0].t>450){const d=trend[0].c-ac;if(d>1.5)hint=' · closer';else if(d<-1.5)hint=' · wrong way'}
+   st.textContent=cents<0?(far?`Too low · tune up ↑ · ${c}¢ (${nm(heard)} → ${nm(m)})`:`Tune up ↑ · ${c}¢${hint}`):(far?`Too high · tune down ↓ · ${c}¢ (${nm(heard)} → ${nm(m)})`:`Tune down ↓ · ${c}¢${hint}`)}
+ }else if(now<holdUntil){
+  // keep the last reading on screen briefly after the note fades, like a clip-on tuner
+  $('screen').classList.add('hold');
+ }else{
+  lastCents=null;trend=[];cHist=[];rawC=[];shownC=null;$('screen').classList.remove('hold','locked');setFine(null);setHeadState('');
+  if(rms>=gate&&r){st.className='status';st.textContent='Pluck one string'}
+  else idle(now);
+ }
+ drawNeedle();
+}
+async function startListening(){
+ const msg=$('msg');msg.hidden=true;
+ try{
+  getCtx();
+  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  const src=ctx.createMediaStreamSource(stream);let node=src;
+  [['highpass',55],['highpass',55],['lowpass',1100],['lowpass',1100]].forEach(([type,f])=>{const bq=ctx.createBiquadFilter();bq.type=type;bq.frequency.value=f;bq.Q.value=0.707;node.connect(bq);node=bq});
+  analyser=ctx.createAnalyser();analyser.fftSize=4096;data=new Float32Array(analyser.fftSize);node.connect(analyser);
+  floor=null;hist=[];playLog=[];quietLvl=null;playHits=0;envF=envSl=0;lastLoud=listenStart=performance.now();
+  listening=true;$('live').hidden=false;$('listen').classList.add('on');$('listenTxt').textContent='Stop';$('status').textContent=`Play string ${6-target}`;
+  try{wake=await navigator.wakeLock.request('screen')}catch(e){}
+  loop();
+ }catch(e){
+  msg.hidden=false;msg.textContent='The microphone isn’t available on this page. Tap a string and use Repeat tone to tune by ear, or open Guitaring in Chrome to tune with the mic.';
+ }
+}
+function stopListening(why){listening=false;setHeadState('');$('live').hidden=true;holdUntil=0;lastCents=null;cancelAnimationFrame(raf);stream&&stream.getTracks().forEach(t=>t.stop());try{wake&&wake.release()}catch(e){}
+ $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent=why==='playing'?'Sounds like you’re playing · Listen off':why==='quiet'?'No string heard for a while · Listen off':'Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
+$('listen').onclick=()=>listening?stopListening():startListening();
+

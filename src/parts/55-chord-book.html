@@ -1,0 +1,104 @@
+/* ================= Chord book ================= */
+const OPEN={std:[40,45,50,55,59,64],dropd:[38,45,50,55,59,64]};
+const QALIAS={maj:'',M:'',min:'m','-':'m',sus:'sus4',M7:'maj7',min7:'m7','°':'dim','+':'aug'};
+function canon(name){const p=parseChord(name);if(!p)return null;const q=QALIAS[p.q]??p.q;return CH[p.root]+q+(p.bass!=null&&p.bass!==p.root?'/'+CH[p.bass]:'')}
+const BOOKK='chordbook';
+const bookGet=()=>store.get(BOOKK,{});
+function bookAdd(names,song){
+ const b=bookGet();let changed=false,added=0;
+ for(const n of names){const k=canon(n);if(!k)continue;let e=b[k];if(!e){e=b[k]={added:Date.now(),songs:[]};added++;changed=true}
+  if(song&&!e.songs.includes(song)){e.songs.push(song);if(e.songs.length>20)e.songs.shift();changed=true}}
+ if(changed)store.set(BOOKK,b);return added;
+}
+function rememberChords(a){if(a&&a.kind==='lyrics'){bookAdd(lyricChords(a),a.title||'');return}if(!a||!a.segs)return;const names=[...new Set(a.segs.filter(g=>g.c<NS).map(g=>nameOf(g,a.play?a.play.tun:'std',a.play?a.play.capo:0)))];bookAdd(names,a.title||'')}
+function seedBook(){if(store.get('bookSeeded',false))return;try{
+ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith(KP+'song.'))continue;const d=loadSong(k.slice((KP+'song.').length));if(d)rememberChords(d)}
+ libAll().forEach(e=>{try{rememberChords(expand(e.data))}catch(err){}})}catch(e){}store.set('bookSeeded',true)}
+
+/* fingering: barre on the lowest fret when it can lie flat, then one finger per remaining note */
+function fingerize(f){
+ const fr=f.map((x,i)=>({x,i})).filter(o=>o.x>0);const fi=f.map(()=>0);if(!fr.length)return {fi,barre:0,bFrom:0,n:0};
+ const min=Math.min(...fr.map(o=>o.x)),atMin=fr.filter(o=>o.x===min);let barre=0,bFrom=0,next=1,used=0;
+ if(atMin.length>=2){const a=atMin[0].i;let ok=true;for(let i=a;i<6;i++)if(f[i]<min)ok=false;
+  if(ok){barre=min;bFrom=a;for(let i=a;i<6;i++)if(f[i]===min)fi[i]=1;next=2;used=1}}
+ const rest=fr.filter(o=>!fi[o.i]).sort((p,q)=>p.x-q.x||p.i-q.i);
+ const groups=[];for(const o of rest){const g=groups[groups.length-1];if(g&&g[0].x===o.x)g.push(o);else groups.push([o])}
+ for(let gi=0;gi<groups.length;gi++){const g=groups[gi],left=groups.slice(gi+1).reduce((a,x)=>a+x.length,0);let fg=Math.max(next,g[0].x-min+1);
+  if(fg+g.length-1+left<=4||g.length===1){for(const o of g){if(fg>4)return null;fi[o.i]=fg++;used++}next=fg}
+  else{const span=g[g.length-1].i-g[0].i+1;if(span!==g.length||fg>4)return null;g.forEach(o=>fi[o.i]=fg);used++;next=fg+1}}
+ return {fi,barre,bFrom,n:used};
+}
+const voiceCache=new Map();
+function voicings(name,tun){
+ const key=name+'|'+tun;if(voiceCache.has(key))return voiceCache.get(key);
+ const p=parseChord(name);if(!p){voiceCache.set(key,[]);return []}
+ const pcs=new Set(p.iv.map(i=>(p.root+i)%12));const bass=p.bass??p.root;pcs.add(bass);
+ const fifth=(p.root+7)%12,req=[...pcs].filter(x=>!(x===fifth&&p.iv.length>=4&&p.bass!==fifth));
+ const open=OPEN[tun]||OPEN.std,seen=new Map();
+ for(let pos=0;pos<=12;pos++){
+  const lo=pos===0?1:pos,hi=pos===0?4:pos+3;
+  const opts=open.map(o=>{const a=[-1];if(pcs.has(o%12))a.push(0);for(let fr=lo;fr<=hi;fr++)if(pcs.has((o+fr)%12))a.push(fr);return a});
+  const cur=[];
+  const rec=(s,started,ended)=>{
+   if(s===6){evalV(cur.slice(),pos);return}
+   for(const fr of opts[s]){
+    if(fr<0){if(started&&s<5)continue;if(started&&s===5){cur[s]=-1;rec(s+1,started,true);continue}cur[s]=-1;rec(s+1,false,false);continue}
+    if(!started&&(open[s]+fr)%12!==bass)continue;
+    cur[s]=fr;rec(s+1,true,ended)}
+  };
+  rec(0,false,false);
+ }
+ function evalV(f,pos){
+  const snd=f.map((x,i)=>x>=0?(open[i]+x)%12:null).filter(x=>x!=null);if(snd.length<(pcs.size<=2?3:4))return;
+  if(!req.every(r=>snd.includes(r)))return;
+  const frets=f.filter(x=>x>0);if(pos>0&&!frets.includes(pos))return;
+  if(frets.length&&Math.max(...frets)-Math.min(...frets)>3)return;
+  const fg=fingerize(f);if(!fg)return;
+  const opens=f.filter(x=>x===0).length,minF=frets.length?Math.min(...frets):0;if(minF>=5&&opens>1)return;
+  const score=fg.n*1+(fg.barre?1.2:0)+minF*.12+opens*(minF>=5?.6:-.35)-snd.length*.6+(snd.includes(fifth)?0:.4);
+  const k=f.join(',');if(!seen.has(k)||seen.get(k).score>score)seen.set(k,{f,...fg,score,minF,opens});
+ }
+ const all=[...seen.values()].sort((a,b)=>a.score-b.score);
+ // best shape per neck position, max 8, ordered up the neck
+ const byPos=new Map();for(const v of all){const b=v.minF<=3&&v.opens?0:v.minF;if(!byPos.has(b))byPos.set(b,v)}
+ let out=[...byPos.values()].sort((a,b)=>a.score-b.score).slice(0,8).sort((a,b)=>a.minF-b.minF||a.score-b.score);
+ const lib=(LIBT[tun]&&LIBT[tun][name])||((tun==='std'||!LIBT[tun])&&LIB[name]);
+ if(lib){const l=parseLib(lib),k=l.f.join(',');out=out.filter(v=>v.f.join(',')!==k);out.unshift({...l,common:true,minF:Math.min(...l.f.filter(x=>x>0),99)})}
+ out=out.map(v=>({f:v.f,fi:v.fi,barre:v.barre,bFrom:v.bFrom,common:!!v.common,label:v.common?'Common':((v.f.includes(0)&&Math.max(...v.f)<=4)?'Open position':(v.barre?'Barre · fret ':'Fret ')+Math.min(...v.f.filter(x=>x>0)))}));
+ voiceCache.set(key,out);return out;
+}
+const chordNotes=name=>{const p=parseChord(name);if(!p)return '';const ns=p.iv.map(i=>CH[(p.root+i)%12]);if(p.bass!=null&&!ns.includes(CH[p.bass]))ns.unshift(CH[p.bass]);return ns.join(' ')};
+const ROOTORD=n=>{const p=parseChord(n);return p?p.root*100+(Object.keys(QUAL).indexOf(p.q))+(p.bass!=null?50:0):9999};
+
+/* ---- Chords tab UI ---- */
+let bookTun=store.get('bookTun','std'),bookOpen=null;
+function setBookTun(t){bookTun=t;store.set('bookTun',t);[...$('chTun').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));renderBook()}
+$('chTun').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setBookTun(b.dataset.t)});
+function normQ(q){return q.trim().toLowerCase().replace(/\s+/g,'').replace(/sharp/g,'#').replace(/♯/g,'#').replace(/♭/g,'b').replace(/flat/g,'b').replace(/minor/g,'m').replace(/major/g,'maj')}
+function renderBook(){
+ if(bookOpen){renderChordDetail(bookOpen);return}
+ const b=bookGet(),q=normQ($('chSearch').value);let names=Object.keys(b).sort((x,y)=>(b[y].songs||[]).length-(b[x].songs||[]).length||ROOTORD(x)-ROOTORD(y));// most-used first
+ const total=names.length;
+ if(q)names=names.filter(n=>n.toLowerCase().includes(q)||(q.length>=2&&canon(q.charAt(0).toUpperCase()+q.slice(1))===n));
+ const typed=q&&canon(q.charAt(0).toUpperCase()+q.slice(1));
+ let h='';
+ if(typed&&!b[typed])h+=`<button class="bookcard extra" data-n="${esc(typed)}">${diagram(voicings(typed,bookTun)[0]||null,typed)}<small>Not in your book yet · tap to see shapes</small></button>`;
+ h+=names.map(n=>{const v=voicings(n,bookTun)[0];return `<button class="bookcard" data-n="${esc(n)}">${v?diagram(v,n):diagram(null,n)}<small>${b[n].songs.length?b[n].songs.length+' song'+(b[n].songs.length>1?'s':''):'added by you'}</small></button>`}).join('');
+ $('chGrid').innerHTML=h||(total?'<p class="tip">No chords match. Try a root like “A” or a type like “sus2”.</p>':'<p class="tip">Chords from every song you analyse land here automatically. You can also search for any chord, like Am7 or G/B.</p>');
+ $('chCount').textContent=total?`${total} chord${total>1?'s':''} in your book · most used first${q?` · ${names.length} shown`:''}`:'';
+ $('chGrid').hidden=false;$('chDetail').hidden=true;$('chSearchRow').hidden=false;$('chFind').hidden=false;
+}
+function renderChordDetail(n){
+ const b=bookGet(),e=b[n],vs=voicings(n,bookTun);
+ let h=`<div class="editrow"><button class="btn ghost" id="chBack">← All chords</button></div><h2 class="chname">${esc(n)}</h2><p class="tunenotes">Notes: ${esc(chordNotes(n))} · ${esc(tName(bookTun))}</p>`;
+ if(e&&e.songs.length)h+=`<p class="tip">In: ${e.songs.map(s=>`<b dir="auto">${esc(s)}</b>`).join(', ')}</p>`;
+ const mine=(e&&e.mine||[]).map(m=>`<div class="voice mine">${diagram(shapeFromFrets(m.f,m.capo),n)}<small>Your fingering${m.tun!=='std'?' · '+esc(tName(m.tun)):''}${m.capo?' · capo '+m.capo:''}</small></div>`).join('');
+ h+=vs.length||mine?`<div class="voices">${mine}${vs.map(v=>`<div class="voice">${diagram(v,n)}<small>${esc(v.label)}</small></div>`).join('')}</div>`:'<p class="tip">No comfortable shape found in this tuning.</p>';
+ h+=`<div class="editrow">${e?'<button class="btn ghost danger" id="chDel">Remove from my book</button>':'<button class="btn" id="chAdd">Add to my book</button>'}</div><div class="confirm" id="chDelOk" hidden><span>Remove ${esc(n)} from your chord book?</span><button class="btn danger" id="chDelYes">Remove</button><button class="btn ghost" id="chDelNo">Keep</button></div>`;
+ $('chDetail').innerHTML=h;$('chDetail').hidden=false;$('chGrid').hidden=true;$('chSearchRow').hidden=true;$('chFind').hidden=true;$('chCount').textContent='';
+ $('chBack').onclick=()=>{bookOpen=null;renderBook()};
+ const add=$('chAdd');if(add)add.onclick=()=>{bookAdd([n],'');renderChordDetail(n)};
+ const del=$('chDel');if(del){del.onclick=()=>{$('chDelOk').hidden=false};$('chDelNo').onclick=()=>{$('chDelOk').hidden=true};$('chDelYes').onclick=()=>{const bb=bookGet();delete bb[n];store.set(BOOKK,bb);bookOpen=null;renderBook()}}
+}
+$('chGrid').addEventListener('click',e=>{const c=e.target.closest('.bookcard');if(!c)return;bookOpen=c.dataset.n;renderBook();window.scrollTo({top:0})});
+$('chSearch').addEventListener('input',()=>renderBook());

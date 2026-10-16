@@ -8,9 +8,9 @@
 
 ## 0. Instructions for the agent
 
-1. **The whole app is one file: `src/guitaring.html`** (~4,500 lines: CSS + HTML + one `<script>`). There is no framework, bundler or npm runtime dependency. `tools/build.sh` wraps it into `index.html` at the repo root (adds `<head>`, manifest link, service-worker registration).
-2. **Never edit `index.html` by hand.** Edit `src/guitaring.html`, then run `bash tools/build.sh`. For a release run `bash tools/release.sh` (build + bump the cache version in `sw.js`). Phones only pick up a new version when `sw.js` changes.
-3. **The repo root is the GitHub Pages site** (`index.html`, `sw.js`, `manifest.webmanifest`, icons, `ideas.json`, `ideas_build.py` for the daily job). Deploy = commit `src/guitaring.html` + `index.html` + `sw.js` and get them onto `main`.
+1. **The whole app is one page built from `src/parts/*.html`** (~5,600 lines in 17 parts by feature: CSS, markup, one app `<script>` that opens in `20-core-tuner` and closes in `99-startup`; split in V2 phase 0). There is no framework, bundler or npm runtime dependency. `tools/build.sh` wraps it into `index.html` at the repo root (adds `<head>`, manifest link, service-worker registration).
+2. **Never edit `index.html` by hand.** Edit the parts in `src/parts/`, then run `bash tools/build.sh`. For a release run `bash tools/release.sh` (build + bump the cache version in `sw.js`). Phones only pick up a new version when `sw.js` changes.
+3. **The repo root is the GitHub Pages site** (`index.html`, `sw.js`, `manifest.webmanifest`, icons, `ideas.json`, `ideas_build.py` for the daily job). Deploy = commit `src/parts/` + `index.html` + `sw.js` and get them onto `main`.
 4. **Edit surgically.** The file is long and dense (many one-line functions). Find code by the section banners listed in §9 (`/* ===== … ===== */`) and by element `id`s. Prefer small, exact replacements over rewrites. Keep existing ids, `localStorage` keys and data shapes stable — users have data saved under them (§7).
 5. **The app is called Guitaring** (renamed from "the tuner" in Oct 2026 — the tuner is now one of its features). Use that name everywhere a person reads it. Kept on purpose: the repo `guitar-tuner` (it is the live web address and the installed app's address), the `tuner.*` storage keys (users' data), `window.__tunerTest` and the `tun_*` tests (they test the tuner feature).
 6. **Test with Playwright before shipping** (`tests/`, see §11). Every change to the tuner must re-run the tuner suite; audio behaviour is easy to break silently.
@@ -51,7 +51,7 @@ Yoav — Israeli PM, plays electric and acoustic guitar, uses **only the phone a
 ## 3. Platform & architecture
 
 ```
-src/guitaring.html ──(tools/build.sh)──► index.html ─────┐
+src/parts/*.html ──(tools/build.sh)──► index.html ───────┐
 sw.js  (offline cache, version guitaring-vNN)         │  GitHub Pages: yoavlan-cmd.github.io/guitar-tuner/
 manifest.webmanifest (PWA + Android share target)     ├─► installed on the phone as "Guitaring"
 ideas.json  ◄── written daily by a scheduled ────┘
@@ -59,7 +59,7 @@ ideas.json  ◄── written daily by a scheduled ────┘
 ```
 
 ### 3.1 Two runtimes, one file
-The same `guitaring.html` runs in two places; code branches on `window.claude`:
+The same page runs in two places; code branches on `window.claude`:
 
 | | **Phone app (GitHub Pages PWA)** — primary | **Claude artifact** (claude.ai, private) |
 |---|---|---|
@@ -89,6 +89,10 @@ Both paths expose one internal interface: `sampleFn(prompt, opts)` / `sampleFn.j
 
 ### 3.4 Storage
 All user data is in `localStorage` under the prefix `tuner.` through the `store.get/set` helper (JSON). Song analyses also use `tuner.song.<fileKey>` (last 8). See §7.
+
+### 3.5 Beta and backup (V2 phase 0)
+- **Beta** at `…/guitar-tuner/beta/` (`bash tools/build.sh beta`): BETA badge, installs as its own "Guitaring beta" icon (`beta/manifest.webmanifest`). It keeps its own data: `tunerb.*` / `guitaringb.*` keys and the database `guitaring-beta`. On its first open it copies the live `tuner.*` / `guitaring.*` keys (`betaCopyLive`); big items (Band breakdown parts, gear photos) are read from the live database the first time they are needed and copied (`mxGet` → `idbLiveGet`, which never creates or writes the live database); deleting in the beta leaves a `{__gone:1}` mark so it isn't read again. "Copy my live data again" (Backup box, two taps) starts the beta over. Code must use `KP`, `KG`, `IDBN` for storage names. Test: `tests/beta_t.js`.
+- **Backup and restore** (Songs › My library › "Backup and restore"; moves to My profile in V2 phase 1): one ZIP file (stored, readable by any ZIP tool): `manifest.json` (counts, options), `local.json` (all `KP`/`KG` keys), `idb/N.json` + `idb/N-i.bin` per database item (Blobs, Files and typed arrays kept exactly). Options: Band breakdown songs (default in; without them the list keeps only songs still splitting) and the Claude/GitHub keys (default out). Saved to Downloads, with Share when the phone allows. Restore checks every part's checksum first (damaged, cut-short and foreign files are refused before anything changes), shows what the file holds, then **Add what's missing** (default: lists gain missing items by id, objects gain missing entries, nothing is overwritten) or **Replace everything** (two taps; replaces only the kinds the file has). A safety copy of the small data (`backup:pre-restore:*`, 30 days) is kept first. A beta backup restores into the live app and the other way round. Test: `tests/bk_t.js`.
 
 ---
 
@@ -303,7 +307,30 @@ Canonical keys: chord names via `canon()` (C, C#, D, Eb, E, F, F#, G, Ab, A, Bb,
 
 ---
 
-## 9. Code map (`src/guitaring.html`, line numbers as of v86 — sections after the practice mixer CSS/HTML are shifted by ~+60…+600 lines in v92; search the banners)
+## 9. Code map
+
+Since V2 phase 0 the source is split into parts (`src/parts/`, joined in name order by `tools/build.sh`):
+
+| Part | Holds |
+|---|---|
+| `00-head-style` | fonts + all CSS |
+| `10-markup` | HTML of every screen (welcome, tabs, panes, sheets, pickers) |
+| `15-splitter-workflow` | the GitHub Actions workflow text the app installs (`#mxWf`) |
+| `20-core-tuner` | app script starts: icons (`PDI`/`SK`), tunings, **storage names** (`KP`, `KG`, `IDBN`, `BETA`, `betaCopyLive`), `store`, tuner |
+| `30-song-analysis` | chord vocabulary, audio analysis, Basic Pitch, song view, Claude via API key |
+| `40-sheet-drive` | chord sheet, My songs, PDF, Drive |
+| `45-writer-ocr-catalog` | writer, chord finder, screenshots/PDF → sheet, sheet catalog |
+| `50-video-lessons` | video lessons |
+| `55-chord-book` | chord book + Chords tab |
+| `60-lesson-view` | lesson view |
+| `65-band-breakdown` | practice mixer / Band breakdown, phone database helpers (`mxDB`, `mxGet` with the beta's read-through, `mxPut`, `mxDel`), GitHub splitter |
+| `70-welcome` | welcome + jokes |
+| `75-gear` | My gear |
+| `80-learning-ideas` | I'm learning, song ideas, gear chat |
+| `85-backup` | backup and restore (`bkMake`, `bkOpen`, `bkRestore`, `safetyCopy`, ZIP writer/reader) |
+| `99-startup` | start-up calls; the app script closes here |
+
+The line numbers below are from v86 (single file) and only show the order of sections inside the parts; search the banners.
 
 | Lines | Section (search for the banner text) | Key functions / ids |
 |---|---|---|
@@ -333,11 +360,11 @@ Test hooks kept in production (harmless, no UI): `window.__tunerTest` (needle/he
 ## 10. Build, release, deploy
 
 ```bash
-bash tools/build.sh      # src/guitaring.html -> index.html (repo root)
+bash tools/build.sh      # src/parts/*.html -> index.html (repo root); bash tools/build.sh beta -> beta/index.html
 bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
-# deploy: commit src/guitaring.html + index.html + sw.js, push / merge to main (GitHub Pages serves main)
+# deploy: commit src/parts/ + index.html + sw.js, push / merge to main (GitHub Pages serves main)
 ```
-- Until 13 Oct 2026 the user uploaded built files through GitHub's web upload. From now on changes are made with Claude Code in the repo; `src/guitaring.html` and `index.html` must always be committed together.
+- Until 13 Oct 2026 the user uploaded built files through GitHub's web upload. From now on changes are made with Claude Code in the repo; `src/parts/` and `index.html` must always be committed together.
 - Always bump `sw.js` with any `index.html` change.
 
 ---
@@ -366,6 +393,9 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `mx_send_t.js` | sending to GitHub (API mocked): retries the start after a fresh splitter install, error names the step and quotes GitHub, Try again order |
 | `mx_silent_t.js` | a silent file is not sent to GitHub (red message), one with sound is, an undecodable one still is; phone split says so; an all-silent split says why when opened |
 | `mx_save_t.js` | Save this mix: exactly the chosen parts at full length/rate after playing, Everything, silent guitars and all-muted give a message not an empty file, short part, guitars → chord analysis |
+| `split_t.js` | the source parts join into the page verbatim and in order, one app script, every part ends with a newline; `LIVE=1`: the committed `index.html` is exactly a fresh build |
+| `bk_t.js` | backup: real ZIP (checked with Python's zipfile), keys out by default, counts; wipe → restore identical (typed arrays, Blobs, Files); Add what's missing never overwrites; Replace everything (two taps); without parts (smaller, keeps phone parts on replace); damaged / cut-short / foreign files refused with nothing changed; safety copy |
+| `beta_t.js` | beta: copies live data on first open, reads big items through and keeps its copy, deletes stick, live data and database untouched, reopening keeps beta changes, "Copy my live data again", own manifest |
 | `mx_t.js` | practice mixer: 44.1 kHz parts (15 kHz tone survives), no window seams, WAV render rate, old 22 kHz songs, FLAC/MP3 GitHub parts, long-song fallback, splitter v3 flags |
 
 Not automated (manual on a real phone): real microphone behaviour on Android, Android share-target, Drive share sheet, PDF output.
@@ -418,12 +448,13 @@ The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("origina
 
 ```
 guitar-tuner/                   ← GitHub Pages serves this root from main
-├─ index.html                   ← BUILT from src/guitaring.html (do not edit)
+├─ index.html                   ← BUILT from src/parts/ (do not edit)
+├─ beta/                        ← beta build + its own manifest (own data, see §3.5)
 ├─ sw.js  manifest.webmanifest  icon-*.png  apple-touch-icon.png
 ├─ ideas.json  ideas_build.py   ← owned by the daily job
 ├─ CLAUDE.md  README.md
-├─ src/guitaring.html           ← THE source (edit this)
-├─ docs/PRD-Guitaring-V1.md     ← this document
+├─ src/parts/*.html             ← THE source, by feature (edit these)
+├─ docs/PRD-Guitaring-V1.md     ← this document; V2-build-plan.md, V2-deployment-plan.md
 ├─ tools/  build.sh  release.sh  get_test_samples.sh  daily-job-prompt.md
 └─ tests/                       ← Playwright checks (see §11), package.json
 ```
