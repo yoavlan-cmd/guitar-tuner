@@ -1146,6 +1146,9 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 .sesdg.none{display:grid;place-items:center;min-height:80px;background:rgba(255,255,255,.06)}.sesdg.none b{font:700 16px var(--body)}
 .sesjam{display:flex;flex-wrap:wrap;gap:8px}.sesjam .btn{flex:1 1 auto}
 #sesNotes{width:100%;resize:vertical;font:400 14px var(--body)}
+/* Learn's two tiles line up: each title on two lines (SONG / VIDEO, CHORD / FINDER), subtitles always two lines high */
+#paneSong[data-seg="learn"] .addgrid .addtile b{word-spacing:100vw}
+.addgrid .addtile .sub{min-height:calc(2em * 1.35)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
