@@ -1149,6 +1149,10 @@ body.mxon .mixplay{box-shadow:0 0 0 6px rgba(78,226,183,.14),0 0 26px rgba(78,22
 /* Learn's two tiles line up: each title on two lines (SONG / VIDEO, CHORD / FINDER), subtitles always two lines high */
 #paneSong[data-seg="learn"] .addgrid .addtile b{word-spacing:100vw}
 .addgrid .addtile .sub{min-height:calc(2em * 1.35)}
+/* Home tiles line up too: every title gets the same two-line box with short titles on its bottom line (JAM next to CHECK MY / GEAR) */
+#paneHome .htile b{display:flex;align-items:flex-end;min-height:2.02em;line-height:1.01}
+#paneHome .htile small{min-height:calc(var(--sublines,2) * 1.35em)}
+@media (max-height:700px){#paneHome .htile small{--sublines:1}}
 </style>
 
 <div class="lesson" id="lesson" hidden>
