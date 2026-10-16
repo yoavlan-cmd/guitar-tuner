@@ -1,6 +1,6 @@
 // Offline support for Guitaring. Bump VERSION whenever index.html changes (tools/release.sh does it).
 // Any cache with another name (including the older tuner-vNN ones) is deleted when a new version takes over.
-const VERSION = 'guitaring-v107';
+const VERSION = 'guitaring-v108';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {

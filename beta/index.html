@@ -949,7 +949,7 @@ body.hasbar .toast{bottom:calc(var(--bnh) + 76px + env(safe-area-inset-bottom,0p
 .jamlist{display:flex;flex-direction:column;gap:8px}
 .jrow{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px;font:inherit;cursor:pointer}
 .jrow b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jrow small{flex:0 0 auto;color:var(--muted)}
-.jrow.ready{border-color:#66BB6A}.jrow.failed{border-color:#E0675F}
+#jamBox .jrow{width:100%}.jrow.ready{border-color:#66BB6A}.jrow.failed{border-color:#E0675F}
 /* My Library and My profile */
 .libnav{display:flex;flex-direction:column;gap:8px}
 .libgo{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;cursor:pointer}
@@ -959,6 +959,11 @@ body.hasbar .toast{bottom:calc(var(--bnh) + 76px + env(safe-area-inset-bottom,0p
 .profhead{display:flex;align-items:center;gap:12px}.profhead .pd{--s:40px;margin:0}.profhead b{display:block;font-size:18px}.profhead small{color:var(--muted)}
 .proflist{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:12px 0;font-size:14px}.proflist dt{color:var(--muted)}.proflist dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .profnone{color:var(--muted);font-style:italic}
+/* open lists: the title sticks to the top with a ✕, and a Close button at the bottom */
+details.v2fold[open]>summary{position:sticky;top:0;z-index:4;background:var(--bg);padding-block:6px}
+.ideabox.v2fold[open]>summary{background:var(--bg)}
+details.v2fold[open]>summary::after{content:"✕";margin-left:auto;flex:0 0 auto;width:32px;height:32px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;font:600 15px var(--body);color:var(--ink);background:var(--surface)}
+.foldx{align-self:center;margin-top:4px}
 /* onboarding */
 .onb{position:fixed;inset:0;z-index:65;background:var(--bg);overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
 .obcard{max-width:460px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:12px}
@@ -5944,8 +5949,16 @@ function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mi
  try{renderMixNew()}catch(e){}
  const l=$('jamList');if(!l)return;const L=(mxIdx||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
  const st=x=>x.state==='ready'?'Ready':x.state==='failed'?'Didn’t work':'Splitting…';
- l.innerHTML=L.length?`<p class="libsub">My jam tracks</p>`+L.map(x=>`<button type="button" class="jrow ${x.state}" data-jid="${esc(x.id)}"><b dir="auto">${esc(x.name||'Song')}</b><small>${st(x)}</small></button>`).join(''):'<p class="tip">No songs yet. Tap Band breakdown to split your first song into its parts.</p>';
+ // the jam tracks are a list you open and close (closed until opened, like every secondary list)
+ const was=$('jamBox')&&$('jamBox').open;
+ l.innerHTML=L.length?`<details class="apibox" id="jamBox"${was?' open':''}><summary>My jam tracks <span class="libcount">${L.length}</span></summary>${L.map(x=>`<button type="button" class="jrow ${x.state}" data-jid="${esc(x.id)}"><b dir="auto">${esc(x.name||'Song')}</b><small>${st(x)}</small></button>`).join('')}</details>`:'<p class="tip">No songs yet. Tap Band breakdown to split your first song into its parts.</p>';
+ v2Folds();
  l.querySelectorAll('[data-jid]').forEach(b=>b.onclick=()=>{const it=mxIdx.find(x=>x.id===b.dataset.jid);mxView(true);if(it&&it.state==='ready')mxOpen(it.id);else if(!mxBusy)mxSheetUI2()})}
+// ---- open lists can always be closed: ✕ on the title (which stays at the top while you scroll) and "Close" at the bottom ----
+function v2Fold(d){if(!d||d._fold)return;d._fold=true;d.classList.add('v2fold');
+ const add=()=>{if(d.open&&!d.querySelector(':scope>.foldx')){const b=document.createElement('button');b.type='button';b.className='btn ghost foldx';b.textContent='Close ✕';b.onclick=()=>{d.open=false;d.scrollIntoView({block:'nearest',behavior:'smooth'})};d.appendChild(b)}};
+ d.addEventListener('toggle',add);new MutationObserver(add).observe(d,{childList:true});add()}
+function v2Folds(){['catBox','vidBox','libSaved','jamBox','apiCard','folderCfg','ghCfg','bkBox','v2Box'].forEach(id=>v2Fold($(id)))}
 // ---- My Library: the V1 lists, gathered ----
 function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox','vidBox','libSaved'].forEach(id=>{const e=$(id);if(e)h.appendChild(e)});h.dataset.moved='1'}
  const s=$('libJamSub');if(s){const r=(mxIdx||[]).filter(x=>x.state==='ready').length;s.textContent=r?`${r} song${r>1?'s':''} ready to play`:'Band breakdown songs'}}
@@ -6080,7 +6093,7 @@ function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm
 // ---- start: Home, the M1 profile, onboarding when it hasn't been done ----
 async function v2Start(){
  // the Band breakdown tile lives in Jam; sheets, video lessons and saved-on-phone in My Library; connections and backup in My profile
- try{renderJam()}catch(e){}try{renderLibPage()}catch(e){}try{renderProfile()}catch(e){}
+ try{renderJam()}catch(e){}try{renderLibPage()}catch(e){}try{renderProfile()}catch(e){}try{v2Folds()}catch(e){}
  goSec('home',{force:true});
  try{await v2MigM1()}catch(e){}
  const p=profGet();// not over a link shared into the app (Share › Guitaring): that flow comes first, the setup waits for the next open
