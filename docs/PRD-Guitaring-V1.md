@@ -164,6 +164,8 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 - **Lesson view**: video + animated fretboard + strumming rows per bar, sections auto-detected (`autoSections`).
 - Save analysis (`saveSong`, last 8 per phone) → open sheet.
 
+- **Faint thirds follow the song's key** (`songKey`, `keyFit`, `TUNE.keyFix` .6, Oct 2026): a guitar that sounds mostly root and 5th has a faint 3rd, and the root's own overtone sits on the major 3rd, so minor chords were heard major ("במקום בו אני גר", guitars only: F#m → F#, C#m → C#; 41% of the time in the sheet's chords). The key comes from all the song's notes (Krumhansl profiles); a major/minor triad (or 7/m7) whose other 3rd is at least 0.6× as strong as its own, and whose other quality is in the key while its own isn't, takes the key's quality. A clear 3rd wins, so out-of-key chords stay (D and E in C major). On that song: C#m · F#m · E · A in 100% of the time (A as Aadd9/Asus2: a B is really sounding).
+
 ### 5.3 Chord sheet, My songs, PDF, Drive (`/* Chord sheet, My songs, Google Drive */`)
 - Sheet (`#sheetView`): name, artist, tuning + capo meta, chord diagrams of used chords, progression or lyrics-with-chords, my notes, footer "Guitaring · date". Hebrew lines RTL.
 - **Save to My songs** (`lib` key, on this phone), **Save PDF**, **Share / save to Drive** (PDF via the Android share sheet; inside Claude via the Drive connector into the artist's folder, with artist chips).
@@ -207,6 +209,8 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 
 ### 5.5e Jam: create in Band breakdown, pick in the Jamming player (Oct 2026)
 - The Jam page has two tiles and **no song list**: **Band breakdown** (`#mixNew`) only creates: its sheet (`mxCreate`) offers *A song file on this phone* (split on GitHub), *A song in your Google Drive* (the Drive form), *Split on this phone instead* and *GitHub connection*, and shows what's **being split** (Progress for a Drive song) or failed (Try again). **Jamming player** (`#jamOpen`) is **the only place to pick a split song**: its sheet (`mxHome`, "Your split songs") lists them (Delete, Try again for failed ones) with nothing to create; with none yet it points to Band breakdown. Inside a song, the list folds under "Your split songs (n): play another". The tiles say what's ready and what's being split (`renderMixNew`). My Library › My jam tracks opens the player (`data-player`).
+
+- **Jamming player transport, "Fluid Pulse"** (Oct 2026): a soft squircle card; the seek bar is the song's waveform (`mxWave`, all parts together, drawn once per song; grey unplayed, mint played) with a glowing orb at the position (the range `#mxSeek` sits invisibly on top, so dragging and the tests are unchanged); the times in mint under it; a large glowing play button, whose glow ring breathes while playing (the button itself stays still; off with reduced motion); recessed −5s / +5s with ripple rings; the speed choice under them.
 
 ### 5.5d Add a song from Google Drive (V2 phase 4, part `66-drive-song`)
 - Learn › **Add a song** (`#addSong`, dialog `#dsDlg`): paste the link to the song's **video (MP4) and/or audio (MP3)** in your Drive songs folder (a second link is optional). A YouTube link is refused kindly (YouTube doesn't allow downloading) and offered as a video lesson; a non-Drive link, a non-media file and a missing GitHub connection each say what to do.
@@ -453,6 +457,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `gcover_t.js` | My gear preview picture: amp picture without photos, first photo by default, pick another (visible in the list, after a reload), editing keeps photos and choice, removing the chosen photo falls back |
 | `home_fit_t.js` | Home doesn't scroll and all four tiles are fully visible above the bottom bar and the player, from 360×560 to 412×860, with Continue cards; other sections still scroll |
 | `mx_ui_t.js` | the player as a mixing desk: title / artist, one coloured strip per part with fader, meter and M / S, times, ±5s, meters move while playing and drop on pause, a fader changes only its part |
+| `key_t.js` | faint thirds: a generated guitar part like "במקום בו אני גר" (root and 5th, faint minor 3rds, the roots' overtone on the major 3rd) is heard C#m · A · E · F#m, not C# / F# (fails without `keyFit`) |
 | `ses_t.js` | song session: opens from Learn, title/artist/tuning/capo, what it has, Practise picks the best material and opens it, chord diagrams (incl. built ones), status and notes saved, jam buttons set the player, chord finder, ‹ and back return to Learn |
 | `guide_t.js` | song guide against the reference "שאריות של החיים" (capo 2, 108 BPM, Cadd9 · Asus2 · Fmaj7 · G, D · DU · UDU): before you play, how sure, Full and Easy chords, strumming, song map with repeating parts and no lyrics, level picks the tab, play-along; a messy analysis is "a guess" |
 | `mx_speed_t.js` | jam track at Slow / Medium / Full: the song moves at 0.6× / 0.8× real time and a 440 Hz tone stays 440 Hz, meters move, seek works, back to Full |
