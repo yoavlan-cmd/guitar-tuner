@@ -23,7 +23,8 @@ const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=docu
   const d={};for(const [k,v] of all.sort((a,b)=>a[0]<b[0]?-1:1)){d[k]=JSON.stringify(v,(kk,vv)=>ArrayBuffer.isView(vv)?Array.from(vv):vv)}return {l,d}});
  const s0=await liveState();
  // the beta, first open
- const beta=await ctx.newPage();beta.on('pageerror',e=>errs.push('beta: '+e.message));await beta.goto(BASE+'beta/');await beta.waitForTimeout(500);
+ const beta=await ctx.newPage();beta.on('pageerror',e=>errs.push('beta: '+e.message));const asked=[];beta.on('request',q=>{if(/ideas\.json/.test(q.url()))asked.push(new URL(q.url()).pathname)});await beta.goto(BASE+'beta/');await beta.waitForTimeout(500);
+ ok(asked.length&&asked.every(u=>u.endsWith('/ideas.json')&&!u.includes('/beta/')),'the beta reads the daily ideas and chord-sheet index from the site’s ideas.json, not beta/ideas.json '+JSON.stringify(asked));
  ok(await beta.evaluate(()=>window.__bk.beta===true&&document.title==='Guitaring beta'),'the beta knows it is the beta');
  const copied=await beta.evaluate(()=>({name:JSON.parse(localStorage.getItem('tunerb.userName')),inst:JSON.parse(localStorage.getItem('tunerb.instruments')),gh:JSON.parse(localStorage.getItem('guitaringb.gh'))}));
  ok(copied.name==='Yoav'&&copied.inst[0].name==='Muse'&&copied.gh&&copied.gh.repo==='me/split','first open: your live data is copied into the beta');
