@@ -5878,11 +5878,15 @@ async function gdPrune(dir){try{const r=await gdFetch(`${GD_API}?q=${encodeURICo
 async function bkNotify(title,body){try{if(!('Notification' in window)||Notification.permission!=='granted')return;
  const reg=navigator.serviceWorker&&await Promise.race([navigator.serviceWorker.getRegistration(),new Promise(r=>setTimeout(()=>r(null),1500))]);
  if(reg&&reg.showNotification)await reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'guitaring-backup'});else new Notification(title,{body,icon:'icon-192.png'})}catch(e){}}
+let bkRun=0;// the newest tap wins (a tap after a Google window that never came up starts over)
 async function bkToDrive(){const btn=$('bkDrive'),out=$('bkOut');if(!btn||btn.disabled)return;
- // the Google window must open straight from the tap
- const tp=gdToken();btn.disabled=true;out.textContent='Connecting to your Google Drive…';
- try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{})}catch(e){}
- try{await tp;
+ // the Google window must open straight from the tap; nothing else may ask for anything in the same tap (on Android a
+ // notification prompt there can stop the Google window from opening, and then Google never answers)
+ const id=++bkRun,tp=gdToken();btn.disabled=true;out.textContent='Opening Google sign-in…';
+ const hint=setTimeout(()=>{if(id!==bkRun)return;btn.disabled=false;out.textContent='Waiting for Google… If no Google window opened, tap Back up to Google Drive again.'},5000);
+ try{await tp;clearTimeout(hint);if(id!==bkRun)return;btn.disabled=true;
+  // now (after Google) ask once for notifications, so the "done" message can reach the phone
+  try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{})}catch(e){}
   const opt={parts:$('bkParts').checked,keys:$('bkKeys').checked};
   const {zip,man}=await bkMake(opt,(st,a,b)=>{out.textContent=st==='read'?`Collecting your data… ${a} of ${b}`:`Packing the file… ${Math.round(a/b*100)}%`});
   const dir=await gdBackupFolder(),d=new Date(),p2=x=>String(x).padStart(2,'0');
@@ -5895,8 +5899,8 @@ async function bkToDrive(){const btn=$('bkDrive'),out=$('bkOut');if(!btn||btn.di
   out.innerHTML=`<b>Saved to Google Drive</b> › ${esc(GD_BKDIR)} › ${esc(nm)} (${bkSize(zip.size)}).<br>It holds: ${esc(bkCountText(man.counts))}.${gone?` Older backups trashed: ${gone} (the last ${GD_KEEP} are kept).`:''} <a href="${esc(url)}" target="_blank" rel="noopener">Open it ↗</a>`;
   toast('Backup saved to Google Drive.','ok');renderBackupDate();
   bkNotify('Guitaring backup saved',`${nm} (${bkSize(zip.size)}) is in Google Drive › ${GD_BKDIR}.`)}
- catch(e){out.innerHTML=gdErr(e).replace('Save to Google Drive','Back up to Google Drive');toast('The backup wasn’t saved to Drive.','err');bkNotify('Guitaring backup didn’t finish','Open Guitaring to try again.')}
- finally{btn.disabled=false}}
+ catch(e){clearTimeout(hint);if(id!==bkRun)return;out.innerHTML=gdErr(e).replace(/Save to Google Drive/g,'Back up to Google Drive');toast('The backup wasn’t saved to Drive.','err');bkNotify('Guitaring backup didn’t finish','Open Guitaring to try again.')}
+ finally{if(id===bkRun)btn.disabled=false}}
 // ---- the Backup box (Songs › My library, under "Sheets, lessons and settings"; moves to My profile in V2) ----
 function bkDate(t){try{return new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
 function bkSize(n){return n>1048576?(n/1048576).toFixed(n>1e8?0:1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
