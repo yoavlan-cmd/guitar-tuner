@@ -24,6 +24,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
  catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
  await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
 function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
-// after a restart: finish what was being built
-mxReady.then(()=>{mxIdx.filter(x=>x.state==='ready'&&AS_ON.includes(x.sess)).forEach(x=>{x.sess='queued';asBuild(x.id)})}).catch(()=>{});
-window.__as={build:asBuild,list:()=>mkList()};// test hooks
+// build one by hand (the song's page offers it for a split with no guide, or when the build failed)
+function asStart(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready')return;if(!AS_ON.includes(it.sess)){it.sess='queued';mxIdxSave();try{dsStatusUI()}catch(e){}}asBuild(id)}
+// after a restart: finish what was being built; a song added from Drive before sessions built themselves gets its session now
+mxReady.then(()=>{mxIdx.filter(x=>x.state==='ready'&&(AS_ON.includes(x.sess)||(x.drive&&!x.sess))).forEach(x=>{x.sess='queued';asBuild(x.id)});mxIdxSave()}).catch(()=>{});
+window.__as={build:asBuild,start:asStart,list:()=>mkList()};// test hooks
