@@ -10,6 +10,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
  it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
  try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
   const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
+  it.sessStep='guitar';try{dsStatusUI()}catch(e){}
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
   const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
@@ -17,8 +19,11 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const key='mix_'+id;
   // built again: a capo you set from the video stays
   try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
-  // and the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
-  if(it.drive){it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}}
+  // 2. the whole song (every part but the drums): where the guitar's 3rd is faint, the other instruments often play it
+  it.sessStep='whole';try{dsStatusUI()}catch(e){}
+  try{const w=await asWhole(d);if(w)asFuse(a,w);else a.whole={skip:'parts'}}catch(e){a.whole={skip:'err'};try{console.error('whole song',e)}catch(_){}}
+  // 3. the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
+  it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;
@@ -27,6 +32,22 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const o=$('asOpen');if(o)o.onclick=()=>{const t=$('toast');if(t)t.hidden=true;asOpenSong(id)}}
  catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
  await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
+// the whole song from its split parts (all but the drums), at the analysis' rate, and its chord analysis
+async function asWhole(d){const S=d&&d.stems;if(!S)return null;let sum=null,n=0;
+ for(const k of ['bass','other','vocals','piano','guitar']){const b=S[k];if(!b)continue;const y=await decodeFile(new File([b],k+'.flac',{type:'audio/flac'}));
+  if(!sum)sum=new Float32Array(y.length);const L=Math.min(sum.length,y.length);for(let i=0;i<L;i++)sum[i]+=y[i];n++;await tick()}
+ if(n<2)return null;return await analyse(sum,()=>{},null)}
+// what the whole song adds: where the guitar's 3rd was too faint to tell minor from major and the whole song plays one clearly,
+// the whole song decides; how often both hear the same root (a check on the guitar's chords). The guitar's chords stay the base.
+function asFuse(a,w){const gE=gdThirds(a),wE=gdThirds({feat:w.feat});if(!gE||!wE)return;
+ const MJ=TYPES.findIndex(x=>x.id===''),MN=TYPES.findIndex(x=>x.id==='m'),D7=TYPES.findIndex(x=>x.id==='7'),M7=TYPES.findIndex(x=>x.id==='m7');
+ const flip={[MJ]:MN,[MN]:MJ,[D7]:M7,[M7]:D7},fixed=new Set();let same=0,tot=0;
+ for(const g of a.segs){if(g.c>=NS)continue;const l=g.t1-g.t0,r=Math.floor(g.c/NT),q=g.c%NT,mid=(g.t0+g.t1)/2;tot+=l;
+  const o=w.segs.find(s=>s.c<NS&&mid>=s.t0&&mid<s.t1);if(o&&Math.floor(o.c/NT)===r)same+=l;
+  if(!(q in flip))continue;const isM=q===MJ||q===D7,ge=gE(g),we=wE(g),gm=isM?ge.M:ge.m,go=isM?ge.m:ge.M,wm=isM?we.M:we.m,wo=isM?we.m:we.M;
+  const gFaint=gm===0||go/gm>=.6,wOther=wo>0&&(wm===0||wm/wo<=.5);
+  if(gFaint&&wOther){const k=chordName(g.c)+' → '+chordName(r*NT+flip[q]);fixed.add(k);g.c=r*NT+flip[q]}}
+ a.mfeat={n:w.feat.n,c:w.feat.c,hop:w.feat.hop,off:w.feat.off};a.whole={agree:tot?+(same/tot).toFixed(2):0,fixed:[...fixed]}}
 function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
 // build one by hand (the song's page offers it for a split with no guide, or when the build failed)
 function asStart(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready')return;if(!AS_ON.includes(it.sess)){it.sess='queued';mxIdxSave();try{dsStatusUI()}catch(e){}}asBuild(id)}

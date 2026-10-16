@@ -50,9 +50,13 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
 async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
  const it={id,name:base,at:Date.now(),src:'cloud',state:'up',drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
+ // no video given with the audio: a video of the song in the same folder is used too (for the chord check)
+ if(!vid&&dsKind(src)==='audio'){try{const v=await vlFind(it,gdFullTok);if(v)vid={id:v.id,name:v.name}}catch(e){}}
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
+ // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
+ if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
  return it}
 // ---- the progress while GitHub works: real steps from GitHub (its job's steps), the long split estimated from the time it takes ----
@@ -63,12 +67,12 @@ let dsTimer=0,dsShown='';
 async function dsRunInfo(it){const runs=(await gh('/actions/runs?event=workflow_dispatch&per_page=30')).workflow_runs||[];// can't reach GitHub: the caller says so
  const run=runs.find(r=>r.display_title==='split '+it.id||r.name==='split '+it.id);if(!run)return {stage:'sent'};if(run.status==='queued'||run.status==='waiting')return {stage:'queue'};
  let steps=[];try{steps=((await gh('/actions/runs/'+run.id+'/jobs')).jobs||[])[0].steps||[]}catch(e){}
- const of=n=>/^Get the song/.test(n)?'get':/^Split it/.test(n)?'split':/^Make the MP3s/.test(n)?'mp3':/^Hand the parts back|^Report a failure|^Complete job|^Post /.test(n)?'back':'setup';
+ const of=n=>/^Get the song/.test(n)?'get':/^Split it/.test(n)?'split':/^Make the MP3s|^Take stills/.test(n)?'mp3':/^Hand the parts back|^Report a failure|^Complete job|^Post /.test(n)?'back':'setup';
  const cur=steps.find(x=>x.status!=='completed'),sp=steps.find(x=>/^Split it/.test(x.name));
- const stage=run.status==='completed'?'back':cur?of(cur.name):'back';
+ const stage=run.status==='completed'?'back':cur?of(cur.name):'back',step=cur&&/^Take stills/.test(cur.name)?'stills':'';
  // learn how long a split takes on your GitHub (it depends on the song's length, so keep a running average)
  if(sp&&sp.status==='completed'&&sp.started_at&&sp.completed_at&&!it.splitMin){it.splitMin=(Date.parse(sp.completed_at)-Date.parse(sp.started_at))/60000;const a=store.get('dsSplitMin',0);store.set('dsSplitMin',a?a*.6+it.splitMin*.4:it.splitMin)}
- return {stage,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
+ return {stage,step,splitAt:sp&&sp.started_at?Date.parse(sp.started_at):0,runAt:run.run_started_at?Date.parse(run.run_started_at):0}}
 // where a song being made stands: stage, %, minutes left, and a plain warning when something is slow (never silent)
 function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_ST.findIndex(x=>x[0]===(it.state==='ready'?'sess':it.state==='get'?'back':it.state==='up'?'sent':i.stage))),exp=store.get('dsSplitMin',0)||14,now=Date.now();
  const sm=k===4&&i.splitAt?(now-i.splitAt)/60000:0,inSplit=Math.min(.95,sm/exp);
@@ -79,7 +83,8 @@ function dsCalc(it,info){const i=info||it._info||{stage:'sent'},k=Math.max(0,DS_
  else if(k<=1&&since>8)warn='GitHub hasn’t started yet. It usually takes under a minute; its free computers may be busy. Guitaring keeps checking, nothing is lost.';
  else if(k===4&&sm>exp*2.2)warn='This split is taking longer than usual (long songs take longer). GitHub is still working on it.';
  return {k,pct,left,inSplit,warn,label:dsStageLabel(it,k)}}
-const dsStageLabel=(it,k)=>k===7&&it.sessStep==='video'?'Looking at the song’s video: the capo and the chord shapes':k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
+const AS_STEP={guitar:'Listening to the guitars-only part',whole:'Listening to the whole song too',video:'Looking at the song’s video: the capo and the chord shapes'};
+const dsStageLabel=(it,k)=>k===7&&AS_STEP[it.sessStep]?AS_STEP[it.sessStep]:k===5&&it._info&&it._info.step==='stills'?'Taking stills from the video (for the chord check)':k===3&&!it.drive?'Getting the song':DS_ST[k][1].replace(' (the long step)','');
 const dsAgo=t=>{if(!t)return '';const s=Math.round((Date.now()-t)/1000);return s<10?'just now':s<60?s+' s ago':Math.round(s/60)+' min ago'};
 function dsProgHTML(it,info){const c=dsCalc(it,info),k=c.k,pct=c.pct,left=c.left,inSplit=c.inSplit;
  return `<div class="dshead"><h3>Making the song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>

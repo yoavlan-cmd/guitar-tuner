@@ -1,8 +1,10 @@
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v4
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v5
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
+# v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
+# with the parts (stills.bin + stills.json), so the app can check the chords against the guitarist's hand without the video.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -109,6 +111,45 @@ jobs:
                   out['error'] = str(e)[:200]
           json.dump(out, open('res/drive.json', 'w'))
           print('drive', json.dumps(out)[:300])
+          PY
+      - name: Take stills from the video
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee -a log.txt
+          import glob, json, os, subprocess, urllib.request
+          d = json.load(open('job/drive.json')) if os.path.exists('job/drive.json') else {}
+          song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
+          vid = None
+          if d.get('video') and d.get('video') != d.get('file'):
+              vid = 'job/video.' + (d.get('vext') or 'mp4')
+              req = urllib.request.Request('https://www.googleapis.com/drive/v3/files/%s?alt=media&supportsAllDrives=true' % d['video'], headers={'Authorization': 'Bearer ' + d['token']})
+              with urllib.request.urlopen(req) as r, open(vid, 'wb') as f:
+                  while True:
+                      b = r.read(1 << 20)
+                      if not b:
+                          break
+                      f.write(b)
+          elif os.path.splitext(song)[1].lower() in ('.mp4', '.mov', '.m4v', '.webm', '.mkv'):
+              vid = song
+          if not vid:
+              print('no video: no stills')
+              raise SystemExit(0)
+          has = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', vid], capture_output=True, text=True).stdout.strip()
+          if not has:
+              print('no picture in the video file: no stills')
+              raise SystemExit(0)
+          os.makedirs('stills', exist_ok=True)
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'fps=1/2,scale=480:-2', '-q:v', '6', 'stills/s%04d.jpg'], check=True)
+          idx, o = [], 0
+          with open('res/stills.bin', 'wb') as out:
+              for i, f in enumerate(sorted(glob.glob('stills/*.jpg'))):
+                  b = open(f, 'rb').read()
+                  out.write(b)
+                  idx.append([i * 2, o, len(b)])
+                  o += len(b)
+          json.dump({'every': 2, 'n': len(idx), 'idx': idx}, open('res/stills.json', 'w'))
+          print('stills', len(idx), 'bytes', o)
           PY
       - name: Report a failure to the app
         if: failure()

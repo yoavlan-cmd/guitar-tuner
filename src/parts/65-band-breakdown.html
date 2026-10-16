@@ -371,7 +371,7 @@ function mxHome(){if(mxBusy)return;mxCreating=false;const v=$('mixView');
 function mxSheetUI(){if(mxBusy)return;if(mxCreating&&mxSheetOpen())return mxCreate();if(mxSong&&mxSong.tracks){const m=$('mxMore');if(m&&$('mxRows'))mxLibUI();else mxMixer()}else if($('mxSetMsg')){}else mxHome()}
 async function mxForget(id,quiet){const it=mxIdx.find(x=>x.id===id);mxIdx=mxIdx.filter(x=>x.id!==id);
  if(mxSong&&mxSong.id===id){mxStopAudio();mxSong=null;mxPos=0}
- try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}await mxIdxSave();
+ try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}await mxIdxSave();
  if(it&&it.src==='cloud'&&mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
  if(!quiet){mxSheetUI();mxBar();renderMixNew()}}
 const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannels>1?au.getChannelData(1):a,o=new Int16Array(n*2);for(let i=0;i<n;i++){let x=a[i],y=b[i];o[2*i]=(x>1?1:x<-1?-1:x)*32767;o[2*i+1]=(y>1?1:y<-1?-1:y)*32767}return o};
@@ -532,7 +532,10 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
+   await mxPut('mixdata:'+it.id,{stems});
+   // stills from the song's video (splitter v5), for the chord check
+   try{const j=await gh('/contents/stills.json?ref=r-'+it.id,{raw:true,ok404:true});if(j){const m=JSON.parse(await j.text());if(m&&m.n){const bin=await gh('/contents/stills.bin?ref=r-'+it.id,{raw:true});await mxPut('mixstills:'+it.id,{every:m.every,idx:m.idx,bin})}}}catch(e){}
+   if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
    try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
    try{asBuild(it.id)}catch(e){}
    toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`,'ok');
