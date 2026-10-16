@@ -22,11 +22,13 @@ const VID=path.join(OUT,'vl_video.webm');execFileSync('ffmpeg',['-y','-v','error
 const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees" with capo 4
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await ctx.route(/ideas\.json/,r=>r.abort());
- const calls={list:0,media:0,claude:0,images:0,prompt:''};const vbytes=fs.readFileSync(VID);
+ const calls={list:0,media:0,claude:0,images:0,prompt:'',find:0,nohand:false};const vbytes=fs.readFileSync(VID);
  await ctx.route(/^https:\/\//,async r=>{const u=r.request().url(),H={'access-control-allow-origin':'*'};
   if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){calls.list++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
   if(/googleapis\.com\/drive\/v3\/files\/vid1\?alt=media/.test(u)){calls.media++;return r.fulfill({contentType:'video/webm',headers:H,body:vbytes})}
-  if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;calls.prompt=txt;
+  if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high'})))})}]})})}
+   calls.prompt=txt;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));let lastE=-1;ts.forEach((t,i)=>{if(seq[Math.floor(t/4.6)]==='E')lastE=i});
    const frames=ts.map((t,i)=>({t,shape:i===lastE?'G':SHAPE[seq[Math.floor(t/4.6)]],conf:'high'}));
    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:4,capo_conf:'high',frames})}]})})}
@@ -57,7 +59,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  let lab='';for(let i=0;i<200&&!/video/.test(lab);i++){lab=await p.$eval('#mxBar',e=>e.hidden?'':e.innerText.replace(/\s+/g,' ')).catch(()=>'');if(!/video/.test(lab))await p.waitForTimeout(150)}
  console.log('  bar:',lab);ok(/Looking at the song’s video/.test(lab),'while it looks, the bar says “Looking at the song’s video”');
  await done();await p.waitForTimeout(400);a=await ana();console.log('  video:',JSON.stringify(a.video&&{capo:a.video.capo,agree:a.video.agree,differ:a.video.differ,fixed:a.video.fixed,asked:a.video.asked}));
- ok(calls.list===1&&calls.media===1&&calls.claude===1&&calls.images>=4&&calls.images<=8,`the video was found in the song’s folder, read once, and ${calls.images} stills went to Claude in one call`);
+ ok(calls.list===1&&calls.media===1&&calls.claude===2&&calls.find===1,`the video was found in the song’s folder, read once; two Claude calls (find the hand, then read the close-ups), ${calls.images} pictures in all`);
  ok(!/heard|C#m|E · |\bF#\b(?!m)/.test(calls.prompt)&&(calls.prompt.match(/F#m/g)||[]).length===1,'Claude isn’t told what the sound heard (only the example shape name is in the question)');
  ok(a.video.capo===4&&a.play.capoBy==='video','the capo comes from the video: 4');
  const R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],T=['','m','7','m7','maj7','sus2','sus4','add9'],nm=c=>R[Math.floor(c/8)]+T[c%8];
@@ -73,5 +75,12 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  ok(/video shows something else at \d:\d\d \(heard E, the hand plays B\)/.test(lv['Chords and order'][1]),'How sure names where the video disagrees: '+lv['Chords and order'][1]);
  ok(/Checked against the video: the hand was clear at \d of \d moments; capo on fret 4/.test(await p.$eval('.vlnote',e=>e.textContent).catch(()=>'')),'the guide says it was checked against the video');
  await p.screenshot({path:path.join(OUT,'vlook.png'),fullPage:true});
+ // ---- 3. a video where the guitarist's hand is never shown clearly: one Claude call only (no close-ups), and the guide says so ----
+ calls.nohand=true;const before3=calls.claude;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
+ const a3=await ana();console.log('  no hand:',JSON.stringify(a3.video&&{nohand:a3.video.nohand,asked:a3.video.asked,frames:a3.video.frames.length}));
+ ok(calls.claude-before3===1&&a3.video.nohand&&a3.play.capoBy!=='video','a video that never shows the hand clearly: one Claude call only, nothing taken from it');
+ if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
+ const src3=await p.$$eval('.gdsrc li',l=>l.map(x=>[x.className,x.textContent]));const v3=src3.find(x=>/The video/.test(x[1]))||[];console.log('  video line:',JSON.stringify(v3));
+ ok(v3[0]==='n'&&/fretting hand isn’t shown clearly/.test(v3[1]),'Built from lists the video as not helping, and why');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();

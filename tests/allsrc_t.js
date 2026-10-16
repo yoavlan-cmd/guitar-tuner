@@ -31,10 +31,13 @@ const SHAPE={'C#m':'C#m',A:'A',E:'E',B:'Bm'};// the stand-in Claude sees no capo
 const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chords:['C#m','A','E','Bm'],src:'phone',at:'2026-10-11'};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await ctx.route(/ideas\.json/,r=>r.abort());
- const calls={drive:0,claude:0,images:0};
+ const calls={drive:0,claude:0,images:0,find:0,read:0,readImgs:0};
  await ctx.route(/^https:\/\//,async r=>{const u=r.request().url(),H={'access-control-allow-origin':'*'};
   if(/googleapis\.com\/(drive|upload)/.test(u)){calls.drive++;return r.abort()}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
+   // step 1 (find): every tile shows the hand, in its middle
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:true,box:[.3,.3,.7,.7],quality:'high'})))})}]})})}
+   calls.read++;calls.readImgs=c.filter(x=>x.type==='image').length;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));
    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:0,capo_conf:'high',frames:ts.map(t=>({t,shape:SHAPE[seq[Math.min(seq.length-1,Math.floor(t/4.6))]],conf:'high'}))})}]})})}
   return r.abort()});
@@ -59,7 +62,7 @@ const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chor
  ok(a&&a.whole&&!a.whole.skip&&a.whole.agree>=.7,'the whole song (every part but the drums) was listened to, and hears the same roots');
  ok(a.whole.fixed.some(x=>/^B → Bm$/.test(x)),'where the guitar’s 3rd was faint, the whole song settled it: B → Bm (the key alone would have said B)');
  ok(a.video&&a.video.from==='stills'&&calls.drive===0,'the video came from the stills GitHub took (no Drive, no download on the phone)');
- ok(calls.claude===1&&calls.images>=3&&calls.images<=8,`one Claude call with ${calls.images} stills`);
+ ok(calls.find===1&&calls.read===1&&calls.readImgs>=4&&calls.readImgs<=9,`two Claude calls: find the hand (contact sheets), then read ${calls.readImgs-1} close-ups and one whole still`);
  ok(a.video.agree>=3&&!a.video.differ.length,'the hand in the stills agrees with the chords');
  // the guide
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("Video Song")');await p.waitForTimeout(500);
