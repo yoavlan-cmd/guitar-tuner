@@ -1180,6 +1180,7 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .gdblock{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
 .gdblock h4{margin:0;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 .gdbig{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sesguide .gdre{margin-top:10px}
 .gdcapo{display:flex;flex-direction:column;gap:6px;margin-top:10px}.gdcapo small{color:var(--muted);font-size:12.5px}
 .gdcapo .seg{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.gdcapo .seg button{min-width:0;padding:8px 0;font-size:13px}
 .gdbig>div{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:rgba(255,255,255,.05)}
@@ -5214,7 +5215,10 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),v:2,at:Date.now(),from:'guitars',mix:id};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
-  const key='mix_'+id;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
+  const key='mix_'+id;
+  // built again: a capo you set from the video stays
+  try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
+  localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
@@ -6411,7 +6415,7 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
   <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
  </section>
- ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(g.r.analysis[0].key)}">▶ Play along with the chords, in time</button></section>`:''}
+ ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(g.r.analysis[0].key)}">▶ Play along with the chords, in time</button>${g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{};return AS_ON.includes(it.sess)?`<p class="tip gdre">Building the guide again from the guitars-only part: about a minute; you can keep using Guitaring.</p>`:it.state==='ready'?`<button type="button" class="btn ghost wide gdre" id="sesRebuild">Rebuild the guide from the guitars-only part</button>`:''})():''}</section>`:''}
  ${!G&&g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{},on=AS_ON.includes(it.sess);return `<section class="card sessec" id="sesBuild"><h3>Song guide</h3>${on?`<p class="tip">Building the song’s session from its guitars-only part: the chords, the strumming and the Easy / Full guide. About a minute; you can keep using Guitaring.</p>`:`<p class="tip">${it.sess==='failed'?'The session couldn’t be built from the guitars-only part last time.':'This song has a jam track but no guide yet.'} Guitaring can work out its chords and strumming from the guitars-only part (about a minute, on this phone).</p><button type="button" class="btn wide" id="sesMake">${it.sess==='failed'?'Try again':'Build the song guide'}</button>`}</section>`})():''}
  ${!G&&f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
@@ -6419,6 +6423,8 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
  <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
  const mk=$('sesMake');if(mk)mk.onclick=()=>{asStart(g.r.mix[0].mix);renderSession()};
+ // rebuild: the chords are heard again with the latest listening (a capo you set stays)
+ const rb=$('sesRebuild');if(rb)rb.onclick=()=>{asStart(g.r.mix[0].mix);renderSession()};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}
