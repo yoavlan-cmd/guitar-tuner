@@ -36,8 +36,10 @@ const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chor
   if(/googleapis\.com\/(drive|upload)/.test(u)){calls.drive++;return r.abort()}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
    // step 1 (find): every tile shows the hand, in its middle
-   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:true,box:[.3,.3,.7,.7],quality:'high'})))})}]})})}
-   calls.read++;calls.readImgs=c.filter(x=>x.type==='image').length;
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,
+     // two guitarists: the acoustic's hand in every tile, the electric's in two
+     hands:[{guitar:'acoustic',box:[.3,.3,.7,.7],quality:'high'}].concat(si===0&&k<2?[{guitar:'electric',box:[.6,.1,.95,.4],quality:'high'}]:[])})))})}]})})}
+   calls.read++;calls.readImgs=c.filter(x=>x.type==='image').length;calls.readPrompt=txt;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));
    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:0,capo_conf:'high',frames:ts.map(t=>({t,shape:SHAPE[seq[Math.min(seq.length-1,Math.floor(t/4.6))]],conf:'high'}))})}]})})}
   return r.abort()});
@@ -64,6 +66,7 @@ const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chor
  ok(a.video&&a.video.from==='stills'&&calls.drive===0,'the video came from the stills GitHub took (no Drive, no download on the phone)');
  ok(calls.find===1&&calls.read===1&&calls.readImgs>=4&&calls.readImgs<=9,`two Claude calls: find the hand (contact sheets), then read ${calls.readImgs-1} close-ups and one whole still`);
  ok(a.video.agree>=3&&!a.video.differ.length,'the hand in the stills agrees with the chords');
+ ok(a.video.who==='acoustic'&&(a.video.others||[]).includes('electric')&&/the acoustic guitarist’s fretting hand/.test(calls.readPrompt||''),'two guitarists: the acoustic one (clear most often) is read; the electric one is named');
  // the guide
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("Video Song")');await p.waitForTimeout(500);
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
