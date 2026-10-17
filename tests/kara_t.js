@@ -59,7 +59,11 @@ execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`testsrc=size=320x180
  await p.tap('#gdKara .kbig');await p.waitForTimeout(800);const t1=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);
  const box=await p.$eval('#gdKara .klane',e=>{const r=e.getBoundingClientRect();return {x:r.left+r.width*.9,y:r.top+r.height/2}});await p.mouse.click(box.x,box.y);await p.waitForTimeout(300);
  const t2=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);console.log('  jump:',t1.toFixed(2),'→',t2.toFixed(2));ok(t2>t1+1.5,'tapping the lane ahead of the line jumps there');
+ // the play button as in the player: in a −5s / ▶ / +5s row under the video (not over it); ❚❚ while it plays; −5s goes back
+ ok(await p.$eval('#gdKara .kbig',e=>e.classList.contains('mixplay')&&!e.closest('.kvid')&&e.textContent==='❚❚'&&e.getAttribute('aria-label')==='Pause'),'the play button is the player’s, under the video: ❚❚ while it plays');
+ {const a0=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);await p.tap('#gdKara [data-kj="-5"]');await p.waitForTimeout(150);const a1=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);ok(a1<a0-4,'−5s goes back 5 seconds');}
  await p.screenshot({path:path.join(OUT,'karaoke.png'),fullPage:false});
+ await p.tap('#gdKara .kbig');await p.waitForTimeout(150);ok(await p.$eval('#gdKara .kbig',e=>e.textContent==='▶'),'tapping it pauses (▶)');
  // leaving the page stops it
  await p.tap('#bnav [data-sec=home]');await p.waitForTimeout(400);ok(await p.evaluate(()=>!window.__ka.state())&&await p.evaluate(()=>{const v=document.querySelector('#gdKara video');return !v||v.paused}),'leaving the page stops the video');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
