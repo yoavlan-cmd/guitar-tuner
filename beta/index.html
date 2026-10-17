@@ -5464,7 +5464,7 @@ window.__as={build:asBuild,start:asStart,list:()=>mkList()};// test hooks
 /* ===== The video's view (V2 phase 4): building a song's session also looks at its video, when there is one ===== */
 // Sound can't tell a capo (an open C#m sounds like an Am shape with capo 4), and a faint 3rd can't always tell minor from major;
 // the guitarist's hand can. When the song has a video and Claude is on, Guitaring looks in two steps (two Claude calls at most):
-// (1) find: stills from the middle of the chords the sound found (up to 27) go as contact sheets of 9 numbered tiles; Claude says
+// (1) find: stills from the middle of the chords the sound found (up to 27) go as contact sheets of 4 numbered tiles; Claude says
 // which tiles clearly show the guitarist's fretting hand, and where it is; (2) read: close-ups of the hand and neck (up to 8, cut
 // from the full-size stills) and one whole frame go back to Claude: what capo it sees, and which shape the hand holds. When no
 // tile shows the hand clearly, step 2 is skipped (no cost) and the guide says the hand isn't shown clearly in this video. Sound keeps the chords and
@@ -5502,15 +5502,17 @@ async function vlFrames(v,tok,times){
 // a still as a picture to draw from
 const vlImg=b=>createImageBitmap(b);
 const vlJpg=(cv,q=.82)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
-// (1) find: contact sheets of up to 9 numbered tiles (3 × 3, each 320 wide); Claude says which show the fretting hand clearly, and where
-async function vlContact(frames){const out=[];for(let i=0;i<frames.length;i+=9){const part=frames.slice(i,i+9),W=480,H=270,cv=document.createElement('canvas');cv.width=W*3;cv.height=H*3;const g=cv.getContext('2d');
+// (1) find: contact sheets of up to 4 numbered tiles (2 × 2, each 720 wide: a hand in a wide shot stays big enough to spot; 9 tiles of
+// 480 shrank it too far, Oct 2026); Claude says which show the fretting hand clearly, and where
+const VL_T={n:4,cols:2,W:720,H:405};
+async function vlContact(frames){const out=[],{n:N,cols:C,W,H}=VL_T;for(let i=0;i<frames.length;i+=N){const part=frames.slice(i,i+N),cv=document.createElement('canvas');cv.width=W*C;cv.height=H*Math.ceil(N/C);const g=cv.getContext('2d');
   g.fillStyle='#000';g.fillRect(0,0,cv.width,cv.height);const tiles=[];
-  for(let k=0;k<part.length;k++){const im=await vlImg(part[k].blob),sc=Math.min(W/im.width,H/im.height),w=im.width*sc,h=im.height*sc,x=(k%3)*W+(W-w)/2,y=Math.floor(k/3)*H+(H-h)/2;
-   g.drawImage(im,x,y,w,h);g.fillStyle='rgba(0,0,0,.7)';g.fillRect((k%3)*W,Math.floor(k/3)*H,32,28);g.fillStyle='#ff0';g.font='bold 22px sans-serif';g.fillText(String(k+1),(k%3)*W+9,Math.floor(k/3)*H+22);
-   tiles.push({n:k+1,f:part[k],fx:(x-(k%3)*W)/W,fy:(y-Math.floor(k/3)*H)/H,fw:w/W,fh:h/H})}
+  for(let k=0;k<part.length;k++){const im=await vlImg(part[k].blob),sc=Math.min(W/im.width,H/im.height),w=im.width*sc,h=im.height*sc,x=(k%C)*W+(W-w)/2,y=Math.floor(k/C)*H+(H-h)/2;
+   g.drawImage(im,x,y,w,h);g.fillStyle='rgba(0,0,0,.7)';g.fillRect((k%C)*W,Math.floor(k/C)*H,32,28);g.fillStyle='#ff0';g.font='bold 22px sans-serif';g.fillText(String(k+1),(k%C)*W+9,Math.floor(k/C)*H+22);
+   tiles.push({n:k+1,f:part[k],fx:(x-(k%C)*W)/W,fy:(y-Math.floor(k/C)*H)/H,fw:w/W,fh:h/H})}
   out.push({blob:await vlJpg(cv,.8),tiles})}return out}
 async function vlFind1(title,sheets){
- const prompt=`These ${sheets.length} images are contact sheets of stills from a video of the song "${title}". Each sheet has up to 9 tiles numbered 1–9 (left to right, top to bottom).
+ const prompt=`These ${sheets.length} images are contact sheets of stills from a video of the song "${title}". Each sheet has up to ${VL_T.n} tiles numbered 1–${VL_T.n} (left to right, top to bottom).
 There may be more than one guitarist (for example one on an acoustic guitar and one on an electric). For every tile, list each guitarist whose fretting hand on the neck is clearly visible: sharp, not blocked, close enough to see which strings and frets the fingers press. For each, say which guitar it is ("acoustic" or "electric", or "guitar" if you can't tell), give a box around the fretting hand and the part of the neck around it, as fractions of the tile [x0, y0, x1, y1] (0,0 is the tile's top left), and how clear it is. A tile with no clear fretting hand has an empty list.
 Don't read lyrics or any other text on screen.
 Reply with only JSON: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}]}]}`;

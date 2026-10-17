@@ -7,6 +7,8 @@ const {chromium}=require('playwright');const path=require('path'),fs=require('fs
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(__dirname,'out');fs.mkdirSync(OUT,{recursive:true});
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':'application/octet-stream'});r.end(d)})}).listen(0);
 const APP=process.env.APP||`http://localhost:${srv.address().port}/index.html`;
+// a JPEG's width and height from its frame header
+const jpgSize=b64=>{const d=Buffer.from(b64,'base64');for(let i=2;i<d.length-9;){if(d[i]!==0xFF){i++;continue}const m=d[i+1];if(m>=0xC0&&m<=0xC3)return d.readUInt16BE(i+7)+'x'+d.readUInt16BE(i+5);i+=2+d.readUInt16BE(i+2)}return ''};
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
 // a guitar part like the one that met this ("במקום בו אני גר", guitars only): C#m · A · E · F#m, 4.6 s each, mostly root and 5th;
 // each minor 3rd is faint, and the root's own overtone on the major 3rd is a little louder (so the 3rd alone would say "major")
@@ -27,7 +29,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
   if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){calls.list++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
   if(/googleapis\.com\/drive\/v3\/files\/vid1\?alt=media/.test(u)){calls.media++;return r.fulfill({contentType:'video/webm',headers:H,body:vbytes})}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
-   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high'})))})}]})})}
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;calls.sheets=n;calls.sheetSize=jpgSize(c.find(x=>x.type==='image').source.data);calls.tilesSaid=(txt.match(/up to (\d+) tiles/)||[])[1];return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high'})))})}]})})}
    calls.prompt=txt;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));let lastE=-1;ts.forEach((t,i)=>{if(seq[Math.floor(t/4.6)]==='E')lastE=i});
    const frames=ts.map((t,i)=>({t,shape:i===lastE?'G':SHAPE[seq[Math.floor(t/4.6)]],conf:'high'}));
@@ -59,6 +61,8 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  let lab='';for(let i=0;i<200&&!/video/.test(lab);i++){lab=await p.$eval('#mxBar',e=>e.hidden?'':e.innerText.replace(/\s+/g,' ')).catch(()=>'');if(!/video/.test(lab))await p.waitForTimeout(150)}
  console.log('  bar:',lab);ok(/Looking at the song’s video/.test(lab),'while it looks, the bar says “Looking at the song’s video”');
  await done();await p.waitForTimeout(400);a=await ana();console.log('  video:',JSON.stringify(a.video&&{capo:a.video.capo,agree:a.video.agree,differ:a.video.differ,fixed:a.video.fixed,asked:a.video.asked}));
+ {const asked=(await ana()).video.asked;console.log('  find: '+calls.sheets+' sheets of '+calls.sheetSize+', '+asked+' moments');
+  ok(calls.sheetSize==='1440x810'&&calls.tilesSaid==='4'&&calls.sheets===Math.ceil(asked/4),'the hand is looked for on sheets of 4 tiles, each 720 wide (a hand in a wide shot stays big enough)');}
  ok(calls.list===1&&calls.media===1&&calls.claude===2&&calls.find===1,`the video was found in the song’s folder, read once; two Claude calls (find the hand, then read the close-ups), ${calls.images} pictures in all`);
  ok(!/heard|C#m|E · |\bF#\b(?!m)/.test(calls.prompt)&&(calls.prompt.match(/F#m/g)||[]).length===1,'Claude isn’t told what the sound heard (only the example shape name is in the question)');
  ok(a.video.capo===4&&a.play.capoBy==='video','the capo comes from the video: 4');
