@@ -1309,6 +1309,11 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .gtwhy{margin:10px 0 8px;font:500 15px/1.45 var(--body)}
 .gtbonus{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}.gtbonus b{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFB27A}.gtbonus ul{margin:6px 0 0;padding-left:18px}.gtbonus li{font:500 14px/1.45 var(--body);margin:3px 0}
 .gtl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}.gtl dt{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}.gtl dd{margin:0;font:500 14px/1.45 var(--body)}
+/* my profile for daily ideas (privacy step A) */
+.prfsync{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.prfrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer}.prfrow input{width:22px;height:22px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+.prfrow span{display:flex;flex-direction:column;gap:4px}.prfrow b{font:600 15px var(--body)}.prfrow small{color:var(--muted);font:500 13px/1.45 var(--body)}.prfrow code{font:500 12.5px var(--mono)}
+.prfst{margin:8px 0 0 34px}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -7700,7 +7705,7 @@ function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox
 const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],capo:'',genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
 function profGet(){const p=store.get('profile',null)||{};return {...JSON.parse(JSON.stringify(PROF_DEF)),...p,time:{...PROF_DEF.time,...(p.time||{})},onboarding:{...PROF_DEF.onboarding,...(p.onboarding||{})}}}
 // saving the profile also feeds the V1 places that read the same things (greeting name, song-idea language)
-function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
+function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);try{prfQueue()}catch(e){}if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
  // only the language, and only when it changed (V1 data is never rewritten otherwise)
  if(p.songLang&&p.songLang.length){const lang=p.songLang.length>1?'both':p.songLang[0],ip=store.get('ideaPrefs',null)||{};if(ip.lang!==lang)store.set('ideaPrefs',{...ip,lang})}}
 // the player's taste for Claude prompts, in words, from the profile
@@ -7809,10 +7814,11 @@ function obRender(){const box=$('onb'),pos=ob.i,si=ob.steps[pos],st=OB_STEPS[si]
 // ---- My profile ----
 function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm=(k,v)=>(OB_OPTS[k].find(o=>String(o[0])===String(v))||[0,v])[1],li=(k,a)=>a.map(v=>nm(k,v)).join(', ');
  const rows=[['Name',p.name],['Songs in',li('songLang',p.songLang)],['Playing for',p.years?nm('years',p.years):''],['Level',p.level?nm('level',p.level):''],['Can play',li('skills',p.skills)],['Instruments',li('instruments',p.instruments)],['Capo',p.capo==='yes'?'I have one (Easy opens with the capo version)':p.capo==='no'?'I don’t use one (Easy opens without a capo)':''],['Genres',li('genres',p.genres)],['Artists',p.artists.join(', ')],['Dream songs',p.dreamSongs.join(', ')],['Goals',li('goals',p.goals)],['Learns by',li('learnBy',p.learnBy)],['Time',p.time.minPerDay?`${nm('minPerDay',p.time.minPerDay)} a day${p.time.daysPerWeek?`, ${p.time.daysPerWeek} days a week`:''}`:''],['Plays',li('context',p.context)]];
- c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>Your answers stay on this phone.</small></div></div>
+ c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>${p.sync&&p.sync.repo?'Your answers are also saved in your private GitHub repository, for daily ideas.':'Your answers stay on this phone.'}</small></div></div>
   <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
-  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>`;
- $('profEdit').onclick=()=>openOnb(p.onboarding.done);
+  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>
+  <div class="prfsync" id="prfSync"></div>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);try{prfUI()}catch(e){}
  // Connections and Backup: the V1 boxes, moved here
  const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
   const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}
@@ -7837,6 +7843,34 @@ async function v2Start(){
  renderHome()}
 $('findNew').onclick=()=>cfOpen('book');
 window.__v2={goSec,profGet,profSet,openOnb,prefill:profPrefill,cur:()=>curSec};// test hooks
+/* ===== My profile for daily ideas (privacy step A, deployment plan §7): the profile in your private GitHub repository ===== */
+// A switch in My profile, off until you turn it on (profile.sync.repo). On: your profile answers (no keys, songs, notes, gear or
+// backups) are saved as profile.json in the private repository the app already uses for Band breakdown (the same GitHub key),
+// again whenever you change them; off: the file is deleted. The beta writes profile-beta.json, so testing never touches the file
+// the daily ideas job will read (step B, its own OK). Saving a file there starts no GitHub job (the splitter runs only when sent).
+const PRF_FILE=BETA?'profile-beta.json':'profile.json';
+const PRF_KEYS=['name','songLang','years','level','skills','instruments','capo','genres','artists','dreamSongs','goals','learnBy','time','context'];
+const prfOn=()=>{try{return !!profGet().sync.repo}catch(e){return false}};
+function prfData(p){const o={app:'Guitaring',kind:'profile',v:1,at:new Date().toISOString()};PRF_KEYS.forEach(k=>{if(p[k]!=null)o[k]=p[k]});return o}
+const prfB64=s=>btoa(unescape(encodeURIComponent(s)));
+async function prfSha(cfg){const r=await gh('/contents/'+PRF_FILE+(cfg.branch?'?ref='+encodeURIComponent(cfg.branch):''),{ok404:true},cfg);return r&&r.sha||''}
+async function prfWrite(){const cfg=mxGh();if(!cfg)throw {code:'nogh'};const sha=await prfSha(cfg);
+ await gh('/contents/'+PRF_FILE,{method:'PUT',body:JSON.stringify({message:'Guitaring: my profile for daily ideas',content:prfB64(JSON.stringify(prfData(profGet()),null,1)),...(sha?{sha}:{}),...(cfg.branch?{branch:cfg.branch}:{})})},cfg);
+ store.set('profRepo',{at:Date.now(),repo:cfg.repo,file:PRF_FILE})}
+async function prfDelete(){const cfg=mxGh();if(!cfg)return;const sha=await prfSha(cfg);
+ if(sha)await gh('/contents/'+PRF_FILE,{method:'DELETE',body:JSON.stringify({message:'Guitaring: profile removed',sha,...(cfg.branch?{branch:cfg.branch}:{})})},cfg);store.set('profRepo',null)}
+// after a change to your answers (profSet): saved again a moment later while the switch is on
+let prfT=null,prfBusy=Promise.resolve();
+function prfQueue(){if(!prfOn())return;clearTimeout(prfT);prfT=setTimeout(()=>{prfBusy=prfBusy.then(()=>prfWrite()).then(()=>store.set('profRepoErr',''),e=>store.set('profRepoErr',e&&e.code==='nogh'?'nogh':String(e&&e.message||e))).then(prfUI)},window.__prfMs??1500)}
+// the switch and its line in My profile
+function prfUI(){const box=$('prfSync');if(!box)return;const on=prfOn(),cfg=mxGh(),st=store.get('profRepo',null),err=store.get('profRepoErr','');
+ box.innerHTML=`<label class="prfrow"><input type="checkbox" id="prfOn"${on?' checked':''}${cfg?'':' disabled'}> <span><b>Use my profile for daily ideas</b>
+  <small>Saves your answers above (not your keys, songs, notes or gear) as <code>${PRF_FILE}</code> in your private GitHub repository${cfg?` <b>${esc(cfg.repo)}</b>`:''}, and again when you change them. Turning it off deletes the file.</small></span></label>
+  <p class="tip prfst" role="status">${!cfg?'Connect GitHub first (below, “GitHub for Band breakdown”).':err==='nogh'?'GitHub isn’t connected.':err?`Couldn’t save it: ${esc(err)}`:on&&st?`Saved ${esc(bkDate(st.at))}.`:on?'Saving…':'Off: nothing is saved outside this phone.'}</p>`;
+ const cb=$('prfOn');if(cb)cb.onchange=async()=>{const p=profGet();p.sync={...(p.sync||{}),repo:cb.checked};profSet(p);
+  if(!cb.checked){clearTimeout(prfT);box.querySelector('.prfst').textContent='Deleting the file…';try{await prfDelete();store.set('profRepoErr','')}catch(e){store.set('profRepoErr',String(e&&e.message||e))}}
+  try{renderProfile()}catch(e){prfUI()}}}
+window.__prf={file:PRF_FILE};// test hooks
 // ---- start the app ----
 renderGear();
 

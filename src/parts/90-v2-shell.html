@@ -69,7 +69,7 @@ function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox
 const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],capo:'',genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
 function profGet(){const p=store.get('profile',null)||{};return {...JSON.parse(JSON.stringify(PROF_DEF)),...p,time:{...PROF_DEF.time,...(p.time||{})},onboarding:{...PROF_DEF.onboarding,...(p.onboarding||{})}}}
 // saving the profile also feeds the V1 places that read the same things (greeting name, song-idea language)
-function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
+function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);try{prfQueue()}catch(e){}if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
  // only the language, and only when it changed (V1 data is never rewritten otherwise)
  if(p.songLang&&p.songLang.length){const lang=p.songLang.length>1?'both':p.songLang[0],ip=store.get('ideaPrefs',null)||{};if(ip.lang!==lang)store.set('ideaPrefs',{...ip,lang})}}
 // the player's taste for Claude prompts, in words, from the profile
@@ -178,10 +178,11 @@ function obRender(){const box=$('onb'),pos=ob.i,si=ob.steps[pos],st=OB_STEPS[si]
 // ---- My profile ----
 function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm=(k,v)=>(OB_OPTS[k].find(o=>String(o[0])===String(v))||[0,v])[1],li=(k,a)=>a.map(v=>nm(k,v)).join(', ');
  const rows=[['Name',p.name],['Songs in',li('songLang',p.songLang)],['Playing for',p.years?nm('years',p.years):''],['Level',p.level?nm('level',p.level):''],['Can play',li('skills',p.skills)],['Instruments',li('instruments',p.instruments)],['Capo',p.capo==='yes'?'I have one (Easy opens with the capo version)':p.capo==='no'?'I don’t use one (Easy opens without a capo)':''],['Genres',li('genres',p.genres)],['Artists',p.artists.join(', ')],['Dream songs',p.dreamSongs.join(', ')],['Goals',li('goals',p.goals)],['Learns by',li('learnBy',p.learnBy)],['Time',p.time.minPerDay?`${nm('minPerDay',p.time.minPerDay)} a day${p.time.daysPerWeek?`, ${p.time.daysPerWeek} days a week`:''}`:''],['Plays',li('context',p.context)]];
- c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>Your answers stay on this phone.</small></div></div>
+ c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>${p.sync&&p.sync.repo?'Your answers are also saved in your private GitHub repository, for daily ideas.':'Your answers stay on this phone.'}</small></div></div>
   <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
-  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>`;
- $('profEdit').onclick=()=>openOnb(p.onboarding.done);
+  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>
+  <div class="prfsync" id="prfSync"></div>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);try{prfUI()}catch(e){}
  // Connections and Backup: the V1 boxes, moved here
  const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
   const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}
