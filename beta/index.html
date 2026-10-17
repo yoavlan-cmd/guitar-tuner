@@ -1298,14 +1298,37 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 <div class="wrap">
   <header>
     <div class="brand"><svg class="logo" id="appLogoSvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 512 512"><g id="appLogo"><defs>
-<radialGradient id="lg-fbg" cx="50%" cy="72%" r="78%"><stop offset="0" stop-color="#FFD54A"/><stop offset=".28" stop-color="#FFA126"/><stop offset=".6" stop-color="#FF6A1A"/><stop offset=".85" stop-color="#E4391A"/><stop offset="1" stop-color="#B21E10"/></radialGradient>
-<linearGradient id="lg-t1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#D2260F"/><stop offset="1" stop-color="#F0531A" stop-opacity=".0"/></linearGradient>
-<linearGradient id="lg-t2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFB02E" stop-opacity=".0"/></linearGradient>
-<linearGradient id="lg-t3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#FFD54A" stop-opacity=".0"/></linearGradient>
-<linearGradient id="lg-yfire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E0331A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFD54A"/></linearGradient>
-<linearGradient id="lg-pickO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC24A"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#D9301A"/></linearGradient>
-<filter id="lg-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#5A0E05" flood-opacity=".55"/></filter>
-</defs><rect width="512" height="512" fill="url(#lg-fbg)"/><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#lg-t1)"/><path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#lg-t1)"/><path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#lg-t1)"/><path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#lg-t1)"/><path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#lg-t2)"/><path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#lg-t2)"/><path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#lg-t2)"/><path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#lg-t3)"/><path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#lg-t3)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#1A0F0B" filter="url(#lg-sh)"/><path d="M186 170 L256 266 L326 170 M256 266 V370" stroke="url(#lg-yfire)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg><h1>Guitaring</h1></div>
+<linearGradient id="ig-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A52C08"/><stop offset=".4" stop-color="#D84315"/><stop offset=".72" stop-color="#FF6D00"/><stop offset="1" stop-color="#FFAB00"/></linearGradient>
+<radialGradient id="ig-glow" cx="50%" cy="100%" r="70%"><stop offset="0" stop-color="#FFE9A0" stop-opacity=".95"/><stop offset=".5" stop-color="#FF8F00" stop-opacity=".35"/><stop offset="1" stop-color="#D84315" stop-opacity="0"/></radialGradient>
+<radialGradient id="ig-top" cx="50%" cy="0%" r="75%"><stop offset="0" stop-color="#3A0E03" stop-opacity=".55"/><stop offset="1" stop-color="#3A0E03" stop-opacity="0"/></radialGradient>
+<linearGradient id="ig-t1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF6D00"/><stop offset="1" stop-color="#FF6D00" stop-opacity="0"/></linearGradient>
+<linearGradient id="ig-t2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFA000"/><stop offset="1" stop-color="#FFB300" stop-opacity="0"/></linearGradient>
+<linearGradient id="ig-t3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFE9A0"/><stop offset="1" stop-color="#FFD54F" stop-opacity="0"/></linearGradient>
+<linearGradient id="ig-pick" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E2E2E"/><stop offset="1" stop-color="#141414"/></linearGradient>
+<filter id="ig-sh" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".55"/></filter>
+<filter id="ig-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .07 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<mask id="ig-slots" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><g stroke="#000" stroke-width="13" stroke-linecap="round">
+<line x1="400.9" y1="37.6" x2="159.1" y2="279.5"/>
+<line x1="420.0" y1="56.7" x2="173.9" y2="302.8"/>
+<line x1="439.1" y1="75.8" x2="188.8" y2="326.1"/>
+<line x1="458.2" y1="94.9" x2="203.6" y2="349.5"/>
+<line x1="477.3" y1="114.0" x2="218.5" y2="372.8"/>
+<line x1="496.4" y1="133.1" x2="233.3" y2="396.1"/>
+</g></mask>
+</defs>
+<rect width="512" height="512" fill="url(#ig-bg)"/><rect width="512" height="512" fill="url(#ig-top)"/>
+<g transform="matrix(1 0 0 .7 0 158)"><path d="M60 540 C-10.0 540 -13.5 401.4 21.5 335.4 C39.0 302.4 35.5 256.2 51.6 210 C70.5 276.0 103.4 322.2 116.0 401.4 C130.0 490.5 102.0 540 60 540Z" fill="url(#ig-t1)"/>
+<path d="M170 540 C90.0 540 86.0 372.0 126.0 292.0 C146.0 252.0 142.0 196.0 160.4 140 C182.0 220.0 219.6 276.0 234.0 372.0 C250.0 480.0 218.0 540 170 540Z" fill="url(#ig-t1)"/>
+<path d="M300 540 C220.0 540 216.0 380.4 256.0 304.4 C276.0 266.40000000000003 272.0 213.2 290.4 160 C312.0 236.0 349.6 289.2 364.0 380.4 C380.0 483.0 348.0 540 300 540Z" fill="url(#ig-t1)"/>
+<path d="M440 540 C368.0 540 364.4 397.20000000000005 400.4 329.2 C418.4 295.20000000000005 414.8 247.60000000000002 431.36 200 C450.8 268.0 484.64 315.6 497.6 397.20000000000005 C512.0 489.0 483.2 540 440 540Z" fill="url(#ig-t1)"/>
+<path d="M110 540 C50.0 540 47.0 435.0 77.0 385.0 C92.0 360.0 89.0 325.0 102.8 290 C119.0 340.0 147.2 375.0 158.0 435.0 C170.0 502.5 146.0 540 110 540Z" fill="url(#ig-t2)"/>
+<path d="M240 540 C176.0 540 172.8 418.2 204.8 360.2 C220.8 331.20000000000005 217.6 290.6 232.32 250 C249.6 308.0 279.68 348.6 291.2 418.2 C304.0 496.5 278.4 540 240 540Z" fill="url(#ig-t2)"/>
+<path d="M380 540 C316.0 540 312.8 426.6 344.8 372.6 C360.8 345.6 357.6 307.8 372.32 270 C389.6 324.0 419.68 361.79999999999995 431.2 426.6 C444.0 499.5 418.4 540 380 540Z" fill="url(#ig-t2)"/>
+<path d="M180 540 C130.0 540 127.5 468.6 152.5 434.6 C165.0 417.6 162.5 393.8 174.0 370 C187.5 404.0 211.0 427.8 220.0 468.6 C230.0 514.5 210.0 540 180 540Z" fill="url(#ig-t3)"/>
+<path d="M330 540 C280.0 540 277.5 464.4 302.5 428.4 C315.0 410.4 312.5 385.2 324.0 360 C337.5 396.0 361.0 421.2 370.0 464.4 C380.0 513.0 360.0 540 330 540Z" fill="url(#ig-t3)"/></g>
+<rect width="512" height="512" fill="url(#ig-glow)"/>
+<g transform="translate(256 262) scale(.9) translate(-256 -262)"><g filter="url(#ig-sh)"><g mask="url(#ig-slots)"><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="url(#ig-pick)"/><path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="#000" filter="url(#ig-grain)"/>
+<path d="M256 84 C364 84 430 121 424 203 C417 300 325 404 256 443 C187 404 95 300 88 203 C82 121 148 84 256 84Z" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2"/></g></g></g></g></svg><h1>Guitaring</h1></div>
     <div class="hicons">
       <button type="button" class="hic" id="hTuner" data-tab="tune" data-sec="tuner" aria-label="Tuner"><span data-pd="TUNE"></span><small>Tuner</small></button>
       <button type="button" class="hic" id="hLib" data-sec="library" aria-label="My Library"><span data-pd="LIB"></span><small>Library</small></button>
@@ -6347,7 +6370,7 @@ function learnSongs(){
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
 // the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
 // background (covWarm)
-async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov:not(.on)')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
+async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
   const c=await coverFor(t,a,{look:false});if(c)covPaint(el.dataset.ck,c)}
  covWarm()}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
@@ -6367,7 +6390,7 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
-   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist);return `<span class="lcov${c&&c.thumb?' on':''}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${c&&c.thumb?` style="background-image:url(&quot;${c.thumb}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
@@ -6722,7 +6745,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  if(!gdMode||sesKey._g!==g.title){gdMode=gdDefault();sesKey._g=g.title}
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
- box.innerHTML=`<section class="seshero">
+ box.innerHTML=`<section class="seshero hascov covdef" style="--cov:url(&quot;${covDef()}&quot;)">
   <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}${g.r.mix.length?`<button type="button" class="tlink sesname" id="sesName">Edit name</button>`:''}
   ${info.length?`<div class="sesinfo">${info.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
   <div class="sestags">${has.length?has.map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join(''):'<span class="ltag none">Nothing yet</span>'}</div>
@@ -6742,8 +6765,9 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;
  // rebuild: the chords are heard again with the latest listening (a capo you set stays)
  const rb=$('sesRebuild');if(rb)rb.onclick=goBuild;
- // the album cover as a light background behind the name (kept on the phone, or looked up once)
- coverFor(g.title,g.artist).then(c=>{const h=box.querySelector('.seshero');if(c&&c.big&&h&&h.isConnected){h.style.setProperty('--cov',`url("${c.big}")`);h.classList.add('hascov')}}).catch(()=>{});
+ // the album cover as a light background behind the name (kept on the phone, or looked up once); Guitaring's own picture until then
+ // (and when none is found)
+ coverFor(g.title,g.artist).then(c=>{const h=box.querySelector('.seshero');if(c&&c.big&&h&&h.isConnected){h.style.setProperty('--cov',`url("${c.big}")`);h.classList.add('hascov');h.classList.remove('covdef')}}).catch(()=>{});
  // fix the song's name (a live or video upload is often named differently): the session, its jam track and the cover follow
  const nb=$('sesName');if(nb)nb.onclick=()=>{const h=box.querySelector('.seshero'),f=document.createElement('div');f.className='sesnamef';
   f.innerHTML=`<label class="dslab">Song<input id="snT" class="textin" dir="auto" value="${esc(g.title)}"></label><label class="dslab">Artist<input id="snA" class="textin" dir="auto" value="${esc(g.artist||'')}"></label><button type="button" class="btn" id="snOk">Save</button>`;
@@ -7288,8 +7312,12 @@ async function coverFor(t,a,{look=true,force=false}={}){if(!t||!a)return null;co
   const url=hit.artworkUrl100.replace(/\/\d+x\d+bb\./,'/600x600bb.');let rec={url,at:Date.now(),album:hit.collectionName||'',artist:hit.artistName||'',track:hit.trackName||''};
   try{const r=await fetch(url);if(r.ok)rec={...rec,...await covMake(await r.blob())}}catch(e){}// no copy allowed: the picture is shown from its address
   await mxPut(k,rec);const c=covUse(k,rec);covPaint(k,c);return c}catch(e){return null}finally{delete covBusy[k]}})()}
+// Guitaring's own picture (the app icon): shown until a song's real cover is found, and for good when none fits or the song has
+// no artist to look it up by
+let covDefU='';function covDef(){if(covDefU)return covDefU;try{const s=document.getElementById('appLogoSvg');
+ covDefU=URL.createObjectURL(new Blob([s.outerHTML.replace(/^<svg /,'<svg width="512" height="512" ')],{type:'image/svg+xml'}))}catch(e){}return covDefU}
 // show a cover wherever its song is on screen (the Learn list), without drawing the list again
-function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&!el.classList.contains('on')){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}})}
+function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&(!el.classList.contains('on')||el.classList.contains('def'))){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.remove('def');el.classList.add('on')}})}
 const covNow=(t,a)=>t&&a?COV[coverKey(t,a)]||null:null;// a cover already shown in this visit (drawn with the list, no flicker)
 // every song's cover ready ahead: at start and whenever the list changes, the missing ones are looked up in the background, one
 // at a time with a pause (the catalog limits how fast it may be asked)
@@ -7300,7 +7328,7 @@ function covWarm(){if(covRun){covAgain=true;return covRun}
    const c0=await coverFor(g.title,g.artist,{look:false});if(c0){covPaint(k,c0);continue}
    if(!navigator.onLine)break;const n0=covAsked;await coverFor(g.title,g.artist);if(covAsked>n0)await new Promise(ok=>setTimeout(ok,window.__covGapMs??1500))}}while(covAgain)}
   finally{covRun=null}})()}
-window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks
+window.__cov={def:()=>covDef(),clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks
 /* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
