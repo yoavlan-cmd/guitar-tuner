@@ -25,6 +25,11 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const key='mix_'+id;
   // built again: a capo you set from the video stays
   try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
+  // 1b. several guitars: the guitars part split by where each one sits (left / centre / right, as the jam track does), and each
+  // side with enough of the guitars analysed alone. Measured and shown in the guide for now: the chords still come from the
+  // whole guitars part (step 1, Oct 2026).
+  it.sessStep='sides';try{dsStatusUI()}catch(e){}
+  try{a.guitars=await asSides(d,a)}catch(e){a.guitars={skip:'err'};try{console.error('guitar sides',e)}catch(_){}}
   // 2. the whole song (every part but the drums): where the guitar's 3rd is faint, the other instruments often play it
   it.sessStep='whole';try{dsStatusUI()}catch(e){}
   try{const w=await asWhole(d);if(w)asFuse(a,w);else a.whole={skip:'parts'}}catch(e){a.whole={skip:'err'};try{console.error('whole song',e)}catch(_){}}
@@ -39,6 +44,41 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
  catch(e){it.sess='failed';try{console.error('auto session',e&&e.message||e)}catch(_){}}
  await mxIdxSave();try{dsStatusUI()}catch(e){}try{renderLearn()}catch(e){}if(curSec==='session'){try{renderSession()}catch(e){}}}
 // the whole song from its split parts (all but the drums), at the analysis' rate, and its chord analysis
+// the guitars by side: how much of the guitars sits left, centre and right; when they sit apart (the jam track's rule), each side
+// with at least 12% is analysed alone: its main chords, how often it hears the same roots as the whole guitars part, and how many
+// notes it plays at once (a strummed chord: 3 or more; a riff or a lead line: about 1–2)
+async function asSides(d,a){const b=d&&d.stems&&d.stems.guitar;if(!b)return null;
+ const au=await new Promise(async(res,rej)=>{const p=getCtx().decodeAudioData(await b.arrayBuffer(),res,rej);if(p&&p.then)p.then(res,rej)});
+ if(au.numberOfChannels<2)return {apart:false,mono:true};
+ const R=MX.OUT_SR,o=new OfflineAudioContext(2,Math.max(1,Math.ceil(au.duration*R)),R),src=o.createBufferSource();src.buffer=au;src.connect(o.destination);src.start();
+ const g=mxToI16(await o.startRendering()),sp=await mxPanSplit(g,()=>{}),eG=mxEnergy(g)+1;
+ const share={L:mxEnergy(sp.gL)/eG,C:mxEnergy(sp.gC)/eG,R:mxEnergy(sp.gR)/eG},r2=x=>+x.toFixed(2);
+ const apart=(share.L>.12||share.R>.12)&&Object.values(share).filter(x=>x>.04).length>=2;
+ const out={apart,share:{L:r2(share.L),C:r2(share.C),R:r2(share.R)}};if(!apart)return out;
+ out.sides=[];for(const pos of ['L','C','R']){if(share[pos]<.12)continue;const t=sp['g'+pos],n=t.length/2,m=new Float32Array(n);
+  for(let i=0;i<n;i++)m[i]=(t[2*i]+t[2*i+1])/65536;
+  const ab=new AudioBuffer({length:n,numberOfChannels:1,sampleRate:R});ab.copyToChannel(m,0);
+  const o2=new OfflineAudioContext(1,Math.max(1,Math.ceil(n*SR/R)),SR),s2=o2.createBufferSource();s2.buffer=ab;s2.connect(o2.destination);s2.start();
+  const x=(await o2.startRendering()).getChannelData(0),r=await analyse(x,()=>{},null);
+  // the same roots as the whole guitars part (time-weighted), its main chords, notes at once
+  let same=0,tot=0;const dur=new Map();
+  for(const g2 of r.segs){if(g2.c>=NS)continue;const l=g2.t1-g2.t0,mid=(g2.t0+g2.t1)/2;dur.set(g2.c,(dur.get(g2.c)||0)+l);
+   const o3=a.segs.find(x=>x.c<NS&&mid>=x.t0&&mid<x.t1);if(o3){tot+=l;if(Math.floor(o3.c/NT)===Math.floor(g2.c/NT))same+=l}}
+  const all=[...dur.values()].reduce((x,y)=>x+y,0)||1,main=[...dur.entries()].filter(([,l])=>l/all>=.06).sort((x,y)=>y[1]-x[1]).slice(0,6).map(([c])=>c);
+  out.sides.push({pos,share:r2(share[pos]),chords:main,agree:tot?r2(same/tot):0,notes:await asNotesAtOnce(x)});await tick()}
+ return out}
+// how many notes sound at once, on average, where the guitar plays: short frames (0.37 s), the peaks between 70 and 1500 Hz, a note's
+// own overtones (2–6 times a lower peak) not counted, then the different note names. A strummed chord gives about 3, a riff or a
+// lead line about 1
+async function asNotesAtOnce(x){const N=4096,H=2048,fft=makeFFT(N),re=new Float64Array(N),im=new Float64Array(N),mag=new Float32Array(N/2),hz=SR/N;
+ const b0=Math.ceil(70/hz),b1=Math.floor(1500/hz),E=[],Q=[];
+ for(let f=0,c=0;f+N<=x.length;f+=H,c++){let e=0;for(let i=0;i<N;i++){const w=.5-.5*Math.cos(2*Math.PI*i/N),v=x[f+i]*w;re[i]=v;im[i]=0;e+=v*v}
+  fft(re,im);let mx=0;for(let b=b0;b<=b1;b++){mag[b]=Math.hypot(re[b],im[b]);if(mag[b]>mx)mx=mag[b]}
+  const pk=[];for(let b=b0+2;b<=b1-2;b++){const m=mag[b];if(m>=.15*mx&&m>mag[b-1]&&m>=mag[b+1]&&m>mag[b-2]&&m>=mag[b+2])pk.push(b*hz)}
+  const kept=[];for(const fq of pk){if(kept.some(f0=>{const r=fq/f0,k=Math.round(r);return k>=2&&k<=6&&Math.abs(r-k)/k<.025}))continue;kept.push(fq)}
+  E.push(e);Q.push(new Set(kept.map(fq=>((Math.round(12*Math.log2(fq/440))+9)%12+12)%12)).size);if(c%200===0)await tick()}
+ // where the guitar plays: frames at least a tenth as loud as the loud ones
+ const loud=[...E].sort((a,b)=>b-a)[Math.floor(E.length*.2)]||0;let k=0,n=0;E.forEach((e,i)=>{if(e>=loud*.1){k+=Q[i];n++}});return n?+(k/n).toFixed(1):0}
 async function asWhole(d){const S=d&&d.stems;if(!S)return null;let sum=null,n=0;
  for(const k of ['bass','other','vocals','piano','guitar']){const b=S[k];if(!b)continue;const y=await decodeFile(new File([b],k+'.flac',{type:'audio/flac'}));
   if(!sum)sum=new Float32Array(y.length);const L=Math.min(sum.length,y.length);for(let i=0;i<L;i++)sum[i]+=y[i];n++;await tick()}
