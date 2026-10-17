@@ -1304,6 +1304,7 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .gtbox summary h3{margin:0}.gtbox summary small{color:var(--muted);font:500 13px var(--body)}.gtbox summary h3::after{content:" ▾";font-size:.7em;color:var(--muted)}.gtbox[open] summary h3::after{content:" ▴"}
 .gtask{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px}.gtask .chips2{margin-bottom:4px}.gtask>span{font:600 13px var(--body);color:var(--muted)}.gtask small{color:var(--muted);font-size:12px;align-self:center}
 .gtwhy{margin:10px 0 8px;font:500 15px/1.45 var(--body)}
+.gtbonus{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}.gtbonus b{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFB27A}.gtbonus ul{margin:6px 0 0;padding-left:18px}.gtbonus li{font:500 14px/1.45 var(--body);margin:3px 0}
 .gtl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}.gtl dt{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}.gtl dd{margin:0;font:500 14px/1.45 var(--body)}
 </style>
 
@@ -6481,14 +6482,15 @@ function gxForm(){const x=gxEdit,box=$('gearExtra'),T=x.kind==='pedal'?GX_PEDALS
  const d=$('gxDel');if(d)d.onclick=()=>{if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='Tap again to remove it';return}gxSave(gxAll().filter(y=>y.id!==x.id));gxClose()}}
 window.__gx={all:gxAll};// test hooks
 /* ===== Gear for this song (V2 phase 5): which of my guitars, pickup, amp settings and pedals; one sentence why ===== */
-// How the guitar sounds comes from you (one tap on the card: Clean / Crunch / Distorted, Acoustic / Electric, kept with the song's
-// analysis as tone.you), or for acoustic / electric from the video when it saw the guitarist. The session build also measures the
-// guitars part's sound (asTone, kept as the analysis' tone: brightness, how filled-in the spectrum is, peaks): on real recordings
-// those measures couldn't yet tell clean from distorted (Oct 2026: clean acoustic notes read as distorted), so they aren't used for
-// the tip; with your answers they become examples to tune an automatic reading later. The tip is made on the phone from rules (no
-// cost): which of your guitars fits, the pickup (neck for clean, bridge for drive), the amp's starting channel and gain, your pedals
-// that fit (with where to start their knobs; a delay's time from the song's tempo), your capo and picks; when nothing you own fits,
-// it says what would get closer.
+// The aim (the user's, Oct 2026): get as close as possible to the song's sound with the gear you have, and never leave you feeling you
+// can't practise without other gear. An acoustic song gets acoustic advice only (no pickups, drive or pedals); an amplified acoustic
+// (a Lava with built-in effects, an acoustic amp, a reverb pedal) adds a few things to try, as a bonus. When your gear differs from
+// the song's, the tip says how to get closest on what you have (lighter strumming, palm-muting, power chords…), never "not in your
+// gear". How the guitar sounds comes from you (one tap: An acoustic / An electric, and for an electric Clean / Crunch / Distorted;
+// kept with the song's analysis as tone.you), or for acoustic / electric from the video when it saw the guitarist. The session build
+// also measures the guitars part (asTone, kept as the analysis' tone); on real recordings those measures couldn't yet tell clean from
+// distorted, so the tip doesn't use them (with your answers they are examples for an automatic reading later). Rules on the phone, no
+// cost.
 // ---- the sound of the guitars part (x: mono at SR) ----
 async function asTone(x){const N=2048,fft=makeFFT(N),re=new Float64Array(N),im=new Float64Array(N),hz=SR/N,F=[];
  const bin=f=>Math.max(1,Math.min(N/2-1,Math.round(f/hz)));const b80=bin(80),b300=bin(300),b2500=bin(2500),b4000=bin(4000),b5000=bin(5000);
@@ -6507,51 +6509,64 @@ async function asTone(x){const N=2048,fft=makeFFT(N),re=new Float64Array(N),im=n
  const bright=cent>1500?'bright':cent<900?'warm':'balanced',kind=drive!=='clean'?'electric':hf>.12?'acoustic':hf<.04?'electric':'';
  return {cent:Math.round(cent),hf:+hf.toFixed(3),flat:+flat.toFixed(3),crest:+crest.toFixed(2),dist,drive,bright,kind}}
 // ---- the tip ----
-function gtTip(d,G){const T0=d&&d.tone||{},Y=T0.you||{},T=Y.drive?{drive:Y.drive}:null,ins=(()=>{try{return instAll()}catch(e){return []}})(),X=(()=>{try{return gxAll()}catch(e){return []}})();
- const V=d&&d.video,vk=!Y.kind&&V&&!V.skip&&/acoustic|electric/.test(V.who||'')?V.who:'',kind=Y.kind||vk,drive=Y.drive||'',bright='';
+// built-in effects of smart / amplified acoustics (brand or model), for the bonus
+const GT_ONBOARD=[[/\blava\b/i,'reverb, delay and chorus'],[/yamaha.*\b(ta|transacoustic)\b|transacoustic/i,'reverb and chorus']];
+function gtTip(d,G){const T0=d&&d.tone||{},Y=T0.you||{},ins=(()=>{try{return instAll()}catch(e){return []}})(),X=(()=>{try{return gxAll()}catch(e){return []}})();
+ const V=d&&d.video,vk=!Y.kind&&V&&!V.skip&&/acoustic|electric/.test(V.who||'')?V.who:'',kind=Y.kind||vk,drive=kind==='acoustic'?'':(Y.drive||'');
  const gtr=ins.filter(i=>!GEAR[i.type]||!GEAR[i.type].amp),amps=ins.filter(i=>GEAR[i.type]&&GEAR[i.type].amp);
- const ac=gtr.filter(i=>/acoustic|classical/.test(i.type)),el=gtr.filter(i=>i.type==='electric'),hum=el.filter(i=>/humbucker|mixed|active/.test((i.specs||{}).pickups||''));const sgl=el.filter(i=>/single|mixed/.test((i.specs||{}).pickups||''));
- const ped=g=>X.filter(x=>x.kind==='pedal'&&(GX_PEDALS[x.type]||{}).g===g),pedT=t=>X.filter(x=>x.kind==='pedal'&&x.type===t),acc=t=>X.find(x=>x.kind==='acc'&&x.type===t);
- const out=[],miss=[],nm=i=>i.name||[i.brand,i.model].filter(Boolean).join(' ');let why='',pick=null;
- // the guitar
- if(kind==='acoustic'){pick=ac.find(i=>i.type==='electroacoustic')||ac.find(i=>i.type==='acoustic')||ac[0];
-  if(pick)out.push(['Guitar',`${nm(pick)}: the guitars here sound acoustic${vk?' (as in the video)':''}.`]);
-  else if(el.length){pick=el[0];out.push(['Guitar',`${nm(pick)} on the neck pickup, clean: the closest you have to the acoustic sound here.`]);miss.push('an acoustic guitar')}}
- else if(kind==='electric'||drive==='crunch'||drive==='distorted'){pick=drive&&drive!=='clean'&&hum.length?hum[0]:drive==='clean'&&sgl.length?sgl[0]:el[0];
-  if(pick)out.push(['Guitar',`${nm(pick)}${drive&&drive!=='clean'&&hum.includes(pick)?' (its humbuckers suit the drive)':drive==='clean'&&sgl.includes(pick)?' (its single-coils sound clear and clean)':': the song is played on an electric'}.`]);
-  else if(ac.length){pick=ac[0];out.push(['Guitar',`${nm(pick)}: the song is played on an electric; strum it lighter to get near.`]);miss.push('an electric guitar')}}
- else if(gtr.length){pick=gtr[0];out.push(['Guitar',`${nm(pick)}.`])}
- // the pickup
- if(pick&&pick.type==='electric')out.push(['Pickup',drive==='clean'?(bright==='bright'?'The middle or in-between position: clean and bright.':'The neck pickup: clean and warm.'):'The bridge pickup: it keeps the drive tight.']);
- // the amp
- const amp=pick&&/acoustic|classical/.test(pick.type)?amps.find(a=>a.type==='acamp'):amps.find(a=>a.type==='elamp')||amps[0];
- if(amp&&T){const tr=bright==='bright'?'treble a little past noon':bright==='warm'?'treble just under noon, bass a little up':'bass, middle and treble at noon';
-  out.push(['Amp',amp.type==='acamp'?`${nm(amp)}: ${tr}; a little reverb.`:drive==='clean'?`${nm(amp)}: the clean channel, gain about 9 o’clock, ${tr}.`:drive==='crunch'?`${nm(amp)}: gain about noon (or clean with an overdrive), ${tr}.`:`${nm(amp)}: the drive channel, gain about 2 o’clock, middle a little up so chords stay clear.`])}
- // pedals: what fits from yours, with where to start
- const P=[];if(T&&drive!=='clean'){const want=drive==='distorted'?['distortion','fuzz','overdrive']:['overdrive','boost','distortion'],have=want.map(t=>pedT(t)[0]).find(Boolean)||ped('multi')[0];
-  if(have)P.push(`${nm(have)} (${(GX_PEDALS[have.type]||{}).l||'multi-effects'})${GX_PEDALS[have.type]&&GX_PEDALS[have.type].start?': '+GX_PEDALS[have.type].start:''}`);else if(!amp)miss.push(drive==='distorted'?'a distortion pedal':'an overdrive pedal')}
- const bpm=d&&d.bpm?Math.round(d.bpm):0;
- if(T&&drive==='clean'){const dl=pedT('delay')[0],rv=pedT('reverb')[0],cp=pedT('compressor')[0];
-  if(cp&&kind!=='acoustic')P.push(`${nm(cp)} (compressor): evens out the strumming. ${GX_PEDALS.compressor.start}`);
-  if(rv)P.push(`${nm(rv)} (reverb): ${GX_PEDALS.reverb.start}`);
-  if(dl&&bpm&&bpm<100)P.push(`${nm(dl)} (delay): ${Math.round(60000/bpm/2)} ms (an eighth note at ${bpm} BPM), 1–2 repeats, mix low.`)}
- if(P.length)out.push(['Pedals',P.join(' · ')]);
+ const ac=gtr.filter(i=>/acoustic/.test(i.type)),cl=gtr.filter(i=>i.type==='classical'),el=gtr.filter(i=>i.type==='electric'),eac=gtr.filter(i=>i.type==='electroacoustic');
+ const pu=i=>(i.specs||{}).pickups||'',hum=el.filter(i=>/humbucker|mixed|active/.test(pu(i))),sgl=el.filter(i=>/single|mixed/.test(pu(i)));
+ const pedT=t=>X.filter(x=>x.kind==='pedal'&&x.type===t),acc=t=>X.find(x=>x.kind==='acc'&&x.type===t),nm=i=>i.name||[i.brand,i.model].filter(Boolean).join(' ');
+ const onboard=i=>{const k=((i.brand||'')+' '+(i.model||'')+' '+(i.name||''));const m=GT_ONBOARD.find(([r])=>r.test(k));return m?m[1]:''};
+ const out=[],bonus=[];let pick=null,how='';const bpm=d&&d.bpm?Math.round(d.bpm):0,dly=bpm?Math.round(60000/bpm/2):0;
+ if(kind==='acoustic'){
+  // an acoustic song: your acoustic; nothing electric
+  pick=ac.find(i=>i.type==='acoustic')||eac[0]||cl[0]||el[0]||null;
+  if(pick&&/acoustic/.test(pick.type))out.push(['Guitar',`${nm(pick)}.`]);
+  else if(pick&&pick.type==='classical'){out.push(['Guitar',`${nm(pick)}.`]);how='Nylon strings sound softer: strum with a thin pick (or the side of your thumb) a little nearer the bridge for more sparkle.'}
+  else if(pick){out.push(['Guitar',`${nm(pick)}.`]);how='For an acoustic-like sound: the neck pickup, the guitar’s tone a little down, the amp clean with a touch of reverb, and a thin pick.'}
+  if(how)out.push(['Closest sound',how]);
+  // bonus: an amplified acoustic
+  const amped=[...eac,...ac].find(i=>onboard(i))||null,acamp=amps.find(a=>a.type==='acamp'),rv=pedT('reverb')[0]||pedT('acpre')[0],dl=pedT('delay')[0],ch=pedT('chorus')[0];
+  if(amped)bonus.push(`${nm(amped)}’s built-in effects (${onboard(amped)}): a little reverb fills out the strumming${bpm&&bpm<100?`; a soft delay (about ${dly} ms) suits the slow parts`:''}.`);
+  if(acamp&&(eac.length||amped))bonus.push(`Plug into ${nm(acamp)}: treble just under noon, a little reverb.`);
+  if((eac.length||amped)&&rv)bonus.push(`${nm(rv)}: ${(GX_PEDALS[rv.type]||{}).start||''}`);
+  if((eac.length||amped)&&ch)bonus.push(`${nm(ch)} (chorus), very light, for a shimmering verse.`);
+  if((eac.length||amped)&&dl&&bpm&&bpm<100)bonus.push(`${nm(dl)}: ${dly} ms, one repeat, mix low.`);
+ }else if(kind==='electric'){
+  // an electric song: your electric for the sound; on an acoustic, how to get closest
+  pick=drive&&drive!=='clean'&&hum.length?hum[0]:drive==='clean'&&sgl.length?sgl[0]:el[0]||null;
+  if(pick){out.push(['Guitar',`${nm(pick)}${drive&&drive!=='clean'&&hum.includes(pick)?' (its humbuckers suit the drive)':drive==='clean'&&sgl.includes(pick)?' (its single-coils sound clear and clean)':''}.`]);
+   if(drive)out.push(['Pickup',drive==='clean'?'The neck pickup (or the in-between position for a brighter clean).':'The bridge pickup: it keeps the drive tight.']);
+   const amp=amps.find(a=>a.type==='elamp')||amps[0],od=drive==='distorted'?(pedT('distortion')[0]||pedT('fuzz')[0]||pedT('overdrive')[0]):drive==='crunch'?(pedT('overdrive')[0]||pedT('boost')[0]||pedT('distortion')[0]):null,mf=pedT('multi')[0];
+   if(amp&&drive)out.push(['Amp',drive==='clean'?`${nm(amp)}: the clean channel, gain about 9 o’clock, EQ at noon.`:od?`${nm(amp)}: the clean channel, a little louder; ${nm(od)} gives the drive.`:`${nm(amp)}: ${drive==='crunch'?'gain about noon':'the drive channel, gain about 2 o’clock'}, middle a little up so the chords stay clear.`]);
+   if(od)out.push(['Drive',`${nm(od)} (${(GX_PEDALS[od.type]||{}).l}): ${(GX_PEDALS[od.type]||{}).start||''}`]);else if(drive&&drive!=='clean'&&mf)out.push(['Drive',`${nm(mf)}: a ${drive==='crunch'?'crunch':'high-gain'} preset, then lower the gain until the chords ring.`]);
+   if(drive&&drive!=='clean'&&!amp&&!od&&!mf)out.push(['Closest sound','Practise the parts clean (or unplugged): the chords, the strumming and the timing are the same, and they sound tighter when you play the chords as power chords and mute the low strings with the side of your hand.']);
+   // bonus: time and modulation effects you have
+   const dl=pedT('delay')[0],rv=pedT('reverb')[0],cp=pedT('compressor')[0];
+   if(drive==='clean'&&cp)bonus.push(`${nm(cp)} (compressor): evens out the strumming. ${GX_PEDALS.compressor.start}`);
+   if(rv)bonus.push(`${nm(rv)}: ${GX_PEDALS.reverb.start}`);if(dl&&bpm)bonus.push(`${nm(dl)}: ${dly} ms (an eighth note at ${bpm} BPM), 1–2 repeats, mix low.`);
+  }else{pick=ac.find(i=>i.type==='acoustic')||eac[0]||cl[0]||null;
+   if(pick){out.push(['Guitar',`${nm(pick)}.`]);
+    out.push(['Closest sound',drive&&drive!=='clean'?'For the driven sound on an acoustic: play the chords as power chords (root and fifth) and palm-mute the low strings with the side of your hand; dig in on the accents.':'Strum lighter, a little nearer the neck, for the rounder sound of a clean electric; palm-mute the verses a little.'])}}
+ }else if(gtr.length){pick=ac[0]||eac[0]||el[0]||cl[0];out.push(['Guitar',`${nm(pick)}.`])}
  // capo and picks
- const capo=d&&d.play&&d.play.capo;if(capo){const c=acc('capo');out.push(['Capo',`Capo on fret ${capo}${c?` (${nm(c)})`:''}.`]);if(!c)miss.push('a capo')}
- const pk=acc('picks');if(pk&&pk.thick){const t=parseFloat(pk.thick);if(t)out.push(['Pick',t<=.65?`Your ${t} mm picks suit strumming.`:`Your ${t} mm picks are on the heavy side for strumming: hold them loosely.`])}
- // one sentence why
- const snd=T?`${drive==='clean'?'clean':drive==='crunch'?'lightly driven':'distorted'}${bright?' and '+bright:''}`:'';
- why=T||kind?`The guitar${T?` sounds ${snd}`:''}${kind?`${T?', on':' is'} ${kind==='acoustic'?'an acoustic':'an electric'}${vk?' (seen in the video)':''}`:''}${pick?`, so your ${nm(pick)} is the one to reach for`:''}.`:'';
- if(miss.length)why+=` ${miss.length>1?'Not in your gear: ':'Not in your gear: '}${miss.join(', ')} would get closer.`;
- return {lines:out,why,drive,kind,vk:!!vk,gear:ins.length+X.length}}
-// the card: how the guitar sounds (your taps), then the tip
+ const capo=d&&d.play&&d.play.capo;if(capo){const c=acc('capo');out.push(['Capo',c?`Capo on fret ${capo} (${nm(c)}).`:`Capo on fret ${capo}. No capo at hand? The Easy guide has a version without one that sounds the same.`])}
+ const pkk=acc('picks');if(pkk&&pkk.thick){const t=parseFloat(pkk.thick);if(t)out.push(['Pick',t<=.65?`Your ${t} mm picks suit strumming.`:`Your ${t} mm picks are on the heavy side for strumming: hold them loosely.`])}
+ // one sentence why: the song's sound, and how close your gear gets
+ const snd=kind==='acoustic'?'an acoustic':kind==='electric'?`${drive==='clean'?'a clean':drive==='crunch'?'a lightly driven':drive==='distorted'?'a distorted':'an'} electric`:'';
+ const match=pick&&(kind==='acoustic'?/acoustic|classical/.test(pick.type):kind==='electric'?pick.type==='electric':true);
+ const why=!kind?'':pick?`The song is played on ${snd}${vk?' (seen in the video)':''}${match?`, so your ${nm(pick)} gets you right there.`:`; your ${nm(pick)} gets close with the tips below, and the chords and strumming are exactly the same.`}`:`The song is played on ${snd}${vk?' (seen in the video)':''}.`;
+ return {lines:out,bonus,why,drive,kind,vk:!!vk,gear:ins.length+X.length}}
+// the card: what the guitar is (and for an electric, how it sounds), then the tip and the bonus
 function gtHTML(t){if(!t)return '';const ch=(k,v,l,on)=>`<button type="button" class="chip" data-${k}="${v}" aria-pressed="${on}">${l}</button>`;
- const ask=`<div class="gtask"><span>The guitar sounds</span><div class="chips2">${[['clean','Clean'],['crunch','Crunch'],['distorted','Distorted']].map(([v,l])=>ch('gtd',v,l,t.drive===v)).join('')}</div>
-  <span>On</span><div class="chips2">${[['acoustic','An acoustic'],['electric','An electric']].map(([v,l])=>ch('gtk',v,l,t.kind===v)).join('')}${t.vk?'<small>(from the video)</small>':''}</div></div>`;
- const sum=t.drive||t.kind?t.lines.map(x=>x[1].split(/[:.(]/)[0]).slice(0,2).join(' · '):'Tell it how the guitar sounds';
- return `<section class="card sessec" id="sesGear"><details class="gtbox"${t.drive?'':' open'}><summary><h3>Gear for this song</h3><small>${esc(sum)}</small></summary>${ask}
+ const ask=`<div class="gtask"><span>The song is played on</span><div class="chips2">${[['acoustic','An acoustic'],['electric','An electric']].map(([v,l])=>ch('gtk',v,l,t.kind===v)).join('')}${t.vk?'<small>(from the video)</small>':''}</div>
+  ${t.kind==='electric'?`<span>It sounds</span><div class="chips2">${[['clean','Clean'],['crunch','Crunch'],['distorted','Distorted']].map(([v,l])=>ch('gtd',v,l,t.drive===v)).join('')}</div>`:''}</div>`;
+ const done=t.kind==='acoustic'||(t.kind==='electric'&&t.drive),sum=done?t.lines.map(x=>x[1].split(/[:.(]/)[0]).slice(0,2).join(' · '):'Tell it how the song is played';
+ return `<section class="card sessec" id="sesGear"><details class="gtbox"${done?'':' open'}><summary><h3>Gear for this song</h3><small>${esc(sum)}</small></summary>${ask}
   ${t.why?`<p class="gtwhy">${esc(t.why)}</p>`:''}${t.lines.length?`<dl class="gtl">${t.lines.map(([k,v])=>`<dt>${esc(k)}</dt><dd dir="auto">${esc(v)}</dd>`).join('')}</dl>`:''}
-  ${t.gear?'':`<p class="tip">Add your guitars, amp and pedals in Gear and this picks from them.</p>`}${t.drive?'':'<p class="tip">Tap how it sounds and the amp and pedal suggestions follow.</p>'}</details></section>`}
+  ${t.bonus.length?`<div class="gtbonus"><b>Bonus: worth a try</b><ul>${t.bonus.map(x=>`<li dir="auto">${esc(x)}</li>`).join('')}</ul></div>`:''}
+  ${t.gear?'':`<p class="tip">Add your guitars (and amp or pedals, if you have them) in Gear and this picks from them.</p>`}${t.kind==='electric'&&!t.drive?'<p class="tip">Tap how it sounds and the amp and drive suggestions follow.</p>':''}</details></section>`}
 // your answer, kept with the song's analysis (tone.you); a second tap clears it
 function gtSet(key,k,v){const d=loadSong(key);if(!d)return;const t=d.tone||{},y={...(t.you||{})};y[k]=y[k]===v?'':v;d.tone={...t,you:y};
  try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(d)))}catch(e){}}
