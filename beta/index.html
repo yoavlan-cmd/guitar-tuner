@@ -5513,10 +5513,11 @@ async function vlContact(frames){const out=[],{n:N,cols:C,W,H}=VL_T;for(let i=0;
   out.push({blob:await vlJpg(cv,.8),tiles})}return out}
 async function vlFind1(title,sheets){
  const prompt=`These ${sheets.length} images are contact sheets of stills from a video of the song "${title}". Each sheet has up to ${VL_T.n} tiles numbered 1–${VL_T.n} (left to right, top to bottom).
-There may be more than one guitarist (for example one on an acoustic guitar and one on an electric). For every tile, list each guitarist whose fretting hand on the neck is clearly visible: sharp, not blocked, close enough to see which strings and frets the fingers press. For each, say which guitar it is ("acoustic" or "electric", or "guitar" if you can't tell), give a box around the fretting hand and the part of the neck around it, as fractions of the tile [x0, y0, x1, y1] (0,0 is the tile's top left), and how clear it is. A tile with no clear fretting hand has an empty list.
+There may be more than one guitarist (for example one on an acoustic guitar and one on an electric). List only the tiles where a guitarist's fretting hand on the neck is clearly visible, and in each, every such guitarist: sharp, not blocked, close enough to see which strings and frets the fingers press. For each, say which guitar it is ("acoustic" or "electric", or "guitar" if you can't tell), give a box around the fretting hand and the part of the neck around it, as fractions of the tile [x0, y0, x1, y1] (0,0 is the tile's top left), and how clear it is. Leave out tiles with no clear fretting hand.
 Don't read lyrics or any other text on screen.
-Reply with only JSON: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}]}]}`;
- return await sampleFn.json(prompt,{images:sheets.map(x=>x.blob)})}
+Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}]}]}`;
+ // room for a long answer: with the 720 px tiles many hands are seen (an answer cut short can't be read)
+ return await sampleFn.json(prompt,{images:sheets.map(x=>x.blob),maxTokens:8000})}
 // (2) read: the hand and the neck cut from the full still (with room around it), up to 768 wide
 async function vlCrop(f,box){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
  x0=Math.max(0,x0-mx);y0=Math.max(0,y0-my);x1=Math.min(1,x1+mx);y1=Math.min(1,y1+my);const sw=(x1-x0)*im.width,sh=(y1-y0)*im.height;if(sw<8||sh<8)return f.blob;
@@ -5548,7 +5549,7 @@ async function vlAsk(title,frames,whole,who){const gw=who&&who!=='guitar'?`the $
 2. For each ${whole?'close-up':'image'}, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
 Don't read lyrics or any other text on screen.
 Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low"|null, "frames": [{"t": seconds, "shape": chord name or null, "conf": "high"|"medium"|"low"|null}]}`;
- const ims=(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims})}
+ const ims=(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
 // a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
 const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
@@ -5580,11 +5581,13 @@ async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}c
   const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
   const res=await vlLookFrames(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
  catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:vname};try{console.error('video look',e)}catch(_){}}}
+// why the video couldn't be looked at, in a few words (kept as video.code)
+const vlErrWhy=c=>c===403||c===404?' (Drive refused it)':c==='video_decode'||c==='video_timeout'?' (the phone couldn’t open it)':c==='invalid_json'?' (Claude’s answer was cut short or couldn’t be read)':c==='rate_limited'?' (Claude was busy: try again in a minute)':c==='network'?' (no connection to Claude)':c==='bad_key'?' (your Claude key was refused)':c==='no_credit'?' (no Claude credit left)':c==='api_error'?' (Claude returned an error)':'';
 // the guide's line about the video (and a way to check it when it was skipped)
 function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='drive')return `<p class="tip vlnote">The song’s video wasn’t looked at: Guitaring needs your Drive for that. <button type="button" class="tlink" id="vlCheck">Rebuild and check the video</button></p>`;
  if(v.skip==='claude')return `<p class="tip vlnote">With your Claude key (My profile › Claude features), Guitaring also looks at the song’s video for the capo and the chord shapes.</p>`;
- if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${v.code===403||v.code===404?' (Drive refused it)':v.code==='video_decode'||v.code==='video_timeout'?' (the phone couldn’t open it)':''}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
+ if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${vlErrWhy(v.code)}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
  if(v.skip)return '';
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
 window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s)};// test hooks
@@ -6937,7 +6940,7 @@ function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
  if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
  // the video helps only when the hand (or the capo) was seen: looked at but nothing clear is shown as not helping
  o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`${V.who&&V.who!=='guitar'?`the ${V.who} guitarist’s hand`:'the hand'} was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} moments, but the guitarist’s fretting hand isn’t shown clearly in any`}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
-  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time')]);
+  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time'+vlErrWhy(V.code))]);
  o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
  return o}
 // what the chord sheet check found, in plain words

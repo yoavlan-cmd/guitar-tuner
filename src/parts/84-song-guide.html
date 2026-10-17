@@ -117,7 +117,7 @@ function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
  if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
  // the video helps only when the hand (or the capo) was seen: looked at but nothing clear is shown as not helping
  o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`${V.who&&V.who!=='guitar'?`the ${V.who} guitarist’s hand`:'the hand'} was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} moments, but the guitarist’s fretting hand isn’t shown clearly in any`}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
-  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time')]);
+  [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time'+vlErrWhy(V.code))]);
  o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
  return o}
 // what the chord sheet check found, in plain words
