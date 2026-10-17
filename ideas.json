@@ -1,86 +1,55 @@
 {
  "v": 1,
- "at": "2026-10-16T02:55:34Z",
- "date": "2026-10-16",
+ "at": "2026-10-17T02:55:29Z",
+ "date": "2026-10-17",
  "index": {
   "artists": [
-   "Tuna",
    "Green Day",
-   "Amir dadon",
-   "Jimbo J",
-   "Nirvana",
-   "Jack Johnson",
-   "Beri Saharof",
-   "Oasis",
-   "Eviatar Banai",
    "Rockfour",
+   "Oasis",
    "RHCP",
+   "Jack Johnson",
+   "Eviatar Banai",
+   "Amir dadon",
    "Ivri lider",
+   "Tuna",
+   "Jimbo J",
+   "Beri Saharof",
+   "Nirvana",
    "Foo"
   ],
   "songs": [
    {
-    "a": "Tuna",
-    "t": "יא",
+    "a": "Jimbo J",
+    "t": "במקום בו אני גר",
     "ch": [
-     "Cm",
+     "F#m",
+     "E",
+     "C#m",
+     "A"
+    ]
+   },
+   {
+    "a": "Eviatar Banai",
+    "t": "מאיר בנאי אצלך בעולם",
+    "ch": [
+     "Am",
+     "Em",
+     "Em7",
+     "Cadd9",
      "C",
-     "C#"
+     "D"
     ]
    },
    {
     "a": "Green Day",
     "t": "Good Riddance (Time Of Your Life)",
     "ch": [
-     "C",
-     "D",
-     "Em",
      "G",
-     "Cadd9"
-    ]
-   },
-   {
-    "a": "Amir dadon",
-    "t": "שאריות של החיים",
-    "ch": [
-     "Db",
-     "Bbm",
-     "Fm",
-     "Fm/Eb",
-     "Db/C",
-     "Gb",
-     "Ebm",
-     "Ab",
-     "Bbm/Ab",
-     "Eb/G",
-     "Ab/Gb",
-     "Db/F",
-     "Eb"
-    ]
-   },
-   {
-    "a": "Amir dadon",
-    "t": "חלל",
-    "ch": [
-     "Bmaj7",
-     "E",
-     "Abm",
-     "Emaj7",
-     "F#",
-     "Ebm",
-     "F"
-    ]
-   },
-   {
-    "a": "Amir dadon",
-    "t": "אור גדול",
-    "ch": [
-     "Eb",
-     "Ab",
-     "Cm",
-     "Gm",
-     "Bb4",
-     "Fm7"
+     "Cadd9",
+     "D",
+     "C",
+     "Em"
     ]
    },
    {
@@ -97,12 +66,20 @@
    },
    {
     "a": "Tuna",
+    "t": "יא",
+    "ch": [
+     "Cm",
+     "C#"
+    ]
+   },
+   {
+    "a": "Tuna",
     "t": "סהרה",
     "ch": [
      "Bbm",
      "Ebm",
-     "Abm",
-     "B"
+     "B",
+     "Abm"
     ]
    },
    {
@@ -111,29 +88,50 @@
     "ch": [
      "Bm",
      "A",
+     "G",
+     "D",
      "F#m",
      "Em",
-     "F#",
-     "G",
-     "D"
+     "F#"
     ]
    },
    {
-    "a": "Ivri lider",
-    "t": "ביום שמש יפה",
+    "a": "Amir dadon",
+    "t": "שאריות של החיים",
     "ch": [
-     "G/B",
-     "Am",
-     "Dm7",
-     "Dm",
+     "Db",
+     "Bbm",
+     "Fm",
+     "Fm/Eb",
+     "Db/C",
+     "Gb",
+     "Ebm",
+     "Ab"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "חלל",
+    "ch": [
+     "Bmaj7",
+     "E",
+     "Abm",
+     "Emaj7",
+     "F#",
+     "Ebm"
+    ]
+   },
+   {
+    "a": "Amir dadon",
+    "t": "אור גדול",
+    "ch": [
      "Eb",
-     "Bb",
+     "Ab",
      "Cm",
-     "Ddim",
-     "F",
-     "C"
-    ],
-    "capo": 1
+     "Gm",
+     "Bb4",
+     "Fm7"
+    ]
    },
    {
     "a": "Amir dadon",
@@ -149,20 +147,14 @@
     ]
    },
    {
-    "a": "Beri Saharof",
-    "t": "חם על הירח",
+    "a": "Amir dadon",
+    "t": "צבעים",
     "ch": [
-     "A",
-     "B",
-     "F#",
+     "Em",
      "Cmaj7",
-     "Am7",
      "C",
-     "E",
-     "Dm",
-     "Am",
-     "Ebdim",
-     "B7"
+     "D",
+     "Bm"
     ]
    },
    {
@@ -171,24 +163,11 @@
     "ch": [
      "Dm",
      "F",
+     "C",
      "Gm",
      "Bb",
-     "Am",
-     "C"
+     "Am"
     ]
-   },
-   {
-    "a": "Oasis",
-    "t": "Wanderwall",
-    "ch": [
-     "Cadd9",
-     "Em7",
-     "E",
-     "G",
-     "D4",
-     "G/F#"
-    ],
-    "capo": 2
    },
    {
     "a": "Eviatar Banai",
@@ -197,37 +176,58 @@
      "F#m",
      "C#m",
      "G#m",
+     "D",
      "A",
      "E",
-     "Bm",
-     "F#m7",
-     "F#m6",
-     "D"
+     "Bm"
     ]
    },
    {
-    "a": "Eviatar Banai",
-    "t": "מאיר בנאי אצלך בעולם",
+    "a": "Ivri lider",
+    "t": "ביום שמש יפה",
     "ch": [
+     "G/B",
      "Am",
-     "Em",
-     "Em7",
-     "Cadd9",
+     "F",
      "C",
-     "D"
-    ]
+     "Dm7",
+     "Dm",
+     "Eb",
+     "Bb",
+     "Cm",
+     "Ddim"
+    ],
+    "capo": 1
    },
    {
-    "a": "Amir dadon",
-    "t": "צבעים",
+    "a": "Beri Saharof",
+    "t": "חם על הירח",
     "ch": [
-     "Em",
+     "A",
+     "B",
+     "F#",
      "Cmaj7",
-     "Bm",
-     "D",
+     "Am7",
+     "E",
+     "Am",
      "Dm",
+     "Ebdim",
+     "B7",
      "C"
     ]
+   },
+   {
+    "a": "Oasis",
+    "t": "Wanderwall",
+    "ch": [
+     "Em7",
+     "G",
+     "Cadd9",
+     "D4",
+     "G/F#",
+     "E"
+    ],
+    "capo": 2
    },
    {
     "a": "Rockfour",
@@ -237,11 +237,11 @@
      "Bb",
      "Am",
      "Eb",
-     "F#m",
-     "A",
      "G",
      "C",
-     "D"
+     "F#m",
+     "D",
+     "A"
     ]
    },
    {
@@ -254,18 +254,7 @@
      "Bb",
      "Bb/A",
      "Gm",
-     "C",
-     "B"
-    ]
-   },
-   {
-    "a": "Jimbo J",
-    "t": "במקום בו אני גר",
-    "ch": [
-     "F#m",
-     "E",
-     "C#m",
-     "A"
+     "C"
     ]
    },
    {
@@ -276,18 +265,14 @@
      "Dm7",
      "Dm7/F",
      "G/B",
+     "G",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
      "D",
-     "Asus2/B",
-     "A/B",
-     "F#add9/B",
-     "G",
      "C",
-     "D/F#",
-     "F"
+     "D/F#"
     ],
     "tuning": "Drop D"
    },
@@ -298,124 +283,168 @@
    }
   ]
  },
- "level": "Comfortable with open chords and full barre chords in flat keys (Bbm, Ebm, Abm), plus maj7, dim and slash chords; ready for faster changes and new strumming feels.",
+ "level": "Comfortable intermediate: open chords, full barre chords in flat keys (Bbm, Ebm, Abm), maj7 and slash chords, plus capo and Drop D.",
  "suggestions": [
   {
-   "title": "כל הכוכבים",
+   "title": "גשם",
+   "artist": "מאיר בנאי",
+   "style": "Israeli rock ballad",
+   "difficulty": 3,
+   "chords": [
+    "Dm",
+    "Am",
+    "F",
+    "G",
+    "C",
+    "Fm7b5",
+    "G/Ab"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "You already play his 'אצלך בעולם'; mostly familiar chords, with Fm7b5 as one new colour chord."
+  },
+  {
+   "title": "דרך",
+   "artist": "מוש בן ארי",
+   "style": "Israeli groove / folk-rock",
+   "difficulty": 2,
+   "chords": [
+    "A9",
+    "D9",
+    "F",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Easy, laid-back groove; the A9 and D9 shapes are new and add colour to your strumming."
+  },
+  {
+   "title": "יומולדת",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "D9",
+    "Bm",
+    "G",
+    "D",
+    "A",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed Berry classic after 'חם על הירח', almost all open chords you know: a good easy one."
+  },
+  {
+   "title": "השם ירחם",
    "artist": "טונה",
-   "style": "Israeli hip-hop",
+   "style": "Israeli hip-hop / pop",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "Cmaj7",
+    "Bm7",
+    "Em",
+    "Asus2",
+    "E"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "You already play three Tuna songs; this one keeps the groove-based strumming you know."
+   "why": "A fourth Tuna song for your folder; Bm7 and Asus2 are new, smooth shapes over a steady rhythm."
   },
   {
-   "title": "לא סתם",
+   "title": "לבד",
    "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
+   "style": "Israeli rock ballad",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "Am",
+    "Aadd9",
+    "Aadd9/F#",
+    "G",
+    "C",
+    "C/B",
+    "F",
+    "F#m",
+    "Em",
+    "E",
+    "D"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Amir Dadon is your biggest folder; another of his ballads at your current level."
+   "why": "Your most-played artist; the add9 shapes and walking bass (C/B) are a small step up in finger-picking detail."
   },
   {
-   "title": "מישהו פעם",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
+   "title": "כל כיוון",
+   "artist": "רוקפור",
+   "style": "Israeli alt-rock",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "D",
+    "C#m",
+    "C",
+    "F",
+    "F#m",
+    "Am",
+    "Bb",
+    "G",
+    "Dm"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits right next to ביום שמש יפה; smooth chord changes and a gentle strum."
+   "why": "Another Rockfour after 'הכעס'; quick moves between unrelated chords like C#m to C train your chord changes."
   },
   {
-   "title": "אבות ובנים",
-   "artist": "אביתר בנאי",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A fourth Eviatar Banai song for your folder, in the same style as עד מתי."
-  },
-  {
-   "title": "על הרצפה",
-   "artist": "מוניקה סקס",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A new band close to Rockfour's sound: driving rock strumming with a punchy rhythm."
-  },
-  {
-   "title": "היינו עושים אהבה",
-   "artist": "כנסיית השכל",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A small step up: an energetic Israeli rock classic with quicker chord changes."
-  },
-  {
-   "title": "Stand By Me",
+   "title": "Live Forever",
    "artist": "Oasis",
    "style": "Britpop",
    "difficulty": 2,
    "chords": [
     "G",
     "D",
+    "Am",
     "C",
-    "Em",
-    "Am"
+    "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "The natural next Oasis song after Wonderwall, all open chords you already know."
+   "why": "An easy Oasis anthem in open chords: a natural next song after Wonderwall."
   },
   {
-   "title": "21 Guns",
+   "title": "Holiday",
    "artist": "Green Day",
-   "style": "Rock",
-   "difficulty": 4,
+   "style": "Punk rock",
+   "difficulty": 3,
    "chords": [
-    "Em",
+    "Fm",
+    "Db",
+    "Ab",
+    "Eb",
     "C",
-    "G",
-    "D",
-    "Am"
+    "Bbm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from Basket Case: a long build from soft picking to a big chorus."
+   "why": "You already play Basket Case in flat keys; this one adds palm-muted power-chord drive."
   },
   {
-   "title": "I'm Yours",
-   "artist": "Jason Mraz",
-   "style": "Acoustic pop",
-   "difficulty": 1,
-   "chords": [
-    "G",
-    "D",
-    "Em",
-    "C"
-   ],
-   "capo": 4,
-   "tuning": "Standard",
-   "why": "An easy one in the Jack Johnson mood; practise the reggae-style chunk strum."
-  },
-  {
-   "title": "Polly",
+   "title": "All Apologies",
    "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 2,
+   "style": "Grunge / acoustic",
+   "difficulty": 3,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Your Nirvana folder is still empty; a short acoustic song built on simple power chords."
+   "why": "Your Nirvana folder is still empty; the Unplugged version is a mellow, repetitive song to start it with."
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "style": "Acoustic surf-pop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Follows Better Together; the step up is Jack's muted, percussive 'chucking' strum."
   }
  ],
  "history": [
@@ -768,9 +797,106 @@
    "title": "Polly",
    "artist": "Nirvana",
    "date": "2026-10-16"
+  },
+  {
+   "title": "גשם",
+   "artist": "מאיר בנאי",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "דרך",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "יומולדת",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "השם ירחם",
+   "artist": "טונה",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "לבד",
+   "artist": "אמיר דדון",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "כל כיוון",
+   "artist": "רוקפור",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "date": "2026-10-17"
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "date": "2026-10-17"
   }
  ],
  "sheets": [
+  {
+   "title": "מאיר בנאי אצלך בעולם",
+   "artist": "Eviatar Banai",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "Am",
+    "Em",
+    "Em7",
+    "Cadd9",
+    "C",
+    "D"
+   ],
+   "level": 1,
+   "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
+   "at": "2026-10-10T23:07:35.424Z"
+  },
+  {
+   "title": "במקום-טסט שיר",
+   "artist": "Jimbo J",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m",
+    "A"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "at": "2026-10-16T22:12:44.867Z"
+  },
+  {
+   "title": "במקום בו אני גר",
+   "artist": "Jimbo J",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m",
+    "A"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "at": "2026-10-11T20:50:16.168Z"
+  },
   {
    "title": "יא",
    "artist": "Tuna",
@@ -1026,23 +1152,6 @@
    "at": "2026-10-11T03:48:41.071Z"
   },
   {
-   "title": "מאיר בנאי אצלך בעולם",
-   "artist": "Eviatar Banai",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "Am",
-    "Em",
-    "Em7",
-    "Cadd9",
-    "C",
-    "D"
-   ],
-   "level": 1,
-   "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
-   "at": "2026-10-10T23:07:35.424Z"
-  },
-  {
    "title": "צבעים",
    "artist": "Amir dadon",
    "capo": 0,
@@ -1091,27 +1200,11 @@
     "Bb",
     "Bb/A",
     "Gm",
-    "C",
-    "B"
+    "C"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
    "at": "2026-10-11T04:46:28.822Z"
-  },
-  {
-   "title": "במקום בו אני גר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m",
-    "A"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "My friends",
