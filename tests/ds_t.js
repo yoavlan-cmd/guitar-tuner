@@ -48,8 +48,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await ctx.route(/^https:\/\/(?!www\.googleapis\.com|accounts\.google\.com|api\.github\.com)/,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{window.__GD_CLIENT='test.apps.googleusercontent.com';window.__mxWaitScale=0.001;window.__mxPollMs=1e9;window.__dsTickMs=250;window.__notes=[];
-  window.Notification=class{static get permission(){return 'granted'}static requestPermission(){return Promise.resolve('granted')}constructor(t){window.__notes.push(t)}};
-  if(window.ServiceWorkerRegistration)ServiceWorkerRegistration.prototype.showNotification=function(t){window.__notes.push(t);return Promise.resolve()};
+  window.Notification=class{static get permission(){return 'granted'}static requestPermission(){return Promise.resolve('granted')}constructor(t,o){window.__notes.push(t);window.__noteData=o&&o.data}};
+  if(window.ServiceWorkerRegistration)ServiceWorkerRegistration.prototype.showNotification=function(t,o){window.__notes.push(t);window.__noteData=o&&o.data;return Promise.resolve()};
   if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('tuner.profile',JSON.stringify({name:'Yoav',onboarding:{done:true}}));localStorage.setItem('tuner.learnLang','"en"')});
  await p.goto(APP);await p.waitForTimeout(500);
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);
@@ -96,6 +96,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const sti=await p.evaluate(async id=>{const v=await window.__bk.get('mixstills:'+id);return v&&{n:v.idx.length,size:v.bin.size}},it1.id);
  ok(sti&&sti.n===3&&sti.size===12,'the video stills come back with the parts and are kept on the phone '+JSON.stringify(sti));
  ok((await p.evaluate(()=>window.__notes)).some(t=>/is split|is ready/.test(t)),'a phone notification says it’s split (its session follows)');
+ ok(await p.evaluate(()=>{const d=window.__noteData;return !!(d&&d.url&&d.url.split('#')[0]===location.href.split('#')[0])}),'the notification carries the app’s address (a tap on it opens this app: sw.js notificationclick)');
  // the song's page, from "Open the song"
  await p.tap('#dsOpen');await p.waitForTimeout(400);ok(await p.evaluate(()=>window.__v2.cur())==='session','“Open the song” opens its page');
  const pg=await p.$eval('#sesBox',e=>e.innerText.replace(/\s+/g,' '));
