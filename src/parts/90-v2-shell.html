@@ -33,10 +33,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(
 // the big one-word titles on Home need the narrow display font: on once it's loaded (a wider fallback would overflow the tiles)
 try{document.fonts.load('800 40px "Big Shoulders Display"').then(f=>{if(f&&f.length)document.documentElement.classList.add('fdisp')}).catch(()=>{})}catch(e){}
 function homeName(){const p=profGet();return p.name||store.get('userName','')}
-function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
+function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName();
  // the pick says it: Guitaring's pick with a speech bubble, the greeting above it, "Another one" under it
- h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"><p class="hjoke" id="hJoke" dir="auto">${j}</p></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
- $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'));const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
+ h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
+ // the comment: a joke, or now and then a song reminder (92-song-remind)
+ homeLineShow(h);
+ $('hMore').onclick=()=>{homeLineShow(h);const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
  renderHomeCont()}
 // Continue: refreshed on its own (the joke stays)
 function renderHomeCont(){
@@ -181,8 +183,8 @@ function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm
  c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>${p.sync&&p.sync.repo?'Your answers are also saved in your private GitHub repository, for daily ideas.':'Your answers stay on this phone.'}</small></div></div>
   <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
   <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>
-  <div class="prfsync" id="prfSync"></div>`;
- $('profEdit').onclick=()=>openOnb(p.onboarding.done);try{prfUI()}catch(e){}
+  <div class="prfsync" id="remSet"></div><div class="prfsync" id="prfSync"></div>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);try{remUI()}catch(e){}try{prfUI()}catch(e){}
  // Connections and Backup: the V1 boxes, moved here
  const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
   const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}

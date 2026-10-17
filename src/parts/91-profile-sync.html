@@ -1,12 +1,16 @@
 /* ===== My profile for daily ideas (privacy step A, deployment plan §7): the profile in your private GitHub repository ===== */
-// A switch in My profile, off until you turn it on (profile.sync.repo). On: your profile answers (no keys, songs, notes, gear or
-// backups) are saved as profile.json in the private repository the app already uses for Band breakdown (the same GitHub key),
+// A switch in My profile, off until you turn it on (profile.sync.repo). On: your profile answers and your songs with their status
+// (no keys, notes, gear, files or backups) are saved as profile.json in the private repository the app already uses for Band breakdown (the same GitHub key),
 // again whenever you change them; off: the file is deleted. The beta writes profile-beta.json, so testing never touches the file
 // the daily ideas job will read (step B, its own OK). Saving a file there starts no GitHub job (the splitter runs only when sent).
 const PRF_FILE=BETA?'profile-beta.json':'profile.json';
 const PRF_KEYS=['name','songLang','years','level','skills','instruments','capo','genres','artists','dreamSongs','goals','learnBy','time','context'];
 const prfOn=()=>{try{return !!profGet().sync.repo}catch(e){return false}};
-function prfData(p){const o={app:'Guitaring',kind:'profile',v:1,at:new Date().toISOString()};PRF_KEYS.forEach(k=>{if(p[k]!=null)o[k]=p[k]});return o}
+// your songs (hidden ones left out): status and since when, so the daily job sees your progress; the chords and capo the app knows
+function prfSongs(){let G=[];try{G=learnSongs({all:true}).filter(g=>!songHid(g))}catch(e){return []}
+ return G.map(g=>{const r=songRec(g)||{},o={t:g.title,a:g.artist||'',status:r.status||'learning'};if(r.statusAt||r.createdAt)o.since=r.statusAt||r.createdAt;if(r.touchedAt)o.opened=r.touchedAt;
+  try{const f=sesFacts(g);if(f.chords.length)o.chords=f.chords.slice(0,16);if(f.capo)o.capo=f.capo}catch(e){}return o})}
+function prfData(p){const o={app:'Guitaring',kind:'profile',v:2,at:new Date().toISOString()};PRF_KEYS.forEach(k=>{if(p[k]!=null)o[k]=p[k]});o.songs=prfSongs();return o}
 const prfB64=s=>btoa(unescape(encodeURIComponent(s)));
 async function prfSha(cfg){const r=await gh('/contents/'+PRF_FILE+(cfg.branch?'?ref='+encodeURIComponent(cfg.branch):''),{ok404:true},cfg);return r&&r.sha||''}
 async function prfWrite(){const cfg=mxGh();if(!cfg)throw {code:'nogh'};const sha=await prfSha(cfg);
@@ -20,9 +24,9 @@ function prfQueue(){if(!prfOn())return;clearTimeout(prfT);prfT=setTimeout(()=>{p
 // the switch and its line in My profile
 function prfUI(){const box=$('prfSync');if(!box)return;const on=prfOn(),cfg=mxGh(),st=store.get('profRepo',null),err=store.get('profRepoErr','');
  box.innerHTML=`<label class="prfrow"><input type="checkbox" id="prfOn"${on?' checked':''}${cfg?'':' disabled'}> <span><b>Use my profile for daily ideas</b>
-  <small>Saves your answers above (not your keys, songs, notes or gear) as <code>${PRF_FILE}</code> in your private GitHub repository${cfg?` <b>${esc(cfg.repo)}</b>`:''}, and again when you change them. Turning it off deletes the file.</small></span></label>
+  <small>Saves your answers above and your songs with their status (Learning, Learned, Idea for later), not your keys, notes, gear or files, as <code>${PRF_FILE}</code> in your private GitHub repository${cfg?` <b>${esc(cfg.repo)}</b>`:''}, and again when you change them. Turning it off deletes the file.</small></span></label>
   <p class="tip prfst" role="status">${!cfg?'Connect GitHub first (below, “GitHub for Band breakdown”).':err==='nogh'?'GitHub isn’t connected.':err?`Couldn’t save it: ${esc(err)}`:on&&st?`Saved ${esc(bkDate(st.at))}.`:on?'Saving…':'Off: nothing is saved outside this phone.'}</p>`;
  const cb=$('prfOn');if(cb)cb.onchange=async()=>{const p=profGet();p.sync={...(p.sync||{}),repo:cb.checked};profSet(p);
   if(!cb.checked){clearTimeout(prfT);box.querySelector('.prfst').textContent='Deleting the file…';try{await prfDelete();store.set('profRepoErr','')}catch(e){store.set('profRepoErr',String(e&&e.message||e))}}
   try{renderProfile()}catch(e){prfUI()}}}
-window.__prf={file:PRF_FILE};// test hooks
+window.__prf={file:PRF_FILE,data:()=>prfData(profGet())};// test hooks

@@ -18,8 +18,10 @@ function songMake(g){const now=new Date().toISOString();return {id:songNewId(),t
 // touching a song: create its record if needed, refresh its links, apply the change
 function songTouch(g,patch){const all=songsGet();let r=all.find(x=>sameSong(x,g));
  if(!r){r=songMake(g);all.unshift(r)}
- Object.assign(r,patch||{},{links:songLinks(g),touchedAt:new Date().toISOString()});if(!r.artist&&g.artist)r.artist=g.artist;
- store.set('songs2',all);return r}
+ // statusAt: when the status last changed (your progress for the daily ideas and the song reminders on Home)
+ const moved=patch&&patch.status&&patch.status!==(r.status||'learning');
+ Object.assign(r,patch||{},{links:songLinks(g),touchedAt:new Date().toISOString()});if(moved)r.statusAt=r.touchedAt;if(!r.artist&&g.artist)r.artist=g.artist;
+ store.set('songs2',all);if(moved)try{prfQueue()}catch(e){}return r}
 // every V1 item a song points to, as one key each (for the M2 check)
 const songItemKeys=l=>[...l.sheets.map(s=>s.src==='phone'?'lib:'+s.lib:s.src==='draft'?'draft':'drive:'+s.url),...(l.folder?['folder:'+vlKey(l.folder.a)+'|'+vlKey(l.folder.t)]:[]),...l.videos.map(u=>'vid:'+u),...l.analysis.map(k=>'ana:'+k),...l.jam.map(k=>'jam:'+k)];
 // M2: a record for every song in the learning list. Checked: as many records as list rows, every item linked to exactly one record.
