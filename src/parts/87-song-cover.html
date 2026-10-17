@@ -31,9 +31,11 @@ const covArtists=a=>String(a||'').split(/\s*(?:,|&|\+|\/|\bfeat\.?|\bft\.?|\band
 // does a catalog entry fit: one of our artists in its artist, and the same song (live / remaster tags left aside)
 function covFits(r,t,a){const ra=vlKey(r.artistName||''),names=covArtists(a).map(vlKey).filter(Boolean),rt=songClean(r.trackName||'').s;
  return names.some(n=>n&&(ra===n||ra.includes(n)||n.includes(ra)))&&(vlMatch(rt,t)||vlKey(rt)===vlKey(t))}
-async function covSearch(t,a){for(const c of ['IL','US']){try{
+// the catalog entry that fits; sure: the catalog answered (a network error or "too many requests" isn't "no cover")
+let covAsked=0;// lookups made (the pause between them is only after a real one)
+async function covSearch(t,a){let sure=false;covAsked++;for(const c of ['IL','US']){try{
   const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent((a+' '+t).trim())}&media=music&entity=song&limit=15&country=${c}`);if(!r.ok)continue;
-  const j=await r.json(),hit=(j.results||[]).find(x=>covFits(x,t,a)&&x.artworkUrl100);if(hit)return hit}catch(e){}}return null}
+  const j=await r.json();sure=true;const hit=(j.results||[]).find(x=>covFits(x,t,a)&&x.artworkUrl100);if(hit)return {hit,sure}}catch(e){}}return {hit:null,sure}}
 const covJpg=(cv,q)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
 // the cover in the app's sizes: 600 square for the background, 96 for the lists, and its colour
 async function covMake(blob){const im=await createImageBitmap(blob),out={};
@@ -42,12 +44,29 @@ async function covMake(blob){const im=await createImageBitmap(blob),out={};
   if(k==='thumb'){const d=g.getImageData(0,0,n,n).data;let r=0,gg=0,b=0;for(let i=0;i<d.length;i+=16){r+=d[i];gg+=d[i+1];b+=d[i+2]}const c=d.length/16;out.color=`rgb(${Math.round(r/c)},${Math.round(gg/c)},${Math.round(b/c)})`}}
  return out}
 const covUse=(k,v)=>{if(COV[k])return COV[k];if(!v||v.none)return null;return COV[k]={big:v.big?URL.createObjectURL(v.big):v.url||'',thumb:v.thumb?URL.createObjectURL(v.thumb):v.url||'',color:v.color||''}};
-// the cover for a song: kept on the phone, or looked up once (not again for a week when none fits)
+// the cover for a song: kept on the phone, or looked up once (not again for a week when none fits; force: look again now, after
+// you fixed the name)
 const covBusy={};
-async function coverFor(t,a,{look=true}={}){if(!t||!a)return null;const k=coverKey(t,a);if(COV[k])return COV[k];let v=null;try{v=await mxGet(k)}catch(e){}
- if(v&&(!v.none||!look||Date.now()-v.at<7*864e5))return covUse(k,v);if(!look||!navigator.onLine)return null;
- if(covBusy[k])return covBusy[k];return covBusy[k]=(async()=>{try{const hit=await covSearch(songClean(t).s,a);if(!hit){await mxPut(k,{none:true,at:Date.now()});return null}
+async function coverFor(t,a,{look=true,force=false}={}){if(!t||!a)return null;const k=coverKey(t,a);if(COV[k])return COV[k];let v=null;try{v=await mxGet(k)}catch(e){}
+ if(v&&(!v.none||!look||(!force&&v.v===2&&Date.now()-v.at<7*864e5)))return covUse(k,v);// (a "none" from before v2 may have been a failed lookup)if(!look||!navigator.onLine)return null;
+ if(covBusy[k])return covBusy[k];return covBusy[k]=(async()=>{try{const {hit,sure}=await covSearch(songClean(t).s,a);if(!hit){if(sure)await mxPut(k,{none:true,v:2,at:Date.now()});return null}
   const url=hit.artworkUrl100.replace(/\/\d+x\d+bb\./,'/600x600bb.');let rec={url,at:Date.now(),album:hit.collectionName||'',artist:hit.artistName||'',track:hit.trackName||''};
   try{const r=await fetch(url);if(r.ok)rec={...rec,...await covMake(await r.blob())}}catch(e){}// no copy allowed: the picture is shown from its address
-  await mxPut(k,rec);return covUse(k,rec)}catch(e){return null}finally{delete covBusy[k]}})()}
-window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a)};// test hooks
+  await mxPut(k,rec);const c=covUse(k,rec);covPaint(k,c);return c}catch(e){return null}finally{delete covBusy[k]}})()}
+// Guitaring's own picture (the app icon): shown until a song's real cover is found, and for good when none fits or the song has
+// no artist to look it up by
+let covDefU='';function covDef(){if(covDefU)return covDefU;try{const s=document.getElementById('appLogoSvg');
+ covDefU=URL.createObjectURL(new Blob([s.outerHTML.replace(/^<svg /,'<svg width="512" height="512" ')],{type:'image/svg+xml'}))}catch(e){}return covDefU}
+// show a cover wherever its song is on screen (the Learn list), without drawing the list again
+function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&(!el.classList.contains('on')||el.classList.contains('def'))){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.remove('def');el.classList.add('on')}})}
+const covNow=(t,a)=>t&&a?COV[coverKey(t,a)]||null:null;// a cover already shown in this visit (drawn with the list, no flicker)
+// every song's cover ready ahead: at start and whenever the list changes, the missing ones are looked up in the background, one
+// at a time with a pause (the catalog limits how fast it may be asked)
+let covRun=null,covAgain=false;
+function covWarm(){if(covRun){covAgain=true;return covRun}
+ return covRun=(async()=>{try{do{covAgain=false;let G=[];try{G=learnSongs()}catch(e){}
+  for(const g of G){if(!g.artist)continue;const k=coverKey(g.title,g.artist);if(COV[k]){covPaint(k,COV[k]);continue}
+   const c0=await coverFor(g.title,g.artist,{look:false});if(c0){covPaint(k,c0);continue}
+   if(!navigator.onLine)break;const n0=covAsked;await coverFor(g.title,g.artist);if(covAsked>n0)await new Promise(ok=>setTimeout(ok,window.__covGapMs??1500))}}while(covAgain)}
+  finally{covRun=null}})()}
+window.__cov={def:()=>covDef(),clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks

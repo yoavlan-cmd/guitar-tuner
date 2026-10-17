@@ -23,12 +23,11 @@ function learnSongs(){
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
-// the covers next to the songs: the ones on the phone at once, a few missing ones looked up (one at a time; a lookup already
-// running for a song is shared)
-async function learnCovers(){const els=[...document.querySelectorAll('#learnList .lcov')];let looked=0;
- for(const el of els){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;let c=await coverFor(t,a,{look:false});
-  if(!c&&looked<4&&navigator.onLine){looked++;c=await coverFor(t,a)}
-  if(c&&c.thumb&&el.isConnected){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}}}
+// the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
+// background (covWarm)
+async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
+  const c=await coverFor(t,a,{look:false});if(c)covPaint(el.dataset.ck,c)}
+ covWarm()}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
  // one language at a time (Hebrew or English songs, by the title's letters): the list reads one way, never mixed
  const heb=x=>/[\u0590-\u05FF]/.test(x),L=G.map(g=>heb(g.title)?'he':/[a-z]/i.test(g.title)?'en':heb(g.artist)?'he':'en'),nL={he:0,en:0};L.forEach(x=>nL[x]++);
@@ -46,7 +45,7 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
-   return `<button type="button" class="lrow" data-li="${i}"><span class="lcov" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" aria-hidden="true"></span><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});

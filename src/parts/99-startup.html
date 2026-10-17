@@ -6,6 +6,8 @@ seedBook();
 
 setBookTun(bookTun);
 v2Start();
+// the songs' album covers, ready before they're needed (in the background, after the app is up)
+setTimeout(()=>{try{covWarm()}catch(e){}},window.__covStartMs??2500);
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
 })();

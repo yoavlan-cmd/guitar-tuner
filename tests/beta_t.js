@@ -56,6 +56,9 @@ const noWelcome=pg=>pg.evaluate(()=>{['welcome','onb'].forEach(id=>{const w=docu
  // the beta installs as its own app
  const man=await beta.evaluate(async()=>{const l=document.querySelector('link[rel=manifest]');const u=new URL(l.getAttribute('href'),document.baseURI).href;const j=await (await fetch(u)).json();return {u,j}});
  ok(/\/beta\/manifest\.webmanifest$/.test(man.u)&&man.j.name==='Guitaring beta'&&man.j.scope==='./','the beta has its own install manifest ("Guitaring beta", scope beta/)');
+ const icons=await beta.evaluate(async()=>{const l=document.querySelector('link[rel=manifest]'),u=new URL(l.getAttribute('href'),document.baseURI).href,j=await (await fetch(u)).json();
+  return Promise.all(j.icons.map(async i=>{const s=new URL(i.src,u).href,im=new Image();im.src=s;try{await im.decode()}catch(e){}return {s,ok:im.naturalWidth+'x'+im.naturalHeight===i.sizes,purpose:i.purpose}}))});
+ ok(icons.length===3&&icons.every(i=>/\/beta\/icon-/.test(i.s)&&i.ok)&&icons.some(i=>i.purpose==='maskable'),'the beta installs with its own icons (the new design), at their sizes '+JSON.stringify(icons.map(i=>i.s.split('/').slice(-2).join('/'))));
  const liveMan=await live.evaluate(()=>document.querySelector('link[rel=manifest]').getAttribute('href'));ok(liveMan==='manifest.webmanifest','the live app keeps its own manifest');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();

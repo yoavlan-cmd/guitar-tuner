@@ -15,9 +15,11 @@ const CAT={// what the catalog answers, by the words searched
   {artistName:'ג\'ימבו ג\'יי',trackName:'במקום בו אני גר',collectionName:'אלבום',artworkUrl100:'https://is1.mzstatic.com/x/jimbo/100x100bb.jpg'}],
  'Wonderwall':[{artistName:'Some Cover Band',trackName:'Wonderwall',artworkUrl100:'https://is1.mzstatic.com/x/wall/100x100bb.jpg'}]};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
- const ctx=await b.newContext({...devices['Pixel 7']});const looks=[],arts=[];
+ const ctx=await b.newContext({...devices['Pixel 7']});const looks=[],arts=[];let flaky=2;
  await ctx.route(/^https:\/\//,r=>{const u=r.request().url();
   if(u.startsWith('https://itunes.apple.com/search')){const term=new URL(u).searchParams.get('term');looks.push(term);const k=Object.keys(CAT).find(x=>term.includes(x));
+   const bm=term.match(/^Band (\d+) Song \d+$/);if(bm)return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({results:[{artistName:'Band '+bm[1],trackName:'Song '+bm[1],artworkUrl100:`https://is1.mzstatic.com/x/band${bm[1]}/100x100bb.jpg`}]})});
+   if(/^Flaky/.test(term)){if(flaky-->0)return r.fulfill({status:503,headers:H,body:''});return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({results:[{artistName:'Flaky',trackName:'Again',artworkUrl100:'https://is1.mzstatic.com/x/flaky/100x100bb.jpg'}]})})}
    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({results:k?CAT[k]:[]})})}
   if(u.startsWith('https://is1.mzstatic.com/')){arts.push(u);return r.fulfill({contentType:'image/png',headers:H,body:PNG})}
   return r.abort()});
@@ -25,9 +27,23 @@ const CAT={// what the catalog answers, by the words searched
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{if(sessionStorage.x)return;sessionStorage.x=1;const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));
   S('userName','Yoav');S('profile',{name:'Yoav',onboarding:{done:true}});S('learnLang','he');
-  S('ideaOnIt',[{title:'Wonderwall',artist:'Oasis',at:Date.now()-5000}]);
+  S('ideaOnIt',[{title:'Wonderwall',artist:'Oasis',at:Date.now()-5000},...[1,2,3,4,5,6,7].map(n=>({title:'Song '+n,artist:'Band '+n,at:Date.now()-9000-n}))]);
  });
+ await p.addInitScript(()=>{window.__covGapMs=0;window.__covStartMs=200});
  await p.goto(APP);await p.waitForTimeout(400);
+ // every song's cover is ready from the start, without opening it (more than a few; in the background)
+ const allKept=()=>p.evaluate(()=>Promise.all([1,2,3,4,5,6,7].map(n=>window.__bk.get(window.__cov.key('Song '+n,'Band '+n)))).then(l=>l.every(v=>v&&v.thumb)));
+ for(let i=0;i<40&&!await allKept();i++)await p.waitForTimeout(250);
+ ok(await allKept()&&await p.evaluate(()=>window.__v2.cur())==='home','every song’s cover is fetched at start, before the list or the song is opened (7 songs)');
+ await p.evaluate(()=>localStorage.setItem('tuner.learnLang','"en"'));await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(600);
+ ok(await p.$$eval('#learnList .lrow:has-text("Band") .lcov',l=>l.length===7&&l.every(e=>e.classList.contains('on')&&!e.classList.contains('def'))),'Learn: all of them show their cover at once');
+ // a failed lookup (the catalog busy) isn't "no cover": it's looked up again
+ ok(await p.evaluate(async()=>{const a=await window.__cov.get('Again','Flaky');const v=await window.__bk.get(window.__cov.key('Again','Flaky'));return a===null&&!v}),'a failed lookup isn’t remembered as “no cover”');
+ ok(await p.evaluate(async()=>{const a=await window.__cov.get('Again','Flaky');return !!(a&&a.thumb)}),'…and the next lookup finds it');
+ // a "no cover" kept before this version (it may have been a failed lookup) is looked up again
+ await p.evaluate(()=>window.__bk.put(window.__cov.key('Song 9','Band 9'),{none:true,at:Date.now()}));
+ ok(await p.evaluate(async()=>{const a=await window.__cov.get('Song 9','Band 9');return !!(a&&a.thumb)}),'an old “no cover” record is looked up again');
+ await p.tap('#bnav [data-sec=home]');await p.evaluate(()=>localStorage.setItem('tuner.learnLang','"he"'));
  // names
  const C=await p.evaluate(()=>{const c=window.__cov;return {
   live:c.clean("ג'ימבו ג'יי - במקום בו אני גר (חי באולפן גלגלצ)"),vid:c.clean('Oasis - Wonderwall [Official Video]'),bar:c.clean('Oasis - Wonderwall | Live at Knebworth'),keep:c.clean('Green Day - Good Riddance (Time Of Your Life)'),
@@ -50,12 +66,12 @@ const CAT={// what the catalog answers, by the words searched
  const row=await p.$eval('#learnList .lrow',e=>e.querySelector('.ltxt').innerText.replace(/\s+/g,' '));console.log('  '+row);
  ok(/^במקום בו אני גר /.test(row)&&/אורית טשומה/.test(row)&&!/חי באולפן/.test(row),'Learn: the song’s name first, then its artists, no live tag');
  ok(looks.length>=1&&arts.some(u=>/\/jimbo\/600x600bb\./.test(u))&&!arts.some(u=>/wrong/.test(u)),'the cover is looked up and the one whose artist matches is taken, at 600 px '+JSON.stringify({looks,arts}));
- ok(await p.$eval('#learnList .lcov',e=>e.classList.contains('on')&&/blob:/.test(e.style.backgroundImage)),'Learn: the cover’s small picture next to the song');
+ ok(await p.$eval('#learnList .lcov',e=>e.classList.contains('on')&&!e.classList.contains('def')&&/blob:/.test(e.style.backgroundImage)),'Learn: the cover’s small picture next to the song');
  const kept=await p.evaluate(async()=>{const v=await window.__bk.get(window.__cov.key('במקום בו אני גר','ג\'ימבו ג\'יי, אורית טשומה, אברהם לגסה'));return v&&{big:v.big&&v.big.size,thumb:v.thumb&&v.thumb.size,color:v.color,album:v.album}});
  ok(kept&&kept.big>0&&kept.thumb>0&&/^rgb\(/.test(kept.color),'the cover is made into the app’s sizes and kept on the phone '+JSON.stringify(kept));
  // the song's page: the light background
  await p.tap('#learnList .lrow');await p.waitForTimeout(800);
- const hero=await p.$eval('.seshero',e=>({cls:e.classList.contains('hascov'),v:e.style.getPropertyValue('--cov'),op:getComputedStyle(e,'::before').opacity,h3:e.querySelector('h3').textContent,art:(e.querySelector('.sesart')||{}).textContent}));
+ const hero=await p.$eval('.seshero',e=>({cls:e.classList.contains('hascov')&&!e.classList.contains('covdef'),v:e.style.getPropertyValue('--cov'),op:getComputedStyle(e,'::before').opacity,h3:e.querySelector('h3').textContent,art:(e.querySelector('.sesart')||{}).textContent}));
  console.log('  '+JSON.stringify(hero));
  ok(hero.cls&&/blob:/.test(hero.v)&&+hero.op>0&&+hero.op<.6,'the song’s page: the cover as a light background behind the name');
  ok(hero.h3==='במקום בו אני גר'&&/ג'ימבו ג'יי/.test(hero.art),'the page shows the song as its name and the artists under it');
@@ -64,17 +80,25 @@ const CAT={// what the catalog answers, by the words searched
  await p.screenshot({path:path.join(OUT,'cover_hero.png')});
  // reused: no second lookup (another visit)
  const n0=looks.length;await p.reload();await p.waitForTimeout(600);await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(800);
- ok(looks.length===n0&&await p.$eval('#learnList .lcov',e=>e.classList.contains('on')),'the kept cover is reused, no second lookup');
+ ok(looks.length===n0&&await p.$eval('#learnList .lcov',e=>e.classList.contains('on')&&!e.classList.contains('def')),'the kept cover is reused, no second lookup');
  // a catalog result by another artist: no cover
  ok(await p.evaluate(()=>window.__cov.get('Wonderwall','Oasis'))===null,'a song found only by another artist gets no cover');
  ok(await p.evaluate(async()=>{const v=await window.__bk.get(window.__cov.key('Wonderwall','Oasis'));return !!(v&&v.none)}),'"no cover" is remembered (looked again after a week)');
+ // no cover found (Wonderwall: only another artist's), or no artist: Guitaring's own picture instead, in Learn and on the song's page
+ await p.evaluate(()=>{localStorage.setItem('tuner.learnLang','"en"');window.__v2.goSec('home')});await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(400);
+ ok(await p.$eval('#learnList .lrow:has-text("Wonderwall") .lcov',e=>e.classList.contains('on')&&e.classList.contains('def')&&/blob:/.test(e.style.backgroundImage)),'Learn: a song with no cover found shows Guitaring’s picture');
+ ok(await p.evaluate(async()=>{const im=new Image();im.src=window.__cov.def();await im.decode();return im.naturalWidth===512}),'Guitaring’s picture is the app icon, ready to show (512 px)');
+ await p.tap('#learnList .lrow:has-text("Wonderwall")');await p.waitForTimeout(500);
+ ok(await p.$eval('.seshero',e=>e.classList.contains('hascov')&&e.classList.contains('covdef')&&/blob:/.test(e.style.getPropertyValue('--cov'))),'its page: Guitaring’s picture as the light background');
+ await p.evaluate(()=>{localStorage.setItem('tuner.learnLang','"he"');window.__v2.goSec('learn')});await p.waitForTimeout(300);
  // Edit name
  await p.tap('#learnList .lrow:has-text("במקום")');await p.waitForTimeout(500);
  await p.tap('#sesName');await p.waitForTimeout(150);
  ok(await p.$eval('#snT',e=>e.value)==='במקום בו אני גר','Edit name opens with the song’s name');
- await p.fill('#snA',"ג'ימבו ג'יי");await p.tap('#snOk');await p.waitForTimeout(800);
+ await p.evaluate(()=>window.__bk.put(window.__cov.key('במקום בו אני גר',"ג'ימבו ג'יי"),{none:true,v:2,at:Date.now()}));
+ await p.fill('#snA',"ג'ימבו ג'יי");await p.tap('#snOk');await p.waitForTimeout(1200);
  const after=await p.evaluate(async()=>({art:document.querySelector('.seshero .sesart').textContent,song:(await window.__bk.get('mixIndex')).find(x=>x.id==='m1').song}));
  ok(after.art==="ג'ימבו ג'יי"&&after.song&&after.song.by==='you'&&after.song.a==="ג'ימבו ג'יי",'Edit name: saved as yours, the page follows '+JSON.stringify(after));
- ok(await p.$eval('.seshero',e=>e.classList.contains('hascov')),'the cover for the new name is found');
+ ok(await p.$eval('.seshero',e=>e.classList.contains('hascov')&&!e.classList.contains('covdef')),'the cover for the new name is looked up again (even with a “no cover” kept for it) and shown');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
