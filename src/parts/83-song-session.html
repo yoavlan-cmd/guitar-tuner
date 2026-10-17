@@ -71,6 +71,8 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(GK,+c.dataset.gdcapo);renderSession();return}
+  // the Easy version you play (with or without a capo): kept in your profile, so every song opens with it
+  const ev=e.target.closest('[data-gdever]');if(ev){try{const P=profGet();P.capo=+ev.dataset.gdever?'yes':'no';profSet(P)}catch(x){}gb.innerHTML=gdHTML(G,gdMode);return}
   const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;karaStop();gb.innerHTML=gdHTML(G,gdMode);karaMount(G,GD,GK)});
  // the video with its chords in time (Full, when the song has a video)
  if(G)karaMount(G,GD,GK);
