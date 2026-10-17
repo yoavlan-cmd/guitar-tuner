@@ -410,7 +410,7 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 |---|---|---|
 | 0–4 | Safety, navigation, library, song sessions, upload | Live (v110) |
 | 5 | Gear suggestions | In the beta (pedals and accessories; gear for this song); live release v111 on the user's go |
-| P | Privacy, deployment plan §7 steps **A → B → C → D**, in that order, each with the user's OK (E only if asked) | After the phase 5 release |
+| P | Privacy, deployment plan §7 steps **A → B → C → D**, in that order, each with the user's OK (E only if asked) | A in the beta; B built (with song reminders on Home); C, D next |
 | T | **Test users** (the user's goal for the privacy work): a few friends try the app and give feedback; their use of the user's Claude account must be limited. **When we reach this stage, explain the options to limit them, and the user chooses.** | After privacy A–D |
 | 8 | Record myself | Last |
 | 6, 7, 9 | Riff guides, basic material, Hebrew interface | Backlog |

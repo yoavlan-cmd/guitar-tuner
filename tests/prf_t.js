@@ -1,5 +1,6 @@
 // My profile for daily ideas (privacy step A): a switch in My profile, off by default. On: profile.json in the private repository
-// (only the answers: no keys, songs or gear), again after a change; off: the file is deleted. Without GitHub the switch can't be
+// (the answers and your songs with their status and since when: no keys, notes or gear), again after a change to the answers or a
+// song's status; off: the file is deleted. Without GitHub the switch can't be
 // turned on. The beta writes profile-beta.json.
 const {chromium,devices}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(__dirname,'out');fs.mkdirSync(OUT,{recursive:true});
@@ -20,6 +21,10 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   await p.addInitScript(gh=>{window.__prfMs=50;if(sessionStorage.x)return;sessionStorage.x=1;const live=!window.__GUITARING_BETA;
    localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('tuner.apiKey','"sk-secret"');
    localStorage.setItem('tuner.profile',JSON.stringify({name:'Yoav',level:'intermediate',genres:['israeli-rock'],artists:['אביתר בנאי'],songLang:['he'],onboarding:{done:true}}));
+   localStorage.setItem('tuner.songIndex',JSON.stringify({songs:[{t:'יא',a:'אביתר בנאי',ch:['Am','G']},{t:'Wonderwall',a:'Oasis',ch:['Em7','G']},{t:'Gone',a:'X'}]}));
+   localStorage.setItem('tuner.songs2',JSON.stringify([{id:'s1',title:'יא',artist:'אביתר בנאי',aliases:[],status:'learned',statusAt:'2026-09-01T10:00:00.000Z',createdAt:'2026-08-01T10:00:00.000Z',touchedAt:'2026-09-01T10:00:00.000Z',links:{},notes:'my secret note'},
+    {id:'s2',title:'Wonderwall',artist:'Oasis',aliases:[],status:'learning',createdAt:'2026-08-05T10:00:00.000Z',touchedAt:'2026-08-05T10:00:00.000Z',links:{},notes:''}]));
+   localStorage.setItem('tuner.songHidden',JSON.stringify([{t:'Gone',a:'X',at:1}]));
    localStorage.setItem('tuner.gearExtra',JSON.stringify([{id:'g1',kind:'pedal',type:'delay',name:'DD-3'}]));
    if(gh)localStorage.setItem('guitaring.gh',JSON.stringify({repo:'yoav/guitaring-split',token:'t',branch:'main'}))},gh);
   await p.goto(BASE+page);await p.waitForTimeout(500);await p.evaluate(()=>window.__v2.goSec('profile'));await p.waitForTimeout(300);return {p,ctx,errs,files,log}};
@@ -29,7 +34,15 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.check('#prfOn');await p.waitForTimeout(600);
  const f=files['profile.json'];console.log('  file:',JSON.stringify(f&&f.json));
  ok(f&&f.json.name==='Yoav'&&f.json.level==='intermediate'&&f.json.artists[0]==='אביתר בנאי'&&f.branch==='main'&&log.some(x=>/^PUT yoav\/guitaring-split\/contents\/profile\.json/.test(x)),'on: profile.json in the private repository, with your answers (Hebrew kept)');
- ok(f&&!JSON.stringify(f.json).match(/sk-secret|DD-3|onboarding|"sync"|apiKey|token/),'only the answers: no keys, gear, or the app’s own fields');
+ ok(f&&!JSON.stringify(f.json).match(/sk-secret|DD-3|onboarding|"sync"|apiKey|token/),'no keys, gear, or the app’s own fields');
+ const S=(f&&f.json.songs)||[],ya=S.find(x=>x.t==='יא'),ww=S.find(x=>x.t==='Wonderwall');
+ ok(ya&&ya.status==='learned'&&ya.since==='2026-09-01T10:00:00.000Z'&&ww&&ww.status==='learning'&&ww.since==='2026-08-05T10:00:00.000Z','your songs, with their status and since when');
+ ok(!S.some(x=>x.t==='Gone')&&!JSON.stringify(f&&f.json).includes('my secret note'),'hidden songs and song notes are left out');
+ // a status change in the song session: saved again, with the new date
+ await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("יא")');await p.waitForTimeout(400);await p.click('#sesBox [data-st="learning"]');await p.waitForTimeout(600);
+ const w2=((files['profile.json']||{}).json.songs||[]).find(x=>x.t==='יא');
+ ok(w2&&w2.status==='learning'&&Date.now()-Date.parse(w2.since)<60000,'changing a song’s status saves it again, dated now');
+ await p.evaluate(()=>window.__v2.goSec('profile'));await p.waitForTimeout(300);
  ok(/Saved /.test(await p.$eval('#prfSync',e=>e.textContent)),'My profile says when it was saved');
  ok(/also saved in your private GitHub repository/.test(await p.$eval('#profCard .profhead',e=>e.textContent)),'the top of My profile no longer says the answers stay on this phone');
  // a change to the answers: saved again
