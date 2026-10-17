@@ -15,7 +15,7 @@ let mxSess=null,mxSessKind='',mxBusy=false,mxCancel=false,mxSong=null,mxCtx=null
 const mxIsGtr=id=>id==='guitar'||id==='gL'||id==='gC'||id==='gR';
 // ---- small IndexedDB store: the last separated song stays on the phone, so reopening it is instant ----
 function mxDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDBN,1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
-async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||Object.assign(new Error('The phone’s storage refused it'),{name:'AbortError'}))})}// a full phone aborts the write (no error event): without onabort it would never finish
 async function mxGet(k){const db=await mxDB();const v=await new Promise((res,rej)=>{const t=db.transaction('kv','readonly'),q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)});
  if(v&&v.__gone)return null;if(v!=null||!BETA)return v;
  // beta: not copied yet → read it from the live app's database (never written to) and keep a copy here
