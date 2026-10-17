@@ -67,7 +67,9 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   nb.replaceWith(f);$('snT').focus();$('snOk').onclick=async()=>{const t=$('snT').value.trim(),a=$('snA').value.trim();if(!t)return;
    for(const m of g.r.mix){const it=mxIdx.find(x=>x.id===m.mix);if(it)it.song={t,a,by:'you'};const k='mix_'+m.mix,d=loadSong(k);if(d){d.song={t,a};d.title=a?`${t} - ${a}`:t;d.artist=a;try{localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(d)))}catch(e){}}}
    for(const x of g.r.analysis){const d=loadSong(x.key);if(d&&!d.mix){d.song={t,a};try{localStorage.setItem(KP+'song.'+x.key,JSON.stringify(compact(d)))}catch(e){}}}
-   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};try{renderLearn()}catch(e){}renderSession()}};
+   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};
+   // the cover for the new name is looked for again now (even if none was found for it before)
+   if(a)coverFor(t,a,{force:true}).then(()=>{if(curSec==='session')renderSession()}).catch(()=>{});try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(GK,+c.dataset.gdcapo);renderSession();return}
