@@ -6,7 +6,7 @@
 // little ahead or behind the audio the chords came from is lined up (the offset is kept with the analysis).
 // The video: the phone-sized copy GitHub made during the split (splitter v7), kept on the phone; a song split before that loads its
 // video from Drive once (a tap; kept on the phone too). Easy keeps the song map (its chords and capo can differ from the video).
-let KA=null;
+let KA=null;const KA_NOTE={};// a note per song for this visit (the video wasn't kept)
 const KA_PPS=72;// lane pixels per second
 const karaItem=mix=>mix?mxIdx.find(x=>x.id===mix):null;
 const karaHas=mix=>{const it=karaItem(mix);return !!(it&&(it.hasVid||(it.drive&&it.drive.video)))};
@@ -41,18 +41,23 @@ async function karaLoadDrive(it,onP){await gdTokenFull();const v=await vlFind(it
  const r=await fetch(`${VL_GD}/${v.id}?alt=media&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});if(!r.ok)throw {code:'gd_http',status:r.status};
  const len=+r.headers.get('content-length')||0,rd=r.body&&r.body.getReader?r.body.getReader():null;let blob;
  if(rd){const parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onP&&onP(got,len)}blob=new Blob(parts,{type:'video/mp4'})}else blob=await r.blob();
- await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return blob}
+ // kept on the phone when it fits (an installed app asks to keep its storage for good first); a video too big to keep still plays
+ // now, from memory, and is loaded again next time
+ try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
+ try{await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return {blob,kept:true}}
+ catch(e){KA_MEM[it.id]=blob;return {blob,kept:false}}}
+const KA_MEM={};// videos too big to keep on the phone, for this visit
 // the card in the guide (Full): filled in once the video is on the phone
 function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
  <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
 let kaGen=0;
 async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
- let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}
+ let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}if((!rec||!rec.blob)&&KA_MEM[d.mix])rec={blob:KA_MEM[d.mix]};
  if(gen!==kaGen||!host.isConnected)return;// the guide was redrawn meanwhile
  if(!rec||!rec.blob){if(!(it&&it.drive&&it.drive.video)){body.innerHTML='<p class="tip">This song has no video on the phone.</p>';return}
   body.innerHTML=`<p class="tip">The song’s video is in your Drive. Load it once to play along with the chords; it stays on this phone.</p><button type="button" class="btn wide" id="kaLoad">Load the song’s video</button><p class="tip" id="kaMsg" role="status"></p>`;
   $('kaLoad').onclick=async()=>{const b=$('kaLoad'),m=$('kaMsg');b.disabled=true;m.textContent='Opening Google…';
-   try{await karaLoadDrive(it,(g,l)=>{m.textContent=`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});karaMount(G,d,key)}
+   try{const r=await karaLoadDrive(it,(g,l)=>{m.textContent=g>=l&&l?'Keeping it on this phone…':`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});if(!r.kept)KA_NOTE[d.mix]=`This video (${Math.round(r.blob.size/1048576)} MB) is too big to keep on this phone: it plays now and loads again next time.`;karaMount(G,d,key)}
    catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
  body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
@@ -63,6 +68,9 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
   <p class="tip kof" hidden></p>`;
  const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
  v.src=url;KA={v,url,M,off:+(d.vOff||0),cur:-2,raf:0,host};
+ if(KA_NOTE[d.mix]){const p0=document.createElement('p');p0.className='tip kanote';p0.textContent=KA_NOTE[d.mix];body.appendChild(p0)}
+ // a video the phone can't play (some cameras' formats): say so instead of a black box
+ v.onerror=()=>{const p1=document.createElement('p');p1.className='dswarn';p1.textContent='This phone can’t play this video’s format. The chords still play along with the song in the jam track.';body.querySelector('.kvid').after(p1)};
  // line the video up with the analysis once (kept with the analysis)
  if(d.vOff==null){const p0=body.querySelector('.kof');p0.hidden=false;p0.textContent='Lining the video up with the chords…';karaOffset(rec.blob,d).then(o=>{if(!KA||KA.v!==v)return;body.querySelector('.kof').hidden=!o;KA.off=o;try{const s=loadSong(key);if(s){s.vOff=o;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(s)))}}catch(e){}
   if(o){const p=body.querySelector('.kof');p.hidden=false;p.textContent=`The video runs ${Math.abs(o).toFixed(2)} s ${o>0?'behind':'ahead of'} the song’s audio; the chords are lined up with it.`}})}
