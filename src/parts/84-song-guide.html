@@ -109,6 +109,11 @@ function gdBuild(d){const keep=A;A=d;try{
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
 function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
  o.push([1,d.from==='guitars'?'The guitars-only part: the chords, their timing and the strumming':'The recording you analysed: the chords, their timing and the strumming']);
+ // the guitars by side (step 1: measured and shown; the chords still come from the whole guitars part)
+ if(d.from==='guitars'){const S=d.guitars,pc=x=>Math.round(x*100)+'%',POS={L:'left',C:'centre',R:'right'};
+  o.push(!S||S.skip?[0,'The guitars by side: '+(S&&S.skip?'couldn’t be measured this time':'not measured yet (rebuild to add it)')]:
+   !S.apart?[0,`The guitars by side: they sit together${S.mono?' (the part is mono)':` (left ${pc(S.share.L)}, centre ${pc(S.share.C)}, right ${pc(S.share.R)})`}, so they can’t be told apart that way`]:
+   [1,`${S.sides.length>1?S.sides.length+' guitars sit apart':'One guitar sits apart'}: `+S.sides.map(x=>`${POS[x.pos]} (${pc(x.share)} of the guitars) ${x.notes<1.8?`plays mostly single notes (a riff or a lead line, about ${x.notes} at once)`:`${x.notes<2.3?'plays a mix of chords and single notes':'strums'} ${x.chords.map(c=>nameOf({c,t0:0,t1:1})).join(' · ')||'–'} (about ${x.notes} notes at once), the same roots as the guitars part ${pc(x.agree)} of the time`}`).join('; ')])}
  if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
  // the video helps only when the hand (or the capo) was seen: looked at but nothing clear is shown as not helping
  o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`${V.who&&V.who!=='guitar'?`the ${V.who} guitarist’s hand`:'the hand'} was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} moments, but the guitarist’s fretting hand isn’t shown clearly in any`}${V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:

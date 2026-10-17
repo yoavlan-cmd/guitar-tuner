@@ -71,7 +71,9 @@ const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chor
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("Video Song")');await p.waitForTimeout(500);
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
  const src=await p.$$eval('.gdsrc li',l=>l.map(x=>[x.className,x.textContent]));console.log('  built from:',JSON.stringify(src));
- ok(src.length===4&&src.every(x=>x[0]==='y'),'Built from: the guitars-only part, the whole song, the video and the chord sheet, all ✓');
+ const main=src.filter(x=>!/by side|sit apart|sits apart/.test(x[1]));
+ ok(main.length===4&&main.every(x=>x[0]==='y'),'Built from: the guitars-only part, the whole song, the video and the chord sheet, all ✓');
+ ok(src.some(x=>/The guitars by side: they sit together/.test(x[1])),'…and the guitars by side (one guitar part in the middle: they sit together)');
  const ch=await p.$$eval('#gdBody .seschords svg .dgName',l=>l.map(x=>x.textContent));console.log('  chords:',await p.$eval('.gdbig b',e=>e.textContent),'|',ch.join(' '));
  ok(ch.includes('Bm')&&!ch.includes('B')&&['C#m','A','E'].every(n=>ch.includes(n)),'the guide: C#m · A · E · Bm');
  await p.screenshot({path:path.join(OUT,'allsrc.png'),fullPage:true});
