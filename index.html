@@ -1226,8 +1226,11 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .dslab{display:flex;flex-direction:column;gap:6px;font:600 13px var(--body);color:var(--muted)}.dslab .textin{font:400 14px var(--body)}
 .dsmore summary{cursor:pointer;color:var(--accent);font:600 13px var(--body);padding:4px 0}
 .dsnote{font-size:12px;margin:0}
-#paneSong[data-seg="learn"] #addSong{--tex:var(--tex-learn);grid-column:1/-1;min-height:132px}
-#paneSong[data-seg="learn"] #addSong b{word-spacing:normal}
+/* Learn starts with two tiles (Oct 2026): Create a chord sheet from media (the basic option: a video or MP3, on the phone) and
+   Create a song session (from Drive); the chord finder lives in Write and on each song's page */
+#paneSong[data-seg="learn"] #addSong,#paneSong[data-seg="learn"] #drop{--tex:var(--tex-learn);min-height:200px}
+#paneSong[data-seg="learn"] #addSong b,#paneSong[data-seg="learn"] #drop b{word-spacing:normal;font-size:clamp(21px,6vw,25px);line-height:1.02}
+#paneSong[data-seg="learn"] #findNew,#paneSong[data-seg="learn"] .addnote{display:none!important}
 .dsname{margin:-4px 0 0;font:600 15px var(--body);color:var(--muted)}
 .dsbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.dsbar i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),#8AF0D2);transition:width .6s}
 .dseta{margin:0;font:500 14px var(--body);color:var(--muted)}.dseta b{color:var(--ink);font-family:var(--mono)}
@@ -1304,6 +1307,16 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .gtwhy{margin:10px 0 8px;font:500 15px/1.45 var(--body)}
 .gtbonus{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}.gtbonus b{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFB27A}.gtbonus ul{margin:6px 0 0;padding-left:18px}.gtbonus li{font:500 14px/1.45 var(--body);margin:3px 0}
 .gtl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}.gtl dt{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}.gtl dd{margin:0;font:500 14px/1.45 var(--body)}
+/* my profile for daily ideas (privacy step A) */
+.prfsync{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.prfrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer}.prfrow input{width:22px;height:22px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+.prfrow span{display:flex;flex-direction:column;gap:4px}.prfrow b{font:600 15px var(--body)}.prfrow small{color:var(--muted);font:500 13px/1.45 var(--body)}.prfrow code{font:500 12.5px var(--mono)}
+.prfst{margin:8px 0 0 34px}
+/* a song reminder in the Home comments: green-framed, with a call to practise (92-song-remind) */
+.hjbub.hrem{background:#E9F6E5;box-shadow:0 0 0 2px #7FC77A,0 4px 14px rgba(0,0,0,.35)}.hjbub.hrem::before{border-right-color:#7FC77A}
+.hremact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hremact button{border-radius:999px;font:700 12.5px var(--body);padding:6px 11px;white-space:nowrap;cursor:pointer;border:0}
+.hremgo{background:#2F8A3B;color:#fff}.hremok{background:transparent;color:#24612C;box-shadow:inset 0 0 0 1.5px #7FC77A}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -1512,14 +1525,14 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
     <div id="resumeCard" hidden></div>
     <section class="card draftcard" id="draftCard" hidden></section>
     <div class="addgrid" id="addGrid">
-      <button class="drop addtile" id="addSong" type="button">
-        <i aria-hidden="true"><span data-pd="ADD"></span></i><b>Add a song</b>
-        <span class="sub">From your Google Drive: split, MP3s and a session, made for you</span>
-      </button>
       <label class="drop addtile" for="vidIn" id="drop">
-        <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Song video</b>
-        <span class="sub">Get the chords from a video</span>
+        <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Create a chord sheet from media</b>
+        <span class="sub">A video (best) or an MP3, on this phone</span>
       </label>
+      <button class="drop addtile" id="addSong" type="button">
+        <i aria-hidden="true"><span data-pd="ADD"></span></i><b>Create a song session</b>
+        <span class="sub">From your Drive: chords, guide and jam track</span>
+      </button>
       <button class="drop write addtile" id="shotNew" type="button">
         <i aria-hidden="true"><span data-pd="SCAN"></span></i><b>Screenshots or PDF</b>
         <span class="sub">Turn them into a chord sheet</span>
@@ -5245,7 +5258,7 @@ const dsKind=f=>/^video\//.test(f.mimeType)||/\.(mp4|mov|m4v|webm|mkv)$/i.test(f
 function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
  const busy=!fresh&&mxIdx.find(x=>x.drive&&['up','wait','get'].includes(x.state));if(busy)return dsShowProgress(busy.id);
  d.hidden=false;document.body.classList.add('wopen');
- d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Add a song from Google Drive"><div class="dshead"><h3>Add a song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
+ d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Create a song session from Google Drive"><div class="dshead"><h3>Create a song session</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
  <p class="tip">Paste the link to the song’s <b>folder</b> in your Google Drive, or to its <b>video (MP4)</b> or <b>audio (MP3)</b> there. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
  <label class="dslab">Link to the song’s folder, video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label>
  <details class="dsmore"><summary>Have both the video and the audio? Add the other one</summary><label class="dslab">Second link (optional)<input id="dsL2" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label></details>
@@ -6772,11 +6785,17 @@ function renderIdeas(){
  wireIdeas();ideaAuto();
 }
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#ideaBox>summary'))$('ideaBox')._mine=true});
-// daily ideas: the scheduled scan writes ideas.json next to the app; the phone app just reads it
+// daily ideas: the scheduled scan writes ideas.json next to the app and (privacy step C) to your private GitHub repository; the
+// phone reads the private copy when GitHub is connected (the Band breakdown key), else, or when that fails, the public one
 let dailyAt=0,dailyTried=false;
+const ideasOk=d=>d&&d.v===1&&d.index;
+async function ideasPrivate(){const cfg=mxGh();if(!cfg)return null;
+ try{const b=await gh('/contents/ideas.json'+(cfg.branch?'?ref='+encodeURIComponent(cfg.branch):''),{raw:true,ok404:true},cfg);if(!b)return null;const d=JSON.parse(await b.text());return ideasOk(d)?d:null}catch(e){return null}}
 async function loadDailyIdeas(force){
  if(window.claude||location.protocol==='file:'&&!force)return;if(!force&&Date.now()-dailyAt<3*3600e3)return;dailyAt=Date.now();
- try{const r=await fetch((BETA?'../':'')+'ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
+ try{let d=await ideasPrivate(),src='private';
+  if(!d){src='public';const r=await fetch((BETA?'../':'')+'ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}d=await r.json();if(!ideasOk(d))return}
+  dailyTried=true;store.set('ideasSrc',{src,at:Date.now(),date:d.date||''});try{prfUI()}catch(e){}
   if(Array.isArray(d.sheets)){store.set('sheetIndex',d.sheets);try{renderCatalog()}catch(e){}}
   if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
   store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
@@ -6923,8 +6942,10 @@ function songMake(g){const now=new Date().toISOString();return {id:songNewId(),t
 // touching a song: create its record if needed, refresh its links, apply the change
 function songTouch(g,patch){const all=songsGet();let r=all.find(x=>sameSong(x,g));
  if(!r){r=songMake(g);all.unshift(r)}
- Object.assign(r,patch||{},{links:songLinks(g),touchedAt:new Date().toISOString()});if(!r.artist&&g.artist)r.artist=g.artist;
- store.set('songs2',all);return r}
+ // statusAt: when the status last changed (your progress for the daily ideas and the song reminders on Home)
+ const moved=patch&&patch.status&&patch.status!==(r.status||'learning');
+ Object.assign(r,patch||{},{links:songLinks(g),touchedAt:new Date().toISOString()});if(moved)r.statusAt=r.touchedAt;if(!r.artist&&g.artist)r.artist=g.artist;
+ store.set('songs2',all);if(moved)try{prfQueue()}catch(e){}return r}
 // every V1 item a song points to, as one key each (for the M2 check)
 const songItemKeys=l=>[...l.sheets.map(s=>s.src==='phone'?'lib:'+s.lib:s.src==='draft'?'draft':'drive:'+s.url),...(l.folder?['folder:'+vlKey(l.folder.a)+'|'+vlKey(l.folder.t)]:[]),...l.videos.map(u=>'vid:'+u),...l.analysis.map(k=>'ana:'+k),...l.jam.map(k=>'jam:'+k)];
 // M2: a record for every song in the learning list. Checked: as many records as list rows, every item linked to exactly one record.
@@ -7659,10 +7680,12 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(
 // the big one-word titles on Home need the narrow display font: on once it's loaded (a wider fallback would overflow the tiles)
 try{document.fonts.load('800 40px "Big Shoulders Display"').then(f=>{if(f&&f.length)document.documentElement.classList.add('fdisp')}).catch(()=>{})}catch(e){}
 function homeName(){const p=profGet();return p.name||store.get('userName','')}
-function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
+function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName();
  // the pick says it: Guitaring's pick with a speech bubble, the greeting above it, "Another one" under it
- h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"><p class="hjoke" id="hJoke" dir="auto">${j}</p></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
- $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'));const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
+ h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
+ // the comment: a joke, or now and then a song reminder (92-song-remind)
+ homeLineShow(h);
+ $('hMore').onclick=()=>{homeLineShow(h);const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
  renderHomeCont()}
 // Continue: refreshed on its own (the joke stays)
 function renderHomeCont(){
@@ -7695,7 +7718,7 @@ function renderLibPage(){const h=$('libHolder');if(h&&!h.dataset.moved){['catBox
 const PROF_DEF={v:1,name:'',songLang:[],uiLang:'en',years:'',level:'',skills:[],instruments:[],capo:'',genres:[],artists:[],dreamSongs:[],goals:[],learnBy:[],time:{minPerDay:0,daysPerWeek:0},context:[],onboarding:{done:false,later:false,skipped:[],at:''},pending:[],sync:{repo:false,drive:false}};
 function profGet(){const p=store.get('profile',null)||{};return {...JSON.parse(JSON.stringify(PROF_DEF)),...p,time:{...PROF_DEF.time,...(p.time||{})},onboarding:{...PROF_DEF.onboarding,...(p.onboarding||{})}}}
 // saving the profile also feeds the V1 places that read the same things (greeting name, song-idea language)
-function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
+function profSet(p){p.updatedAt=new Date().toISOString();store.set('profile',p);try{prfQueue()}catch(e){}if(p.name&&store.get('userName','')!==p.name)store.set('userName',p.name);
  // only the language, and only when it changed (V1 data is never rewritten otherwise)
  if(p.songLang&&p.songLang.length){const lang=p.songLang.length>1?'both':p.songLang[0],ip=store.get('ideaPrefs',null)||{};if(ip.lang!==lang)store.set('ideaPrefs',{...ip,lang})}}
 // the player's taste for Claude prompts, in words, from the profile
@@ -7804,10 +7827,11 @@ function obRender(){const box=$('onb'),pos=ob.i,si=ob.steps[pos],st=OB_STEPS[si]
 // ---- My profile ----
 function renderProfile(){const c=$('profCard');if(!c)return;const p=profGet(),nm=(k,v)=>(OB_OPTS[k].find(o=>String(o[0])===String(v))||[0,v])[1],li=(k,a)=>a.map(v=>nm(k,v)).join(', ');
  const rows=[['Name',p.name],['Songs in',li('songLang',p.songLang)],['Playing for',p.years?nm('years',p.years):''],['Level',p.level?nm('level',p.level):''],['Can play',li('skills',p.skills)],['Instruments',li('instruments',p.instruments)],['Capo',p.capo==='yes'?'I have one (Easy opens with the capo version)':p.capo==='no'?'I don’t use one (Easy opens without a capo)':''],['Genres',li('genres',p.genres)],['Artists',p.artists.join(', ')],['Dream songs',p.dreamSongs.join(', ')],['Goals',li('goals',p.goals)],['Learns by',li('learnBy',p.learnBy)],['Time',p.time.minPerDay?`${nm('minPerDay',p.time.minPerDay)} a day${p.time.daysPerWeek?`, ${p.time.daysPerWeek} days a week`:''}`:''],['Plays',li('context',p.context)]];
- c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>Your answers stay on this phone.</small></div></div>
+ c.innerHTML=`<div class="profhead">${SK('PROFILE')}<div><b dir="auto">${esc(p.name||'Your profile')}</b><small>${p.sync&&p.sync.repo?'Your answers are also saved in your private GitHub repository, for daily ideas.':'Your answers stay on this phone.'}</small></div></div>
   <dl class="proflist">${rows.map(([k,v])=>`<dt>${k}</dt><dd dir="auto">${v?esc(v):'<span class="profnone">not set</span>'}</dd>`).join('')}</dl>
-  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>`;
- $('profEdit').onclick=()=>openOnb(p.onboarding.done);
+  <button type="button" class="btn wide" id="profEdit">${p.onboarding.done?'Change my answers':'Finish setting up'}</button>
+  <div class="prfsync" id="remSet"></div><div class="prfsync" id="prfSync"></div>`;
+ $('profEdit').onclick=()=>openOnb(p.onboarding.done);try{remUI()}catch(e){}try{prfUI()}catch(e){}
  // Connections and Backup: the V1 boxes, moved here
  const cn=$('profConn');if(cn&&!cn.dataset.moved){['apiCard','folderCfg'].forEach(id=>{const e=$(id);if(e)cn.appendChild(e)});
   const gh=document.createElement('details');gh.className='apibox';gh.id='ghCfg';cn.appendChild(gh);cn.dataset.moved='1'}
@@ -7832,6 +7856,81 @@ async function v2Start(){
  renderHome()}
 $('findNew').onclick=()=>cfOpen('book');
 window.__v2={goSec,profGet,profSet,openOnb,prefill:profPrefill,cur:()=>curSec};// test hooks
+/* ===== My profile for daily ideas (privacy step A, deployment plan §7): the profile in your private GitHub repository ===== */
+// A switch in My profile, off until you turn it on (profile.sync.repo). On: your profile answers and your songs with their status
+// (no keys, notes, gear, files or backups) are saved as profile.json in the private repository the app already uses for Band breakdown (the same GitHub key),
+// again whenever you change them; off: the file is deleted. The beta writes profile-beta.json, so testing never touches the file
+// the daily ideas job will read (step B, its own OK). Saving a file there starts no GitHub job (the splitter runs only when sent).
+const PRF_FILE=BETA?'profile-beta.json':'profile.json';
+const PRF_KEYS=['name','songLang','years','level','skills','instruments','capo','genres','artists','dreamSongs','goals','learnBy','time','context'];
+const prfOn=()=>{try{return !!profGet().sync.repo}catch(e){return false}};
+// your songs (hidden ones left out): status and since when, so the daily job sees your progress; the chords and capo the app knows
+function prfSongs(){let G=[];try{G=learnSongs({all:true}).filter(g=>!songHid(g))}catch(e){return []}
+ return G.map(g=>{const r=songRec(g)||{},o={t:g.title,a:g.artist||'',status:r.status||'learning'};if(r.statusAt||r.createdAt)o.since=r.statusAt||r.createdAt;if(r.touchedAt)o.opened=r.touchedAt;
+  try{const f=sesFacts(g);if(f.chords.length)o.chords=f.chords.slice(0,16);if(f.capo)o.capo=f.capo}catch(e){}return o})}
+function prfData(p){const o={app:'Guitaring',kind:'profile',v:2,at:new Date().toISOString()};PRF_KEYS.forEach(k=>{if(p[k]!=null)o[k]=p[k]});o.songs=prfSongs();return o}
+const prfB64=s=>btoa(unescape(encodeURIComponent(s)));
+async function prfSha(cfg){const r=await gh('/contents/'+PRF_FILE+(cfg.branch?'?ref='+encodeURIComponent(cfg.branch):''),{ok404:true},cfg);return r&&r.sha||''}
+async function prfWrite(){const cfg=mxGh();if(!cfg)throw {code:'nogh'};const sha=await prfSha(cfg);
+ await gh('/contents/'+PRF_FILE,{method:'PUT',body:JSON.stringify({message:'Guitaring: my profile for daily ideas',content:prfB64(JSON.stringify(prfData(profGet()),null,1)),...(sha?{sha}:{}),...(cfg.branch?{branch:cfg.branch}:{})})},cfg);
+ store.set('profRepo',{at:Date.now(),repo:cfg.repo,file:PRF_FILE})}
+async function prfDelete(){const cfg=mxGh();if(!cfg)return;const sha=await prfSha(cfg);
+ if(sha)await gh('/contents/'+PRF_FILE,{method:'DELETE',body:JSON.stringify({message:'Guitaring: profile removed',sha,...(cfg.branch?{branch:cfg.branch}:{})})},cfg);store.set('profRepo',null)}
+// after a change to your answers (profSet): saved again a moment later while the switch is on
+let prfT=null,prfBusy=Promise.resolve();
+function prfQueue(){if(!prfOn())return;clearTimeout(prfT);prfT=setTimeout(()=>{prfBusy=prfBusy.then(()=>prfWrite()).then(()=>store.set('profRepoErr',''),e=>store.set('profRepoErr',e&&e.code==='nogh'?'nogh':String(e&&e.message||e))).then(prfUI)},window.__prfMs??1500)}
+// the switch and its line in My profile
+function prfUI(){const box=$('prfSync');if(!box)return;const on=prfOn(),cfg=mxGh(),st=store.get('profRepo',null),err=store.get('profRepoErr','');
+ box.innerHTML=`<label class="prfrow"><input type="checkbox" id="prfOn"${on?' checked':''}${cfg?'':' disabled'}> <span><b>Use my profile for daily ideas</b>
+  <small>Saves your answers above and your songs with their status (Learning, Learned, Idea for later), not your keys, notes, gear or files, as <code>${PRF_FILE}</code> in your private GitHub repository${cfg?` <b>${esc(cfg.repo)}</b>`:''}, and again when you change them. Turning it off deletes the file.</small></span></label>
+  <p class="tip prfst" role="status">${!cfg?'Connect GitHub first (below, “GitHub for Band breakdown”).':err==='nogh'?'GitHub isn’t connected.':err?`Couldn’t save it: ${esc(err)}`:on&&st?`Saved ${esc(bkDate(st.at))}.`:on?'Saving…':'Off: nothing is saved outside this phone.'}</p>${(()=>{const i=store.get('ideasSrc',null);return i?`<p class="tip prfst" id="ideasSrcLine">Daily ideas: from ${i.src==='private'?'your private repository':'the public site'} (${esc(bkDate(i.at))}).</p>`:''})()}`;
+ const cb=$('prfOn');if(cb)cb.onchange=async()=>{const p=profGet();p.sync={...(p.sync||{}),repo:cb.checked};profSet(p);
+  if(!cb.checked){clearTimeout(prfT);box.querySelector('.prfst').textContent='Deleting the file…';try{await prfDelete();store.set('profRepoErr','')}catch(e){store.set('profRepoErr',String(e&&e.message||e))}}
+  try{renderProfile()}catch(e){prfUI()}}}
+window.__prf={file:PRF_FILE,data:()=>prfData(profGet())};// test hooks
+/* ===== Song reminders in the Home comments: a song that has been in Learning for 3+ weeks, now and then ===== */
+// They join the jokes' random pick (one chance per song, at most 3 songs in the pool), so they come up as often as any other line.
+// A song shown is left alone for a week. The card is green-framed and has a Practise button: the song session when the song has
+// a play-along or a jam track, else its chord sheet. My profile › "Song reminders in the comments" turns them off (profile.remind).
+const REM_DAYS=21,REM_GAP=7,REM_MAX=3,DAY=864e5;
+const REM_T=[
+ "“{s}” has been on your Learning list for {w}, {n}. At this point it’s paying rent.",
+ "{w} with “{s}”, {n}. Either you’ve nailed it or it’s nailing you. Which one?",
+ "“{s}” called, {n}. It misses you. It’s been {w}.",
+ "Still learning “{s}” after {w}, {n}? Ten minutes today and it’s yours.",
+ "“{s}” is gathering dust on your Learning list ({w}), {n}. Blow it off and play it."];
+const remOn=()=>{try{return profGet().remind!==false}catch(e){return true}};
+const remKey=g=>vlKey(g.title)+'|'+vlKey(g.artist||'');
+// the songs due a reminder: Learning for 3+ weeks (since the status last changed, else since the song was added), not shown this week
+function remSongs(){if(!remOn())return [];const now=Date.now(),seen=store.get('remSeen',{})||{};let G=[];try{G=learnSongs()}catch(e){return []}
+ const due=G.map(g=>{const r=songRec(g);if(!r||(r.status||'learning')!=='learning')return null;const since=Date.parse(r.statusAt||r.createdAt||'');
+  return since&&now-since>=REM_DAYS*DAY&&!(now-(seen[remKey(g)]||0)<REM_GAP*DAY)?{g,days:Math.floor((now-since)/DAY)}:null}).filter(Boolean);
+ for(let i=due.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[due[i],due[j]]=[due[j],due[i]]}return due.slice(0,REM_MAX)}
+// the comment shown on Home: a joke, or (as one more line in the same random pick) a song reminder; never two reminders in a row
+let remLast=false;
+function homeLine(){const R=remLast?[]:remSongs(),J=allJokes().length;
+ if(R.length&&Math.random()<R.length/(R.length+J)){const x=R[0],seen=store.get('remSeen',{})||{};seen[remKey(x.g)]=Date.now();store.set('remSeen',seen);remLast=true;
+  const w=Math.round(x.days/7),t=REM_T[Math.floor(Math.random()*REM_T.length)];
+  return {rem:x.g,html:esc(t).replace('{s}',()=>`<bdi>${esc(x.g.title)}</bdi>`).replace('{w}',w+' week'+(w>1?'s':'')).replace(/\{n\}/g,esc(homeName()||'friend'))}}
+ remLast=false;return {html:esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'))}}
+// draws the comment into the Home bubble (with Practise / Learned on a reminder)
+function homeLineShow(h){const L=homeLine(),b=h.querySelector('.hjbub');b.classList.toggle('hrem',!!L.rem);
+ b.innerHTML=`<p class="hjoke" id="hJoke" dir="auto">${L.html}</p>${L.rem?`<div class="hremact"><button type="button" class="hremgo" id="hRemGo">Practise it <span aria-hidden="true">›</span></button><button type="button" class="hremok" id="hRemOk">I can play it ✓</button></div>`:''}`;
+ if(L.rem){$('hRemGo').onclick=()=>remGo(L.rem);
+  $('hRemOk').onclick=()=>{songTouch(L.rem,{status:'learned'});toast(`“${L.rem.title}” is now Learned. Nice!`,'ok');try{renderLibPage()}catch(e){}homeLineShow(h)}}}
+// Practise: the song session if it has a play-along or a jam track, else its chord sheet (one of them is there for a listed song)
+function remGo(g){g=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x))||g;
+ if(g.r.analysis.length||g.r.mix.length)return openSession(g);
+ const sh=g.r.sheet.find(x=>x.lib)||g.r.sheet.find(x=>x.draft)||g.r.sheet[0]||g.r.folder[0];
+ if(sh&&sh.lib)return learnAct(g,'lib',sh.lib);
+ if(sh&&sh.draft)return learnAct(g,'draft','');
+ if(sh&&sh.url){window.open(sh.url,'_blank','noopener');return}
+ openSession(g)}
+// the switch in My profile
+function remUI(){const box=$('remSet');if(!box)return;
+ box.innerHTML=`<label class="prfrow"><input type="checkbox" id="remOn"${remOn()?' checked':''}> <span><b>Song reminders in the comments</b><small>Now and then, a comment on Home asks about a song that’s been in Learning for 3 weeks or more, with a Practise button.</small></span></label>`;
+ $('remOn').onchange=e=>{const p=profGet();p.remind=e.target.checked;profSet(p)}}
+window.__rem={songs:remSongs,line:homeLine,go:remGo,key:(t,a)=>remKey({title:t,artist:a}),reset:()=>{remLast=false}};// test hooks
 // ---- start the app ----
 renderGear();
 
