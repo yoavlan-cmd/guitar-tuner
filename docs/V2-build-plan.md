@@ -404,13 +404,15 @@ The library list is built from `songs2` **plus** the existing merge logic. Anyth
 | 8 | **Record myself** | Record, name, play, delete, attach to a song, My Music | S |
 | 9 | *(later)* Hebrew interface | Full Hebrew UI with right-to-left layout | L |
 
-**Plan change (17 Oct 2026, the user):** phases **6 (riff guides)**, **7 (basic guitar material)** and **9 (Hebrew interface)** move to the **backlog**, to be prioritised later (PRD §14). The plan now ends with **5 (gear suggestions)** and **8 (record myself)**, each shipped step by step: beta, your try, then live.
+**Plan change (17 Oct 2026, the user):** phases **6 (riff guides)**, **7 (basic guitar material)** and **9 (Hebrew interface)** move to the **backlog**, to be prioritised later (PRD §14). The plan now runs: **5 (gear suggestions)** → **privacy A–D** → **test users** → **8 (record myself)**, each step by step: beta, your try, then live (added 17 Oct 2026).
 
 | # | Phase | Status (17 Oct 2026) |
 |---|---|---|
 | 0–4 | Safety, navigation, library, song sessions, upload | Live (v110) |
-| 5 | Gear suggestions | Building (pedals and accessories; gear for this song) |
-| 8 | Record myself | Next |
+| 5 | Gear suggestions | In the beta (pedals and accessories; gear for this song); live release v111 on the user's go |
+| P | Privacy, deployment plan §7 steps **A → B → C → D**, in that order, each with the user's OK (E only if asked) | After the phase 5 release |
+| T | **Test users** (the user's goal for the privacy work): a few friends try the app and give feedback; their use of the user's Claude account must be limited. **When we reach this stage, explain the options to limit them, and the user chooses.** | After privacy A–D |
+| 8 | Record myself | Last |
 | 6, 7, 9 | Riff guides, basic material, Hebrew interface | Backlog |
 
 **Notes on the order:**
