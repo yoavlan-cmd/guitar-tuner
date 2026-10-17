@@ -55,7 +55,22 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  ok(saved.play.capo===0&&saved.play.capoBy==='none'&&sn.includes('F#m')&&!sn.includes('F#')&&sn.includes('C#'),'saved: no capo, F# settled to F#m, C# kept ('+sn.join(' ')+')');
  // Easy: the capo version
  await p.tap('[data-gd=easy]');await p.waitForTimeout(150);L=await look(p);const ei=await p.$eval('.gdintro',e=>e.textContent);console.log('  easy:',L.capo,'|',L.ch.join(' '));
- ok(/^Capo [1-5]$/.test(L.capo)&&/easier version: capo \d/.test(ei),'Easy is the capo version ('+L.capo+')');
+ ok(/^Capo [1-7]$/.test(L.capo)&&/easier version: capo \d/.test(ei),'Easy opens with the easiest version, with a capo ('+L.capo+')');
+ // both Easy versions: with and without a capo; your pick is kept in your profile and opens next time
+ const vers=await p.$$eval('[data-gdever]',l=>l.map(b=>b.textContent+(b.getAttribute('aria-checked')==='true'?'*':'')));console.log('  easy versions:',vers.join(' | '));
+ ok(vers.length===2&&/^No capo$/.test(vers[0])&&/^With capo [1-7]\*$/.test(vers[1]),'Easy offers both: no capo, and with a capo (picked)');
+ await p.tap('[data-gdever="0"]');await p.waitForTimeout(150);L=await look(p);const ei0=await p.$eval('.gdintro',e=>e.textContent);console.log('  easy, no capo:',L.capo,'|',L.ch.join(' '),'|',ei0);
+ ok(L.capo==='No capo'&&L.ch.includes('C#m')&&L.ch.includes('A')&&L.ch.includes('E')&&L.ch.includes('F#m')&&!L.ch.some(n=>/add9|sus/.test(n)),'no capo: the song’s basic chords as they sound (C#m · A · E · F#m)');
+ ok(/Still a barre in this version: .*C#m/.test(ei0)&&/F#m/.test(ei0)&&/capo \d avoids/.test(ei0),'…and it says which chords are still barres, and that the capo version avoids them');
+ ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.profile')).capo)==='no','the choice is kept in your profile (no capo)');
+ await p.reload();await p.waitForTimeout(500);await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("במקום בו אני גר")');await p.waitForTimeout(400);
+ if(await p.$eval('[data-gd=easy]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=easy]');await p.waitForTimeout(150)}
+ ok((await look(p)).capo==='No capo'&&await p.$eval('[data-gdever="0"]',e=>e.getAttribute('aria-checked'))==='true','next time, Easy opens with the version you picked');
+ await p.tap('[data-gdever]:not([data-gdever="0"])');await p.waitForTimeout(150);
+ ok(/^Capo [1-7]$/.test((await look(p)).capo)&&await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.profile')).capo)==='yes','picking the capo version keeps “I have a capo”');
+ await p.evaluate(()=>window.__v2.goSec('profile'));await p.waitForTimeout(300);
+ ok(/I have one/.test(await p.evaluate(()=>document.body.innerText)),'My profile shows it');
+ await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("במקום בו אני גר")');await p.waitForTimeout(400);
  await full(p);
  // you set the capo you see in the video
  await p.tap('[data-gdcapo="4"]');await p.waitForTimeout(300);await full(p);L=await look(p);console.log('  capo 4 set:',L.capo,'|',L.ch.join(' '));

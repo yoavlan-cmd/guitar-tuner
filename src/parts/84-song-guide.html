@@ -12,8 +12,13 @@ function gdCost(n){const m=String(n).match(/^([A-G][#b]?)([^/]*)$/);if(!m)return
  try{const sh=shapeFor(r*NT+t);return sh&&sh.cost!=null?sh.cost:1}catch(e){return 1}}
 // the easy shape: the basic chord, unless the original is the easier one to hold (an open Fmaj7 beats a barre F)
 const gdEasyPick=n=>{const b=gdEasyName(n);return gdCost(n)<gdCost(b)-.05?n:b};
-// the easiest capo for the basic chords (standard tuning): the same pitch, the friendliest shapes
-function gdEasyCapo(names,w,capo){let best={capo,cost:1e9};for(let k=0;k<=5;k++){let c=0;names.forEach((n,i)=>c+=w[i]*gdCost(gdEasyPick(gdShift(n,capo-k))));c=c/(w.reduce((a,b)=>a+b,0)||1)+Math.abs(k-capo)*.08+k*.01;if(c<best.cost-1e-6)best={capo:k,cost:c}}return best.capo}
+// the Easy versions (standard tuning): without a capo, and the easiest with one (capo 1–7) when it's clearly easier. Both sound
+// like the recording; hard: the chords still held as a barre in that version
+function gdEasyVers(names,w,capo){const W=w.reduce((a,b)=>a+b,0)||1,at=k=>names.map(n=>gdEasyPick(gdShift(n,capo-k))),cost=k=>at(k).reduce((c,n,i)=>c+w[i]*gdCost(n),0)/W;
+ const hard=k=>[...new Set(at(k).filter(n=>gdCost(n)>=2))],c0=cost(0);let best=null;for(let k=1;k<=7;k++){const c=cost(k)+k*.01;if(!best||c<best.c-1e-6)best={capo:k,c}}
+ const v0={capo:0,cost:c0,hard:hard(0)};return best&&best.c<c0-.15?[v0,{capo:best.capo,cost:best.c,hard:hard(best.capo)}]:[v0]}
+// which Easy version you see: the one you picked last on any song (you have a capo or not; kept in your profile), else the easiest
+function gdEasyAt(G){const V=G.eVers||[{capo:G.eCapo}];if(V.length<2)return V[0].capo;let h='';try{h=profGet().capo||''}catch(e){}return h==='no'?V[0].capo:V[1].capo}
 const gdTempoWord=b=>!b?'':b<70?'slow':b<95?'relaxed':b<115?'a walking pace':b<135?'upbeat':'fast';
 // a beat's chord, only when the beat falls inside it (a lead-in before the first chord has none)
 const gdSlot=x=>x.g&&x.t>=x.g.t0-.05&&x.t<x.g.t1+.05?nameOf(x.g):'';
@@ -75,7 +80,7 @@ function gdBuild(d){const keep=A;A=d;try{
  const full=[...dur.keys()].filter(n=>dur.get(n)>=.25),fullMain=full.filter(n=>dur.get(n)/tot>=.02);
  // Easy: basic chords, passing chords shorter than a beat left out, and the friendliest capo (standard tuning)
  const ew=new Map();d.segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<bp*.9)return;const n=nameOf(g);ew.set(n,(ew.get(n)||0)+g.t1-g.t0)});
- const en=[...ew.keys()],eCapo=tun==='std'?gdEasyCapo(en,en.map(n=>ew.get(n)),capo):capo,eName=n=>gdEasyPick(gdShift(n,capo-eCapo));
+ const en=[...ew.keys()],eVers=tun==='std'?gdEasyVers(en,en.map(n=>ew.get(n)),capo):[{capo,cost:0,hard:[]}],eCapo=eVers[eVers.length-1].capo,eAt=(n,k)=>gdEasyPick(gdShift(n,capo-k)),eName=n=>eAt(n,eCapo);
  // song map: the parts with their times and chords (never lyrics)
  const secs=gdParts(M).map((s,i,all)=>{const bars=M.bars.filter(b=>b.t0>=s.t-.01&&b.t0<(all[i+1]?all[i+1].t-.01:1e9));
   // the part's progression once (its first 4 bars, each bar's main chord) and how many times it goes round
@@ -99,7 +104,7 @@ function gdBuild(d){const keep=A;A=d;try{
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+ return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,eVers,eAt,eSrc:en,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
 function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
@@ -125,15 +130,17 @@ function gdPatOf(bars){const B=bars.filter(b=>b.slots.some(x=>x.g));if(!B.length
 function gdPat(p){const lab=['1','&','2','&','3','&','4','&'];return `<div class="gdpat" role="img" aria-label="Strumming: ${esc(p.split('').map((c,i)=>c==='·'?'':(c==='D'?'down':'up')+' on '+lab[i]).filter(Boolean).join(', '))}">${[...p].map((c,i)=>`<span class="${c==='·'?'rest':c==='D'?'dn':'up'}"><b>${c==='·'?'':c==='D'?'↓':'↑'}</b><small>${lab[i]}</small></span>`).join('')}</div>`}
 let gdMode=null;// 'easy' | 'full', per visit; the profile picks the first one
 function gdDefault(){try{const l=profGet().level;return l==='beginner'||l==='improving'?'easy':'full'}catch(e){return 'easy'}}
-function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tName(G.tun),nm=n=>easy?G.eName(n):n,lv=x=>`<span class="gdlv ${x}">${GD_LV[x]}</span>`;
- const chords=easy?G.easy:G.full,mapCh=s=>{const o=[];s.chords.forEach(n=>{const v=nm(n);if(o[o.length-1]!==v)o.push(v)});return o.slice(0,10)};
+function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.capo,tn=tName(G.tun),eN=n=>G.eAt?G.eAt(n,ek):G.eName(n),nm=n=>easy?eN(n):n,lv=x=>`<span class="gdlv ${x}">${GD_LV[x]}</span>`;
+ const EV=G.eVers||[],ev=EV.find(v=>v.capo===ek)||{hard:[]};
+ const chords=easy?(G.eSrc?[...new Set(G.eSrc.map(eN))]:G.easy):G.full,mapCh=s=>{const o=[];s.chords.forEach(n=>{const v=nm(n);if(o[o.length-1]!==v)o.push(v)});return o.slice(0,10)};
  const beat='D·D·D·D·'.split('').join('');
  return `<div class="gdtabs seg" role="tablist"><button type="button" role="tab" data-gd="easy" aria-pressed="${easy}">Easy</button><button type="button" role="tab" data-gd="full" aria-pressed="${!easy}">Full</button></div>
- <p class="tip gdintro">${easy?(G.eCapo!==G.capo?`The easier version: capo ${G.eCapo} with basic shapes, one strum on every beat. It sounds the same as the recording.`:'Basic chord shapes, one strum on every beat: play along today.'):'As it’s played in the recording: its chords, capo and strumming.'}</p>
+ ${easy&&EV.length>1?`<div class="gdever seg" role="radiogroup" aria-label="Easy version">${EV.map(v=>`<button type="button" role="radio" data-gdever="${v.capo}" aria-checked="${v.capo===ek}" aria-pressed="${v.capo===ek}">${v.capo?'With capo '+v.capo:'No capo'}</button>`).join('')}</div>`:''}
+ <p class="tip gdintro">${easy?(ek?`The easier version: capo ${ek} with basic shapes, one strum on every beat. It sounds the same as the recording.`:`Basic chord shapes${G.capo?' without a capo':''}, one strum on every beat: play along today.${G.capo?' It sounds the same as the recording.':''}`)+(ev.hard.length?` Still a barre in this version: ${ev.hard.join(', ')}${EV.length>1&&!ek?` (capo ${EV[1].capo} avoids ${EV[1].hard.length?'some of them':'them'})`:''}.`:''):'As it’s played in the recording: its chords, capo and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
   ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo&&G.capoBy!=='you'?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. <button type="button" class="tlink" data-gdcapo="${G.sheetCapo}">Use ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}</button></p>`:''}
   ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
-  ${easy&&G.eCapo!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; capo ${G.eCapo} gives the same song with easier shapes. Full shows it as played.</p>`:''}</div>
+  ${easy&&ek!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; ${ek?'capo '+ek:'no capo'} gives the same song with ${ek?'easier':'these'} shapes. Full shows it as played.</p>`:''}</div>
  <div class="gdblock"><h4>Built from</h4><ul class="gdsrc">${G.sources.map(([y,t])=>`<li class="${y?'y':'n'}"><span aria-hidden="true">${y?'✓':'–'}</span>${esc(t)}</li>`).join('')}</ul></div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
