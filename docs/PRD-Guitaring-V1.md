@@ -545,6 +545,14 @@ The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("origina
 5. Direct Google Drive OAuth for all users; sync video lessons/chord book to Drive (P2).
 6. Refactor into modules (tuner, analysis, writer, ocr, gear, ideas, ui) with a bundler that still outputs one `index.html` for GitHub Pages; keep ids and storage keys (P2).
 7. Left-handed fretboard/headstock option; sound on fret tap in the chord finder (P3).
+8. **Video check over the whole video** (parked 17 Oct 2026, user: "add it to our roadmap"): look for the fretting hand in **all** the stills GitHub takes (every 3 s, e.g. 87 for a 4-minute song), not only the up to 27 chord middles, then read the moments where a hand is clear and match each to the chord the sound heard there. Why: in "במקום - טסט וידאו" (a live studio session, mostly wide shots) the 27 picks found no clear hand even at 720 px tiles; the close-ups fall between them. Cost: about 22 sheets instead of 7, in 3 Claude calls, roughly 10–15 cents per build on the user's key (ask before building) (P2).
+9. **Several guitars, step 2** (step 1 shipped in #57: the sides are measured and shown): when one side plays mostly single notes (a riff or lead) and another strums, take the chords from the strumming side; show Guitar 1 / Guitar 2 in the guide only when they really play different things. Build when there is a song with a lead guitar to test on (P2).
+10. **Strumming on real songs** (backlog since 16 Oct 2026): the guide shows four down-strums at 65% for "במקום בו אני גר"; compare with the real pattern from the user, and align the strums to the bar grid from the drums (P2).
+11. **Easier versions beyond the capo** (user, 16 Oct 2026: "a great input to build in the future"): simpler shapes or a simpler key for the Easy guide, besides the with/without capo versions (shipped in #56) (P3).
+12. **Riff guides** (was V2 phase 6; moved to the backlog 17 Oct 2026): pick part of a song → fretboard steps, tab, compare by ear, confidence; the splitter's optional note-detection job (deployment plan §7 F) (P2).
+13. **Basic guitar material** (was V2 phase 7; backlog 17 Oct 2026): four tracks of short lessons (chords, rhythm, technique, light theory), today's lesson on Home, level suggestions (P2).
+14. **Hebrew interface** (was V2 phase 9; backlog 17 Oct 2026): the whole UI in Hebrew, right to left (P3).
+15. **Gear tip: an automatic reading of the guitar's sound** (from phase 5): the session build keeps measurements of the guitars part (`tone`); compare them with the user's answers (clean / crunch / distorted, acoustic / electric) on several real songs and tune a reading that's right before the tip uses it (P3).
 
 ---
 
