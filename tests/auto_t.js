@@ -35,6 +35,7 @@ const GTR=path.join(OUT,'auto_gtr.flac');execFileSync('ffmpeg',['-y','-v','error
  const ana=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_z1')||'null'));
  const names=await p.evaluate(()=>{const d=JSON.parse(localStorage.getItem('tuner.song.mix_z1'));return d?d.segs.length:0});
  ok(ana&&ana.title==='Test Band - Four Chords'.split(' - ').reverse().join(' - ')||ana&&/Four Chords/.test(ana.title),'the analysis is named after the song ('+(ana&&ana.title)+')');
+ ok(ana&&ana.tone&&ana.tone.cent>0&&typeof ana.tone.flat==='number'&&typeof ana.tone.crest==='number','the guitars’ sound is measured and kept with the analysis (for the gear tip’s later tuning) '+JSON.stringify(ana&&ana.tone));
  ok((await p.evaluate(()=>window.__notes)).some(t=>/the session is ready/.test(t)),'a notification says the session is ready');
  // the song's page has the guide built from it
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);
