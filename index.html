@@ -1283,6 +1283,27 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
    titles and their lines sit at the same height. Only with the display font loaded (html.fdisp): a wider fallback font keeps the normal size */
 #paneHome .htile{container-type:inline-size}
 .fdisp #paneHome .htile[data-sec=learn] b,.fdisp #paneHome .htile[data-sec=write] b,.fdisp #paneHome .htile[data-sec=jam] b{font-size:min(calc(clamp(20px,6.4vw,26px) * 1.9),33cqi);line-height:.92;letter-spacing:.03em;min-height:calc(clamp(20px,6.4vw,26px) * 2.02)}
+/* removing a song from my songs: a quiet button at the end of the song's page; the confirm in its place; Hidden songs in Learn */
+.sesrmb{color:var(--muted);border-color:var(--line)}
+.sesrm .rmdel{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.4 var(--body);margin:10px 0}.sesrm .rmdel input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:#FF6A4D}
+.sesrm .rmacts{display:flex;gap:8px;margin-top:6px}.sesrm .rmacts .btn{flex:1}.sesrm .rmdanger{background:#FF6A4D;color:#1a0d0a}
+.lhid{margin-top:12px}.lhidt{background:none;border:0;padding:6px 0;color:var(--muted);font:600 14px var(--body);text-decoration:underline;cursor:pointer}
+.lhidl{display:flex;flex-direction:column;gap:8px;margin-top:6px}.lhidr{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.lhidr .ltxt{flex:1;min-width:0;display:flex;flex-direction:column}.lhidr .ltxt b,.lhidr .ltxt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lhidr .ltxt small{color:var(--muted)}.lhidr .btn{padding:6px 10px;font-size:13px}
+/* pedals and accessories (V2 phase 5) */
+.gxhead{flex-wrap:nowrap;gap:10px}.gxhead h2{font-size:clamp(18px,5.4vw,22px);min-width:0}.gxhead .btn{flex:0 0 auto}
+.gxh{margin:12px 0 6px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.gxic{font-size:22px;color:var(--accent)}
+.gxkind{margin:4px 0 10px}
+.gxhow{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:rgba(255,255,255,.03)}.gxhow p{margin:0 0 4px;font:500 14px/1.45 var(--body)}.gxhow p:last-child{margin:0}
+.gxdel{margin-top:12px;color:#FF8A70}
+/* gear for this song (V2 phase 5): folded card; the summary names the guitar and pickup, the body one sentence why and the list */
+.gtbox summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px}.gtbox summary::-webkit-details-marker{display:none}
+.gtbox summary h3{margin:0}.gtbox summary small{color:var(--muted);font:500 13px var(--body)}.gtbox summary h3::after{content:" ▾";font-size:.7em;color:var(--muted)}.gtbox[open] summary h3::after{content:" ▴"}
+.gtask{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px}.gtask .chips2{margin-bottom:4px}.gtask>span{font:600 13px var(--body);color:var(--muted)}.gtask small{color:var(--muted);font-size:12px;align-self:center}
+.gtwhy{margin:10px 0 8px;font:500 15px/1.45 var(--body)}
+.gtbonus{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}.gtbonus b{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFB27A}.gtbonus ul{margin:6px 0 0;padding-left:18px}.gtbonus li{font:500 14px/1.45 var(--body);margin:3px 0}
+.gtl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}.gtl dt{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}.gtl dd{margin:0;font:500 14px/1.45 var(--body)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -1464,6 +1485,7 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 
   <div class="pane" id="paneGear" hidden>
     <div id="gearOut" class="gearout"></div>
+    <div id="gearExtra" class="gearout"></div>
   </div>
   <div class="pane" id="paneChords" hidden>
     <div class="pagebar"><button type="button" class="pgback" data-back aria-label="Back">‹</button><h2>My chords</h2></div>
@@ -4620,7 +4642,7 @@ let mxSess=null,mxSessKind='',mxBusy=false,mxCancel=false,mxSong=null,mxCtx=null
 const mxIsGtr=id=>id==='guitar'||id==='gL'||id==='gC'||id==='gR';
 // ---- small IndexedDB store: the last separated song stays on the phone, so reopening it is instant ----
 function mxDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDBN,1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
-async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function mxPut(k,v){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||Object.assign(new Error('The phone’s storage refused it'),{name:'AbortError'}))})}// a full phone aborts the write (no error event): without onabort it would never finish
 async function mxGet(k){const db=await mxDB();const v=await new Promise((res,rej)=>{const t=db.transaction('kv','readonly'),q=t.objectStore('kv').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)});
  if(v&&v.__gone)return null;if(v!=null||!BETA)return v;
  // beta: not copied yet → read it from the live app's database (never written to) and keep a copy here
@@ -5268,7 +5290,8 @@ async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
- if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});// its album cover, while GitHub works
+ if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});
+ try{const n=song&&song.t?song:songFromName(songClean(base).s);if(n&&n.t)songUnhide({title:n.t,artist:n.a||''})}catch(e){}// a song you removed and add again shows again// its album cover, while GitHub works
  // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
  if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
@@ -5315,7 +5338,7 @@ async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false
  const draw=async(fetchInfo)=>{if(dsShown!==id)return;const it=mxIdx.find(x=>x.id===id);if(!it)return close();
   let html;
   if(it.state==='ready'&&AS_ON.includes(it.sess))html=dsProgHTML(it);
-  else if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar done"><i style="width:100%"></i></div>
+  else if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar dsfull" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i style="width:100%"></i></div>
    <p class="dseta"><b>100%</b> · split${it.drive&&it.drive.ok?', the MP3s are in your Drive folder':''}${it.sess==='done'?', and its session is built: chords, guide and jam track':''}.</p>${it.sess==='failed'?'<p class="dswarn">The chords couldn’t be found automatically. The jam track is ready; on the song’s page, tap Pick a video or Find the chords from the guitars only.</p>':''}<button type="button" class="btn wide" id="dsOpen">Open the song</button>`;
   else if(it.state==='failed')html=`<div class="dshead"><h3>Didn’t finish</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><p class="msg">${esc(it.err||'The split stopped on GitHub.')}</p><div class="dsacts"><button type="button" class="btn" id="dsRetry">Try again</button><button type="button" class="btn ghost" id="dsHide">Close</button></div>`;
   else{if(fetchInfo&&it.state==='wait')await dsCheck(it);if(dsShown!==id)return;html=dsProgHTML(it)}
@@ -5372,13 +5395,15 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
   it.sessStep='guitar';try{dsStatusUI()}catch(e){}
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
+  // the guitars' sound (bright / warm, clean / crunch / distorted, acoustic?) for the song's gear tip (77-gear-tip)
+  let tone=null;try{tone=await asTone(x)}catch(e){}
   // the beat from the drums part, when the song has drums: kick and snare mark the beat (and the tempo) more clearly than the guitar's
   // own accents, which can lock it half a beat off or at the wrong tempo; the strums are read against it. No drums (an acoustic song:
   // the split's drums part is nearly silent): the guitar's beat stays.
   let beatFrom='';try{const db=d.stems.drums;if(db){const y=await decodeFile(new File([db],'drums.flac',{type:'audio/flac'}));
    let e=0;for(let i=0;i<y.length;i+=16)e+=y[i]*y[i];const rms=Math.sqrt(e/Math.max(1,y.length/16));
    if(rms>.01){const bt=beatTimes(y);if(bt.beats.length>8&&bt.bpm){r.beats=bt.beats;r.bpm=bt.bpm;beatFrom='drums'}}}}catch(e){}
-  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''}};
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''},...(tone?{tone}:{})};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;
@@ -5783,6 +5808,8 @@ function daysSince(d){return Math.floor((Date.now()-new Date(d).getTime())/864e5
 function stringsStatus(it){const g=GEAR[it.type];if(g.amp){const sp=it.specs||{};const k={tube:'Tube amp · have the tubes checked about once a year',solid:'Solid-state amp',modeling:'Modelling amp',hybrid:'Hybrid amp'}[sp.ampkind]||g.short;return {txt:k+(sp.power==='battery'?' · battery powered':''),due:false}}const per=it.specs&&it.specs.top==='solid'?g.strings:g.strings;if(!it.strings)return {txt:'Strings: no date yet',due:false};const d=daysSince(it.strings),left=per-d;return {txt:`Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}`,due:left<0}}
 function renderGear(){
  const l=instAll();
+ // pedals and accessories (76-gear-extra) show under the list, not with a guitar's form or page
+ const gx=$('gearExtra');if(gx&&(instEdit||instOpen))gx.hidden=true;
  if(instEdit){renderInstForm();return}
  if(instOpen){const it=l.find(x=>x.id===instOpen);if(it){renderInstDetail(it);return}instOpen=null}
  gearVisit=null;
@@ -5795,6 +5822,7 @@ function renderGear(){
  if($('lostNo'))$('lostNo').onclick=()=>{store.set('gearLost',[]);renderGear()};
  gpCoversLoad(l);
  $('instAdd').onclick=()=>{instEdit={id:'',name:'',type:'acoustic',brand:'',model:'',year:'',specs:{},strings:''};renderGear()};
+ try{if(!gxEdit){const g=$('gearOut');if(g)g.hidden=false}renderGearExtra()}catch(e){}
 }
 $('gearOut').addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r){instOpen=r.dataset.open;renderGear();window.scrollTo({top:0})}});
 /* small drawings that explain each detail option (64×40) */
@@ -6372,15 +6400,184 @@ function renderInstDetail(it){
  gpEnsure(it);
 }
 
+/* ===== Pedals and accessories (V2 phase 5): my effects and the small things (capo, strings, picks, tuner) ===== */
+// Kept in their own key (tuner.gearExtra: [{id, kind:'pedal'|'acc', type, name, brand, model, controls, gauge, thick, note, added}]),
+// so the guitars and amps (tuner.instruments) are untouched. Listed under the guitars and amps on the Gear page; tap one to edit it.
+// Each pedal type says what it does and where to start its knobs; the song's gear tip (77-gear-tip) uses what you own. Adding a
+// capo tells the Easy guide you have one (profile.capo, when you haven't chosen yet).
+const GX_PEDALS={
+ overdrive:{l:'Overdrive',g:'drive',what:'Warm, amp-like crunch that grows as you dig in.',start:'Drive about 9 o’clock, tone at noon, level a little above unity (a bit louder than off).'},
+ distortion:{l:'Distortion',g:'drive',what:'Heavier, compressed crunch for rock and riffs.',start:'Gain at 10 o’clock, tone at noon; raise the gain only until chords still ring clearly.'},
+ fuzz:{l:'Fuzz',g:'drive',what:'Thick, buzzy saturation (60s and 70s rock, stoner).',start:'Fuzz near full, volume to taste; roll the guitar’s volume back to clean it up.'},
+ boost:{l:'Boost',g:'drive',what:'Louder (and a little hotter) for solos, or to push the amp.',start:'Level so a solo cuts through the band without jumping out.'},
+ compressor:{l:'Compressor',g:'dyn',what:'Evens out loud and soft notes; snappier clean strumming and longer sustain.',start:'Sustain at 10 o’clock, attack at noon, level so on and off sound equally loud.'},
+ delay:{l:'Delay',g:'time',what:'Echoes of what you play.',start:'Time to the song’s tempo, 1–2 repeats (feedback 9 o’clock), mix low so the echo sits behind you.'},
+ reverb:{l:'Reverb',g:'time',what:'Room or hall around the sound.',start:'Mix about 10 o’clock; more for slow songs, less for fast strumming.'},
+ chorus:{l:'Chorus',g:'mod',what:'Shimmering, doubled sound (80s clean, arpeggios).',start:'Rate slow (9 o’clock), depth at noon.'},
+ phaser:{l:'Phaser',g:'mod',what:'Swirling, sweeping sound (funk and 70s rock).',start:'Rate slow; one knob pedals: about 10 o’clock.'},
+ flanger:{l:'Flanger',g:'mod',what:'Jet-plane sweep.',start:'Rate slow, regeneration low; use it for a part, not a whole song.'},
+ tremolo:{l:'Tremolo',g:'mod',what:'Volume pulsing in time.',start:'Rate to the song’s tempo, depth at noon.'},
+ wah:{l:'Wah',g:'filter',what:'A foot-swept vowel sound (funk rhythm, expressive solos).',start:'Rock it in time with the strumming: heel on the downbeat, toe on the upbeat.'},
+ octave:{l:'Octave',g:'filter',what:'Adds a note an octave below or above (single notes only).',start:'Dry at full, octave below at noon.'},
+ eq:{l:'EQ',g:'filter',what:'Shapes the tone, or acts as a boost.',start:'Start flat; cut what sounds muddy before adding anything.'},
+ acpre:{l:'Acoustic preamp / DI',g:'util',what:'Shapes an acoustic’s pickup and sends it to a PA or amp.',start:'Gain until the loudest strums don’t clip; cut a little low-mids if it booms.'},
+ looper:{l:'Looper',g:'util',what:'Records a part and plays it back so you can play over it.',start:'Record one clean pass of the chords, then practise the lead or strumming over it.'},
+ tuner:{l:'Pedal tuner',g:'util',what:'Mutes and tunes between songs.',start:'First pedal in the chain.'},
+ volume:{l:'Volume / expression',g:'util',what:'Swells and level control with your foot.',start:'Place it after the drive pedals to control loudness without changing the crunch.'},
+ multi:{l:'Multi-effects',g:'multi',what:'Many effects (and often amp models) in one unit.',start:'Start from a clean preset and add one effect at a time.'},
+ other:{l:'Other pedal',g:'util',what:'',start:''}};
+const GX_ACC={
+ capo:{l:'Capo',tip:'Clamp just behind the fret, straight across; retune a little if the strings go sharp.'},
+ strings:{l:'Strings',tip:'Note the gauge: lighter strings are easier on the fingers, heavier ones sound fuller and stay in tune with a capo.'},
+ picks:{l:'Picks',tip:'Thin picks (under 0.6 mm) suit strumming; medium to heavy (0.7–1.0 mm and up) suit single notes and riffs.'},
+ ctuner:{l:'Clip-on tuner',tip:'Clip it to the headstock; it hears the vibration, not the room.'},
+ slide:{l:'Slide',tip:'Rest it over the fret wire, not between frets; mute behind it with a spare finger.'},
+ strap:{l:'Strap',tip:'Set it so the guitar sits at the same height standing as sitting.'},
+ cable:{l:'Cable',tip:'A crackle when you move it usually means a worn plug or cable.'},
+ humid:{l:'Humidifier',tip:'Acoustics like 45–55% humidity; dry winters crack tops.'},
+ other:{l:'Other',tip:''}};
+const gxAll=()=>store.get('gearExtra',[])||[];
+const gxSave=l=>store.set('gearExtra',l);
+let gxEdit=null;
+const gxType=x=>x.kind==='pedal'?(GX_PEDALS[x.type]||GX_PEDALS.other):(GX_ACC[x.type]||GX_ACC.other);
+const gxSub=x=>{const bm=[x.brand,x.model].filter(Boolean).join(' '),n=vlKey(x.name||''),t=gxType(x).l;return [vlKey(t)===n?'':t,bm&&!n.includes(vlKey(bm))?bm:'',x.kind==='acc'&&x.type==='strings'&&x.gauge?x.gauge:'',x.kind==='acc'&&x.type==='picks'&&x.thick?x.thick+' mm':'',x.note||''].filter(Boolean).join(' · ')||t};
+// the list, under the guitars and amps
+function renderGearExtra(){const box=$('gearExtra');if(!box)return;box.hidden=false;if(gxEdit){gxForm();return}
+ const L=gxAll(),P=L.filter(x=>x.kind==='pedal'),A=L.filter(x=>x.kind==='acc');
+ const row=x=>`<button type="button" class="instrow gxrow" data-gx="${esc(x.id)}"><span class="ithumb none gxic" aria-hidden="true">${x.kind==='pedal'?'◉':'✚'}</span><span class="itxt"><b dir="auto">${esc(x.name)}</b><span dir="auto">${esc(gxSub(x))}</span></span></button>`;
+ box.innerHTML=`<section class="card"><div class="cardhead gxhead"><h2>Pedals &amp; accessories</h2><button class="btn" id="gxAdd" type="button">+ Add</button></div>
+ ${L.length?`${P.length?`<h3 class="gxh">Pedals</h3><div class="instlist">${P.map(row).join('')}</div>`:''}${A.length?`<h3 class="gxh">Accessories</h3><div class="instlist">${A.map(row).join('')}</div>`:''}`
+ :'<p class="tip">Your effects pedals and the small things: capo, strings, picks, a tuner. Each song’s page then suggests which of your gear to use for it.</p>'}</section>`;
+ $('gxAdd').onclick=()=>{gxEdit={id:'',kind:'pedal',type:'overdrive',name:'',brand:'',model:'',controls:'',gauge:'',thick:'',note:''};gxOpenForm()};
+ box.querySelectorAll('[data-gx]').forEach(b=>b.onclick=()=>{const x=gxAll().find(y=>y.id===b.dataset.gx);if(x){gxEdit={...x};gxOpenForm()}})}
+// the form takes the page (the guitars list hides while it's open)
+function gxOpenForm(){const g=$('gearOut');if(g)g.hidden=true;gxForm();window.scrollTo({top:0})}
+function gxClose(){gxEdit=null;const g=$('gearOut');if(g)g.hidden=false;renderGear();window.scrollTo({top:0})}
+function gxForm(){const x=gxEdit,box=$('gearExtra'),T=x.kind==='pedal'?GX_PEDALS:GX_ACC,t=T[x.type]||T.other;
+ box.innerHTML=`<section class="card instform gxform"><h2>${x.id?'Edit':'Add'} ${x.kind==='pedal'?'pedal':'accessory'}</h2>
+ <div class="seg gxkind" role="radiogroup" aria-label="Kind">${[['pedal','Pedal'],['acc','Accessory']].map(([k,l])=>`<button type="button" role="radio" data-gk="${k}" aria-checked="${x.kind===k}" aria-pressed="${x.kind===k}">${l}</button>`).join('')}</div>
+ <div class="namefield">Type<div class="chips2" id="gxType">${Object.entries(T).map(([k,v])=>`<button type="button" class="chip" data-gt="${k}" aria-pressed="${x.type===k}">${esc(v.l)}</button>`).join('')}</div></div>
+ ${t.what||t.start||t.tip?`<div class="gxhow">${t.what?`<p><b>What it does:</b> ${esc(t.what)}</p>`:''}${t.start?`<p><b>Where to start:</b> ${esc(t.start)}</p>`:''}${t.tip?`<p>${esc(t.tip)}</p>`:''}</div>`:''}
+ <label class="namefield">Name it <input id="gxName" type="text" dir="auto" maxlength="40" placeholder="${esc(t.l)}" value="${esc(x.name||'')}"></label>
+ <div class="wrow"><label class="namefield">Brand <input id="gxBrand" type="text" list="iBrands" autocomplete="off" value="${esc(x.brand||'')}" placeholder="${x.kind==='pedal'?'e.g. Boss':'e.g. Kyser'}"></label><label class="namefield">Model <input id="gxModel" type="text" autocomplete="off" value="${esc(x.model||'')}" placeholder="${x.kind==='pedal'?'e.g. SD-1':''}"></label></div>
+ ${x.kind==='pedal'?`<label class="namefield">Its knobs (optional) <input id="gxCtl" type="text" dir="auto" maxlength="80" value="${esc(x.controls||'')}" placeholder="e.g. Drive, Tone, Level"></label>`:''}
+ ${x.kind==='acc'&&x.type==='strings'?`<label class="namefield">Gauge <input id="gxGauge" type="text" maxlength="12" value="${esc(x.gauge||'')}" placeholder="e.g. 12-53 or 10-46"></label>`:''}
+ ${x.kind==='acc'&&x.type==='picks'?`<label class="namefield">Thickness (mm) <input id="gxThick" type="text" inputmode="decimal" maxlength="5" value="${esc(x.thick||'')}" placeholder="e.g. 0.6"></label>`:''}
+ <label class="namefield">Note (optional) <input id="gxNote" type="text" dir="auto" maxlength="80" value="${esc(x.note||'')}"></label>
+ <div class="editrow"><button class="btn cta" id="gxOk" type="button">${x.id?'Save changes':'Add to my gear'}</button><button class="btn ghost" id="gxNo" type="button">Cancel</button></div>
+ ${x.id?`<button type="button" class="btn ghost wide gxdel" id="gxDel">Remove from my gear</button>`:''}</section>`;
+ const sync=()=>{x.name=$('gxName').value.trim();x.brand=$('gxBrand').value.trim();x.model=$('gxModel').value.trim();x.note=$('gxNote').value.trim();
+  if($('gxCtl'))x.controls=$('gxCtl').value.trim();if($('gxGauge'))x.gauge=$('gxGauge').value.trim();if($('gxThick'))x.thick=$('gxThick').value.trim()};
+ box.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{sync();if(x.kind!==b.dataset.gk){x.kind=b.dataset.gk;x.type=x.kind==='pedal'?'overdrive':'capo'}gxForm()});
+ $('gxType').onclick=e=>{const b=e.target.closest('[data-gt]');if(!b)return;sync();x.type=b.dataset.gt;gxForm()};
+ $('gxNo').onclick=gxClose;
+ $('gxOk').onclick=()=>{sync();if(!x.name)x.name=[x.brand,x.model].filter(Boolean).join(' ')||gxType(x).l;
+  const l=gxAll(),it={id:x.id||'g'+Date.now().toString(36),kind:x.kind,type:x.type,name:x.name,brand:x.brand,model:x.model,controls:x.kind==='pedal'?x.controls||'':'',gauge:x.type==='strings'?x.gauge||'':'',thick:x.type==='picks'?x.thick||'':'',note:x.note||'',added:x.added||Date.now()};
+  const i=l.findIndex(y=>y.id===it.id);if(i>=0)l[i]=it;else l.push(it);gxSave(l);
+  // a capo: the Easy guide opens with its capo version (unless you chose otherwise)
+  if(it.kind==='acc'&&it.type==='capo'){try{const p=profGet();if(!p.capo){p.capo='yes';profSet(p)}}catch(e){}}
+  gxClose()};
+ const d=$('gxDel');if(d)d.onclick=()=>{if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='Tap again to remove it';return}gxSave(gxAll().filter(y=>y.id!==x.id));gxClose()}}
+window.__gx={all:gxAll};// test hooks
+/* ===== Gear for this song (V2 phase 5): which of my guitars, pickup, amp settings and pedals; one sentence why ===== */
+// The aim (the user's, Oct 2026): get as close as possible to the song's sound with the gear you have, and never leave you feeling you
+// can't practise without other gear. An acoustic song gets acoustic advice only (no pickups, drive or pedals); an amplified acoustic
+// (a Lava with built-in effects, an acoustic amp, a reverb pedal) adds a few things to try, as a bonus. When your gear differs from
+// the song's, the tip says how to get closest on what you have (lighter strumming, palm-muting, power chords…), never "not in your
+// gear". How the guitar sounds comes from you (one tap: An acoustic / An electric, and for an electric Clean / Crunch / Distorted;
+// kept with the song's analysis as tone.you), or for acoustic / electric from the video when it saw the guitarist. The session build
+// also measures the guitars part (asTone, kept as the analysis' tone); on real recordings those measures couldn't yet tell clean from
+// distorted, so the tip doesn't use them (with your answers they are examples for an automatic reading later). Rules on the phone, no
+// cost.
+// ---- the sound of the guitars part (x: mono at SR) ----
+async function asTone(x){const N=2048,fft=makeFFT(N),re=new Float64Array(N),im=new Float64Array(N),hz=SR/N,F=[];
+ const bin=f=>Math.max(1,Math.min(N/2-1,Math.round(f/hz)));const b80=bin(80),b300=bin(300),b2500=bin(2500),b4000=bin(4000),b5000=bin(5000);
+ for(let f=0,c=0;f+N<=x.length;f+=N,c++){let e=0,pk=0;for(let i=0;i<N;i++){const v=x[f+i];e+=v*v;const a=Math.abs(v);if(a>pk)pk=a;re[i]=v*(.5-.5*Math.cos(2*Math.PI*i/N));im[i]=0}
+  const rms=Math.sqrt(e/N);if(rms<1e-4){F.push(null);continue}fft(re,im);
+  let all=0,hi=0,cw=0,mx=0;for(let b=b80;b<=b5000;b++){const p=re[b]*re[b]+im[b]*im[b];all+=p;cw+=p*b*hz;if(b>=b2500)hi+=p;const m=Math.sqrt(p);if(b>=b300&&b<=b4000&&m>mx)mx=m}
+  // how filled-in the spectrum is between 300 and 4000 Hz (distortion adds tones between the chord's notes); a floor a thousandth of
+  // the strongest keeps silent bins from ruling it
+  let lg=0,ar=0,n=0;const fl=mx*1e-3+1e-9;for(let b=b300;b<=b4000;b++){const m=Math.hypot(re[b],im[b])+fl;lg+=Math.log(m);ar+=m;n++}
+  F.push({rms,crest:pk/rms,cent:all?cw/all:0,hf:all?hi/all:0,flat:n&&ar?Math.exp(lg/n)/(ar/n):0});if(c%300===0)await tick()}
+ const L=F.filter(Boolean);if(L.length<8)return null;const top=[...L].sort((a,b)=>b.rms-a.rms)[Math.floor(L.length*.1)].rms,U=L.filter(f=>f.rms>=top*.3);
+ const med=k=>{const v=U.map(f=>f[k]).sort((a,b)=>a-b);return v[Math.floor(v.length/2)]};
+ const cent=med('cent'),hf=med('hf'),flat=med('flat'),crest=med('crest'),cl=v=>Math.max(0,Math.min(1,v));
+ // distortion: flat, dense overtones and squashed peaks; brightness from where the energy sits
+ const dist=+(cl((flat-.08)/.22)*.6+cl((4.2-crest)/2.2)*.4).toFixed(2),drive=dist<.35?'clean':dist<.65?'crunch':'distorted';
+ const bright=cent>1500?'bright':cent<900?'warm':'balanced',kind=drive!=='clean'?'electric':hf>.12?'acoustic':hf<.04?'electric':'';
+ return {cent:Math.round(cent),hf:+hf.toFixed(3),flat:+flat.toFixed(3),crest:+crest.toFixed(2),dist,drive,bright,kind}}
+// ---- the tip ----
+// built-in effects of smart / amplified acoustics (brand or model), for the bonus
+const GT_ONBOARD=[[/\blava\b/i,'reverb, delay and chorus'],[/yamaha.*\b(ta|transacoustic)\b|transacoustic/i,'reverb and chorus']];
+function gtTip(d,G){const T0=d&&d.tone||{},Y=T0.you||{},ins=(()=>{try{return instAll()}catch(e){return []}})(),X=(()=>{try{return gxAll()}catch(e){return []}})();
+ const V=d&&d.video,vk=!Y.kind&&V&&!V.skip&&/acoustic|electric/.test(V.who||'')?V.who:'',kind=Y.kind||vk,drive=kind==='acoustic'?'':(Y.drive||'');
+ const gtr=ins.filter(i=>!GEAR[i.type]||!GEAR[i.type].amp),amps=ins.filter(i=>GEAR[i.type]&&GEAR[i.type].amp);
+ const ac=gtr.filter(i=>/acoustic/.test(i.type)),cl=gtr.filter(i=>i.type==='classical'),el=gtr.filter(i=>i.type==='electric'),eac=gtr.filter(i=>i.type==='electroacoustic');
+ const pu=i=>(i.specs||{}).pickups||'',hum=el.filter(i=>/humbucker|mixed|active/.test(pu(i))),sgl=el.filter(i=>/single|mixed/.test(pu(i)));
+ const pedT=t=>X.filter(x=>x.kind==='pedal'&&x.type===t),acc=t=>X.find(x=>x.kind==='acc'&&x.type===t),nm=i=>i.name||[i.brand,i.model].filter(Boolean).join(' ');
+ const onboard=i=>{const k=((i.brand||'')+' '+(i.model||'')+' '+(i.name||''));const m=GT_ONBOARD.find(([r])=>r.test(k));return m?m[1]:''};
+ const out=[],bonus=[];let pick=null,how='';const bpm=d&&d.bpm?Math.round(d.bpm):0,dly=bpm?Math.round(60000/bpm/2):0;
+ if(kind==='acoustic'){
+  // an acoustic song: your acoustic; nothing electric
+  pick=ac.find(i=>i.type==='acoustic')||eac[0]||cl[0]||el[0]||null;
+  if(pick&&/acoustic/.test(pick.type))out.push(['Guitar',`${nm(pick)}.`]);
+  else if(pick&&pick.type==='classical'){out.push(['Guitar',`${nm(pick)}.`]);how='Nylon strings sound softer: strum with a thin pick (or the side of your thumb) a little nearer the bridge for more sparkle.'}
+  else if(pick){out.push(['Guitar',`${nm(pick)}.`]);how='For an acoustic-like sound: the neck pickup, the guitar’s tone a little down, the amp clean with a touch of reverb, and a thin pick.'}
+  if(how)out.push(['Closest sound',how]);
+  // bonus: an amplified acoustic
+  const amped=[...eac,...ac].find(i=>onboard(i))||null,acamp=amps.find(a=>a.type==='acamp'),rv=pedT('reverb')[0]||pedT('acpre')[0],dl=pedT('delay')[0],ch=pedT('chorus')[0];
+  if(amped)bonus.push(`${nm(amped)}’s built-in effects (${onboard(amped)}): a little reverb fills out the strumming${bpm&&bpm<100?`; a soft delay (about ${dly} ms) suits the slow parts`:''}.`);
+  if(acamp&&(eac.length||amped))bonus.push(`Plug into ${nm(acamp)}: treble just under noon, a little reverb.`);
+  if((eac.length||amped)&&rv)bonus.push(`${nm(rv)}: ${(GX_PEDALS[rv.type]||{}).start||''}`);
+  if((eac.length||amped)&&ch)bonus.push(`${nm(ch)} (chorus), very light, for a shimmering verse.`);
+  if((eac.length||amped)&&dl&&bpm&&bpm<100)bonus.push(`${nm(dl)}: ${dly} ms, one repeat, mix low.`);
+ }else if(kind==='electric'){
+  // an electric song: your electric for the sound; on an acoustic, how to get closest
+  pick=drive&&drive!=='clean'&&hum.length?hum[0]:drive==='clean'&&sgl.length?sgl[0]:el[0]||null;
+  if(pick){out.push(['Guitar',`${nm(pick)}${drive&&drive!=='clean'&&hum.includes(pick)?' (its humbuckers suit the drive)':drive==='clean'&&sgl.includes(pick)?' (its single-coils sound clear and clean)':''}.`]);
+   if(drive)out.push(['Pickup',drive==='clean'?'The neck pickup (or the in-between position for a brighter clean).':'The bridge pickup: it keeps the drive tight.']);
+   const amp=amps.find(a=>a.type==='elamp')||amps[0],od=drive==='distorted'?(pedT('distortion')[0]||pedT('fuzz')[0]||pedT('overdrive')[0]):drive==='crunch'?(pedT('overdrive')[0]||pedT('boost')[0]||pedT('distortion')[0]):null,mf=pedT('multi')[0];
+   if(amp&&drive)out.push(['Amp',drive==='clean'?`${nm(amp)}: the clean channel, gain about 9 o’clock, EQ at noon.`:od?`${nm(amp)}: the clean channel, a little louder; ${nm(od)} gives the drive.`:`${nm(amp)}: ${drive==='crunch'?'gain about noon':'the drive channel, gain about 2 o’clock'}, middle a little up so the chords stay clear.`]);
+   if(od)out.push(['Drive',`${nm(od)} (${(GX_PEDALS[od.type]||{}).l}): ${(GX_PEDALS[od.type]||{}).start||''}`]);else if(drive&&drive!=='clean'&&mf)out.push(['Drive',`${nm(mf)}: a ${drive==='crunch'?'crunch':'high-gain'} preset, then lower the gain until the chords ring.`]);
+   if(drive&&drive!=='clean'&&!amp&&!od&&!mf)out.push(['Closest sound','Practise the parts clean (or unplugged): the chords, the strumming and the timing are the same, and they sound tighter when you play the chords as power chords and mute the low strings with the side of your hand.']);
+   // bonus: time and modulation effects you have
+   const dl=pedT('delay')[0],rv=pedT('reverb')[0],cp=pedT('compressor')[0];
+   if(drive==='clean'&&cp)bonus.push(`${nm(cp)} (compressor): evens out the strumming. ${GX_PEDALS.compressor.start}`);
+   if(rv)bonus.push(`${nm(rv)}: ${GX_PEDALS.reverb.start}`);if(dl&&bpm)bonus.push(`${nm(dl)}: ${dly} ms (an eighth note at ${bpm} BPM), 1–2 repeats, mix low.`);
+  }else{pick=ac.find(i=>i.type==='acoustic')||eac[0]||cl[0]||null;
+   if(pick){out.push(['Guitar',`${nm(pick)}.`]);
+    out.push(['Closest sound',drive&&drive!=='clean'?'For the driven sound on an acoustic: play the chords as power chords (root and fifth) and palm-mute the low strings with the side of your hand; dig in on the accents.':'Strum lighter, a little nearer the neck, for the rounder sound of a clean electric; palm-mute the verses a little.'])}}
+ }else if(gtr.length){pick=ac[0]||eac[0]||el[0]||cl[0];out.push(['Guitar',`${nm(pick)}.`])}
+ // capo and picks
+ const capo=d&&d.play&&d.play.capo;if(capo){const c=acc('capo');out.push(['Capo',c?`Capo on fret ${capo} (${nm(c)}).`:`Capo on fret ${capo}. No capo at hand? The Easy guide has a version without one that sounds the same.`])}
+ const pkk=acc('picks');if(pkk&&pkk.thick){const t=parseFloat(pkk.thick);if(t)out.push(['Pick',t<=.65?`Your ${t} mm picks suit strumming.`:`Your ${t} mm picks are on the heavy side for strumming: hold them loosely.`])}
+ // one sentence why: the song's sound, and how close your gear gets
+ const snd=kind==='acoustic'?'an acoustic':kind==='electric'?`${drive==='clean'?'a clean':drive==='crunch'?'a lightly driven':drive==='distorted'?'a distorted':'an'} electric`:'';
+ const match=pick&&(kind==='acoustic'?/acoustic|classical/.test(pick.type):kind==='electric'?pick.type==='electric':true);
+ const why=!kind?'':pick?`The song is played on ${snd}${vk?' (seen in the video)':''}${match?`, so your ${nm(pick)} gets you right there.`:`; your ${nm(pick)} gets close with the tips below, and the chords and strumming are exactly the same.`}`:`The song is played on ${snd}${vk?' (seen in the video)':''}.`;
+ return {lines:out,bonus,why,drive,kind,vk:!!vk,gear:ins.length+X.length}}
+// the card: what the guitar is (and for an electric, how it sounds), then the tip and the bonus
+function gtHTML(t){if(!t)return '';const ch=(k,v,l,on)=>`<button type="button" class="chip" data-${k}="${v}" aria-pressed="${on}">${l}</button>`;
+ const ask=`<div class="gtask"><span>The song is played on</span><div class="chips2">${[['acoustic','An acoustic'],['electric','An electric']].map(([v,l])=>ch('gtk',v,l,t.kind===v)).join('')}${t.vk?'<small>(from the video)</small>':''}</div>
+  ${t.kind==='electric'?`<span>It sounds</span><div class="chips2">${[['clean','Clean'],['crunch','Crunch'],['distorted','Distorted']].map(([v,l])=>ch('gtd',v,l,t.drive===v)).join('')}</div>`:''}</div>`;
+ const done=t.kind==='acoustic'||(t.kind==='electric'&&t.drive),sum=done?t.lines.map(x=>x[1].split(/[:.(]/)[0]).slice(0,2).join(' · '):'Tell it how the song is played';
+ return `<section class="card sessec" id="sesGear"><details class="gtbox"${done?'':' open'}><summary><h3>Gear for this song</h3><small>${esc(sum)}</small></summary>${ask}
+  ${t.why?`<p class="gtwhy">${esc(t.why)}</p>`:''}${t.lines.length?`<dl class="gtl">${t.lines.map(([k,v])=>`<dt>${esc(k)}</dt><dd dir="auto">${esc(v)}</dd>`).join('')}</dl>`:''}
+  ${t.bonus.length?`<div class="gtbonus"><b>Bonus: worth a try</b><ul>${t.bonus.map(x=>`<li dir="auto">${esc(x)}</li>`).join('')}</ul></div>`:''}
+  ${t.gear?'':`<p class="tip">Add your guitars (and amp or pedals, if you have them) in Gear and this picks from them.</p>`}${t.kind==='electric'&&!t.drive?'<p class="tip">Tap how it sounds and the amp and drive suggestions follow.</p>':''}</details></section>`}
+// your answer, kept with the song's analysis (tone.you); a second tap clears it
+function gtSet(key,k,v){const d=loadSong(key);if(!d)return;const t=d.tone||{},y={...(t.you||{})};y[k]=y[k]===v?'':v;d.tone={...t,you:y};
+ try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(d)))}catch(e){}}
+window.__gt={tone:x=>asTone(Float32Array.from(x)),tip:(k)=>{const d=loadSong(k);return d?gtTip(d):null}};// test hooks
 /* ================= I'm learning: every song you have something for, and what kind of material it has ================= */
 // One row per song, gathered from: Guitaring sheets (Drive list + this phone), sheets saved on this phone, the Drive songs folder,
 // video lessons, practice-mixer splits, saved chord analyses, an unfinished sheet, and songs marked "On it" in the song ideas.
 // the material chips, in the V2 order (song guides, riff guides and gear tips join them in later phases)
 const LKINDS=[['sheet','SHEET','Guitaring sheet'],['folder','DRIVE','Drive sheets'],['lesson','LESSON','Video lessons'],['analysis','VIDEO','Play-along'],['mix','MIX','Jam track']];
 const LTAG={sheet:'Sheet',folder:'Drive',lesson:'Lesson',analysis:'Play-along',mix:'Jam'};// short words when the icons are off
-let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='';
+let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='',learnHid=false;
 const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
-function learnSongs(){
+function learnSongs({all=false}={}){
  const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
  const add=(t,a,kind,item)=>{t=cleanName(t);a=String(a||'').trim();if(!t)return;
   // same song: titles match and the artists match, or the title is identical and the artist is just written in another script (עד מתי by אביתר בנאי = Eviatar Banai)
@@ -6396,7 +6593,9 @@ function learnSongs(){
  try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=x.song&&x.song.t?x.song:songFromName(songClean(x.name).s)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
- return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+ G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'));
+ // songs you removed from your list stay out (all: every song, for its page and the Hidden list)
+ return all?G:G.filter(g=>!songHid(g))}
 // the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
 // background (covWarm)
 async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
@@ -6416,11 +6615,11 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
- if(!G.length)return;
+ if(!G.length){learnHidUI();return}
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
    return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
-   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnHidUI();learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
  box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
@@ -6430,6 +6629,14 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  // a song opens its song session
  $('learnList').onclick=e=>{const r=e.target.closest('[data-li]');if(r)openSession(G[+r.dataset.li])};
 }
+// the songs you removed from your list: at the end of Learn, folded; each can be shown again
+function learnHidUI(){const box=$('learnBox');if(!box)return;let h=$('learnHidBox');const H=learnSongs({all:true}).filter(songHid);
+ if(!H.length){if(h)h.remove();learnHid=false;return}
+ if(!h){h=document.createElement('div');h.id='learnHidBox';h.className='lhid';box.appendChild(h)}
+ h.innerHTML=`<button type="button" class="tlink lhidt" id="learnHidT" aria-expanded="${learnHid}">Hidden songs (${H.length}) ${learnHid?'▴':'▾'}</button>${learnHid?`<div class="lhidl">${H.map((g,i)=>`<div class="lhidr"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||'')}</small></span><button type="button" class="btn ghost" data-hopen="${i}">Open</button><button type="button" class="btn" data-hshow="${i}">Show again</button></div>`).join('')}<p class="tip">Hidden songs keep everything they have. Show one again to put it back in your songs.</p></div>`:''}`;
+ $('learnHidT').onclick=()=>{learnHid=!learnHid;learnHidUI()};
+ h.querySelectorAll('[data-hshow]').forEach(b=>b.onclick=()=>{songUnhide(H[+b.dataset.hshow]);renderLearn()});
+ h.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>openSession(H[+b.dataset.hopen]))}
 // what the buttons next to a song's material do (song session; also the old inline details)
 function learnAct(g,a,v){
  if(a==='lib'){const ent=libGet(v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
@@ -6733,13 +6940,39 @@ async function v2MigM2(){const log=store.get('v2mig',{done:[]})||{done:[]};if((l
  if(recs.length){try{await safetyCopy('M2')}catch(e){}}
  if(store.get('songs2',null))return;
  store.set('songs2',recs);log.done=[...(log.done||[]),'M2'];log.at2=Date.now();log.report={...(log.report||{}),M2:{songs:recs.length,links:keys.length}};store.set('v2mig',log)}
+// ---- removing a song from my songs (Oct 2026) ----
+// Hidden songs (tuner.songHidden: [{t,a,at}]) stay out of the Learn list and Home; everything they have is kept and they can be
+// shown again from "Hidden songs" at the end of Learn. Removing can also delete what's kept on this phone for the song (jam tracks,
+// chord analyses, sheets saved on the phone, video lesson links, the song's record with its status and notes); files in Google
+// Drive are never deleted. A song left with nothing isn't kept as hidden (adding it again later shows it as usual).
+const songHiddenGet=()=>store.get('songHidden',[])||[];
+const songHid=g=>songHiddenGet().some(h=>sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}));
+function songHide(g){if(songHid(g))return;store.set('songHidden',[{t:g.title,a:g.artist||'',at:Date.now()},...songHiddenGet()])}
+function songUnhide(g){store.set('songHidden',songHiddenGet().filter(h=>!(sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}))))}
+// what removing can delete from this phone, and what stays (Drive)
+function songPhoneParts(g){return {jam:g.r.mix.map(x=>x.mix),ana:g.r.analysis.map(x=>x.key),sheets:g.r.sheet.filter(x=>x.lib).map(x=>x.lib),
+ draft:g.r.sheet.some(x=>x.draft),videos:g.r.lesson.map(x=>x.url).filter(Boolean),rec:!!songRec(g),onit:!!g.onit,
+ drive:g.r.folder.length+g.r.sheet.filter(x=>!x.lib&&!x.draft).length}}
+async function songRemove(g,{del=false}={}){
+ if(del){const P=songPhoneParts(g);
+  for(const id of P.jam){try{await mxForget(id,true)}catch(e){}}
+  if(P.ana.length){for(const k of P.ana){try{localStorage.removeItem(KP+'song.'+k)}catch(e){}}store.set('songs',(store.get('songs',[])||[]).filter(k=>!P.ana.includes(k)))}
+  if(P.sheets.length)libWrite(libAll().filter(e=>!P.sheets.includes(e.id)));
+  if(P.videos.length){const keys=new Set(P.videos.map(u=>{try{return vlNormUrl(u)}catch(e){return u}}));store.set(VLK,vlAll().filter(v=>!P.videos.includes(v.url)&&!keys.has(v.key)))}
+  store.set('songs2',songsGet().filter(r=>!sameSong(r,g)));
+  // "On it" from the song ideas: no longer on it
+  if(P.onit)store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));
+  try{mxSheetUI();mxBar();renderMixNew()}catch(e){}}
+ // still something for it (Drive files, or everything when only hiding): kept, hidden
+ const left=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x));if(left)songHide(left);
+ return !!left}
 /* ===== Song session (V2 phase 3): one page per song, opened from My learning library ===== */
 // Top: title, artist, tuning and capo, status, what you have, one Practise button. Then the chords, quick jam buttons, everything
 // linked to the song (the same rows the learning list used to open inline), the chord finder and your notes (saved in the song record).
 let sesKey=null;// {title, artist} of the open song
 function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{});goSec('session')}
 // the open song's learning-list entry (built fresh, so it follows new sheets, lessons and jam tracks)
-function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
+function sesSong(){if(!sesKey)return null;return learnSongs({all:true}).find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
 // what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
 function sesFacts(g){const f=sesSheet(g);f.bpm=0;const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
  const k0=sesAnaKey(g);for(const x of [...g.r.analysis].sort((a,b)=>(b.key===k0)-(a.key===k0))){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
@@ -6786,8 +7019,10 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  ${!G&&f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
  <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}${dsRows(g)?`<div class="ldet">${dsRows(g)}</div>`:''}</section>
+ ${GD?gtHTML(gtTip(GD,G)):''}
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
- <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
+ <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>
+ ${songHid(g)?`<section class="card sessec sesrm"><p class="tip">This song is hidden from your songs.</p><button type="button" class="btn wide" id="sesShow">Show it in my songs again</button></section>`:`<section class="sesrm"><button type="button" class="btn ghost wide sesrmb" id="sesRm">Remove from my songs</button></section>`}`;
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
  const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(it&&it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}asStart(id);renderSession()};
  if(g.r.mix.length){const it=mxIdx.find(x=>x.id===g.r.mix[0].mix);if(it&&it.drive)try{gdPreload(true)}catch(e){}}
@@ -6818,6 +7053,24 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  box.querySelectorAll('[data-dssave]').forEach(b=>b.onclick=()=>dsSaveLater(b.dataset.dssave));
  $('sesFind').onclick=()=>cfOpen('book');
+ // remove from my songs: hidden by default (everything kept); or also delete what's kept on this phone for it
+ const sh=$('sesShow');if(sh)sh.onclick=()=>{songUnhide(g);renderSession();try{renderLearn()}catch(e){}};
+ const rm=$('sesRm');if(rm)rm.onclick=()=>{const P=songPhoneParts(g),sec=rm.parentNode,n=(k,one,many)=>k?`${k} ${k===1?one:many}`:'';
+  const what=[n(P.jam.length,'jam track','jam tracks'),n(P.ana.length,'chord analysis','chord analyses'),n(P.sheets.length,'sheet saved on this phone','sheets saved on this phone'),n(P.videos.length,'video lesson link','video lesson links'),P.onit?'its “On it” mark':'',P.rec?'its status and notes':''].filter(Boolean);
+  sec.classList.add('card','sessec');
+  sec.innerHTML=`<h3>Remove “<span dir="auto">${esc(g.title)}</span>”?</h3><p class="tip">It leaves your songs list. Nothing is deleted: you can show it again from <b>Hidden songs</b> at the end of Learn.</p>
+   ${what.length?`<label class="rmdel"><input type="checkbox" id="rmDel"> <span>Also delete what’s saved on this phone for it: ${esc(what.join(', '))}. This can’t be undone.</span></label>`:''}
+   ${P.drive?`<p class="tip">Files in your Google Drive stay where they are.</p>`:''}
+   <div class="rmacts"><button type="button" class="btn" id="rmGo">Remove</button><button type="button" class="btn ghost" id="rmNo">Cancel</button></div>`;
+  sec.scrollIntoView({block:'nearest',behavior:'smooth'});
+  $('rmNo').onclick=()=>renderSession();
+  const dl=$('rmDel');if(dl)dl.onchange=()=>{$('rmGo').textContent=dl.checked?'Remove and delete':'Remove';$('rmGo').classList.toggle('rmdanger',dl.checked)};
+  $('rmGo').onclick=async()=>{const del=!!($('rmDel')&&$('rmDel').checked);$('rmGo').disabled=true;const kept=await songRemove(g,{del});
+   goSec('learn');try{renderLearn()}catch(e){}try{renderHome()}catch(e){}
+   toast(`“${esc(g.title)}” ${del?(kept?'was removed; what’s in your Drive is kept (hidden)':'was removed and its phone data deleted'):'is hidden from your songs'}.${kept&&!del?' <button type="button" class="tlink" id="rmUndo">Undo</button>':''}`,'ok');
+   const u=$('rmUndo');if(u)u.onclick=()=>{songUnhide(g);const t=$('toast');if(t)t.hidden=true;try{renderLearn()}catch(e){}try{renderHome()}catch(e){}}}};
+ // gear for this song: how the guitar sounds (your taps), the tip follows
+ const gc=$('sesGear');if(gc)gc.addEventListener('click',e=>{const b=e.target.closest('[data-gtd],[data-gtk]');if(!b)return;gtSet(GK,b.dataset.gtd?'drive':'kind',b.dataset.gtd||b.dataset.gtk);const op=gc.querySelector('details').open;renderSession();const n=$('sesGear');if(n){n.querySelector('details').open=op;n.scrollIntoView({block:'nearest'})}});
  let tm=null;$('sesNotes').addEventListener('input',e=>{clearTimeout(tm);const v=e.target.value;tm=setTimeout(()=>songTouch(g,{notes:v}),400)})}
 /* ===== Song guide (V2 phase 3): Easy | Full, built on the phone from a song's chord analysis ===== */
 // Made from what the analysis already knows (chords, beats, note onsets, parts, tuning and capo): no new service, never lyrics.
@@ -7211,7 +7464,7 @@ window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,g
 // little ahead or behind the audio the chords came from is lined up (the offset is kept with the analysis).
 // The video: the phone-sized copy GitHub made during the split (splitter v7), kept on the phone; a song split before that loads its
 // video from Drive once (a tap; kept on the phone too). Easy keeps the song map (its chords and capo can differ from the video).
-let KA=null;
+let KA=null;const KA_NOTE={};// a note per song for this visit (the video wasn't kept)
 const KA_PPS=72;// lane pixels per second
 const karaItem=mix=>mix?mxIdx.find(x=>x.id===mix):null;
 const karaHas=mix=>{const it=karaItem(mix);return !!(it&&(it.hasVid||(it.drive&&it.drive.video)))};
@@ -7246,18 +7499,23 @@ async function karaLoadDrive(it,onP){await gdTokenFull();const v=await vlFind(it
  const r=await fetch(`${VL_GD}/${v.id}?alt=media&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});if(!r.ok)throw {code:'gd_http',status:r.status};
  const len=+r.headers.get('content-length')||0,rd=r.body&&r.body.getReader?r.body.getReader():null;let blob;
  if(rd){const parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onP&&onP(got,len)}blob=new Blob(parts,{type:'video/mp4'})}else blob=await r.blob();
- await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return blob}
+ // kept on the phone when it fits (an installed app asks to keep its storage for good first); a video too big to keep still plays
+ // now, from memory, and is loaded again next time
+ try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
+ try{await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return {blob,kept:true}}
+ catch(e){KA_MEM[it.id]=blob;return {blob,kept:false}}}
+const KA_MEM={};// videos too big to keep on the phone, for this visit
 // the card in the guide (Full): filled in once the video is on the phone
 function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
  <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
 let kaGen=0;
 async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
- let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}
+ let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}if((!rec||!rec.blob)&&KA_MEM[d.mix])rec={blob:KA_MEM[d.mix]};
  if(gen!==kaGen||!host.isConnected)return;// the guide was redrawn meanwhile
  if(!rec||!rec.blob){if(!(it&&it.drive&&it.drive.video)){body.innerHTML='<p class="tip">This song has no video on the phone.</p>';return}
   body.innerHTML=`<p class="tip">The song’s video is in your Drive. Load it once to play along with the chords; it stays on this phone.</p><button type="button" class="btn wide" id="kaLoad">Load the song’s video</button><p class="tip" id="kaMsg" role="status"></p>`;
   $('kaLoad').onclick=async()=>{const b=$('kaLoad'),m=$('kaMsg');b.disabled=true;m.textContent='Opening Google…';
-   try{await karaLoadDrive(it,(g,l)=>{m.textContent=`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});karaMount(G,d,key)}
+   try{const r=await karaLoadDrive(it,(g,l)=>{m.textContent=g>=l&&l?'Keeping it on this phone…':`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});if(!r.kept)KA_NOTE[d.mix]=`This video (${Math.round(r.blob.size/1048576)} MB) is too big to keep on this phone: it plays now and loads again next time.`;karaMount(G,d,key)}
    catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
  body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
@@ -7268,6 +7526,9 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
   <p class="tip kof" hidden></p>`;
  const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
  v.src=url;KA={v,url,M,off:+(d.vOff||0),cur:-2,raf:0,host};
+ if(KA_NOTE[d.mix]){const p0=document.createElement('p');p0.className='tip kanote';p0.textContent=KA_NOTE[d.mix];body.appendChild(p0)}
+ // a video the phone can't play (some cameras' formats): say so instead of a black box
+ v.onerror=()=>{const p1=document.createElement('p');p1.className='dswarn';p1.textContent='This phone can’t play this video’s format. The chords still play along with the song in the jam track.';body.querySelector('.kvid').after(p1)};
  // line the video up with the analysis once (kept with the analysis)
  if(d.vOff==null){const p0=body.querySelector('.kof');p0.hidden=false;p0.textContent='Lining the video up with the chords…';karaOffset(rec.blob,d).then(o=>{if(!KA||KA.v!==v)return;body.querySelector('.kof').hidden=!o;KA.off=o;try{const s=loadSong(key);if(s){s.vOff=o;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(s)))}}catch(e){}
   if(o){const p=body.querySelector('.kof');p.hidden=false;p.textContent=`The video runs ${Math.abs(o).toFixed(2)} s ${o>0?'behind':'ahead of'} the song’s audio; the chords are lined up with it.`}})}
@@ -7408,7 +7669,7 @@ function renderHomeCont(){
  // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
  const c=[],p=profGet();
  try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
- try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ try{let hid=new Set();try{hid=new Set(learnSongs({all:true}).filter(songHid).flatMap(g=>g.r.mix.map(m=>m.mix)))}catch(e){}const r=(mxIdx||[]).filter(x=>x.state==='ready'&&!hid.has(x.id)).sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  // a song being made comes first: where it stands, tap for the progress
  try{mkList().filter(x=>x.src==='cloud').slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}

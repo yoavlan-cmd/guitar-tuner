@@ -77,6 +77,7 @@ Both paths expose one internal interface: `sampleFn(prompt, opts)` / `sampleFn.j
 - The page reloads once when a new SW takes control.
 - **A tap on a phone notification** ("… is split", "the session is ready", "backup saved"; `bkNotify` gives it the page's address) brings the app it came from to the front (the live app or the beta), or opens it (`notificationclick`, v110).
 - **Releases:** v110 (17 Oct 2026) brought V2 phases 3–4 live: song sessions and the Easy / Full guide (Easy with and without a capo), add a song from Drive with its session built automatically (sound, whole song, video, sheet check, guitars by side), play along with the video, album covers, the new icon and Home design, and notifications that open the app. Rollback point: branch `live-v109`.
+- **v111** (17 Oct 2026): V2 phase 5 live (pedals and accessories in My gear; gear for this song: as close as possible to the song's sound with the gear you have, acoustic advice for acoustic songs, a bonus for amplified acoustics, no shopping list), remove a song from my songs (hidden, or also delete its phone data), the Ready bar full, loading a song's video from Drive no longer hangs when the phone can't keep it. Rollback point: branch `live-v110`.
 
 ### 3.3 External libraries (lazy-loaded from CDNs, only when the feature is used)
 | Library | URL | Used for |
