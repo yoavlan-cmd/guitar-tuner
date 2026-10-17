@@ -1228,8 +1228,11 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .dslab{display:flex;flex-direction:column;gap:6px;font:600 13px var(--body);color:var(--muted)}.dslab .textin{font:400 14px var(--body)}
 .dsmore summary{cursor:pointer;color:var(--accent);font:600 13px var(--body);padding:4px 0}
 .dsnote{font-size:12px;margin:0}
-#paneSong[data-seg="learn"] #addSong{--tex:var(--tex-learn);grid-column:1/-1;min-height:132px}
-#paneSong[data-seg="learn"] #addSong b{word-spacing:normal}
+/* Learn starts with two tiles (Oct 2026): Create a chord sheet from media (the basic option: a video or MP3, on the phone) and
+   Create a song session (from Drive); the chord finder lives in Write and on each song's page */
+#paneSong[data-seg="learn"] #addSong,#paneSong[data-seg="learn"] #drop{--tex:var(--tex-learn);min-height:200px}
+#paneSong[data-seg="learn"] #addSong b,#paneSong[data-seg="learn"] #drop b{word-spacing:normal;font-size:clamp(21px,6vw,25px);line-height:1.02}
+#paneSong[data-seg="learn"] #findNew,#paneSong[data-seg="learn"] .addnote{display:none!important}
 .dsname{margin:-4px 0 0;font:600 15px var(--body);color:var(--muted)}
 .dsbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.dsbar i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),#8AF0D2);transition:width .6s}
 .dseta{margin:0;font:500 14px var(--body);color:var(--muted)}.dseta b{color:var(--ink);font-family:var(--mono)}
@@ -1514,14 +1517,14 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
     <div id="resumeCard" hidden></div>
     <section class="card draftcard" id="draftCard" hidden></section>
     <div class="addgrid" id="addGrid">
-      <button class="drop addtile" id="addSong" type="button">
-        <i aria-hidden="true"><span data-pd="ADD"></span></i><b>Add a song</b>
-        <span class="sub">From your Google Drive: split, MP3s and a session, made for you</span>
-      </button>
       <label class="drop addtile" for="vidIn" id="drop">
-        <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Song video</b>
-        <span class="sub">Get the chords from a video</span>
+        <i aria-hidden="true"><span data-pd="VIDEO"></span></i><b>Create a chord sheet from media</b>
+        <span class="sub">A video (best) or an MP3, on this phone</span>
       </label>
+      <button class="drop addtile" id="addSong" type="button">
+        <i aria-hidden="true"><span data-pd="ADD"></span></i><b>Create a song session</b>
+        <span class="sub">From your Drive: chords, guide and jam track</span>
+      </button>
       <button class="drop write addtile" id="shotNew" type="button">
         <i aria-hidden="true"><span data-pd="SCAN"></span></i><b>Screenshots or PDF</b>
         <span class="sub">Turn them into a chord sheet</span>
@@ -5247,7 +5250,7 @@ const dsKind=f=>/^video\//.test(f.mimeType)||/\.(mp4|mov|m4v|webm|mkv)$/i.test(f
 function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
  const busy=!fresh&&mxIdx.find(x=>x.drive&&['up','wait','get'].includes(x.state));if(busy)return dsShowProgress(busy.id);
  d.hidden=false;document.body.classList.add('wopen');
- d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Add a song from Google Drive"><div class="dshead"><h3>Add a song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
+ d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Create a song session from Google Drive"><div class="dshead"><h3>Create a song session</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
  <p class="tip">Paste the link to the song’s <b>folder</b> in your Google Drive, or to its <b>video (MP4)</b> or <b>audio (MP3)</b> there. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
  <label class="dslab">Link to the song’s folder, video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label>
  <details class="dsmore"><summary>Have both the video and the audio? Add the other one</summary><label class="dslab">Second link (optional)<input id="dsL2" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label></details>

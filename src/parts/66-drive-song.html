@@ -29,7 +29,7 @@ const dsKind=f=>/^video\//.test(f.mimeType)||/\.(mp4|mov|m4v|webm|mkv)$/i.test(f
 function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
  const busy=!fresh&&mxIdx.find(x=>x.drive&&['up','wait','get'].includes(x.state));if(busy)return dsShowProgress(busy.id);
  d.hidden=false;document.body.classList.add('wopen');
- d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Add a song from Google Drive"><div class="dshead"><h3>Add a song</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
+ d.innerHTML=`<section class="dsbox" role="dialog" aria-label="Create a song session from Google Drive"><div class="dshead"><h3>Create a song session</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div>
  <p class="tip">Paste the link to the song’s <b>folder</b> in your Google Drive, or to its <b>video (MP4)</b> or <b>audio (MP3)</b> there. Guitaring splits it on your GitHub, saves a <b>full MP3</b> and a <b>guitars-only MP3</b> next to it in the same folder, and builds the song’s page. You can lock the phone; you’ll get a notification.</p>
  <label class="dslab">Link to the song’s folder, video or audio in Drive<input id="dsL1" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label>
  <details class="dsmore"><summary>Have both the video and the audio? Add the other one</summary><label class="dslab">Second link (optional)<input id="dsL2" class="textin" type="url" inputmode="url" placeholder="https://drive.google.com/file/d/…" autocomplete="off"></label></details>
