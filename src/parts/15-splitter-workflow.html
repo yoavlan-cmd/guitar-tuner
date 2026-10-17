@@ -1,12 +1,13 @@
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v7
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v8
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
 # with the parts (stills.bin + stills.json), so the app can check the chords against the guitarist's hand without the video.
 # v6: the stills are 960 pixels wide (sharp enough to cut a close-up of the fretting hand from).
 # v7: a phone-sized copy of the video (480p, video.mp4) is handed back too, for playing along with the chords in time.
+# v8: stills 1440 pixels wide every 3 seconds (hands in wide shots are small), about the same size as before.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -142,15 +143,15 @@ jobs:
               print('no picture in the video file: no stills')
               raise SystemExit(0)
           os.makedirs('stills', exist_ok=True)
-          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'fps=1/2,scale=960:-2', '-q:v', '7', 'stills/s%04d.jpg'], check=True)
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'fps=1/3,scale=1440:-2', '-q:v', '7', 'stills/s%04d.jpg'], check=True)
           idx, o = [], 0
           with open('res/stills.bin', 'wb') as out:
               for i, f in enumerate(sorted(glob.glob('stills/*.jpg'))):
                   b = open(f, 'rb').read()
                   out.write(b)
-                  idx.append([i * 2, o, len(b)])
+                  idx.append([i * 3, o, len(b)])
                   o += len(b)
-          json.dump({'every': 2, 'n': len(idx), 'idx': idx}, open('res/stills.json', 'w'))
+          json.dump({'every': 3, 'n': len(idx), 'idx': idx}, open('res/stills.json', 'w'))
           print('stills', len(idx), 'bytes', o)
           # a phone-sized copy to play along with (480p, small sound); left out if it would be too big to hand back
           r = subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'scale=-2:480', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '30', '-pix_fmt', 'yuv420p',
