@@ -75,6 +75,10 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
   ({p,ctx,errs}=await run(a,SHEET));L=await look(p);console.log('  video saw F#:',L.ch.join(' '));
   ok(L.ch.includes('F#')&&!/settled it: F#/.test(L.lv['Chords and order'][1]),'where the video saw the hand play F#, the sheet’s F#m doesn’t change it');
   ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close()}
+ // ---- 3b. the video was looked at, but the hand wasn't clear in any still: listed as not helping ----
+ {const a=mk();a.video={at:Date.now(),name:'v.mp4',capo:null,frames:[],asked:8,agree:0,differ:[],fixed:[]};
+  ({p,ctx,errs}=await run(a,SHEET));const src=await p.$$eval('.gdsrc li',l=>l.map(x=>[x.className,x.textContent]));const vs=src.find(x=>/The video/.test(x[1]))||[];console.log('  video line:',JSON.stringify(vs));
+  ok(vs[0]==='n'&&/looked at 8 moments, but the guitarist’s fretting hand isn’t shown clearly in any/.test(vs[1]),'a video where the hand was never clear is listed as not helping (no ✓)');await ctx.close()}
  // ---- 4. a guide matched to the sheet by the earlier version says to rebuild ----
  {const a=mk();a.fit={by:'sheet',share:.5,chords:['F#m','E','C#m','A']};({p,ctx,errs}=await run(a,null));L=await look(p);
   ok(/earlier version of Guitaring: rebuild it/.test(L.lv['Chords and order'][1]),'an older sheet-matched guide suggests a rebuild');await ctx.close()}

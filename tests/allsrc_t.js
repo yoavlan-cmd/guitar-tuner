@@ -18,6 +18,8 @@ const P={'C#m':['C#','E','Ab'],A:['A','C#','E'],E:['E','Ab','B'],B:['B','D','F#'
 const gen=(fn,amp,file)=>{const expr=seq.map((c,i)=>{const t0=i*4.6;return fn(c).map(([f,a])=>`${a}*between(t,${t0},${t0+4.6})*sin(2*PI*${f.toFixed(2)}*t)*exp(-1.2*mod(t-${t0},1.15))`).join('+')}).join('+');
  execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`aevalsrc='(${expr})*${amp}':s=44100:d=${seq.length*4.6}`,'-ac','2',file]);return file};
 const GTR=gen(c=>G[c],.07,path.join(OUT,'all_gtr.flac')),PNO=gen(c=>P[c].map(n=>[N(n,4),1]),.09,path.join(OUT,'all_pno.flac'));
+// the drums: a kick on every beat (0.575 s, 104 BPM), so the beat is clear
+const DRM=path.join(OUT,'all_drm.flac');execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`aevalsrc='0.6*sin(2*PI*55*t)*exp(-25*mod(t,0.575))+0.3*(random(0)-0.5)*exp(-60*mod(t,0.575))':s=44100:d=${seq.length*4.6}`,'-ac','2',DRM]);
 // the stills, made by the splitter's own step on a generated video
 const W=path.join(OUT,'all_wf');fs.mkdirSync(path.join(W,'job'),{recursive:true});fs.mkdirSync(path.join(W,'res'),{recursive:true});
 execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`testsrc=size=320x240:rate=10:duration=${seq.length*4.6}`,'-c:v','libx264','-pix_fmt','yuv420p',path.join(W,'job','song.mp4')]);
@@ -29,10 +31,13 @@ const SHAPE={'C#m':'C#m',A:'A',E:'E',B:'Bm'};// the stand-in Claude sees no capo
 const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chords:['C#m','A','E','Bm'],src:'phone',at:'2026-10-11'};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await ctx.route(/ideas\.json/,r=>r.abort());
- const calls={drive:0,claude:0,images:0};
+ const calls={drive:0,claude:0,images:0,find:0,read:0,readImgs:0};
  await ctx.route(/^https:\/\//,async r=>{const u=r.request().url(),H={'access-control-allow-origin':'*'};
   if(/googleapis\.com\/(drive|upload)/.test(u)){calls.drive++;return r.abort()}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
+   // step 1 (find): every tile shows the hand, in its middle
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:true,box:[.3,.3,.7,.7],quality:'high'})))})}]})})}
+   calls.read++;calls.readImgs=c.filter(x=>x.type==='image').length;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));
    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:0,capo_conf:'high',frames:ts.map(t=>({t,shape:SHAPE[seq[Math.min(seq.length-1,Math.floor(t/4.6))]],conf:'high'}))})}]})})}
   return r.abort()});
@@ -42,20 +47,22 @@ const SHEET={title:'Video Song',artist:'Test Band',capo:0,tuning:'Standard',chor
   if(sessionStorage.x)return;sessionStorage.x=1;const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));S('userName','Yoav');S('profile',{name:'Yoav',level:'intermediate',onboarding:{done:true}});S('learnLang','en');S('apiKey','sk-test');S('sheetCat',[SH])},SHEET);
  await p.goto(APP);await p.waitForTimeout(400);
  const B=f=>fs.readFileSync(f).toString('base64');
- await p.evaluate(async([g,pn,stj,stb])=>{const bl=(b,t)=>new Blob([Uint8Array.from(atob(b),c=>c.charCodeAt(0))],{type:t});
-  await window.__bk.put('mixdata:w1',{stems:{guitar:bl(g,'audio/flac'),other:bl(pn,'audio/flac')}});
+ await p.evaluate(async([g,pn,stj,stb,dr])=>{const bl=(b,t)=>new Blob([Uint8Array.from(atob(b),c=>c.charCodeAt(0))],{type:t});
+  await window.__bk.put('mixdata:w1',{stems:{guitar:bl(g,'audio/flac'),other:bl(pn,'audio/flac'),drums:bl(dr,'audio/flac')}});
   await window.__bk.put('mixstills:w1',{every:stj.every,idx:stj.idx,bin:bl(stb,'application/octet-stream')});
-  await window.__bk.put('mixIndex',[{id:'w1',name:'Test Band - Video Song',at:Date.now(),src:'cloud',state:'ready',sess:'queued',drive:{file:'a1',folder:'fold1',ok:true,video:{id:'v1',name:'Test Band - Video Song.mp4',url:'u'}}}])},[B(GTR),B(PNO),STJ,STB.toString('base64')]);
+  await window.__bk.put('mixIndex',[{id:'w1',name:'Test Band - Video Song',at:Date.now(),src:'cloud',state:'ready',sess:'queued',drive:{file:'a1',folder:'fold1',ok:true,video:{id:'v1',name:'Test Band - Video Song.mp4',url:'u'}}}])},[B(GTR),B(PNO),STJ,STB.toString('base64'),B(DRM)]);
  await p.reload();await p.waitForTimeout(300);
  let steps=new Set();for(let i=0;i<1200;i++){const t=await p.$eval('#mxBar',e=>e.hidden?'':e.innerText).catch(()=>'');if(/Listening to the guitars/.test(t))steps.add('guitar');if(/whole song/.test(t))steps.add('whole');if(/video/.test(t))steps.add('video');
   const st=await p.evaluate(()=>{const it=window.__mxTest.idx().find(x=>x.id==='w1');return it&&it.sess});if(st==='done'||st==='failed')break;await p.waitForTimeout(150)}
  const a=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_w1')||'null'));
  console.log('  steps on the bar:',[...steps].join(' → '));console.log('  whole:',JSON.stringify(a&&a.whole),'| video:',JSON.stringify(a&&a.video&&{from:a.video.from,capo:a.video.capo,agree:a.video.agree,fixed:a.video.fixed,asked:a.video.asked}));
  ok(steps.has('guitar')&&steps.has('whole'),'the bar shows the steps: the guitars, the whole song (the video step is quick with stills)');
+ {const kick=t=>Math.abs(t/0.575-Math.round(t/0.575))*0.575,off=(a.beats||[]).slice(4,40).map(kick).sort((x,y)=>x-y);console.log('  beat from:',a.beatFrom,'bpm',a.bpm,'| median distance to a kick',Math.round((off[off.length>>1]||9)*1000),'ms');
+  ok(a.beatFrom==='drums'&&Math.abs(a.bpm-104)<=2&&off[off.length>>1]<.04,'the beat is taken from the drums part (104 BPM, on the kicks)')}
  ok(a&&a.whole&&!a.whole.skip&&a.whole.agree>=.7,'the whole song (every part but the drums) was listened to, and hears the same roots');
  ok(a.whole.fixed.some(x=>/^B → Bm$/.test(x)),'where the guitar’s 3rd was faint, the whole song settled it: B → Bm (the key alone would have said B)');
  ok(a.video&&a.video.from==='stills'&&calls.drive===0,'the video came from the stills GitHub took (no Drive, no download on the phone)');
- ok(calls.claude===1&&calls.images>=3&&calls.images<=8,`one Claude call with ${calls.images} stills`);
+ ok(calls.find===1&&calls.read===1&&calls.readImgs>=4&&calls.readImgs<=9,`two Claude calls: find the hand (contact sheets), then read ${calls.readImgs-1} close-ups and one whole still`);
  ok(a.video.agree>=3&&!a.video.differ.length,'the hand in the stills agrees with the chords');
  // the guide
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("Video Song")');await p.waitForTimeout(500);

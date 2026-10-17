@@ -18,19 +18,21 @@ function song(o){const bpm=o.bpm,b=60/bpm,beats=[],segs=[];let t=1.0;
  const dur=t+1;for(let x=1.0;x<dur;x+=b)beats.push(+x.toFixed(3));
  // onsets: hop 256 at 11025 Hz; the pattern D · D U · U D U (eighths 0,2,3,5,6,7 of each bar)
  const h=256,fr=Math.ceil(dur*11025/h),e=new Uint8Array(fr);const hit=(tt,v)=>{const i=Math.round(tt*11025/h);for(let k=-1;k<=1;k++)if(e[i+k]!==undefined)e[i+k]=Math.max(e[i+k],k?v*.6:v)};
- for(let bi=0;bi+4<beats.length;bi+=4)for(let q=0;q<8;q++){const tt=beats[bi]+q*b/2;const on=o.pat[q]!=='·';if(on)hit(tt,200+((q*37+bi)%40));else hit(tt,o.noise||8)}
+ for(let bi=0;bi+4<beats.length;bi+=4)for(let q=0;q<8;q++){const tt=beats[bi]+q*b/2;let on=o.pat[q]!=='·';if(o.vary&&q===((bi/4)*3)%8)on=!on;if(on)hit(tt,200+((q*37+bi)%40));else hit(tt,o.noise||8)}
  return {title:o.title,dur,bpm,offset:0,tuning:{id:'std',conf:o.conf||'high',why:''},segs,play:{tun:'std',capo:o.capo},beats,ons:{h,d:Buffer.from(e).toString('base64')},v:2,at:Date.now()}}
 const REF=song({title:'שאריות של החיים - אמיר דדון',bpm:108,capo:2,pat:'D·DU·UDU',
  prog:{V:[['C','add9',4],['A','sus2',4],['F','maj7',4],['G','',4]],C:[['F','maj7',4],['G','',4],['C','add9',4],['A','sus2',4]]},form:['V','V','V','V','C','C','C','C','V','V','V','V','C','C','C','C']});
 REF.play.capoBy='you';// capo 2 as set from the video (a capo can't be heard; without it the guide says no capo)
+// a player who varies: the same D · D U · U D U, but every bar has one strum added or left out (exact repeats are rare)
+const VARY=song({title:'Varied strums',bpm:96,capo:0,pat:'D·DU·UDU',vary:true,prog:{V:[['G','',4],['C','',4],['D','',4],['E','m',4]]},form:['V','V','V','V','V','V']});VARY.play.capoBy='you';
 // a messy one: chords that never repeat, no beat detail
 const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:'D·D·D·D·',prog:{X:[['C','',1],['E','m7',1],['Bb','sus4',2],['F','m',1],['D','7',3],['Ab','',1],['B','m',2]]},form:['X','X']});delete s.beats;delete s.ons;return s})();
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const run=async(level)=>{const ctx=await b.newContext({...devices['Pixel 7']});await ctx.route(/^https:\/\//,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());
   const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
-  await p.addInitScript(([REF,MESSY,level])=>{if(sessionStorage.x)return;sessionStorage.x=1;const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));
+  await p.addInitScript(([REF,MESSY,VARY,level])=>{if(sessionStorage.x)return;sessionStorage.x=1;const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));
    S('userName','Yoav');S('profile',{name:'Yoav',level,onboarding:{done:true}});S('learnLang','he');
-   S('song.ref1',REF);S('song.mess1',MESSY);S('songs',['ref1','mess1'])},[REF,MESSY,level]);
+   S('song.ref1',REF);S('song.mess1',MESSY);S('song.vary1',VARY);S('songs',['ref1','mess1','vary1'])},[REF,MESSY,VARY,level]);
   await p.goto(APP);await p.waitForTimeout(500);await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);return {p,ctx,errs}};
  // ---- an intermediate player: Full first ----
  let {p,ctx,errs}=await run('intermediate');
@@ -60,6 +62,12 @@ const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:
  await p.screenshot({path:path.join(OUT,'guide_easy.png'),fullPage:true});
  // Play along
  await p.tap('.gdplay');await p.waitForTimeout(400);ok(await p.$eval('#sheetView',e=>!e.hidden)||await p.evaluate(()=>!document.getElementById('paneSong').hidden),'"Play along" opens the play-along');
+ // a player who varies: the pattern is still found (each eighth strummed in most bars), with how well the bars fit it
+ await p.tap('#paneSession [data-back]').catch(()=>{});await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('[data-lang=en]').catch(()=>{});await p.waitForTimeout(150);
+ await p.tap('#learnList .lrow:has-text("Varied strums")');await p.waitForTimeout(400);if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
+ const vp=await p.$$eval('#gdBody .gdpat span',l=>l.slice(0,8).map(x=>x.className==='dn'?'D':x.className==='up'?'U':'·').join(''));
+ const vl=await p.$$eval('.gdsure li',l=>Object.fromEntries(l.map(x=>[x.querySelector('span').textContent,[x.querySelector('.gdlv').className.split(' ')[1],x.querySelector('small').textContent]])));console.log('  varied:',vp,JSON.stringify(vl['Strumming']));
+ ok(vp==='D·DU·UDU'&&vl['Strumming'][0]!=='guess'&&/follow this pattern (8\d|9\d)%/.test(vl['Strumming'][1]),'a player who varies a strum in every bar: the pattern is still D · D U · U D U, and the bars fit it about 88% of the time');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  // ---- a beginner: Easy first; a messy analysis says so ----
  ({p,ctx,errs}=await run('beginner'));
