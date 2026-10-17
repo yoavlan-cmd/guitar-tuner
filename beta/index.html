@@ -1251,6 +1251,14 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0px))}
 .dswarn{margin:0;padding:10px 12px;border-radius:12px;border:1px solid var(--amber);color:#FFC48A;font:500 13.5px/1.4 var(--body);background:rgba(255,140,50,.08)}
 .dsbeat{margin:0;font:500 12px var(--body);color:var(--muted)}.dsbeat::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;animation:dspulse 1.6s ease-in-out infinite}
+/* the song's album cover: a light background behind its name, a small one in the Learn list */
+.seshero.hascov::before{content:"";position:absolute;inset:0;background:var(--cov) center/cover no-repeat;opacity:.34;filter:saturate(1.1);pointer-events:none;
+ -webkit-mask-image:linear-gradient(to left,#000 20%,rgba(0,0,0,.35) 75%,transparent);mask-image:linear-gradient(to left,#000 20%,rgba(0,0,0,.35) 75%,transparent)}
+.seshero>*{position:relative}
+.sesname{align-self:flex-start;background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;font:600 12.5px var(--body);cursor:pointer;margin-top:-4px}
+.sesnamef{display:flex;flex-direction:column;gap:8px}
+.lcov{flex:0 0 40px;width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.06) center/cover no-repeat;display:none}.lcov.on{display:block}
+.dsask{display:flex;flex-direction:column;gap:10px;color:var(--ink);font:500 14px/1.4 var(--body)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -4875,7 +4883,7 @@ let mxIdx=[];
 async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');
  // beta: leave a "deleted" mark, so it isn't read again from the live app's database
  if(BETA)t.objectStore('kv').put({__gone:1},k);else t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid})))}catch(e){}}
+async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid,song})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid,song})))}catch(e){}}
 async function mxIdxLoad(){
  try{mxIdx=(await mxGet('mixIndex'))||[]}catch(e){mxIdx=[]}
  // older versions kept only the last song
@@ -5194,18 +5202,26 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
    // the audio file is the cleaner source to split; the video stays as the song's video
    const src=files[kinds.indexOf('audio')]||files[0],vid=files[kinds.indexOf('video')]||null,folder=(src.parents||[])[0]||(vid&&(vid.parents||[])[0])||'';
    if(!folder)throw {code:'gd_http',message:'Couldn’t tell which folder the file is in. Use a file in your own Drive songs folder.'};
-   msg.textContent='Sending it to your GitHub…';
-   const it=await dsSubmit({src,vid,folder,base:cleanName(src.name)});
-   if(it.state==='failed'){go.disabled=false;msg.textContent=it.err||'Couldn’t send it to GitHub.';return}dsShowProgress(it.id)}
+   // the song's name: from a sheet Guitaring knows, or the file's name; when unsure, ask (live and video uploads are often named differently)
+   const id0=songIdent((vid||src).name);const send=async song=>{msg.textContent='Sending it to your GitHub…';
+    const it=await dsSubmit({src,vid,folder,base:cleanName(src.name),song});
+    if(it.state==='failed'){go.disabled=false;msg.textContent=it.err||'Couldn’t send it to GitHub.';return}dsShowProgress(it.id)};
+   if(id0.sure){await send({t:id0.t,a:id0.a,by:id0.by});return}
+   msg.innerHTML=`<span class="dsask"><b>Which song is it?</b> The file’s name doesn’t say for sure (a live or video upload is often named differently). Check the song and the artist: it helps find its album cover and chord sheets.
+    <label class="dslab">Song<input id="dsT" class="textin" dir="auto" value="${esc(id0.t)}"></label><label class="dslab">Artist<input id="dsA" class="textin" dir="auto" value="${esc(id0.a)}"></label>
+    <button type="button" class="btn wide" id="dsOk">Continue</button></span>`;
+   $('dsT').focus();$('dsOk').onclick=async()=>{const t=$('dsT').value.trim(),a=$('dsA').value.trim();if(!t){$('dsT').focus();return}$('dsOk').disabled=true;
+    try{await send({t,a,by:'you'})}catch(e){go.disabled=false;msg.textContent='Couldn’t send it to GitHub.'}};return}
   catch(e){go.disabled=false;msg.innerHTML=e&&e.code==='gd_http'?esc(e.message):gdErr(e).replace(/Save to Google Drive/g,'Make the song’s session')}}}
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
-async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
- const it={id,name:base,at:Date.now(),src:'cloud',state:'up',drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
+async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString(36);
+ const it={id,name:base,at:Date.now(),src:'cloud',state:'up',...(song&&song.t?{song}:{}),drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
  // no video given with the audio: a video of the song in the same folder is used too (for the chord check)
  if(!vid&&dsKind(src)==='audio'){try{const v=await vlFind(it,gdFullTok);if(v)vid={id:v.id,name:v.name}}catch(e){}}
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
+ if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});// its album cover, while GitHub works
  // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
  if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
@@ -5305,7 +5321,7 @@ function asBuild(id){asQ=asQ.then(()=>asRun(id)).catch(()=>{});return asQ}
 async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready'||!AS_ON.includes(it.sess))return;
  it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
  try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
-  const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  const nm=it.song&&it.song.t?it.song:songFromName(songClean(it.name).s)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
   // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
   it.sessStep='guitar';try{dsStatusUI()}catch(e){}
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
@@ -5315,7 +5331,7 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   let beatFrom='';try{const db=d.stems.drums;if(db){const y=await decodeFile(new File([db],'drums.flac',{type:'audio/flac'}));
    let e=0;for(let i=0;i<y.length;i+=16)e+=y[i]*y[i];const rms=Math.sqrt(e/Math.max(1,y.length/16));
    if(rms>.01){const bt=beatTimes(y);if(bt.beats.length>8&&bt.bpm){r.beats=bt.beats;r.bpm=bt.bpm;beatFrom='drums'}}}}catch(e){}
-  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id};
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''}};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;
@@ -6285,10 +6301,16 @@ function learnSongs(){
  try{const d=store.get('writeDraft',null);if(d&&d.title)add(d.title,d.artist,'sheet',{label:'Unfinished sheet',draft:true,at:d.edited||d.at})}catch(e){}
  try{((store.get('songIndex',{})||{}).songs||[]).forEach(x=>add(x.t,x.a,'folder',{label:'In your Drive songs folder',url:'https://drive.google.com/drive/search?q='+encodeURIComponent(x.t)}))}catch(e){}
  try{vlAll().forEach(v=>add(v.song||v.title,v.artist,'lesson',{label:v.src||vlSource(v.url),sub:v.note||'',url:v.url,at:v.at}))}catch(e){}
- try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=songFromName(x.name)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
- try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=String(d.title||'').split(/\s+[–-]\s+/);add(n[0],n[1]||d.artist||'','analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
+ try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=x.song&&x.song.t?x.song:songFromName(songClean(x.name).s)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
+ try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+// the covers next to the songs: the ones on the phone at once, a few missing ones looked up (one at a time; a lookup already
+// running for a song is shared)
+async function learnCovers(){const els=[...document.querySelectorAll('#learnList .lcov')];let looked=0;
+ for(const el of els){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;let c=await coverFor(t,a,{look:false});
+  if(!c&&looked<4&&navigator.onLine){looked++;c=await coverFor(t,a)}
+  if(c&&c.thumb&&el.isConnected){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}}}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
  // one language at a time (Hebrew or English songs, by the title's letters): the list reads one way, never mixed
  const heb=x=>/[\u0590-\u05FF]/.test(x),L=G.map(g=>heb(g.title)?'he':/[a-z]/i.test(g.title)?'en':heb(g.artist)?'he':'en'),nL={he:0,en:0};L.forEach(x=>nL[x]++);
@@ -6306,8 +6328,8 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
-   return `<button type="button" class="lrow" data-li="${i}"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
-   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>'};
+   return `<button type="button" class="lrow" data-li="${i}"><span class="lcov" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" aria-hidden="true"></span><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
  box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
@@ -6658,7 +6680,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
  box.innerHTML=`<section class="seshero">
-  <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}
+  <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}${g.r.mix.length?`<button type="button" class="tlink sesname" id="sesName">Edit name</button>`:''}
   ${info.length?`<div class="sesinfo">${info.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
   <div class="sestags">${has.length?has.map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join(''):'<span class="ltag none">Nothing yet</span>'}</div>
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
@@ -6677,6 +6699,15 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;
  // rebuild: the chords are heard again with the latest listening (a capo you set stays)
  const rb=$('sesRebuild');if(rb)rb.onclick=goBuild;
+ // the album cover as a light background behind the name (kept on the phone, or looked up once)
+ coverFor(g.title,g.artist).then(c=>{const h=box.querySelector('.seshero');if(c&&c.big&&h&&h.isConnected){h.style.setProperty('--cov',`url("${c.big}")`);h.classList.add('hascov')}}).catch(()=>{});
+ // fix the song's name (a live or video upload is often named differently): the session, its jam track and the cover follow
+ const nb=$('sesName');if(nb)nb.onclick=()=>{const h=box.querySelector('.seshero'),f=document.createElement('div');f.className='sesnamef';
+  f.innerHTML=`<label class="dslab">Song<input id="snT" class="textin" dir="auto" value="${esc(g.title)}"></label><label class="dslab">Artist<input id="snA" class="textin" dir="auto" value="${esc(g.artist||'')}"></label><button type="button" class="btn" id="snOk">Save</button>`;
+  nb.replaceWith(f);$('snT').focus();$('snOk').onclick=async()=>{const t=$('snT').value.trim(),a=$('snA').value.trim();if(!t)return;
+   for(const m of g.r.mix){const it=mxIdx.find(x=>x.id===m.mix);if(it)it.song={t,a,by:'you'};const k='mix_'+m.mix,d=loadSong(k);if(d){d.song={t,a};d.title=a?`${t} - ${a}`:t;d.artist=a;try{localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(d)))}catch(e){}}}
+   for(const x of g.r.analysis){const d=loadSong(x.key);if(d&&!d.mix){d.song={t,a};try{localStorage.setItem(KP+'song.'+x.key,JSON.stringify(compact(d)))}catch(e){}}}
+   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}
@@ -7143,6 +7174,59 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
   KA.raf=requestAnimationFrame(tick)};
  KA.raf=requestAnimationFrame(tick)}
 window.__ka={offset:async(k)=>{const d=loadSong(k),r=await mxGet("mixvideo:"+d.mix);return karaOffset(r.blob,d)},state:()=>KA&&{t:KA.v.currentTime,off:KA.off,cur:KA.cur,blocks:KA.M.blocks.length,name:KA.cur>=0?KA.M.blocks[KA.cur].n:''},blocks:k=>{const d=loadSong(k);return d?karaBlocks(d):null}};// test hooks
+/* ===== The song's name and its album cover (V2) ===== */
+// The right song and artist: yours (asked when adding a song if Guitaring isn't sure, or "Edit name" on its page), else a chord sheet
+// Guitaring knows for it, else the file's name without what a live or video upload adds ("(Live at …)", "(חי באולפן …)",
+// "[Official Video]", "| …"). The cover: looked up by artist and song in Apple's music catalog (the Israeli store, then the US one;
+// free, no key), used only when both the artist and the song match; made once into a background (600) and a thumbnail (96) and kept
+// on the phone, so another song with the same artist and name reuses it.
+const SN_TAG=/(live|חי|הופעה|באולפן|אולפן|acoustic|unplugged|אקוסטי|official|video|clip|קליפ|lyric|מילים|audio|hd|4k|remaster|session|סשן|version|גרסת|גרסה|edit|cover|קאבר)/i;
+// a name without what a live or video upload adds; noisy: something was taken off
+function songClean(raw){let s=cleanName(raw);const was=s;
+ s=s.replace(/\s*[\(\[\{]([^\)\]\}]*)[\)\]\}]/g,(m,x)=>SN_TAG.test(x)?'':m).replace(/\s*[|｜].*$/,'').replace(/\s+[-–—]\s+(live|official( music)? video|lyrics?( video)?|audio)\b.*$/i,'').replace(/\s+/g,' ').trim();
+ return {s,noisy:s!==was}}
+// the song and artist from a file's name, and whether Guitaring is sure (a sheet it knows matches, or a clean "Artist - Song")
+function songIdent(raw){const c=songClean(raw),n=songFromName(c.s)||{t:c.s,a:''};
+ let sh=null;try{sh=vlFindSheet(n.t,n.a)}catch(e){}
+ if(sh&&sh.title)return {t:cleanName(sh.title),a:sh.artist||n.a,by:'sheet',sure:true};
+ return {t:n.t,a:n.a,by:'name',sure:!!(n.t&&n.a&&!c.noisy)}}
+// an analysis' song and artist (a song video's title is its file name, mostly "Artist - Song"; a session built here is "Song - Artist"
+// and keeps the artist apart)
+function anaIdent(d){if(d.song&&d.song.t)return d.song;const T=String(d.title||'');
+ if(d.artist){const a=d.artist,t=T.endsWith(' - '+a)?T.slice(0,-(a.length+3)):T;return {t:songClean(t).s,a}}
+ // no artist apart: the order is whichever way round matches a chord sheet Guitaring knows; else a session's "Song - Artist",
+ // else a file name's "Artist - Song"
+ const c=songClean(T).s,m=c.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+ if(m){const L=m[1].trim(),R=m[2].trim(),sh=(t,a)=>{try{return vlFindSheet(t,a)}catch(e){return null}};
+  if(sh(R,L))return {t:R,a:L};if(sh(L,R)||d.mix)return {t:L,a:R}}
+ const n=songFromName(c)||{t:T,a:''};return {t:n.t,a:n.a}}
+// ---- covers ----
+const coverKey=(t,a)=>'cover:'+vlKey(a||'')+'|'+vlKey(songClean(t||'').s);
+const COV={};// key → {big, thumb} object URLs (this visit)
+const covArtists=a=>String(a||'').split(/\s*(?:,|&|\+|\/|\bfeat\.?|\bft\.?|\band\b|\bx\b|\sו(?=\S))\s*/i).map(s=>s.trim()).filter(Boolean);
+// does a catalog entry fit: one of our artists in its artist, and the same song (live / remaster tags left aside)
+function covFits(r,t,a){const ra=vlKey(r.artistName||''),names=covArtists(a).map(vlKey).filter(Boolean),rt=songClean(r.trackName||'').s;
+ return names.some(n=>n&&(ra===n||ra.includes(n)||n.includes(ra)))&&(vlMatch(rt,t)||vlKey(rt)===vlKey(t))}
+async function covSearch(t,a){for(const c of ['IL','US']){try{
+  const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent((a+' '+t).trim())}&media=music&entity=song&limit=15&country=${c}`);if(!r.ok)continue;
+  const j=await r.json(),hit=(j.results||[]).find(x=>covFits(x,t,a)&&x.artworkUrl100);if(hit)return hit}catch(e){}}return null}
+const covJpg=(cv,q)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
+// the cover in the app's sizes: 600 square for the background, 96 for the lists, and its colour
+async function covMake(blob){const im=await createImageBitmap(blob),out={};
+ for(const [k,n] of [['big',600],['thumb',96]]){const s=Math.min(im.width,im.height),cv=document.createElement('canvas');cv.width=cv.height=n;const g=cv.getContext('2d');g.imageSmoothingQuality='high';
+  g.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,n,n);out[k]=await covJpg(cv,k==='big'?.82:.8);
+  if(k==='thumb'){const d=g.getImageData(0,0,n,n).data;let r=0,gg=0,b=0;for(let i=0;i<d.length;i+=16){r+=d[i];gg+=d[i+1];b+=d[i+2]}const c=d.length/16;out.color=`rgb(${Math.round(r/c)},${Math.round(gg/c)},${Math.round(b/c)})`}}
+ return out}
+const covUse=(k,v)=>{if(COV[k])return COV[k];if(!v||v.none)return null;return COV[k]={big:v.big?URL.createObjectURL(v.big):v.url||'',thumb:v.thumb?URL.createObjectURL(v.thumb):v.url||'',color:v.color||''}};
+// the cover for a song: kept on the phone, or looked up once (not again for a week when none fits)
+const covBusy={};
+async function coverFor(t,a,{look=true}={}){if(!t||!a)return null;const k=coverKey(t,a);if(COV[k])return COV[k];let v=null;try{v=await mxGet(k)}catch(e){}
+ if(v&&(!v.none||!look||Date.now()-v.at<7*864e5))return covUse(k,v);if(!look||!navigator.onLine)return null;
+ if(covBusy[k])return covBusy[k];return covBusy[k]=(async()=>{try{const hit=await covSearch(songClean(t).s,a);if(!hit){await mxPut(k,{none:true,at:Date.now()});return null}
+  const url=hit.artworkUrl100.replace(/\/\d+x\d+bb\./,'/600x600bb.');let rec={url,at:Date.now(),album:hit.collectionName||'',artist:hit.artistName||'',track:hit.trackName||''};
+  try{const r=await fetch(url);if(r.ok)rec={...rec,...await covMake(await r.blob())}}catch(e){}// no copy allowed: the picture is shown from its address
+  await mxPut(k,rec);return covUse(k,rec)}catch(e){return null}finally{delete covBusy[k]}})()}
+window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a)};// test hooks
 /* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).

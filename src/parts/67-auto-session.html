@@ -9,7 +9,7 @@ function asBuild(id){asQ=asQ.then(()=>asRun(id)).catch(()=>{});return asQ}
 async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready'||!AS_ON.includes(it.sess))return;
  it.sess='building';await mxIdxSave();try{dsStatusUI()}catch(e){}
  try{const d=await mxGet('mixdata:'+id),blob=d&&d.stems&&d.stems.guitar;if(!blob)throw new Error('no guitars part');
-  const nm=songFromName(it.name)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
+  const nm=it.song&&it.song.t?it.song:songFromName(songClean(it.name).s)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
   // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
   it.sessStep='guitar';try{dsStatusUI()}catch(e){}
   const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
@@ -19,7 +19,7 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   let beatFrom='';try{const db=d.stems.drums;if(db){const y=await decodeFile(new File([db],'drums.flac',{type:'audio/flac'}));
    let e=0;for(let i=0;i<y.length;i+=16)e+=y[i]*y[i];const rms=Math.sqrt(e/Math.max(1,y.length/16));
    if(rms>.01){const bt=beatTimes(y);if(bt.beats.length>8&&bt.bpm){r.beats=bt.beats;r.bpm=bt.bpm;beatFrom='drums'}}}}catch(e){}
-  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id};
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''}};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;

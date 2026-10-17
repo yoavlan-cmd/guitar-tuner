@@ -36,7 +36,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
  box.innerHTML=`<section class="seshero">
-  <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}
+  <small class="sesk">Song session</small><h3 dir="auto">${esc(g.title)}</h3>${g.artist?`<p class="sesart" dir="auto">${esc(g.artist)}</p>`:''}${g.r.mix.length?`<button type="button" class="tlink sesname" id="sesName">Edit name</button>`:''}
   ${info.length?`<div class="sesinfo">${info.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
   <div class="sestags">${has.length?has.map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join(''):'<span class="ltag none">Nothing yet</span>'}</div>
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
@@ -55,6 +55,15 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;
  // rebuild: the chords are heard again with the latest listening (a capo you set stays)
  const rb=$('sesRebuild');if(rb)rb.onclick=goBuild;
+ // the album cover as a light background behind the name (kept on the phone, or looked up once)
+ coverFor(g.title,g.artist).then(c=>{const h=box.querySelector('.seshero');if(c&&c.big&&h&&h.isConnected){h.style.setProperty('--cov',`url("${c.big}")`);h.classList.add('hascov')}}).catch(()=>{});
+ // fix the song's name (a live or video upload is often named differently): the session, its jam track and the cover follow
+ const nb=$('sesName');if(nb)nb.onclick=()=>{const h=box.querySelector('.seshero'),f=document.createElement('div');f.className='sesnamef';
+  f.innerHTML=`<label class="dslab">Song<input id="snT" class="textin" dir="auto" value="${esc(g.title)}"></label><label class="dslab">Artist<input id="snA" class="textin" dir="auto" value="${esc(g.artist||'')}"></label><button type="button" class="btn" id="snOk">Save</button>`;
+  nb.replaceWith(f);$('snT').focus();$('snOk').onclick=async()=>{const t=$('snT').value.trim(),a=$('snA').value.trim();if(!t)return;
+   for(const m of g.r.mix){const it=mxIdx.find(x=>x.id===m.mix);if(it)it.song={t,a,by:'you'};const k='mix_'+m.mix,d=loadSong(k);if(d){d.song={t,a};d.title=a?`${t} - ${a}`:t;d.artist=a;try{localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(d)))}catch(e){}}}
+   for(const x of g.r.analysis){const d=loadSong(x.key);if(d&&!d.mix){d.song={t,a};try{localStorage.setItem(KP+'song.'+x.key,JSON.stringify(compact(d)))}catch(e){}}}
+   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}

@@ -55,18 +55,26 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
    // the audio file is the cleaner source to split; the video stays as the song's video
    const src=files[kinds.indexOf('audio')]||files[0],vid=files[kinds.indexOf('video')]||null,folder=(src.parents||[])[0]||(vid&&(vid.parents||[])[0])||'';
    if(!folder)throw {code:'gd_http',message:'Couldn’t tell which folder the file is in. Use a file in your own Drive songs folder.'};
-   msg.textContent='Sending it to your GitHub…';
-   const it=await dsSubmit({src,vid,folder,base:cleanName(src.name)});
-   if(it.state==='failed'){go.disabled=false;msg.textContent=it.err||'Couldn’t send it to GitHub.';return}dsShowProgress(it.id)}
+   // the song's name: from a sheet Guitaring knows, or the file's name; when unsure, ask (live and video uploads are often named differently)
+   const id0=songIdent((vid||src).name);const send=async song=>{msg.textContent='Sending it to your GitHub…';
+    const it=await dsSubmit({src,vid,folder,base:cleanName(src.name),song});
+    if(it.state==='failed'){go.disabled=false;msg.textContent=it.err||'Couldn’t send it to GitHub.';return}dsShowProgress(it.id)};
+   if(id0.sure){await send({t:id0.t,a:id0.a,by:id0.by});return}
+   msg.innerHTML=`<span class="dsask"><b>Which song is it?</b> The file’s name doesn’t say for sure (a live or video upload is often named differently). Check the song and the artist: it helps find its album cover and chord sheets.
+    <label class="dslab">Song<input id="dsT" class="textin" dir="auto" value="${esc(id0.t)}"></label><label class="dslab">Artist<input id="dsA" class="textin" dir="auto" value="${esc(id0.a)}"></label>
+    <button type="button" class="btn wide" id="dsOk">Continue</button></span>`;
+   $('dsT').focus();$('dsOk').onclick=async()=>{const t=$('dsT').value.trim(),a=$('dsA').value.trim();if(!t){$('dsT').focus();return}$('dsOk').disabled=true;
+    try{await send({t,a,by:'you'})}catch(e){go.disabled=false;msg.textContent='Couldn’t send it to GitHub.'}};return}
   catch(e){go.disabled=false;msg.innerHTML=e&&e.code==='gd_http'?esc(e.message):gdErr(e).replace(/Save to Google Drive/g,'Make the song’s session')}}}
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
-async function dsSubmit({src,vid,folder,base}){const id=Date.now().toString(36);
- const it={id,name:base,at:Date.now(),src:'cloud',state:'up',drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
+async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString(36);
+ const it={id,name:base,at:Date.now(),src:'cloud',state:'up',...(song&&song.t?{song}:{}),drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
  // no video given with the audio: a video of the song in the same folder is used too (for the chord check)
  if(!vid&&dsKind(src)==='audio'){try{const v=await vlFind(it,gdFullTok);if(v)vid={id:v.id,name:v.name}}catch(e){}}
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
+ if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});// its album cover, while GitHub works
  // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
  if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
