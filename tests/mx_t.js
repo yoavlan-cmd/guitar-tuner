@@ -67,6 +67,6 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok(r6.sr===22050&&Math.abs(r6.len-305*22050)<=1,`5+ minute song kept at 22 kHz (sr ${r6.sr}, ${r6.len} samples)`);
  // 7. the splitter the app installs on GitHub is v3: 3 shifts, 50% overlap, FLAC
  const wf=await p.evaluate(()=>document.getElementById('mxWf').textContent);
- ok(/guitaring-split v6/.test(wf)&&/drive\.json/.test(wf)&&/--shifts 3 --overlap 0\.5 --flac/.test(wf)&&/\\"format\\":\\"flac\\"/.test(wf)&&/Take stills from the video/.test(wf)&&/stills\.bin/.test(wf),'GitHub splitter is v6 (3 shifts, 50% overlap, FLAC; can fetch from Google Drive; takes video stills)');
+ ok(/guitaring-split v7/.test(wf)&&/drive\.json/.test(wf)&&/--shifts 3 --overlap 0\.5 --flac/.test(wf)&&/\\"format\\":\\"flac\\"/.test(wf)&&/Take stills from the video/.test(wf)&&/stills\.bin/.test(wf),'GitHub splitter is v7 (3 shifts, 50% overlap, FLAC; can fetch from Google Drive; takes video stills)');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
