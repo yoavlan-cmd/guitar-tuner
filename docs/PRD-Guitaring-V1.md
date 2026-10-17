@@ -318,8 +318,11 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
   ├─ choose 10 songs, VERIFY each on a chord/lyrics site (made-up Hebrew titles slipped through twice)
   ├─ python3 ideas_build.py write index.json sugg.json sheets.json   (cleans, de-dups, keeps 200-entry history)
   ├─ every 2nd day: python3 ideas_build.py jokes jokes.json          (4 new jokes, ≤80 kept)
-  └─ git commit ideas.json && push to main
-phone ─► loadDailyIdeas(): fetch ideas.json (≤ every 3 h) → songIndex, ideas, sheetIndex, jokesExtra
+  ├─ reads profile.json from the private guitaring-split (privacy step B)
+  ├─ git commit ideas.json && push to main
+  └─ the same ideas.json committed to the private guitaring-split (privacy step C)
+phone ─► loadDailyIdeas(): ideas.json (≤ every 3 h) from the private repository when GitHub is connected (`ideasPrivate`, the
+         Band breakdown key), else / on failure the public one → songIndex, ideas, sheetIndex, jokesExtra; `ideasSrc` = where from
 ```
 
 `ideas.json` schema (v1):
@@ -361,6 +364,7 @@ The phone replaces its list when `date` changes **or** `at` is newer (so a same-
 | `vlinks` | video lessons `[{id,url,key,yt,src,title,thumb,song,artist,note,at}]` |
 | `jokesExtra`, `jokesSeen`, `lastJokeTxt` | welcome jokes |
 | `remSeen` | song reminders on Home: `{<song key>: when last shown}` (a song is left alone for a week) |
+| `ideasSrc` | where the daily ideas last came from: `{src:'private'|'public', at, date}` (shown in My profile; step D waits for `private`) |
 | `apiKey` | user's Anthropic key (phone only) |
 | `myFolder`, `driveFolderLink` | Drive songs folder link |
 | `detailListen`, `taste`, `gearLog`, `gear` | analysis option, taste profile, misc |
@@ -495,6 +499,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 | `mx_ui_t.js` | the player as a mixing desk: title / artist, one coloured strip per part with fader, meter and M / S, times, ±5s, meters move while playing and drop on pause, a fader changes only its part |
 | `key_t.js` | faint thirds (also an F#m with the 9th on top, not F#add9): a generated guitar part like "במקום בו אני גר" (root and 5th, faint minor 3rds, the roots' overtone on the major 3rd) is heard C#m · A · E · F#m, not C# / F# (fails without `keyFit`) |
 | `ses_t.js` | song session: opens from Learn, title/artist/tuning/capo, what it has, Practise picks the best material and opens it, chord diagrams (incl. built ones), status and notes saved, jam buttons set the player, chord finder, ‹ and back return to Learn |
+| `ideas_priv_t.js` | daily ideas from the private repository (GitHub mocked): GitHub connected → the private copy (its branch), My profile says so; no private copy, a broken one, or no GitHub → the public one; the beta reads it too and never writes |
 | `rem_t.js` | song reminders on Home: due after 3 weeks in Learning (since the status changed), not newer or Learned songs; green card with the song, the weeks and the name; Practise → session (play-along) / Drive sheet / phone sheet; I can play it → Learned, dated now; left alone a week; never two in a row; fits 360 px; the My profile switch turns them off (kept after a reload) |
 | `song_rm_t.js` | remove a song from my songs: hidden by default (Undo, Hidden songs, Show again, kept after a reload); also deleting the phone data (jam track parts and video, analysis, phone sheet, lesson link) removes the song completely; a song with a Drive sheet stays hidden; a hidden song's page shows it again; Home's “Back to your jam” leaves it out |
 | `guide_t.js` | song guide against the reference "שאריות של החיים" (capo 2, 108 BPM, Cadd9 · Asus2 · Fmaj7 · G, D · DU · UDU): before you play, how sure, Full and Easy chords, strumming, song map with repeating parts and no lyrics, level picks the tab, play-along; a messy analysis is "a guess"; a player who varies one strum per bar still reads D·DU·UDU, the bars follow it 85% |

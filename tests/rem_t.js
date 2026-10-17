@@ -25,6 +25,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  });
  await p.goto(APP);await p.waitForTimeout(600);
  const due=()=>p.evaluate(()=>window.__rem.songs().map(x=>x.g.title).sort());
+ // Home may already have shown one of them by chance when the app opened (then it's left alone for a week): start clean
+ await p.evaluate(()=>localStorage.removeItem('tuner.remSeen'));
  ok(JSON.stringify(await due())==='["Good Riddance","Hallelujah","Let It Be"]','due: songs in Learning for 3+ weeks (since the status changed); not a newer one or a Learned one '+JSON.stringify(await due()));
  // only one song due at a time, so the test knows which one comes up; Math.random()=0 picks a reminder
  const only=t=>p.evaluate(t=>{const all={};window.__rem.reset();
