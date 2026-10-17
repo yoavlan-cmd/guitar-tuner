@@ -6305,12 +6305,11 @@ function learnSongs(){
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
-// the covers next to the songs: the ones on the phone at once, a few missing ones looked up (one at a time; a lookup already
-// running for a song is shared)
-async function learnCovers(){const els=[...document.querySelectorAll('#learnList .lcov')];let looked=0;
- for(const el of els){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;let c=await coverFor(t,a,{look:false});
-  if(!c&&looked<4&&navigator.onLine){looked++;c=await coverFor(t,a)}
-  if(c&&c.thumb&&el.isConnected){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}}}
+// the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
+// background (covWarm)
+async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov:not(.on)')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
+  const c=await coverFor(t,a,{look:false});if(c)covPaint(el.dataset.ck,c)}
+ covWarm()}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
  // one language at a time (Hebrew or English songs, by the title's letters): the list reads one way, never mixed
  const heb=x=>/[\u0590-\u05FF]/.test(x),L=G.map(g=>heb(g.title)?'he':/[a-z]/i.test(g.title)?'en':heb(g.artist)?'he':'en'),nL={he:0,en:0};L.forEach(x=>nL[x]++);
@@ -6328,7 +6327,7 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
-   return `<button type="button" class="lrow" data-li="${i}"><span class="lcov" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" aria-hidden="true"></span><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist);return `<span class="lcov${c&&c.thumb?' on':''}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${c&&c.thumb?` style="background-image:url(&quot;${c.thumb}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
@@ -6711,7 +6710,9 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   nb.replaceWith(f);$('snT').focus();$('snOk').onclick=async()=>{const t=$('snT').value.trim(),a=$('snA').value.trim();if(!t)return;
    for(const m of g.r.mix){const it=mxIdx.find(x=>x.id===m.mix);if(it)it.song={t,a,by:'you'};const k='mix_'+m.mix,d=loadSong(k);if(d){d.song={t,a};d.title=a?`${t} - ${a}`:t;d.artist=a;try{localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(d)))}catch(e){}}}
    for(const x of g.r.analysis){const d=loadSong(x.key);if(d&&!d.mix){d.song={t,a};try{localStorage.setItem(KP+'song.'+x.key,JSON.stringify(compact(d)))}catch(e){}}}
-   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};try{renderLearn()}catch(e){}renderSession()}};
+   try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};
+   // the cover for the new name is looked for again now (even if none was found for it before)
+   if(a)coverFor(t,a,{force:true}).then(()=>{if(curSec==='session')renderSession()}).catch(()=>{});try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(GK,+c.dataset.gdcapo);renderSession();return}
@@ -7211,9 +7212,11 @@ const covArtists=a=>String(a||'').split(/\s*(?:,|&|\+|\/|\bfeat\.?|\bft\.?|\band
 // does a catalog entry fit: one of our artists in its artist, and the same song (live / remaster tags left aside)
 function covFits(r,t,a){const ra=vlKey(r.artistName||''),names=covArtists(a).map(vlKey).filter(Boolean),rt=songClean(r.trackName||'').s;
  return names.some(n=>n&&(ra===n||ra.includes(n)||n.includes(ra)))&&(vlMatch(rt,t)||vlKey(rt)===vlKey(t))}
-async function covSearch(t,a){for(const c of ['IL','US']){try{
+// the catalog entry that fits; sure: the catalog answered (a network error or "too many requests" isn't "no cover")
+let covAsked=0;// lookups made (the pause between them is only after a real one)
+async function covSearch(t,a){let sure=false;covAsked++;for(const c of ['IL','US']){try{
   const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent((a+' '+t).trim())}&media=music&entity=song&limit=15&country=${c}`);if(!r.ok)continue;
-  const j=await r.json(),hit=(j.results||[]).find(x=>covFits(x,t,a)&&x.artworkUrl100);if(hit)return hit}catch(e){}}return null}
+  const j=await r.json();sure=true;const hit=(j.results||[]).find(x=>covFits(x,t,a)&&x.artworkUrl100);if(hit)return {hit,sure}}catch(e){}}return {hit:null,sure}}
 const covJpg=(cv,q)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
 // the cover in the app's sizes: 600 square for the background, 96 for the lists, and its colour
 async function covMake(blob){const im=await createImageBitmap(blob),out={};
@@ -7222,15 +7225,28 @@ async function covMake(blob){const im=await createImageBitmap(blob),out={};
   if(k==='thumb'){const d=g.getImageData(0,0,n,n).data;let r=0,gg=0,b=0;for(let i=0;i<d.length;i+=16){r+=d[i];gg+=d[i+1];b+=d[i+2]}const c=d.length/16;out.color=`rgb(${Math.round(r/c)},${Math.round(gg/c)},${Math.round(b/c)})`}}
  return out}
 const covUse=(k,v)=>{if(COV[k])return COV[k];if(!v||v.none)return null;return COV[k]={big:v.big?URL.createObjectURL(v.big):v.url||'',thumb:v.thumb?URL.createObjectURL(v.thumb):v.url||'',color:v.color||''}};
-// the cover for a song: kept on the phone, or looked up once (not again for a week when none fits)
+// the cover for a song: kept on the phone, or looked up once (not again for a week when none fits; force: look again now, after
+// you fixed the name)
 const covBusy={};
-async function coverFor(t,a,{look=true}={}){if(!t||!a)return null;const k=coverKey(t,a);if(COV[k])return COV[k];let v=null;try{v=await mxGet(k)}catch(e){}
- if(v&&(!v.none||!look||Date.now()-v.at<7*864e5))return covUse(k,v);if(!look||!navigator.onLine)return null;
- if(covBusy[k])return covBusy[k];return covBusy[k]=(async()=>{try{const hit=await covSearch(songClean(t).s,a);if(!hit){await mxPut(k,{none:true,at:Date.now()});return null}
+async function coverFor(t,a,{look=true,force=false}={}){if(!t||!a)return null;const k=coverKey(t,a);if(COV[k])return COV[k];let v=null;try{v=await mxGet(k)}catch(e){}
+ if(v&&(!v.none||!look||(!force&&v.v===2&&Date.now()-v.at<7*864e5)))return covUse(k,v);// (a "none" from before v2 may have been a failed lookup)if(!look||!navigator.onLine)return null;
+ if(covBusy[k])return covBusy[k];return covBusy[k]=(async()=>{try{const {hit,sure}=await covSearch(songClean(t).s,a);if(!hit){if(sure)await mxPut(k,{none:true,v:2,at:Date.now()});return null}
   const url=hit.artworkUrl100.replace(/\/\d+x\d+bb\./,'/600x600bb.');let rec={url,at:Date.now(),album:hit.collectionName||'',artist:hit.artistName||'',track:hit.trackName||''};
   try{const r=await fetch(url);if(r.ok)rec={...rec,...await covMake(await r.blob())}}catch(e){}// no copy allowed: the picture is shown from its address
-  await mxPut(k,rec);return covUse(k,rec)}catch(e){return null}finally{delete covBusy[k]}})()}
-window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a)};// test hooks
+  await mxPut(k,rec);const c=covUse(k,rec);covPaint(k,c);return c}catch(e){return null}finally{delete covBusy[k]}})()}
+// show a cover wherever its song is on screen (the Learn list), without drawing the list again
+function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&!el.classList.contains('on')){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}})}
+const covNow=(t,a)=>t&&a?COV[coverKey(t,a)]||null:null;// a cover already shown in this visit (drawn with the list, no flicker)
+// every song's cover ready ahead: at start and whenever the list changes, the missing ones are looked up in the background, one
+// at a time with a pause (the catalog limits how fast it may be asked)
+let covRun=null,covAgain=false;
+function covWarm(){if(covRun){covAgain=true;return covRun}
+ return covRun=(async()=>{try{do{covAgain=false;let G=[];try{G=learnSongs()}catch(e){}
+  for(const g of G){if(!g.artist)continue;const k=coverKey(g.title,g.artist);if(COV[k]){covPaint(k,COV[k]);continue}
+   const c0=await coverFor(g.title,g.artist,{look:false});if(c0){covPaint(k,c0);continue}
+   if(!navigator.onLine)break;const n0=covAsked;await coverFor(g.title,g.artist);if(covAsked>n0)await new Promise(ok=>setTimeout(ok,window.__covGapMs??1500))}}while(covAgain)}
+  finally{covRun=null}})()}
+window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks
 /* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
@@ -7444,6 +7460,8 @@ seedBook();
 
 setBookTun(bookTun);
 v2Start();
+// the songs' album covers, ready before they're needed (in the background, after the app is up)
+setTimeout(()=>{try{covWarm()}catch(e){}},window.__covStartMs??2500);
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
 })();
