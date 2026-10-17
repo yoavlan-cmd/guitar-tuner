@@ -53,7 +53,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('tuner.profile',JSON.stringify({name:'Yoav',onboarding:{done:true}}));localStorage.setItem('tuner.learnLang','"en"')});
  await p.goto(APP);await p.waitForTimeout(500);
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);
- ok(await p.$eval('#addSong',e=>!!e.offsetWidth&&/Add a song/.test(e.textContent)),'Learn has an "Add a song" tile');
+ ok(await p.$eval('#addSong',e=>!!e.offsetWidth&&/Create a song session/.test(e.textContent)),'Learn has a "Create a song session" tile');
  await p.tap('#addSong');await p.waitForTimeout(150);ok(await p.$eval('#dsDlg',e=>!e.hidden)&&!!await p.$('#dsL1'),'it asks for a link to the video or audio in Drive');
  const go=async(l1,l2)=>{await p.fill('#dsL1',l1);if(l2){await p.evaluate(()=>document.querySelector('.dsmore').open=true);await p.fill('#dsL2',l2)}await p.tap('#dsGo');await p.waitForTimeout(500);return p.$eval('#dsMsg',e=>e.textContent).catch(()=>'(closed)')};
  let m=await go('https://youtu.be/abcdefghijk');ok(/YouTube links can’t be turned into song files/.test(m)&&!!await p.$('#dsAsLesson'),'a YouTube link: explains, and offers to keep it as a video lesson');

@@ -32,7 +32,6 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   ['Write a sheet','write',['#writeNew']],
   ['Sheet from screenshots or PDF','write',['#shotNew']],
   ['Chord finder','write',['#findNew']],
-  ['Chord finder in Learn too','learn',['#findNew']],
   ['Unfinished sheet (draft)','write',['#draftCard']],
   ['Band breakdown','jam',['#mixNew']],
   ['Jamming player','jam',['#jamOpen']],
@@ -83,5 +82,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p2.goto(APP+'?text='+encodeURIComponent('Great lesson https://youtu.be/ddddddddddd'));await p2.waitForTimeout(1200);
  const sh=await p2.evaluate(()=>({sec:window.__v2.cur(),open:document.getElementById('vidBox').open,form:!!document.getElementById('vlSong'),onb:!document.getElementById('onb').hidden,clean:!location.search}));
  ok(sh.sec==='library'&&sh.open&&sh.form&&!sh.onb&&sh.clean,'a shared link opens My Library with the lesson form, and the setup waits '+JSON.stringify(sh));await c2.close();
+ // Learn starts with Create a chord sheet from media + Create a song session; the chord finder is in Write (and on each song's page), not Learn
+ await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(200);
+ ok(await p.evaluate(()=>{const v=id=>{const e=document.getElementById(id);return !!(e&&e.offsetWidth)};return v('drop')&&v('addSong')&&!v('findNew')&&/Create a chord sheet from media/.test(document.getElementById('drop').textContent)&&/Create a song session/.test(document.getElementById('addSong').textContent)}),'Learn: “Create a chord sheet from media” and “Create a song session”; no chord finder there');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
