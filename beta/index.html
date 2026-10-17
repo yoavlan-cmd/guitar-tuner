@@ -1285,6 +1285,13 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
    titles and their lines sit at the same height. Only with the display font loaded (html.fdisp): a wider fallback font keeps the normal size */
 #paneHome .htile{container-type:inline-size}
 .fdisp #paneHome .htile[data-sec=learn] b,.fdisp #paneHome .htile[data-sec=write] b,.fdisp #paneHome .htile[data-sec=jam] b{font-size:min(calc(clamp(20px,6.4vw,26px) * 1.9),33cqi);line-height:.92;letter-spacing:.03em;min-height:calc(clamp(20px,6.4vw,26px) * 2.02)}
+/* removing a song from my songs: a quiet button at the end of the song's page; the confirm in its place; Hidden songs in Learn */
+.sesrmb{color:var(--muted);border-color:var(--line)}
+.sesrm .rmdel{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.4 var(--body);margin:10px 0}.sesrm .rmdel input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:#FF6A4D}
+.sesrm .rmacts{display:flex;gap:8px;margin-top:6px}.sesrm .rmacts .btn{flex:1}.sesrm .rmdanger{background:#FF6A4D;color:#1a0d0a}
+.lhid{margin-top:12px}.lhidt{background:none;border:0;padding:6px 0;color:var(--muted);font:600 14px var(--body);text-decoration:underline;cursor:pointer}
+.lhidl{display:flex;flex-direction:column;gap:8px;margin-top:6px}.lhidr{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.lhidr .ltxt{flex:1;min-width:0;display:flex;flex-direction:column}.lhidr .ltxt b,.lhidr .ltxt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lhidr .ltxt small{color:var(--muted)}.lhidr .btn{padding:6px 10px;font-size:13px}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -5270,7 +5277,8 @@ async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
- if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});// its album cover, while GitHub works
+ if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});
+ try{const n=song&&song.t?song:songFromName(songClean(base).s);if(n&&n.t)songUnhide({title:n.t,artist:n.a||''})}catch(e){}// a song you removed and add again shows again// its album cover, while GitHub works
  // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
  if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);
@@ -6380,9 +6388,9 @@ function renderInstDetail(it){
 // the material chips, in the V2 order (song guides, riff guides and gear tips join them in later phases)
 const LKINDS=[['sheet','SHEET','Guitaring sheet'],['folder','DRIVE','Drive sheets'],['lesson','LESSON','Video lessons'],['analysis','VIDEO','Play-along'],['mix','MIX','Jam track']];
 const LTAG={sheet:'Sheet',folder:'Drive',lesson:'Lesson',analysis:'Play-along',mix:'Jam'};// short words when the icons are off
-let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='';
+let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='',learnHid=false;
 const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
-function learnSongs(){
+function learnSongs({all=false}={}){
  const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
  const add=(t,a,kind,item)=>{t=cleanName(t);a=String(a||'').trim();if(!t)return;
   // same song: titles match and the artists match, or the title is identical and the artist is just written in another script (עד מתי by אביתר בנאי = Eviatar Banai)
@@ -6398,7 +6406,9 @@ function learnSongs(){
  try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=x.song&&x.song.t?x.song:songFromName(songClean(x.name).s)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
- return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+ G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'));
+ // songs you removed from your list stay out (all: every song, for its page and the Hidden list)
+ return all?G:G.filter(g=>!songHid(g))}
 // the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
 // background (covWarm)
 async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
@@ -6418,11 +6428,11 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
- if(!G.length)return;
+ if(!G.length){learnHidUI();return}
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
    return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
-   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnHidUI();learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
  box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
@@ -6432,6 +6442,14 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  // a song opens its song session
  $('learnList').onclick=e=>{const r=e.target.closest('[data-li]');if(r)openSession(G[+r.dataset.li])};
 }
+// the songs you removed from your list: at the end of Learn, folded; each can be shown again
+function learnHidUI(){const box=$('learnBox');if(!box)return;let h=$('learnHidBox');const H=learnSongs({all:true}).filter(songHid);
+ if(!H.length){if(h)h.remove();learnHid=false;return}
+ if(!h){h=document.createElement('div');h.id='learnHidBox';h.className='lhid';box.appendChild(h)}
+ h.innerHTML=`<button type="button" class="tlink lhidt" id="learnHidT" aria-expanded="${learnHid}">Hidden songs (${H.length}) ${learnHid?'▴':'▾'}</button>${learnHid?`<div class="lhidl">${H.map((g,i)=>`<div class="lhidr"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||'')}</small></span><button type="button" class="btn ghost" data-hopen="${i}">Open</button><button type="button" class="btn" data-hshow="${i}">Show again</button></div>`).join('')}<p class="tip">Hidden songs keep everything they have. Show one again to put it back in your songs.</p></div>`:''}`;
+ $('learnHidT').onclick=()=>{learnHid=!learnHid;learnHidUI()};
+ h.querySelectorAll('[data-hshow]').forEach(b=>b.onclick=()=>{songUnhide(H[+b.dataset.hshow]);renderLearn()});
+ h.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>openSession(H[+b.dataset.hopen]))}
 // what the buttons next to a song's material do (song session; also the old inline details)
 function learnAct(g,a,v){
  if(a==='lib'){const ent=libGet(v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}
@@ -6735,13 +6753,39 @@ async function v2MigM2(){const log=store.get('v2mig',{done:[]})||{done:[]};if((l
  if(recs.length){try{await safetyCopy('M2')}catch(e){}}
  if(store.get('songs2',null))return;
  store.set('songs2',recs);log.done=[...(log.done||[]),'M2'];log.at2=Date.now();log.report={...(log.report||{}),M2:{songs:recs.length,links:keys.length}};store.set('v2mig',log)}
+// ---- removing a song from my songs (Oct 2026) ----
+// Hidden songs (tuner.songHidden: [{t,a,at}]) stay out of the Learn list and Home; everything they have is kept and they can be
+// shown again from "Hidden songs" at the end of Learn. Removing can also delete what's kept on this phone for the song (jam tracks,
+// chord analyses, sheets saved on the phone, video lesson links, the song's record with its status and notes); files in Google
+// Drive are never deleted. A song left with nothing isn't kept as hidden (adding it again later shows it as usual).
+const songHiddenGet=()=>store.get('songHidden',[])||[];
+const songHid=g=>songHiddenGet().some(h=>sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}));
+function songHide(g){if(songHid(g))return;store.set('songHidden',[{t:g.title,a:g.artist||'',at:Date.now()},...songHiddenGet()])}
+function songUnhide(g){store.set('songHidden',songHiddenGet().filter(h=>!(sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}))))}
+// what removing can delete from this phone, and what stays (Drive)
+function songPhoneParts(g){return {jam:g.r.mix.map(x=>x.mix),ana:g.r.analysis.map(x=>x.key),sheets:g.r.sheet.filter(x=>x.lib).map(x=>x.lib),
+ draft:g.r.sheet.some(x=>x.draft),videos:g.r.lesson.map(x=>x.url).filter(Boolean),rec:!!songRec(g),onit:!!g.onit,
+ drive:g.r.folder.length+g.r.sheet.filter(x=>!x.lib&&!x.draft).length}}
+async function songRemove(g,{del=false}={}){
+ if(del){const P=songPhoneParts(g);
+  for(const id of P.jam){try{await mxForget(id,true)}catch(e){}}
+  if(P.ana.length){for(const k of P.ana){try{localStorage.removeItem(KP+'song.'+k)}catch(e){}}store.set('songs',(store.get('songs',[])||[]).filter(k=>!P.ana.includes(k)))}
+  if(P.sheets.length)libWrite(libAll().filter(e=>!P.sheets.includes(e.id)));
+  if(P.videos.length){const keys=new Set(P.videos.map(u=>{try{return vlNormUrl(u)}catch(e){return u}}));store.set(VLK,vlAll().filter(v=>!P.videos.includes(v.url)&&!keys.has(v.key)))}
+  store.set('songs2',songsGet().filter(r=>!sameSong(r,g)));
+  // "On it" from the song ideas: no longer on it
+  if(P.onit)store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));
+  try{mxSheetUI();mxBar();renderMixNew()}catch(e){}}
+ // still something for it (Drive files, or everything when only hiding): kept, hidden
+ const left=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x));if(left)songHide(left);
+ return !!left}
 /* ===== Song session (V2 phase 3): one page per song, opened from My learning library ===== */
 // Top: title, artist, tuning and capo, status, what you have, one Practise button. Then the chords, quick jam buttons, everything
 // linked to the song (the same rows the learning list used to open inline), the chord finder and your notes (saved in the song record).
 let sesKey=null;// {title, artist} of the open song
 function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{});goSec('session')}
 // the open song's learning-list entry (built fresh, so it follows new sheets, lessons and jam tracks)
-function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
+function sesSong(){if(!sesKey)return null;return learnSongs({all:true}).find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
 // what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
 function sesFacts(g){const f=sesSheet(g);f.bpm=0;const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
  const k0=sesAnaKey(g);for(const x of [...g.r.analysis].sort((a,b)=>(b.key===k0)-(a.key===k0))){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
@@ -6789,7 +6833,8 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
  <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}${dsRows(g)?`<div class="ldet">${dsRows(g)}</div>`:''}</section>
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
- <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
+ <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>
+ ${songHid(g)?`<section class="card sessec sesrm"><p class="tip">This song is hidden from your songs.</p><button type="button" class="btn wide" id="sesShow">Show it in my songs again</button></section>`:`<section class="sesrm"><button type="button" class="btn ghost wide sesrmb" id="sesRm">Remove from my songs</button></section>`}`;
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
  const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(it&&it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}asStart(id);renderSession()};
  if(g.r.mix.length){const it=mxIdx.find(x=>x.id===g.r.mix[0].mix);if(it&&it.drive)try{gdPreload(true)}catch(e){}}
@@ -6820,6 +6865,22 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  box.querySelectorAll('[data-dssave]').forEach(b=>b.onclick=()=>dsSaveLater(b.dataset.dssave));
  $('sesFind').onclick=()=>cfOpen('book');
+ // remove from my songs: hidden by default (everything kept); or also delete what's kept on this phone for it
+ const sh=$('sesShow');if(sh)sh.onclick=()=>{songUnhide(g);renderSession();try{renderLearn()}catch(e){}};
+ const rm=$('sesRm');if(rm)rm.onclick=()=>{const P=songPhoneParts(g),sec=rm.parentNode,n=(k,one,many)=>k?`${k} ${k===1?one:many}`:'';
+  const what=[n(P.jam.length,'jam track','jam tracks'),n(P.ana.length,'chord analysis','chord analyses'),n(P.sheets.length,'sheet saved on this phone','sheets saved on this phone'),n(P.videos.length,'video lesson link','video lesson links'),P.onit?'its “On it” mark':'',P.rec?'its status and notes':''].filter(Boolean);
+  sec.classList.add('card','sessec');
+  sec.innerHTML=`<h3>Remove “<span dir="auto">${esc(g.title)}</span>”?</h3><p class="tip">It leaves your songs list. Nothing is deleted: you can show it again from <b>Hidden songs</b> at the end of Learn.</p>
+   ${what.length?`<label class="rmdel"><input type="checkbox" id="rmDel"> <span>Also delete what’s saved on this phone for it: ${esc(what.join(', '))}. This can’t be undone.</span></label>`:''}
+   ${P.drive?`<p class="tip">Files in your Google Drive stay where they are.</p>`:''}
+   <div class="rmacts"><button type="button" class="btn" id="rmGo">Remove</button><button type="button" class="btn ghost" id="rmNo">Cancel</button></div>`;
+  sec.scrollIntoView({block:'nearest',behavior:'smooth'});
+  $('rmNo').onclick=()=>renderSession();
+  const dl=$('rmDel');if(dl)dl.onchange=()=>{$('rmGo').textContent=dl.checked?'Remove and delete':'Remove';$('rmGo').classList.toggle('rmdanger',dl.checked)};
+  $('rmGo').onclick=async()=>{const del=!!($('rmDel')&&$('rmDel').checked);$('rmGo').disabled=true;const kept=await songRemove(g,{del});
+   goSec('learn');try{renderLearn()}catch(e){}try{renderHome()}catch(e){}
+   toast(`“${esc(g.title)}” ${del?(kept?'was removed; what’s in your Drive is kept (hidden)':'was removed and its phone data deleted'):'is hidden from your songs'}.${kept&&!del?' <button type="button" class="tlink" id="rmUndo">Undo</button>':''}`,'ok');
+   const u=$('rmUndo');if(u)u.onclick=()=>{songUnhide(g);const t=$('toast');if(t)t.hidden=true;try{renderLearn()}catch(e){}try{renderHome()}catch(e){}}}};
  let tm=null;$('sesNotes').addEventListener('input',e=>{clearTimeout(tm);const v=e.target.value;tm=setTimeout(()=>songTouch(g,{notes:v}),400)})}
 /* ===== Song guide (V2 phase 3): Easy | Full, built on the phone from a song's chord analysis ===== */
 // Made from what the analysis already knows (chords, beats, note onsets, parts, tuning and capo): no new service, never lyrics.
@@ -7410,7 +7471,7 @@ function renderHomeCont(){
  // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
  const c=[],p=profGet();
  try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
- try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ try{let hid=new Set();try{hid=new Set(learnSongs({all:true}).filter(songHid).flatMap(g=>g.r.mix.map(m=>m.mix)))}catch(e){}const r=(mxIdx||[]).filter(x=>x.state==='ready'&&!hid.has(x.id)).sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  // a song being made comes first: where it stands, tap for the progress
  try{mkList().filter(x=>x.src==='cloud').slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}

@@ -4,7 +4,7 @@
 let sesKey=null;// {title, artist} of the open song
 function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{});goSec('session')}
 // the open song's learning-list entry (built fresh, so it follows new sheets, lessons and jam tracks)
-function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
+function sesSong(){if(!sesKey)return null;return learnSongs({all:true}).find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
 // what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
 function sesFacts(g){const f=sesSheet(g);f.bpm=0;const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
  const k0=sesAnaKey(g);for(const x of [...g.r.analysis].sort((a,b)=>(b.key===k0)-(a.key===k0))){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
@@ -52,7 +52,8 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
  <section class="card sessec"><h3>Everything for this song</h3>${learnDetail(g,0).replace(/<div class="lstbtns"[\s\S]*?<\/div>/,'')}${dsRows(g)?`<div class="ldet">${dsRows(g)}</div>`:''}</section>
  <section class="card sessec"><h3>Don’t know a chord?</h3><button type="button" class="btn ghost wide" id="sesFind">Chord finder: put your fingers on a fretboard, get its name</button></section>
- <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>`;
+ <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>
+ ${songHid(g)?`<section class="card sessec sesrm"><p class="tip">This song is hidden from your songs.</p><button type="button" class="btn wide" id="sesShow">Show it in my songs again</button></section>`:`<section class="sesrm"><button type="button" class="btn ghost wide sesrmb" id="sesRm">Remove from my songs</button></section>`}`;
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
  const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(it&&it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}asStart(id);renderSession()};
  if(g.r.mix.length){const it=mxIdx.find(x=>x.id===g.r.mix[0].mix);if(it&&it.drive)try{gdPreload(true)}catch(e){}}
@@ -83,4 +84,20 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  box.querySelectorAll('[data-dssave]').forEach(b=>b.onclick=()=>dsSaveLater(b.dataset.dssave));
  $('sesFind').onclick=()=>cfOpen('book');
+ // remove from my songs: hidden by default (everything kept); or also delete what's kept on this phone for it
+ const sh=$('sesShow');if(sh)sh.onclick=()=>{songUnhide(g);renderSession();try{renderLearn()}catch(e){}};
+ const rm=$('sesRm');if(rm)rm.onclick=()=>{const P=songPhoneParts(g),sec=rm.parentNode,n=(k,one,many)=>k?`${k} ${k===1?one:many}`:'';
+  const what=[n(P.jam.length,'jam track','jam tracks'),n(P.ana.length,'chord analysis','chord analyses'),n(P.sheets.length,'sheet saved on this phone','sheets saved on this phone'),n(P.videos.length,'video lesson link','video lesson links'),P.onit?'its “On it” mark':'',P.rec?'its status and notes':''].filter(Boolean);
+  sec.classList.add('card','sessec');
+  sec.innerHTML=`<h3>Remove “<span dir="auto">${esc(g.title)}</span>”?</h3><p class="tip">It leaves your songs list. Nothing is deleted: you can show it again from <b>Hidden songs</b> at the end of Learn.</p>
+   ${what.length?`<label class="rmdel"><input type="checkbox" id="rmDel"> <span>Also delete what’s saved on this phone for it: ${esc(what.join(', '))}. This can’t be undone.</span></label>`:''}
+   ${P.drive?`<p class="tip">Files in your Google Drive stay where they are.</p>`:''}
+   <div class="rmacts"><button type="button" class="btn" id="rmGo">Remove</button><button type="button" class="btn ghost" id="rmNo">Cancel</button></div>`;
+  sec.scrollIntoView({block:'nearest',behavior:'smooth'});
+  $('rmNo').onclick=()=>renderSession();
+  const dl=$('rmDel');if(dl)dl.onchange=()=>{$('rmGo').textContent=dl.checked?'Remove and delete':'Remove';$('rmGo').classList.toggle('rmdanger',dl.checked)};
+  $('rmGo').onclick=async()=>{const del=!!($('rmDel')&&$('rmDel').checked);$('rmGo').disabled=true;const kept=await songRemove(g,{del});
+   goSec('learn');try{renderLearn()}catch(e){}try{renderHome()}catch(e){}
+   toast(`“${esc(g.title)}” ${del?(kept?'was removed; what’s in your Drive is kept (hidden)':'was removed and its phone data deleted'):'is hidden from your songs'}.${kept&&!del?' <button type="button" class="tlink" id="rmUndo">Undo</button>':''}`,'ok');
+   const u=$('rmUndo');if(u)u.onclick=()=>{songUnhide(g);const t=$('toast');if(t)t.hidden=true;try{renderLearn()}catch(e){}try{renderHome()}catch(e){}}}};
  let tm=null;$('sesNotes').addEventListener('input',e=>{clearTimeout(tm);const v=e.target.value;tm=setTimeout(()=>songTouch(g,{notes:v}),400)})}

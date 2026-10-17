@@ -43,7 +43,7 @@ function renderHomeCont(){
  // Continue: the unfinished things, newest first (at most 2), and an unfinished setup
  const c=[],p=profGet();
  try{const d=draftNow();if(d)c.push({at:d.edited||0,ic:'DRAFT',t:'Continue your sheet',s:d.title||'Untitled sheet',go:()=>goSec('write')})}catch(e){}
- try{const r=(mxIdx||[]).filter(x=>x.state==='ready').sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
+ try{let hid=new Set();try{hid=new Set(learnSongs({all:true}).filter(songHid).flatMap(g=>g.r.mix.map(m=>m.mix)))}catch(e){}const r=(mxIdx||[]).filter(x=>x.state==='ready'&&!hid.has(x.id)).sort((a,b)=>(b.at||0)-(a.at||0))[0];if(r)c.push({at:r.at||0,ic:'MIX',k:'jam',t:'Back to your jam',s:r.name,go:()=>{mxView(true);mxOpen(r.id)}})}catch(e){}
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  // a song being made comes first: where it stands, tap for the progress
  try{mkList().filter(x=>x.src==='cloud').slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}

@@ -1270,4 +1270,11 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
    titles and their lines sit at the same height. Only with the display font loaded (html.fdisp): a wider fallback font keeps the normal size */
 #paneHome .htile{container-type:inline-size}
 .fdisp #paneHome .htile[data-sec=learn] b,.fdisp #paneHome .htile[data-sec=write] b,.fdisp #paneHome .htile[data-sec=jam] b{font-size:min(calc(clamp(20px,6.4vw,26px) * 1.9),33cqi);line-height:.92;letter-spacing:.03em;min-height:calc(clamp(20px,6.4vw,26px) * 2.02)}
+/* removing a song from my songs: a quiet button at the end of the song's page; the confirm in its place; Hidden songs in Learn */
+.sesrmb{color:var(--muted);border-color:var(--line)}
+.sesrm .rmdel{display:flex;gap:10px;align-items:flex-start;font:500 14px/1.4 var(--body);margin:10px 0}.sesrm .rmdel input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:#FF6A4D}
+.sesrm .rmacts{display:flex;gap:8px;margin-top:6px}.sesrm .rmacts .btn{flex:1}.sesrm .rmdanger{background:#FF6A4D;color:#1a0d0a}
+.lhid{margin-top:12px}.lhidt{background:none;border:0;padding:6px 0;color:var(--muted);font:600 14px var(--body);text-decoration:underline;cursor:pointer}
+.lhidl{display:flex;flex-direction:column;gap:8px;margin-top:6px}.lhidr{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:12px}
+.lhidr .ltxt{flex:1;min-width:0;display:flex;flex-direction:column}.lhidr .ltxt b,.lhidr .ltxt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lhidr .ltxt small{color:var(--muted)}.lhidr .btn{padding:6px 10px;font-size:13px}
 </style>
