@@ -4,9 +4,9 @@
 // the material chips, in the V2 order (song guides, riff guides and gear tips join them in later phases)
 const LKINDS=[['sheet','SHEET','Guitaring sheet'],['folder','DRIVE','Drive sheets'],['lesson','LESSON','Video lessons'],['analysis','VIDEO','Play-along'],['mix','MIX','Jam track']];
 const LTAG={sheet:'Sheet',folder:'Drive',lesson:'Lesson',analysis:'Play-along',mix:'Jam'};// short words when the icons are off
-let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='';
+let learnF={},learnOpen=null,learnQ='',learnSt='',learnArt='',learnHid=false;
 const SKoff=t=>SK(t).replace('class="pd"','class="pd off"');
-function learnSongs(){
+function learnSongs({all=false}={}){
  const G=[],tm=x=>typeof x==='number'?x:(Date.parse(x)||0);
  const add=(t,a,kind,item)=>{t=cleanName(t);a=String(a||'').trim();if(!t)return;
   // same song: titles match and the artists match, or the title is identical and the artist is just written in another script (עד מתי by אביתר בנאי = Eviatar Banai)
@@ -22,7 +22,9 @@ function learnSongs(){
  try{mxIdx.filter(x=>x.state==='ready').forEach(x=>{const n=x.song&&x.song.t?x.song:songFromName(songClean(x.name).s)||{t:x.name,a:''};add(n.t,n.a,'mix',{label:x.src==='cloud'?'Split on GitHub':'Split on this phone',mix:x.id,at:x.at})})}catch(e){}
  try{(store.get('songs',[])||[]).forEach(k=>{let d=null;try{d=JSON.parse(localStorage.getItem(KP+'song.'+k))}catch(e){}if(!d)return;const n=anaIdent(d);add(n.t,n.a,'analysis',{label:'Chords from a video',key:k,at:d.at})})}catch(e){}
  try{onItList().forEach(x=>add(x.title,x.artist,'onit',{at:x.at}))}catch(e){}
- return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
+ G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'));
+ // songs you removed from your list stay out (all: every song, for its page and the Hidden list)
+ return all?G:G.filter(g=>!songHid(g))}
 // the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
 // background (covWarm)
 async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
@@ -42,11 +44,11 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  <div class="lchips" role="group" aria-label="Show songs by what you have">${LKINDS.map(([k,t,l])=>`<button type="button" class="lchip" data-lf="${k}" data-st="${st(k)}">${SK(t)}${esc(l)}<small>${st(k)==='has'?'· have it':st(k)==='miss'?'· missing':cnt(k)}</small></button>`).join('')}</div>
  <div class="llist" id="learnList"></div>`
  :`<p class="tip">Songs you’re learning collect here: chord sheets you make, files in your Drive songs folder, video lessons, mixer splits, and song ideas you mark “On it”.</p>`;
- if(!G.length)return;
+ if(!G.length){learnHidUI();return}
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
    return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
-   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
+   :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnHidUI();learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
  box.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{store.set('learnLang',b.dataset.lang);learnArt='';learnOpen=null;renderLearn()});
@@ -56,6 +58,14 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  // a song opens its song session
  $('learnList').onclick=e=>{const r=e.target.closest('[data-li]');if(r)openSession(G[+r.dataset.li])};
 }
+// the songs you removed from your list: at the end of Learn, folded; each can be shown again
+function learnHidUI(){const box=$('learnBox');if(!box)return;let h=$('learnHidBox');const H=learnSongs({all:true}).filter(songHid);
+ if(!H.length){if(h)h.remove();learnHid=false;return}
+ if(!h){h=document.createElement('div');h.id='learnHidBox';h.className='lhid';box.appendChild(h)}
+ h.innerHTML=`<button type="button" class="tlink lhidt" id="learnHidT" aria-expanded="${learnHid}">Hidden songs (${H.length}) ${learnHid?'▴':'▾'}</button>${learnHid?`<div class="lhidl">${H.map((g,i)=>`<div class="lhidr"><span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||'')}</small></span><button type="button" class="btn ghost" data-hopen="${i}">Open</button><button type="button" class="btn" data-hshow="${i}">Show again</button></div>`).join('')}<p class="tip">Hidden songs keep everything they have. Show one again to put it back in your songs.</p></div>`:''}`;
+ $('learnHidT').onclick=()=>{learnHid=!learnHid;learnHidUI()};
+ h.querySelectorAll('[data-hshow]').forEach(b=>b.onclick=()=>{songUnhide(H[+b.dataset.hshow]);renderLearn()});
+ h.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>openSession(H[+b.dataset.hopen]))}
 // what the buttons next to a song's material do (song session; also the old inline details)
 function learnAct(g,a,v){
  if(a==='lib'){const ent=libGet(v);if(!ent)return;vid.pause();A=expand(ent.data);A.libId=ent.id;fileKey='';showSheet();window.scrollTo({top:0})}

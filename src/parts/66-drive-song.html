@@ -74,7 +74,8 @@ async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString
  mxIdx.unshift(it);await mxIdxSave();mxBar();renderMixNew();
  const ext=((src.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,dsKind(src)==='audio'?'mp3':'mp4'])[1].toLowerCase();
  const job={file:src.id,ext,folder,base,token:gdFullTok,full:!/^mp3$/.test(ext)};
- if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});// its album cover, while GitHub works
+ if(song&&song.t&&song.a)coverFor(song.t,song.a).catch(()=>{});
+ try{const n=song&&song.t?song:songFromName(songClean(base).s);if(n&&n.t)songUnhide({title:n.t,artist:n.a||''})}catch(e){}// a song you removed and add again shows again// its album cover, while GitHub works
  // the video: GitHub takes a small still every 2 seconds from it (the source itself when it's a video)
  if(vid&&vid.id!==src.id){job.video=vid.id;job.vext=((vid.name||'').match(/\.([a-z0-9]{2,4})$/i)||[0,'mp4'])[1].toLowerCase()}
  await mxUpload(it,null,job);

@@ -35,3 +35,29 @@ async function v2MigM2(){const log=store.get('v2mig',{done:[]})||{done:[]};if((l
  if(recs.length){try{await safetyCopy('M2')}catch(e){}}
  if(store.get('songs2',null))return;
  store.set('songs2',recs);log.done=[...(log.done||[]),'M2'];log.at2=Date.now();log.report={...(log.report||{}),M2:{songs:recs.length,links:keys.length}};store.set('v2mig',log)}
+// ---- removing a song from my songs (Oct 2026) ----
+// Hidden songs (tuner.songHidden: [{t,a,at}]) stay out of the Learn list and Home; everything they have is kept and they can be
+// shown again from "Hidden songs" at the end of Learn. Removing can also delete what's kept on this phone for the song (jam tracks,
+// chord analyses, sheets saved on the phone, video lesson links, the song's record with its status and notes); files in Google
+// Drive are never deleted. A song left with nothing isn't kept as hidden (adding it again later shows it as usual).
+const songHiddenGet=()=>store.get('songHidden',[])||[];
+const songHid=g=>songHiddenGet().some(h=>sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}));
+function songHide(g){if(songHid(g))return;store.set('songHidden',[{t:g.title,a:g.artist||'',at:Date.now()},...songHiddenGet()])}
+function songUnhide(g){store.set('songHidden',songHiddenGet().filter(h=>!(sameSong({title:h.t,artist:h.a},g)||sameSong(g,{title:h.t,artist:h.a}))))}
+// what removing can delete from this phone, and what stays (Drive)
+function songPhoneParts(g){return {jam:g.r.mix.map(x=>x.mix),ana:g.r.analysis.map(x=>x.key),sheets:g.r.sheet.filter(x=>x.lib).map(x=>x.lib),
+ draft:g.r.sheet.some(x=>x.draft),videos:g.r.lesson.map(x=>x.url).filter(Boolean),rec:!!songRec(g),onit:!!g.onit,
+ drive:g.r.folder.length+g.r.sheet.filter(x=>!x.lib&&!x.draft).length}}
+async function songRemove(g,{del=false}={}){
+ if(del){const P=songPhoneParts(g);
+  for(const id of P.jam){try{await mxForget(id,true)}catch(e){}}
+  if(P.ana.length){for(const k of P.ana){try{localStorage.removeItem(KP+'song.'+k)}catch(e){}}store.set('songs',(store.get('songs',[])||[]).filter(k=>!P.ana.includes(k)))}
+  if(P.sheets.length)libWrite(libAll().filter(e=>!P.sheets.includes(e.id)));
+  if(P.videos.length){const keys=new Set(P.videos.map(u=>{try{return vlNormUrl(u)}catch(e){return u}}));store.set(VLK,vlAll().filter(v=>!P.videos.includes(v.url)&&!keys.has(v.key)))}
+  store.set('songs2',songsGet().filter(r=>!sameSong(r,g)));
+  // "On it" from the song ideas: no longer on it
+  if(P.onit)store.set('ideaOnIt',onItList().filter(x=>!(vlMatch(x.title,g.title)&&(!x.artist||!g.artist||vlMatch(x.artist,g.artist)))));
+  try{mxSheetUI();mxBar();renderMixNew()}catch(e){}}
+ // still something for it (Drive files, or everything when only hiding): kept, hidden
+ const left=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x));if(left)songHide(left);
+ return !!left}
