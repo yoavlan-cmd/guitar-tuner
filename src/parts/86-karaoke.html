@@ -55,9 +55,10 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
    try{await karaLoadDrive(it,(g,l)=>{m.textContent=`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});karaMount(G,d,key)}
    catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
- body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video><button type="button" class="kbig" aria-label="Play">▶</button></div>
+ body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
   <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
   <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk" data-i="${i}" style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
+  <div class="mixbtns ktrans"><button type="button" class="mixback" data-kj="-5" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay kbig" aria-label="Play">▶</button><button type="button" class="mixback" data-kj="5" aria-label="Forward 5 seconds">+5s</button></div>
   <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
   <p class="tip kof" hidden></p>`;
  const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
@@ -66,7 +67,10 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
  if(d.vOff==null){const p0=body.querySelector('.kof');p0.hidden=false;p0.textContent='Lining the video up with the chords…';karaOffset(rec.blob,d).then(o=>{if(!KA||KA.v!==v)return;body.querySelector('.kof').hidden=!o;KA.off=o;try{const s=loadSong(key);if(s){s.vOff=o;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(s)))}}catch(e){}
   if(o){const p=body.querySelector('.kof');p.hidden=false;p.textContent=`The video runs ${Math.abs(o).toFixed(2)} s ${o>0?'behind':'ahead of'} the song’s audio; the chords are lined up with it.`}})}
  const toggle=()=>{if(v.paused)v.play().catch(()=>{});else v.pause()};big.onclick=toggle;v.onclick=toggle;
- v.onplay=()=>{big.hidden=true;host.classList.add('on')};v.onpause=()=>{big.hidden=false;host.classList.remove('on')};
+ // the play button as in the player: ▶ / ❚❚ under the video (the video stays clear), its glow breathing while it plays; −5s / +5s
+ const pUI=on=>{big.textContent=on?'❚❚':'▶';big.setAttribute('aria-label',on?'Pause':'Play');host.classList.toggle('on',on)};
+ v.onplay=()=>pUI(true);v.onpause=()=>pUI(false);
+ body.querySelectorAll('[data-kj]').forEach(b=>b.onclick=()=>{v.currentTime=Math.max(0,Math.min(v.duration||1e9,v.currentTime+ +b.dataset.kj))});
  body.querySelector('.kspeed').onclick=e=>{const b=e.target.closest('[data-kr]');if(!b)return;v.playbackRate=+b.dataset.kr;try{v.preservesPitch=true}catch(err){}body.querySelectorAll('[data-kr]').forEach(x=>x.setAttribute('aria-pressed',x===b))};
  $('kaFull').onclick=()=>{const f=host.requestFullscreen||host.webkitRequestFullscreen;if(f)f.call(host).catch(()=>{})};
  // tap the lane to jump there

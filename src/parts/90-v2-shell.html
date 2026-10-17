@@ -30,10 +30,13 @@ addEventListener('popstate',e=>{if(!PAGES.includes(curSec))return;const st=e.sta
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(b&&!b.closest('#onb')){e.preventDefault();goSec(b.dataset.sec,{force:b.closest('#bnav')&&b.dataset.sec==='home'});if(b.dataset.player){mxView(true);mxCreating=false;mxSheetUI2()}}
  else if(e.target.closest('[data-back]'))pageClose()});
 // ---- Home ----
+// the big one-word titles on Home need the narrow display font: on once it's loaded (a wider fallback would overflow the tiles)
+try{document.fonts.load('800 40px "Big Shoulders Display"').then(f=>{if(f&&f.length)document.documentElement.classList.add('fdisp')}).catch(()=>{})}catch(e){}
 function homeName(){const p=profGet();return p.name||store.get('userName','')}
 function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName(),j=esc(pickJoke()).replace(/\{n\}/g,esc(n||'friend'));
- h.innerHTML=`<p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><p class="hjoke" id="hJoke" dir="auto">${j}</p><button type="button" class="hmore" id="hMore">Another one ↻</button>`;
- $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'))};
+ // the pick says it: Guitaring's pick with a speech bubble, the greeting above it, "Another one" under it
+ h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"><p class="hjoke" id="hJoke" dir="auto">${j}</p></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
+ $('hMore').onclick=()=>{$('hJoke').innerHTML=esc(pickJoke()).replace(/\{n\}/g,esc(homeName()||'friend'));const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
  renderHomeCont()}
 // Continue: refreshed on its own (the joke stays)
 function renderHomeCont(){
