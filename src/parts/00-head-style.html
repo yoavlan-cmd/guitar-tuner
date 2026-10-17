@@ -1236,4 +1236,12 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0px))}
 .dswarn{margin:0;padding:10px 12px;border-radius:12px;border:1px solid var(--amber);color:#FFC48A;font:500 13.5px/1.4 var(--body);background:rgba(255,140,50,.08)}
 .dsbeat{margin:0;font:500 12px var(--body);color:var(--muted)}.dsbeat::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;animation:dspulse 1.6s ease-in-out infinite}
+/* the song's album cover: a light background behind its name, a small one in the Learn list */
+.seshero.hascov::before{content:"";position:absolute;inset:0;background:var(--cov) center/cover no-repeat;opacity:.34;filter:saturate(1.1);pointer-events:none;
+ -webkit-mask-image:linear-gradient(to left,#000 20%,rgba(0,0,0,.35) 75%,transparent);mask-image:linear-gradient(to left,#000 20%,rgba(0,0,0,.35) 75%,transparent)}
+.seshero>*{position:relative}
+.sesname{align-self:flex-start;background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;font:600 12.5px var(--body);cursor:pointer;margin-top:-4px}
+.sesnamef{display:flex;flex-direction:column;gap:8px}
+.lcov{flex:0 0 40px;width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.06) center/cover no-repeat;display:none}.lcov.on{display:block}
+.dsask{display:flex;flex-direction:column;gap:10px;color:var(--ink);font:500 14px/1.4 var(--body)}
 </style>

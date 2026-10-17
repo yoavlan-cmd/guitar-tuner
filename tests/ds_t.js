@@ -17,6 +17,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const FILES={aud3XyZ12345abcDEF:{id:'aud3XyZ12345abcDEF',name:'Band C - Song C.mp3',mimeType:'audio/mpeg',parents:['folderC'],webViewLink:'https://drive.google.com/file/d/aud3XyZ12345abcDEF/view'},vid1XyZ12345abcDEF:{id:'vid1XyZ12345abcDEF',name:'Amir Dadon - Leftovers.mp4',mimeType:'video/mp4',parents:['folderA'],webViewLink:'https://drive.google.com/file/d/vid1XyZ12345abcDEF/view'},
   aud1XyZ12345abcDEF:{id:'aud1XyZ12345abcDEF',name:'Amir Dadon - Leftovers.mp3',mimeType:'audio/mpeg',parents:['folderA'],webViewLink:'https://drive.google.com/file/d/aud1XyZ12345abcDEF/view'},
   vid2XyZ12345abcDEF:{id:'vid2XyZ12345abcDEF',name:'Tuna - Ya.mp4',mimeType:'video/mp4',parents:['folderB'],webViewLink:'https://drive.google.com/file/d/vid2XyZ12345abcDEF/view'},
+  vid5XyZ12345abcDEF:{id:'vid5XyZ12345abcDEF',name:"ג'ימבו ג'יי - במקום בו אני גר (חי באולפן גלגלצ).mp4",mimeType:'video/mp4',parents:['folderE'],webViewLink:'https://drive.google.com/file/d/vid5XyZ12345abcDEF/view'},
   doc1XyZ12345abcDEF:{id:'doc1XyZ12345abcDEF',name:'Notes.docx',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',parents:['folderA']}};
  await ctx.route(/^https:\/\/www\.googleapis\.com\//,async r=>{const q=r.request(),u=q.url();if(q.method()==='OPTIONS')return r.fulfill({status:204,headers:H});
   // a folder's videos (an MP3 given alone: its video is looked for next to it)
@@ -112,6 +113,14 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await go('https://drive.google.com/drive/folders/folderD1234567?usp=sharing');await p.tap('#dsHide').catch(()=>{});
  {const it6=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.drive&&x.drive.folder==='folderD1234567'));const job6=it6&&jobs[it6.id]?JSON.parse(jobs[it6.id].body):{};console.log('  folder job:',JSON.stringify({file:job6.file,video:job6.video,base:job6.base}));
   ok(job6.file==='audD'&&job6.video==='vidD'&&job6.base==='Band D - Song D','a folder link: the song’s audio and video in it are used (not the MP3s made before)');}
+ // a live video's name: Guitaring isn't sure of the song, so it asks (and keeps what you say)
+ ok(it1.song&&it1.song.t==='Leftovers'&&it1.song.a==='Amir Dadon'&&it1.song.by==='name','a clean "Artist - Song" name: the song and artist are taken without asking');
+ await p.tap('#addSong').catch(()=>{});await p.waitForTimeout(150);if(await p.$('#dsAnother'))await p.tap('#dsAnother');await p.waitForTimeout(100);
+ {const n0=Object.keys(jobs).length;m=await go('https://drive.google.com/file/d/vid5XyZ12345abcDEF/view');
+  ok(/Which song is it\?/.test(m)&&await p.$eval('#dsT',e=>e.value)==='במקום בו אני גר'&&await p.$eval('#dsA',e=>e.value)==="ג'ימבו ג'יי"&&Object.keys(jobs).length===n0,'a live video’s name: it asks for the song and the artist first (filled with its guess), nothing sent yet');
+  await p.fill('#dsA',"ג'ימבו ג'יי, אורית טשומה");await p.tap('#dsOk');await p.waitForTimeout(600);await p.tap('#dsHide').catch(()=>{});
+  const it7=await p.evaluate(()=>window.__mxTest.idx().find(x=>x.drive&&x.drive.file==='vid5XyZ12345abcDEF'));
+  ok(it7&&jobs[it7.id]&&it7.song&&it7.song.t==='במקום בו אני גר'&&it7.song.a==="ג'ימבו ג'יי, אורית טשומה"&&it7.song.by==='you','…then sends it, keeping the song and artist you gave '+JSON.stringify(it7&&it7.song));}
  done[it3.id]={'done.json':JSON.stringify({ok:true,format:'flac'}),...stems,'drive.json':JSON.stringify({ok:false,error:'401 Unauthorized',files:{}}),'full.mp3':Buffer.from('ID3full'),'guitars.mp3':Buffer.from('ID3gtr')};
  for(let k=0;k<3;k++){await p.evaluate(()=>window.__mxTest.poll());await p.waitForTimeout(400)}
   await p.tap('#bnav [data-sec=home]');await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("Ya")');await p.waitForTimeout(300);
