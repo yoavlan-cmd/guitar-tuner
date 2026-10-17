@@ -38,6 +38,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  console.log('  card:',card.t);
  ok(card.rem&&/Good Riddance/.test(card.t)&&/\d+ weeks?/.test(card.t)&&/Yoav/.test(card.t),'a reminder: the song, how long, your name');
  ok(card.go&&card.ok&&/127, 199, 122|rgb\(127/.test(card.bs),'green frame, with “Practise it” and “I can play it”');
+ const av=await p.$eval('#homeHero',h=>{const i=h.querySelector('img.hjav');return {ok:!!i&&i.complete&&i.naturalWidth>300&&/^data:image\/webp/.test(i.src),pick:!!h.querySelector('.hjpick'),w:i&&i.getBoundingClientRect().width}});
+ ok(av.ok&&!av.pick&&av.w>=80,'the comments are said by the avatar (not the app logo) '+JSON.stringify({...av,ok:undefined}));
  await p.setViewportSize({width:390,height:844});await p.screenshot({path:path.join(OUT,'rem390.png')});
  await p.setViewportSize({width:360,height:740});await p.screenshot({path:path.join(OUT,'rem360.png')});
  const fits=await p.evaluate(()=>{const h=document.querySelector('#homeHero .hremact').getBoundingClientRect();return h.right<=innerWidth&&document.documentElement.scrollWidth<=innerWidth});
@@ -46,6 +48,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  // Another one: never two reminders in a row
  await p.evaluate(()=>{localStorage.removeItem('tuner.remSeen');const r=Math.random;Math.random=()=>0;document.getElementById('hMore').click();Math.random=r});
  ok(await p.$eval('#homeHero .hjbub',e=>!e.classList.contains('hrem')),'“Another one” after a reminder: a joke');
+ ok(await p.$eval('#homeHero .hjav',e=>e.classList.contains('laugh')),'“Another one”: the avatar shakes with laughter');
  // Practise: session (has a play-along), Drive sheet, phone sheet
  await only('Good Riddance');await home();await p.tap('#hRemGo');await p.waitForTimeout(400);
  ok(await p.evaluate(()=>window.__v2.cur())==='session'&&/Good Riddance/.test(await p.$eval('#sesBox',e=>e.textContent)),'Practise: the song session when it has a play-along');
