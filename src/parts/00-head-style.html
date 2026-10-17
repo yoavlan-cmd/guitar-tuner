@@ -1284,4 +1284,10 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .gxkind{margin:4px 0 10px}
 .gxhow{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:rgba(255,255,255,.03)}.gxhow p{margin:0 0 4px;font:500 14px/1.45 var(--body)}.gxhow p:last-child{margin:0}
 .gxdel{margin-top:12px;color:#FF8A70}
+/* gear for this song (V2 phase 5): folded card; the summary names the guitar and pickup, the body one sentence why and the list */
+.gtbox summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px}.gtbox summary::-webkit-details-marker{display:none}
+.gtbox summary h3{margin:0}.gtbox summary small{color:var(--muted);font:500 13px var(--body)}.gtbox summary h3::after{content:" ▾";font-size:.7em;color:var(--muted)}.gtbox[open] summary h3::after{content:" ▴"}
+.gtask{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px}.gtask .chips2{margin-bottom:4px}.gtask>span{font:600 13px var(--body);color:var(--muted)}.gtask small{color:var(--muted);font-size:12px;align-self:center}
+.gtwhy{margin:10px 0 8px;font:500 15px/1.45 var(--body)}
+.gtl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0}.gtl dt{font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}.gtl dd{margin:0;font:500 14px/1.45 var(--body)}
 </style>
