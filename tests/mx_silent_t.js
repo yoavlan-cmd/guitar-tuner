@@ -7,7 +7,8 @@ const APP=process.env.APP||`http://localhost:${srv.address().port}/index.html`;
 let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});
  const ctx=await b.newContext({viewport:{width:390,height:844}});let ghCalls=0;
- await ctx.route('https://api.github.com/**',r=>{ghCalls++;r.fulfill({status:500,headers:{'access-control-allow-origin':'*'},body:'{}'})});
+ await ctx.route('https://api.github.com/**',r=>{if(!/\/contents\/ideas\.json/.test(r.request().url()))ghCalls++;// the daily ideas are read from the private repository (step C): not a send
+  r.fulfill({status:500,headers:{'access-control-allow-origin':'*'},body:'{}'})});
  await ctx.route(/^https:\/\/(?!api\.github\.com)/,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{localStorage.setItem('tuner.userName','"Yoav"');localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'t',branch:'main'}));window.__mxWaitScale=0.001;window.__mxPollMs=1e9;
