@@ -53,8 +53,12 @@ async function coverFor(t,a,{look=true,force=false}={}){if(!t||!a)return null;co
   const url=hit.artworkUrl100.replace(/\/\d+x\d+bb\./,'/600x600bb.');let rec={url,at:Date.now(),album:hit.collectionName||'',artist:hit.artistName||'',track:hit.trackName||''};
   try{const r=await fetch(url);if(r.ok)rec={...rec,...await covMake(await r.blob())}}catch(e){}// no copy allowed: the picture is shown from its address
   await mxPut(k,rec);const c=covUse(k,rec);covPaint(k,c);return c}catch(e){return null}finally{delete covBusy[k]}})()}
+// Guitaring's own picture (the app icon): shown until a song's real cover is found, and for good when none fits or the song has
+// no artist to look it up by
+let covDefU='';function covDef(){if(covDefU)return covDefU;try{const s=document.getElementById('appLogoSvg');
+ covDefU=URL.createObjectURL(new Blob([s.outerHTML.replace(/^<svg /,'<svg width="512" height="512" ')],{type:'image/svg+xml'}))}catch(e){}return covDefU}
 // show a cover wherever its song is on screen (the Learn list), without drawing the list again
-function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&!el.classList.contains('on')){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.add('on')}})}
+function covPaint(k,c){if(!c||!c.thumb)return;document.querySelectorAll('.lcov[data-ck]').forEach(el=>{if(el.dataset.ck===k&&(!el.classList.contains('on')||el.classList.contains('def'))){el.style.backgroundImage=`url("${c.thumb}")`;el.classList.remove('def');el.classList.add('on')}})}
 const covNow=(t,a)=>t&&a?COV[coverKey(t,a)]||null:null;// a cover already shown in this visit (drawn with the list, no flicker)
 // every song's cover ready ahead: at start and whenever the list changes, the missing ones are looked up in the background, one
 // at a time with a pause (the catalog limits how fast it may be asked)
@@ -65,4 +69,4 @@ function covWarm(){if(covRun){covAgain=true;return covRun}
    const c0=await coverFor(g.title,g.artist,{look:false});if(c0){covPaint(k,c0);continue}
    if(!navigator.onLine)break;const n0=covAsked;await coverFor(g.title,g.artist);if(covAsked>n0)await new Promise(ok=>setTimeout(ok,window.__covGapMs??1500))}}while(covAgain)}
   finally{covRun=null}})()}
-window.__cov={clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks
+window.__cov={def:()=>covDef(),clean:songClean,ident:songIdent,ana:anaIdent,key:coverKey,get:(t,a)=>coverFor(t,a),warm:covWarm};// test hooks

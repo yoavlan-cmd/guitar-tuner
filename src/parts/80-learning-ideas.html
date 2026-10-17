@@ -25,7 +25,7 @@ function learnSongs(){
  return G.sort((a,b)=>(b.at-a.at)||a.title.localeCompare(b.title,'he'))}
 // the covers next to the songs: drawn with the list when already shown, the ones on the phone at once, the rest looked up in the
 // background (covWarm)
-async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov:not(.on)')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
+async function learnCovers(){for(const el of [...document.querySelectorAll('#learnList .lcov.def')]){const t=el.dataset.ct,a=el.dataset.ca;if(!a)continue;
   const c=await coverFor(t,a,{look:false});if(c)covPaint(el.dataset.ck,c)}
  covWarm()}
 function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs(),st=k=>learnF[k]||'';
@@ -45,7 +45,7 @@ function renderLearn(){const box=$('learnBox');if(!box)return;const G=learnSongs
  if(!G.length)return;
  const draw=()=>{const q=vlKey(learnQ),f=G.filter((g,i)=>inL(i)&&(!q||vlKey(g.title+' '+g.artist).includes(q))&&(!learnSt||S[i]===learnSt)&&(!learnArt||vlKey(g.artist)===learnArt)&&LKINDS.every(([k])=>!st(k)||(st(k)==='has'?g.r[k].length:!g.r[k].length)));
   $('learnList').innerHTML=f.length?f.map(g=>{const i=G.indexOf(g);
-   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist);return `<span class="lcov${c&&c.thumb?' on':''}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${c&&c.thumb?` style="background-image:url(&quot;${c.thumb}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
+   return `<button type="button" class="lrow" data-li="${i}">${(()=>{const c=covNow(g.title,g.artist),u=c&&c.thumb?c.thumb:covDef();return `<span class="lcov on${c&&c.thumb?'':' def'}" data-ct="${esc(g.title)}" data-ca="${esc(g.artist||'')}" data-ck="${esc(g.artist?coverKey(g.title,g.artist):'')}"${u?` style="background-image:url(&quot;${u}&quot;)"`:''} aria-hidden="true"></span>`})()}<span class="ltxt"><b dir="auto">${esc(g.title)}</b><small dir="auto">${esc(g.artist||(g.onit?'On it':''))}</small></span>${S[i]!=='learning'?`<span class="lstate ${S[i]}">${S[i]==='learned'?'Learned':'Idea'}</span>`:''}<span class="lres" role="img" aria-label="${esc(LKINDS.filter(([k])=>g.r[k].length).map(x=>x[2]).join(', ')||'Nothing yet')}">${ICONS?LKINDS.map(([k,t])=>g.r[k].length?SK(t):SKoff(t)).join(''):(LKINDS.filter(([k])=>g.r[k].length).map(x=>`<span class="ltag">${LTAG[x[0]]}</span>`).join('')||'<span class="ltag none">Nothing yet</span>')}</span><i class="lgo" aria-hidden="true">›</i></button>`}).join('')
    :'<p class="tip">No song matches. Tap a filter again to change or clear it.</p>';learnCovers()};
  draw();
  $('learnQ').addEventListener('input',e=>{learnQ=e.target.value;draw()});
