@@ -48,6 +48,7 @@ const GTR=path.join(OUT,'auto_gtr.flac');execFileSync('ffmpeg',['-y','-v','error
  const R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],snd=n=>{const m=n.match(/^([A-G][#b]?)(m?)/);if(!m)return n;const r=R.indexOf({Db:'C#','D#':'Eb',Gb:'F#','G#':'Ab','A#':'Bb'}[m[1]]||m[1]);return R[(r+capo)%12]+m[2]};
  const sounding=[...new Set(ch.map(snd))];console.log('  sounding:',sounding.join(' '));
  ok(['G','C','D','Em'].filter(c=>sounding.includes(c)).length>=3,'the guide’s chords sound like the song’s G · C · D · Em (at least 3 of 4)');
+ ok(/Times are from the guitars-only part/.test(await p.$eval('#gdBody',e=>e.textContent)),'the guide says its times are from the guitars-only part');
  const tog=await p.$$eval('.gdsrc li',l=>l.map(x=>x.textContent).find(t=>/by side/.test(t))||'');console.log('  by side:',tog);
  ok(/they sit together \(left \d+%, centre \d+%, right \d+%\)/.test(tog),'one guitar in the middle: Built from says the guitars sit together (measured by side)');
  // a phone analysis of the same song saved later (a song video analysed on the phone) doesn't hide the split's session
