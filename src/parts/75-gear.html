@@ -121,6 +121,8 @@ function daysSince(d){return Math.floor((Date.now()-new Date(d).getTime())/864e5
 function stringsStatus(it){const g=GEAR[it.type];if(g.amp){const sp=it.specs||{};const k={tube:'Tube amp · have the tubes checked about once a year',solid:'Solid-state amp',modeling:'Modelling amp',hybrid:'Hybrid amp'}[sp.ampkind]||g.short;return {txt:k+(sp.power==='battery'?' · battery powered':''),due:false}}const per=it.specs&&it.specs.top==='solid'?g.strings:g.strings;if(!it.strings)return {txt:'Strings: no date yet',due:false};const d=daysSince(it.strings),left=per-d;return {txt:`Strings changed ${d===0?'today':d===1?'yesterday':d+' days ago'} · ${left<0?'time for a new set':'next change in about '+left+' days'}`,due:left<0}}
 function renderGear(){
  const l=instAll();
+ // pedals and accessories (76-gear-extra) show under the list, not with a guitar's form or page
+ const gx=$('gearExtra');if(gx&&(instEdit||instOpen))gx.hidden=true;
  if(instEdit){renderInstForm();return}
  if(instOpen){const it=l.find(x=>x.id===instOpen);if(it){renderInstDetail(it);return}instOpen=null}
  gearVisit=null;
@@ -133,6 +135,7 @@ function renderGear(){
  if($('lostNo'))$('lostNo').onclick=()=>{store.set('gearLost',[]);renderGear()};
  gpCoversLoad(l);
  $('instAdd').onclick=()=>{instEdit={id:'',name:'',type:'acoustic',brand:'',model:'',year:'',specs:{},strings:''};renderGear()};
+ try{if(!gxEdit){const g=$('gearOut');if(g)g.hidden=false}renderGearExtra()}catch(e){}
 }
 $('gearOut').addEventListener('click',e=>{const r=e.target.closest('[data-open]');if(r){instOpen=r.dataset.open;renderGear();window.scrollTo({top:0})}});
 /* small drawings that explain each detail option (64×40) */
