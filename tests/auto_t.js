@@ -48,6 +48,12 @@ const GTR=path.join(OUT,'auto_gtr.flac');execFileSync('ffmpeg',['-y','-v','error
  const R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],snd=n=>{const m=n.match(/^([A-G][#b]?)(m?)/);if(!m)return n;const r=R.indexOf({Db:'C#','D#':'Eb',Gb:'F#','G#':'Ab','A#':'Bb'}[m[1]]||m[1]);return R[(r+capo)%12]+m[2]};
  const sounding=[...new Set(ch.map(snd))];console.log('  sounding:',sounding.join(' '));
  ok(['G','C','D','Em'].filter(c=>sounding.includes(c)).length>=3,'the guide’s chords sound like the song’s G · C · D · Em (at least 3 of 4)');
+ // a phone analysis of the same song saved later (a song video analysed on the phone) doesn't hide the split's session
+ await p.evaluate(()=>{const d=JSON.parse(localStorage.getItem('tuner.song.mix_z1'));const v={...d,title:'Test Band - Four Chords',artist:undefined,from:undefined,mix:undefined,song:undefined,whole:undefined,video:undefined,at:Date.now()};
+  localStorage.setItem('tuner.song.vid_x',JSON.stringify(v));const ix=JSON.parse(localStorage.getItem('tuner.songs'));ix.unshift('vid_x');localStorage.setItem('tuner.songs',JSON.stringify(ix))});
+ await p.tap('#paneSession [data-back]');await p.waitForTimeout(200);await p.tap('#learnList .lrow');await p.waitForTimeout(500);
+ const src2=await p.$eval('#gdBody',e=>e.innerText.replace(/\s+/g,' ')).catch(()=>'');
+ ok(/The guitars-only part/.test(src2)&&!/The recording you analysed/.test(src2)&&await p.$eval('.gdplay',e=>e.dataset.v)==='mix_z1','with a newer phone analysis of the same song, the guide is still the split’s session');
  await p.screenshot({path:path.join(OUT,'auto_session.png'),fullPage:true});
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
