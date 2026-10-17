@@ -1,0 +1,79 @@
+/* ===== Pedals and accessories (V2 phase 5): my effects and the small things (capo, strings, picks, tuner) ===== */
+// Kept in their own key (tuner.gearExtra: [{id, kind:'pedal'|'acc', type, name, brand, model, controls, gauge, thick, note, added}]),
+// so the guitars and amps (tuner.instruments) are untouched. Listed under the guitars and amps on the Gear page; tap one to edit it.
+// Each pedal type says what it does and where to start its knobs; the song's gear tip (77-gear-tip) uses what you own. Adding a
+// capo tells the Easy guide you have one (profile.capo, when you haven't chosen yet).
+const GX_PEDALS={
+ overdrive:{l:'Overdrive',g:'drive',what:'Warm, amp-like crunch that grows as you dig in.',start:'Drive about 9 o’clock, tone at noon, level a little above unity (a bit louder than off).'},
+ distortion:{l:'Distortion',g:'drive',what:'Heavier, compressed crunch for rock and riffs.',start:'Gain at 10 o’clock, tone at noon; raise the gain only until chords still ring clearly.'},
+ fuzz:{l:'Fuzz',g:'drive',what:'Thick, buzzy saturation (60s and 70s rock, stoner).',start:'Fuzz near full, volume to taste; roll the guitar’s volume back to clean it up.'},
+ boost:{l:'Boost',g:'drive',what:'Louder (and a little hotter) for solos, or to push the amp.',start:'Level so a solo cuts through the band without jumping out.'},
+ compressor:{l:'Compressor',g:'dyn',what:'Evens out loud and soft notes; snappier clean strumming and longer sustain.',start:'Sustain at 10 o’clock, attack at noon, level so on and off sound equally loud.'},
+ delay:{l:'Delay',g:'time',what:'Echoes of what you play.',start:'Time to the song’s tempo, 1–2 repeats (feedback 9 o’clock), mix low so the echo sits behind you.'},
+ reverb:{l:'Reverb',g:'time',what:'Room or hall around the sound.',start:'Mix about 10 o’clock; more for slow songs, less for fast strumming.'},
+ chorus:{l:'Chorus',g:'mod',what:'Shimmering, doubled sound (80s clean, arpeggios).',start:'Rate slow (9 o’clock), depth at noon.'},
+ phaser:{l:'Phaser',g:'mod',what:'Swirling, sweeping sound (funk and 70s rock).',start:'Rate slow; one knob pedals: about 10 o’clock.'},
+ flanger:{l:'Flanger',g:'mod',what:'Jet-plane sweep.',start:'Rate slow, regeneration low; use it for a part, not a whole song.'},
+ tremolo:{l:'Tremolo',g:'mod',what:'Volume pulsing in time.',start:'Rate to the song’s tempo, depth at noon.'},
+ wah:{l:'Wah',g:'filter',what:'A foot-swept vowel sound (funk rhythm, expressive solos).',start:'Rock it in time with the strumming: heel on the downbeat, toe on the upbeat.'},
+ octave:{l:'Octave',g:'filter',what:'Adds a note an octave below or above (single notes only).',start:'Dry at full, octave below at noon.'},
+ eq:{l:'EQ',g:'filter',what:'Shapes the tone, or acts as a boost.',start:'Start flat; cut what sounds muddy before adding anything.'},
+ acpre:{l:'Acoustic preamp / DI',g:'util',what:'Shapes an acoustic’s pickup and sends it to a PA or amp.',start:'Gain until the loudest strums don’t clip; cut a little low-mids if it booms.'},
+ looper:{l:'Looper',g:'util',what:'Records a part and plays it back so you can play over it.',start:'Record one clean pass of the chords, then practise the lead or strumming over it.'},
+ tuner:{l:'Pedal tuner',g:'util',what:'Mutes and tunes between songs.',start:'First pedal in the chain.'},
+ volume:{l:'Volume / expression',g:'util',what:'Swells and level control with your foot.',start:'Place it after the drive pedals to control loudness without changing the crunch.'},
+ multi:{l:'Multi-effects',g:'multi',what:'Many effects (and often amp models) in one unit.',start:'Start from a clean preset and add one effect at a time.'},
+ other:{l:'Other pedal',g:'util',what:'',start:''}};
+const GX_ACC={
+ capo:{l:'Capo',tip:'Clamp just behind the fret, straight across; retune a little if the strings go sharp.'},
+ strings:{l:'Strings',tip:'Note the gauge: lighter strings are easier on the fingers, heavier ones sound fuller and stay in tune with a capo.'},
+ picks:{l:'Picks',tip:'Thin picks (under 0.6 mm) suit strumming; medium to heavy (0.7–1.0 mm and up) suit single notes and riffs.'},
+ ctuner:{l:'Clip-on tuner',tip:'Clip it to the headstock; it hears the vibration, not the room.'},
+ slide:{l:'Slide',tip:'Rest it over the fret wire, not between frets; mute behind it with a spare finger.'},
+ strap:{l:'Strap',tip:'Set it so the guitar sits at the same height standing as sitting.'},
+ cable:{l:'Cable',tip:'A crackle when you move it usually means a worn plug or cable.'},
+ humid:{l:'Humidifier',tip:'Acoustics like 45–55% humidity; dry winters crack tops.'},
+ other:{l:'Other',tip:''}};
+const gxAll=()=>store.get('gearExtra',[])||[];
+const gxSave=l=>store.set('gearExtra',l);
+let gxEdit=null;
+const gxType=x=>x.kind==='pedal'?(GX_PEDALS[x.type]||GX_PEDALS.other):(GX_ACC[x.type]||GX_ACC.other);
+const gxSub=x=>{const bm=[x.brand,x.model].filter(Boolean).join(' '),n=vlKey(x.name||''),t=gxType(x).l;return [vlKey(t)===n?'':t,bm&&!n.includes(vlKey(bm))?bm:'',x.kind==='acc'&&x.type==='strings'&&x.gauge?x.gauge:'',x.kind==='acc'&&x.type==='picks'&&x.thick?x.thick+' mm':'',x.note||''].filter(Boolean).join(' · ')||t};
+// the list, under the guitars and amps
+function renderGearExtra(){const box=$('gearExtra');if(!box)return;box.hidden=false;if(gxEdit){gxForm();return}
+ const L=gxAll(),P=L.filter(x=>x.kind==='pedal'),A=L.filter(x=>x.kind==='acc');
+ const row=x=>`<button type="button" class="instrow gxrow" data-gx="${esc(x.id)}"><span class="ithumb none gxic" aria-hidden="true">${x.kind==='pedal'?'◉':'✚'}</span><span class="itxt"><b dir="auto">${esc(x.name)}</b><span dir="auto">${esc(gxSub(x))}</span></span></button>`;
+ box.innerHTML=`<section class="card"><div class="cardhead gxhead"><h2>Pedals &amp; accessories</h2><button class="btn" id="gxAdd" type="button">+ Add</button></div>
+ ${L.length?`${P.length?`<h3 class="gxh">Pedals</h3><div class="instlist">${P.map(row).join('')}</div>`:''}${A.length?`<h3 class="gxh">Accessories</h3><div class="instlist">${A.map(row).join('')}</div>`:''}`
+ :'<p class="tip">Your effects pedals and the small things: capo, strings, picks, a tuner. Each song’s page then suggests which of your gear to use for it.</p>'}</section>`;
+ $('gxAdd').onclick=()=>{gxEdit={id:'',kind:'pedal',type:'overdrive',name:'',brand:'',model:'',controls:'',gauge:'',thick:'',note:''};gxOpenForm()};
+ box.querySelectorAll('[data-gx]').forEach(b=>b.onclick=()=>{const x=gxAll().find(y=>y.id===b.dataset.gx);if(x){gxEdit={...x};gxOpenForm()}})}
+// the form takes the page (the guitars list hides while it's open)
+function gxOpenForm(){const g=$('gearOut');if(g)g.hidden=true;gxForm();window.scrollTo({top:0})}
+function gxClose(){gxEdit=null;const g=$('gearOut');if(g)g.hidden=false;renderGear();window.scrollTo({top:0})}
+function gxForm(){const x=gxEdit,box=$('gearExtra'),T=x.kind==='pedal'?GX_PEDALS:GX_ACC,t=T[x.type]||T.other;
+ box.innerHTML=`<section class="card instform gxform"><h2>${x.id?'Edit':'Add'} ${x.kind==='pedal'?'pedal':'accessory'}</h2>
+ <div class="seg gxkind" role="radiogroup" aria-label="Kind">${[['pedal','Pedal'],['acc','Accessory']].map(([k,l])=>`<button type="button" role="radio" data-gk="${k}" aria-checked="${x.kind===k}" aria-pressed="${x.kind===k}">${l}</button>`).join('')}</div>
+ <div class="namefield">Type<div class="chips2" id="gxType">${Object.entries(T).map(([k,v])=>`<button type="button" class="chip" data-gt="${k}" aria-pressed="${x.type===k}">${esc(v.l)}</button>`).join('')}</div></div>
+ ${t.what||t.start||t.tip?`<div class="gxhow">${t.what?`<p><b>What it does:</b> ${esc(t.what)}</p>`:''}${t.start?`<p><b>Where to start:</b> ${esc(t.start)}</p>`:''}${t.tip?`<p>${esc(t.tip)}</p>`:''}</div>`:''}
+ <label class="namefield">Name it <input id="gxName" type="text" dir="auto" maxlength="40" placeholder="${esc(t.l)}" value="${esc(x.name||'')}"></label>
+ <div class="wrow"><label class="namefield">Brand <input id="gxBrand" type="text" list="iBrands" autocomplete="off" value="${esc(x.brand||'')}" placeholder="${x.kind==='pedal'?'e.g. Boss':'e.g. Kyser'}"></label><label class="namefield">Model <input id="gxModel" type="text" autocomplete="off" value="${esc(x.model||'')}" placeholder="${x.kind==='pedal'?'e.g. SD-1':''}"></label></div>
+ ${x.kind==='pedal'?`<label class="namefield">Its knobs (optional) <input id="gxCtl" type="text" dir="auto" maxlength="80" value="${esc(x.controls||'')}" placeholder="e.g. Drive, Tone, Level"></label>`:''}
+ ${x.kind==='acc'&&x.type==='strings'?`<label class="namefield">Gauge <input id="gxGauge" type="text" maxlength="12" value="${esc(x.gauge||'')}" placeholder="e.g. 12-53 or 10-46"></label>`:''}
+ ${x.kind==='acc'&&x.type==='picks'?`<label class="namefield">Thickness (mm) <input id="gxThick" type="text" inputmode="decimal" maxlength="5" value="${esc(x.thick||'')}" placeholder="e.g. 0.6"></label>`:''}
+ <label class="namefield">Note (optional) <input id="gxNote" type="text" dir="auto" maxlength="80" value="${esc(x.note||'')}"></label>
+ <div class="editrow"><button class="btn cta" id="gxOk" type="button">${x.id?'Save changes':'Add to my gear'}</button><button class="btn ghost" id="gxNo" type="button">Cancel</button></div>
+ ${x.id?`<button type="button" class="btn ghost wide gxdel" id="gxDel">Remove from my gear</button>`:''}</section>`;
+ const sync=()=>{x.name=$('gxName').value.trim();x.brand=$('gxBrand').value.trim();x.model=$('gxModel').value.trim();x.note=$('gxNote').value.trim();
+  if($('gxCtl'))x.controls=$('gxCtl').value.trim();if($('gxGauge'))x.gauge=$('gxGauge').value.trim();if($('gxThick'))x.thick=$('gxThick').value.trim()};
+ box.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{sync();if(x.kind!==b.dataset.gk){x.kind=b.dataset.gk;x.type=x.kind==='pedal'?'overdrive':'capo'}gxForm()});
+ $('gxType').onclick=e=>{const b=e.target.closest('[data-gt]');if(!b)return;sync();x.type=b.dataset.gt;gxForm()};
+ $('gxNo').onclick=gxClose;
+ $('gxOk').onclick=()=>{sync();if(!x.name)x.name=[x.brand,x.model].filter(Boolean).join(' ')||gxType(x).l;
+  const l=gxAll(),it={id:x.id||'g'+Date.now().toString(36),kind:x.kind,type:x.type,name:x.name,brand:x.brand,model:x.model,controls:x.kind==='pedal'?x.controls||'':'',gauge:x.type==='strings'?x.gauge||'':'',thick:x.type==='picks'?x.thick||'':'',note:x.note||'',added:x.added||Date.now()};
+  const i=l.findIndex(y=>y.id===it.id);if(i>=0)l[i]=it;else l.push(it);gxSave(l);
+  // a capo: the Easy guide opens with its capo version (unless you chose otherwise)
+  if(it.kind==='acc'&&it.type==='capo'){try{const p=profGet();if(!p.capo){p.capo='yes';profSet(p)}}catch(e){}}
+  gxClose()};
+ const d=$('gxDel');if(d)d.onclick=()=>{if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='Tap again to remove it';return}gxSave(gxAll().filter(y=>y.id!==x.id));gxClose()}}
+window.__gx={all:gxAll};// test hooks
