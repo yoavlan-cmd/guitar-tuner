@@ -6787,11 +6787,17 @@ function renderIdeas(){
  wireIdeas();ideaAuto();
 }
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#ideaBox>summary'))$('ideaBox')._mine=true});
-// daily ideas: the scheduled scan writes ideas.json next to the app; the phone app just reads it
+// daily ideas: the scheduled scan writes ideas.json next to the app and (privacy step C) to your private GitHub repository; the
+// phone reads the private copy when GitHub is connected (the Band breakdown key), else, or when that fails, the public one
 let dailyAt=0,dailyTried=false;
+const ideasOk=d=>d&&d.v===1&&d.index;
+async function ideasPrivate(){const cfg=mxGh();if(!cfg)return null;
+ try{const b=await gh('/contents/ideas.json'+(cfg.branch?'?ref='+encodeURIComponent(cfg.branch):''),{raw:true,ok404:true},cfg);if(!b)return null;const d=JSON.parse(await b.text());return ideasOk(d)?d:null}catch(e){return null}}
 async function loadDailyIdeas(force){
  if(window.claude||location.protocol==='file:'&&!force)return;if(!force&&Date.now()-dailyAt<3*3600e3)return;dailyAt=Date.now();
- try{const r=await fetch((BETA?'../':'')+'ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}const d=await r.json();if(!d||d.v!==1||!d.index)return;
+ try{let d=await ideasPrivate(),src='private';
+  if(!d){src='public';const r=await fetch((BETA?'../':'')+'ideas.json?t='+Date.now(),{cache:'no-store'}).finally(()=>{dailyTried=true});if(!r.ok){renderIdeas();return}d=await r.json();if(!ideasOk(d))return}
+  dailyTried=true;store.set('ideasSrc',{src,at:Date.now(),date:d.date||''});try{prfUI()}catch(e){}
   if(Array.isArray(d.sheets)){store.set('sheetIndex',d.sheets);try{renderCatalog()}catch(e){}}
   if(Array.isArray(d.jokes))store.set('jokesExtra',d.jokes.slice(-80));
   store.set('songIndex',{at:Date.parse(d.at)||Date.now(),src:'daily',songs:d.index.songs||[],artists:d.index.artists||[]});
@@ -7879,7 +7885,7 @@ function prfQueue(){if(!prfOn())return;clearTimeout(prfT);prfT=setTimeout(()=>{p
 function prfUI(){const box=$('prfSync');if(!box)return;const on=prfOn(),cfg=mxGh(),st=store.get('profRepo',null),err=store.get('profRepoErr','');
  box.innerHTML=`<label class="prfrow"><input type="checkbox" id="prfOn"${on?' checked':''}${cfg?'':' disabled'}> <span><b>Use my profile for daily ideas</b>
   <small>Saves your answers above and your songs with their status (Learning, Learned, Idea for later), not your keys, notes, gear or files, as <code>${PRF_FILE}</code> in your private GitHub repository${cfg?` <b>${esc(cfg.repo)}</b>`:''}, and again when you change them. Turning it off deletes the file.</small></span></label>
-  <p class="tip prfst" role="status">${!cfg?'Connect GitHub first (below, “GitHub for Band breakdown”).':err==='nogh'?'GitHub isn’t connected.':err?`Couldn’t save it: ${esc(err)}`:on&&st?`Saved ${esc(bkDate(st.at))}.`:on?'Saving…':'Off: nothing is saved outside this phone.'}</p>`;
+  <p class="tip prfst" role="status">${!cfg?'Connect GitHub first (below, “GitHub for Band breakdown”).':err==='nogh'?'GitHub isn’t connected.':err?`Couldn’t save it: ${esc(err)}`:on&&st?`Saved ${esc(bkDate(st.at))}.`:on?'Saving…':'Off: nothing is saved outside this phone.'}</p>${(()=>{const i=store.get('ideasSrc',null);return i?`<p class="tip prfst" id="ideasSrcLine">Daily ideas: from ${i.src==='private'?'your private repository':'the public site'} (${esc(bkDate(i.at))}).</p>`:''})()}`;
  const cb=$('prfOn');if(cb)cb.onchange=async()=>{const p=profGet();p.sync={...(p.sync||{}),repo:cb.checked};profSet(p);
   if(!cb.checked){clearTimeout(prfT);box.querySelector('.prfst').textContent='Deleting the file…';try{await prfDelete();store.set('profRepoErr','')}catch(e){store.set('profRepoErr',String(e&&e.message||e))}}
   try{renderProfile()}catch(e){prfUI()}}}
