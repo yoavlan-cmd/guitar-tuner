@@ -14,10 +14,16 @@ function songIdent(raw){const c=songClean(raw),n=songFromName(c.s)||{t:c.s,a:''}
  let sh=null;try{sh=vlFindSheet(n.t,n.a)}catch(e){}
  if(sh&&sh.title)return {t:cleanName(sh.title),a:sh.artist||n.a,by:'sheet',sure:true};
  return {t:n.t,a:n.a,by:'name',sure:!!(n.t&&n.a&&!c.noisy)}}
-// an analysis' song and artist (a song video's title is its file name, "Artist - Song"; a session built here keeps the artist apart)
+// an analysis' song and artist (a song video's title is its file name, mostly "Artist - Song"; a session built here is "Song - Artist"
+// and keeps the artist apart)
 function anaIdent(d){if(d.song&&d.song.t)return d.song;const T=String(d.title||'');
  if(d.artist){const a=d.artist,t=T.endsWith(' - '+a)?T.slice(0,-(a.length+3)):T;return {t:songClean(t).s,a}}
- const n=songFromName(songClean(T).s)||{t:T,a:''};return {t:n.t,a:n.a}}
+ // no artist apart: the order is whichever way round matches a chord sheet Guitaring knows; else a session's "Song - Artist",
+ // else a file name's "Artist - Song"
+ const c=songClean(T).s,m=c.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+ if(m){const L=m[1].trim(),R=m[2].trim(),sh=(t,a)=>{try{return vlFindSheet(t,a)}catch(e){return null}};
+  if(sh(R,L))return {t:R,a:L};if(sh(L,R)||d.mix)return {t:L,a:R}}
+ const n=songFromName(c)||{t:T,a:''};return {t:n.t,a:n.a}}
 // ---- covers ----
 const coverKey=(t,a)=>'cover:'+vlKey(a||'')+'|'+vlKey(songClean(t||'').s);
 const COV={};// key → {big, thumb} object URLs (this visit)
