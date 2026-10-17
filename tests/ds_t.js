@@ -92,6 +92,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   'stills.json':JSON.stringify({every:2,n:3,idx:[[0,0,4],[2,4,4],[4,8,4]]}),'stills.bin':Buffer.from('JPG1JPG2JPG3')};
  await p.waitForTimeout(900);
  ok(/Ready/.test(await p.$eval('#dsDlg',e=>e.textContent))&&!!await p.$('#dsOpen'),'when it’s done the progress says Ready with “Open the song”');
+ ok(await p.$eval('#dsDlg .dsbar',b=>{const i=b.querySelector('i'),r=b.getBoundingClientRect();return !b.classList.contains('done')&&r.height<=12&&i.getBoundingClientRect().width>=r.width-2}),'Ready: the bar is full (the tuner’s “done” card style doesn’t take it over)');
  const it2=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it2.state==='ready'&&it2.drive.ok&&it2.drive.out.guitars.id==='g9','the parts are back and the guitars-only MP3 GitHub saved in Drive is linked');
  const sti=await p.evaluate(async id=>{const v=await window.__bk.get('mixstills:'+id);return v&&{n:v.idx.length,size:v.bin.size}},it1.id);
  ok(sti&&sti.n===3&&sti.size===12,'the video stills come back with the parts and are kept on the phone '+JSON.stringify(sti));
