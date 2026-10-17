@@ -29,7 +29,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
   if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){calls.list++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
   if(/googleapis\.com\/drive\/v3\/files\/vid1\?alt=media/.test(u)){calls.media++;return r.fulfill({contentType:'video/webm',headers:H,body:vbytes})}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
-   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;calls.sheets=n;calls.sheetSize=jpgSize(c.find(x=>x.type==='image').source.data);calls.tilesSaid=(txt.match(/up to (\d+) tiles/)||[])[1];return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high'})))})}]})})}
+   if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;calls.sheets=n;calls.sheetSize=jpgSize(c.find(x=>x.type==='image').source.data);calls.tilesSaid=(txt.match(/up to (\d+) tiles/)||[])[1];calls.findMax=body.max_tokens;calls.findOnly=/Leave out tiles with no clear fretting hand/.test(txt);if(calls.cut)return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:'{"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acou'}]})});return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high'})))})}]})})}
    calls.prompt=txt;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));let lastE=-1;ts.forEach((t,i)=>{if(seq[Math.floor(t/4.6)]==='E')lastE=i});
    const frames=ts.map((t,i)=>({t,shape:i===lastE?'G':SHAPE[seq[Math.floor(t/4.6)]],conf:'high'}));
@@ -62,6 +62,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  console.log('  bar:',lab);ok(/Looking at the song’s video/.test(lab),'while it looks, the bar says “Looking at the song’s video”');
  await done();await p.waitForTimeout(400);a=await ana();console.log('  video:',JSON.stringify(a.video&&{capo:a.video.capo,agree:a.video.agree,differ:a.video.differ,fixed:a.video.fixed,asked:a.video.asked}));
  {const asked=(await ana()).video.asked;console.log('  find: '+calls.sheets+' sheets of '+calls.sheetSize+', '+asked+' moments');
+  ok(calls.findMax>=8000&&calls.findOnly,'the find step has room for a long answer (max '+calls.findMax+' tokens) and lists only the tiles with a hand');
   ok(calls.sheetSize==='1440x810'&&calls.tilesSaid==='4'&&calls.sheets===Math.ceil(asked/4),'the hand is looked for on sheets of 4 tiles, each 720 wide (a hand in a wide shot stays big enough)');}
  ok(calls.list===1&&calls.media===1&&calls.claude===2&&calls.find===1,`the video was found in the song’s folder, read once; two Claude calls (find the hand, then read the close-ups), ${calls.images} pictures in all`);
  ok(!/heard|C#m|E · |\bF#\b(?!m)/.test(calls.prompt)&&(calls.prompt.match(/F#m/g)||[]).length===1,'Claude isn’t told what the sound heard (only the example shape name is in the question)');
@@ -86,5 +87,10 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
  const src3=await p.$$eval('.gdsrc li',l=>l.map(x=>[x.className,x.textContent]));const v3=src3.find(x=>/The video/.test(x[1]))||[];console.log('  video line:',JSON.stringify(v3));
  ok(v3[0]==='n'&&/fretting hand isn’t shown clearly/.test(v3[1]),'Built from lists the video as not helping, and why');
+ // an answer cut short: Built from names it (and offers nothing from the video)
+ calls.nohand=false;calls.cut=true;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
+ if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
+ {const a4=await ana();const v4=(await p.$$eval('.gdsrc li',l=>l.map(x=>x.textContent))).find(x=>/The video/.test(x))||'';console.log('  cut short:',v4);
+  ok(a4.video&&a4.video.skip==='err'&&a4.video.code==='invalid_json'&&/couldn’t be read this time \(Claude’s answer was cut short or couldn’t be read\)/.test(v4),'an answer cut short: Built from says why the video couldn’t be read');}
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
