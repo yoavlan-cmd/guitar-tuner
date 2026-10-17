@@ -6651,7 +6651,7 @@ function openSession(g){sesKey={title:g.title,artist:g.artist||''};songTouch(g,{
 function sesSong(){if(!sesKey)return null;return learnSongs().find(g=>sameSong(g,sesKey)||sameSong(sesKey,g))||null}
 // what the song's sheets and analyses say: tuning, capo, chords (sheets first: they are what you play from)
 function sesFacts(g){const f=sesSheet(g);f.bpm=0;const addCh=l=>(l||[]).forEach(c=>{if(c&&c!=='N'&&!f.chords.includes(c))f.chords.push(c)});
- for(const x of g.r.analysis){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
+ const k0=sesAnaKey(g);for(const x of [...g.r.analysis].sort((a,b)=>(b.key===k0)-(a.key===k0))){const d=loadSong(x.key);if(!d)continue;if(!f.tun&&d.play)f.tun=d.play.tun;if((f.capo==null||d.play&&d.play.capoBy==='you')&&d.play)f.capo=+d.play.capo||0;if(!f.bpm&&d.bpm)f.bpm=Math.round(d.bpm);
   if(!f.chords.length){const prevA=A;try{A=d;addCh(d.segs.filter(s=>s.t1-s.t0>=.5).map(s=>nameOf(s)))}catch(e){}A=prevA}}
  return f}
 // what the song's chord sheets say (tuning, capo, chords as written): the guide follows a sheet over what was heard
@@ -6672,10 +6672,14 @@ function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practis
  if(sh)return sh.lib?{a:'lib',v:sh.lib,l:'Practise from the chord sheet',s:'Open your sheet'}:sh.draft?{a:'draft',v:'',l:'Finish the chord sheet',s:'Your unfinished sheet'}:{u:sh.url,l:'Practise from the chord sheet',s:'Open it in Drive'};
  if(g.r.lesson.length)return {u:g.r.lesson[0].url,l:'Practise with the video lesson',s:g.r.lesson[0].label||'Watch it'};
  return null}
+// the analysis the guide is built from: the session of the song's newest split (its guitars-only part, whole song and video), then
+// another split's session, then the newest other analysis (a phone analysis saved later must not hide the split's session)
+function sesAnaKey(g){const A=g.r.analysis.map(x=>x.key);if(!A.length)return '';
+ for(const m of g.r.mix){const k='mix_'+m.mix;if(A.includes(k))return k}return A[0]}
 function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g=sesSong();
  if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
  const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
- let G=null,GD=null,GK='';if(g.r.analysis.length){try{const k=g.r.analysis[0].key,d=loadSong(k);if(d&&d.segs&&d.segs.length){const sh=sesSheet(g);GD=gdFit(d,sh.chords.length||sh.capo!=null?sh:null,k);GK=k;G=gdBuild(GD)}}catch(e){try{console.error('guide',e)}catch(x){}}}
+ let G=null,GD=null,GK='';if(g.r.analysis.length){try{const k=sesAnaKey(g),d=loadSong(k);if(d&&d.segs&&d.segs.length){const sh=sesSheet(g);GD=gdFit(d,sh.chords.length||sh.capo!=null?sh:null,k);GK=k;G=gdBuild(GD)}}catch(e){try{console.error('guide',e)}catch(x){}}}
  if(!gdMode||sesKey._g!==g.title){gdMode=gdDefault();sesKey._g=g.title}
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
@@ -6686,7 +6690,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
   <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
  </section>
- ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(g.r.analysis[0].key)}">▶ Play along with the chords, in time</button>${g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{};return AS_ON.includes(it.sess)?`<p class="tip gdre">Building the guide again from the guitars-only part: about a minute; you can keep using Guitaring.</p>`:it.state==='ready'?`<button type="button" class="btn ghost wide gdre" id="sesRebuild">Rebuild the guide from the guitars-only part${it.drive&&claudeReads()?' and the video':''}</button>`:''})():''}${g.r.analysis.length?(()=>{try{return vlNote(loadSong(g.r.analysis[0].key))}catch(e){return ''}})():''}</section>`:''}
+ ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(GK)}">▶ Play along with the chords, in time</button>${g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{};return AS_ON.includes(it.sess)?`<p class="tip gdre">Building the guide again from the guitars-only part: about a minute; you can keep using Guitaring.</p>`:it.state==='ready'?`<button type="button" class="btn ghost wide gdre" id="sesRebuild">Rebuild the guide from the guitars-only part${it.drive&&claudeReads()?' and the video':''}</button>`:''})():''}${g.r.analysis.length?(()=>{try{return vlNote(loadSong(GK))}catch(e){return ''}})():''}</section>`:''}
  ${!G&&g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{},on=AS_ON.includes(it.sess);return `<section class="card sessec" id="sesBuild"><h3>Song guide</h3>${on?`<p class="tip">Building the song’s session from its guitars-only part: the chords, the strumming and the Easy / Full guide. About a minute; you can keep using Guitaring.</p>`:`<p class="tip">${it.sess==='failed'?'The session couldn’t be built from the guitars-only part last time.':'This song has a jam track but no guide yet.'} Guitaring can work out its chords and strumming from the guitars-only part (about a minute, on this phone).</p><button type="button" class="btn wide" id="sesMake">${it.sess==='failed'?'Try again':'Build the song guide'}</button>`}</section>`})():''}
  ${!G&&f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
@@ -6710,7 +6714,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
    try{songTouch(g,{})}catch(e){}await mxIdxSave();sesKey={title:t,artist:a};try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
- const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}
+ const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(GK,+c.dataset.gdcapo);renderSession();return}
   const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;karaStop();gb.innerHTML=gdHTML(G,gdMode);karaMount(G,GD,GK)});
  // the video with its chords in time (Full, when the song has a video)
  if(G)karaMount(G,GD,GK);
