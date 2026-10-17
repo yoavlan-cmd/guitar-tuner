@@ -537,6 +537,10 @@ The pre-redesign app (live v92) is kept on branch **`original-ui-ux`** ("origina
 9. **Several guitars, step 2** (step 1 shipped in #57: the sides are measured and shown): when one side plays mostly single notes (a riff or lead) and another strums, take the chords from the strumming side; show Guitar 1 / Guitar 2 in the guide only when they really play different things. Build when there is a song with a lead guitar to test on (P2).
 10. **Strumming on real songs** (backlog since 16 Oct 2026): the guide shows four down-strums at 65% for "במקום בו אני גר"; compare with the real pattern from the user, and align the strums to the bar grid from the drums (P2).
 11. **Easier versions beyond the capo** (user, 16 Oct 2026: "a great input to build in the future"): simpler shapes or a simpler key for the Easy guide, besides the with/without capo versions (shipped in #56) (P3).
+12. **Riff guides** (was V2 phase 6; moved to the backlog 17 Oct 2026): pick part of a song → fretboard steps, tab, compare by ear, confidence; the splitter's optional note-detection job (deployment plan §7 F) (P2).
+13. **Basic guitar material** (was V2 phase 7; backlog 17 Oct 2026): four tracks of short lessons (chords, rhythm, technique, light theory), today's lesson on Home, level suggestions (P2).
+14. **Hebrew interface** (was V2 phase 9; backlog 17 Oct 2026): the whole UI in Hebrew, right to left (P3).
+15. **Gear tip: an automatic reading of the guitar's sound** (from phase 5): the session build keeps measurements of the guitars part (`tone`); compare them with the user's answers (clean / crunch / distorted, acoustic / electric) on several real songs and tune a reading that's right before the tip uses it (P3).
 
 ---
 
