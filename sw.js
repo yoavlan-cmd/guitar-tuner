@@ -1,6 +1,6 @@
 // Offline support for Guitaring. Bump VERSION whenever index.html changes (tools/release.sh does it).
 // Any cache with another name (including the older tuner-vNN ones) is deleted when a new version takes over.
-const VERSION = 'guitaring-v109';
+const VERSION = 'guitaring-v110';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -47,4 +47,16 @@ self.addEventListener('fetch', e => {
       })
     );
   }
+});
+
+// A tap on one of Guitaring's phone notifications ("… is split", "the session is ready", "backup saved"): bring the app it came
+// from to the front (the live app or the beta), or open it when it's closed.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const want = (e.notification.data && e.notification.data.url) || self.registration.scope;
+  const beta = want.includes('/beta/');
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const open = list.find(w => w.url.includes('/beta/') === beta);
+    return open ? open.focus() : clients.openWindow(want);
+  }));
 });

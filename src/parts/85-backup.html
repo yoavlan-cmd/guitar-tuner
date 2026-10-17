@@ -148,10 +148,11 @@ async function gdBackupFolder(){const id=store.get('gd.bkdir','');
 // keep the newest few backups (the app can only see files it made itself)
 async function gdPrune(dir){try{const r=await gdFetch(`${GD_API}?q=${encodeURIComponent(`'${dir}' in parents and trashed=false and name contains 'guitaring-'`)}&orderBy=createdTime desc&fields=files(id,name)&pageSize=50&spaces=drive`);
  const old=((r&&r.files)||[]).slice(GD_KEEP);for(const f of old){try{await gdFetch(`${GD_API}/${f.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})})}catch(e){}}return old.length}catch(e){return 0}}
-// a phone notification when it's done (the upload can take a while; you can use other apps meanwhile)
+// a phone notification when it's done (the upload can take a while; you can use other apps meanwhile); a tap on it opens the app it
+// came from (sw.js: notificationclick; the live app or the beta)
 async function bkNotify(title,body){try{if(!('Notification' in window)||Notification.permission!=='granted')return;
  const reg=navigator.serviceWorker&&await Promise.race([navigator.serviceWorker.getRegistration(),new Promise(r=>setTimeout(()=>r(null),1500))]);
- if(reg&&reg.showNotification)await reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'guitaring-backup'});else new Notification(title,{body,icon:'icon-192.png'})}catch(e){}}
+ if(reg&&reg.showNotification)await reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'guitaring-backup',data:{url:location.href.split('#')[0]}});else new Notification(title,{body,icon:'icon-192.png',data:{url:location.href.split('#')[0]}})}catch(e){}}
 let bkRun=0;// the newest tap wins (a tap after a Google window that never came up starts over)
 async function bkToDrive(){const btn=$('bkDrive'),out=$('bkOut');if(!btn||btn.disabled)return;
  // the Google window must open straight from the tap; nothing else may ask for anything in the same tap (on Android a
