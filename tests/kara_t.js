@@ -66,5 +66,19 @@ execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`testsrc=size=320x180
  await p.tap('#gdKara .kbig');await p.waitForTimeout(150);ok(await p.$eval('#gdKara .kbig',e=>e.textContent==='▶'),'tapping it pauses (▶)');
  // leaving the page stops it
  await p.tap('#bnav [data-sec=home]');await p.waitForTimeout(400);ok(await p.evaluate(()=>!window.__ka.state())&&await p.evaluate(()=>{const v=document.querySelector('#gdKara video');return !v||v.paused}),'leaving the page stops the video');
+ // ---- a song split before the phone copy: its video loads from Drive once (kept on the phone); a phone that can't keep it plays it anyway ----
+ const vb=fs.readFileSync(VID);let media=0;
+ await p.route(/googleapis\.com\/drive\/v3\/files/,r=>{const u=r.request().url(),H={'access-control-allow-origin':'*'};
+  if(/alt=media/.test(u)){media++;return r.fulfill({status:200,headers:{...H,'content-type':'video/webm','content-length':String(vb.length)},body:vb})}
+  return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Karaoke Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'}]})})});
+ const fromDrive=async()=>{await p.evaluate(async()=>{await window.__bk.del('mixvideo:k1');const ix=await window.__bk.get('mixIndex');ix.forEach(x=>{if(x.id==='k1'){x.hasVid=false;x.drive={file:'a1',folder:'fold1',ok:true,video:{id:'vid1',name:'Test Band - Karaoke Song.webm'}}}});await window.__bk.put('mixIndex',ix)});
+  await p.reload();await p.waitForTimeout(500);await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(300);await p.tap('#learnList .lrow:has-text("Karaoke Song")');await p.waitForTimeout(500);await tab('full');await p.waitForSelector('#kaLoad',{timeout:8000})};
+ await fromDrive();await p.tap('#kaLoad');await p.waitForSelector('#gdKara video',{timeout:20000}).catch(()=>{});
+ ok(!!await p.$('#gdKara video')&&media===1&&await p.evaluate(async()=>!!(await window.__bk.get('mixvideo:k1'))),'“Load the song’s video”: loaded from Drive, kept on the phone, and the video shows');
+ // the phone refuses to keep it (full storage aborts the write): it still plays, and says it wasn't kept
+ await fromDrive();
+ await p.evaluate(()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(v,k){const r=put.call(this,v,k);if(String(k).startsWith('mixvideo:')){const t=this.transaction;setTimeout(()=>{try{t.abort()}catch(e){}},0)}return r}});
+ await p.tap('#kaLoad');await p.waitForSelector('#gdKara video',{timeout:20000}).catch(()=>{});
+ ok(!!await p.$('#gdKara video')&&/too big to keep on this phone/.test(await p.$eval('#gdKara',e=>e.textContent))&&!await p.evaluate(async()=>!!(await window.__bk.get('mixvideo:k1'))),'storage full: the write is refused, yet the video plays (from memory) and the note says it wasn’t kept (no endless “Loading 100%”)');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
