@@ -1181,6 +1181,22 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .gdblock h4{margin:0;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 .gdbig{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sesguide .gdre{margin-top:10px}
+/* play along with the video (the guide's Full tab) */
+.gdkara .kvid{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:16/9}
+.gdkara video{width:100%;height:100%;display:block;object-fit:contain;background:#000}
+.gdkara .kbig{position:absolute;inset:0;margin:auto;width:68px;height:68px;border-radius:50%;border:0;background:var(--accent);color:#0d1113;font-size:26px;box-shadow:0 0 25px rgba(65,226,186,.45);cursor:pointer}
+.gdkara .know{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:12px 0 8px}
+.gdkara .kcur b{display:block;font:800 40px/1 var(--display);color:var(--accent)}.gdkara .knx{text-align:right}.gdkara .knx b{display:block;font:700 26px/1 var(--display)}
+.gdkara .know small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.gdkara .knx em{font-style:normal;color:var(--muted);font-size:13px}
+.gdkara .kdg{width:84px}.gdkara .kdg .sesdg{margin:0}
+.gdkara .klane{position:relative;height:58px;overflow:hidden;border-radius:12px;background:rgba(255,255,255,.04);cursor:pointer;touch-action:manipulation}
+.gdkara .kstrip{position:absolute;left:0;top:0;height:100%;will-change:transform}
+.gdkara .kblk{position:absolute;top:14px;height:36px;display:flex;align-items:center;padding:0 8px;border-radius:9px;background:#2a3036;color:var(--ink);font:700 15px var(--body);white-space:nowrap;overflow:hidden;box-sizing:border-box;direction:ltr}
+.gdkara .kblk.cur{background:var(--accent);color:#0d1113;box-shadow:0 0 14px rgba(65,226,186,.45)}
+.gdkara .kb{position:absolute;top:4px;width:2px;height:6px;margin-left:-1px;border-radius:1px;background:rgba(255,255,255,.22)}.gdkara .kbar{position:absolute;top:2px;bottom:2px;width:2px;margin-left:-1px;background:rgba(255,255,255,.1)}
+.gdkara .khead{position:absolute;top:0;bottom:0;left:30%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 10px var(--accent)}
+.gdkara .kctl{display:flex;gap:8px;align-items:center;margin-top:10px}.gdkara .kspeed{flex:1;grid-template-columns:repeat(3,1fr)}
+.gdkara:fullscreen{background:#0d1113;padding:16px;overflow:auto}.gdkara:fullscreen .kvid{max-height:62vh;aspect-ratio:auto}
 .gdsrc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gdsrc li{display:flex;gap:8px;font-size:13.5px;line-height:1.35}.gdsrc li span{flex:0 0 16px;font-weight:800;color:var(--accent)}.gdsrc li.n{color:var(--muted)}.gdsrc li.n span{color:var(--muted)}
 .gdcapo{display:flex;flex-direction:column;gap:6px;margin-top:10px}.gdcapo small{color:var(--muted);font-size:12.5px}
 .gdcapo .seg{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.gdcapo .seg button{min-width:0;padding:8px 0;font-size:13px}
@@ -1676,12 +1692,13 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v6
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v7
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
 # with the parts (stills.bin + stills.json), so the app can check the chords against the guitarist's hand without the video.
 # v6: the stills are 960 pixels wide (sharp enough to cut a close-up of the fretting hand from).
+# v7: a phone-sized copy of the video (480p, video.mp4) is handed back too, for playing along with the chords in time.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -1827,6 +1844,15 @@ jobs:
                   o += len(b)
           json.dump({'every': 2, 'n': len(idx), 'idx': idx}, open('res/stills.json', 'w'))
           print('stills', len(idx), 'bytes', o)
+          # a phone-sized copy to play along with (480p, small sound); left out if it would be too big to hand back
+          r = subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', vid, '-vf', 'scale=-2:480', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '30', '-pix_fmt', 'yuv420p',
+                              '-c:a', 'aac', '-b:a', '64k', '-ac', '1', '-movflags', '+faststart', 'res/video.mp4'])
+          if r.returncode != 0 or os.path.getsize('res/video.mp4') > 60 * 1024 * 1024:
+              if os.path.exists('res/video.mp4'):
+                  os.remove('res/video.mp4')
+              print('no phone video')
+          else:
+              print('phone video', os.path.getsize('res/video.mp4'))
           PY
       - name: Report a failure to the app
         if: failure()
@@ -4848,7 +4874,7 @@ let mxIdx=[];
 async function mxDel(k){const db=await mxDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');
  // beta: leave a "deleted" mark, so it isn't read again from the live app's database
  if(BETA)t.objectStore('kv').put({__gone:1},k);else t.objectStore('kv').delete(k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey})))}catch(e){}}
+async function mxIdxSave(){try{await mxPut('mixIndex',mxIdx.map(({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid})=>({id,name,at,src,state,err,errKind,sent,run,runAt,drive,sess,anaKey,hasVid})))}catch(e){}}
 async function mxIdxLoad(){
  try{mxIdx=(await mxGet('mixIndex'))||[]}catch(e){mxIdx=[]}
  // older versions kept only the last song
@@ -4894,7 +4920,7 @@ function mxHome(){if(mxBusy)return;mxCreating=false;const v=$('mixView');
 function mxSheetUI(){if(mxBusy)return;if(mxCreating&&mxSheetOpen())return mxCreate();if(mxSong&&mxSong.tracks){const m=$('mxMore');if(m&&$('mxRows'))mxLibUI();else mxMixer()}else if($('mxSetMsg')){}else mxHome()}
 async function mxForget(id,quiet){const it=mxIdx.find(x=>x.id===id);mxIdx=mxIdx.filter(x=>x.id!==id);
  if(mxSong&&mxSong.id===id){mxStopAudio();mxSong=null;mxPos=0}
- try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}await mxIdxSave();
+ try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}try{await mxDel('mixvideo:'+id)}catch(e){}await mxIdxSave();
  if(it&&it.src==='cloud'&&mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
  if(!quiet){mxSheetUI();mxBar();renderMixNew()}}
 const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannels>1?au.getChannelData(1):a,o=new Int16Array(n*2);for(let i=0;i<n;i++){let x=a[i],y=b[i];o[2*i]=(x>1?1:x<-1?-1:x)*32767;o[2*i+1]=(y>1?1:y<-1?-1:y)*32767}return o};
@@ -5057,6 +5083,8 @@ async function mxCollect(it){mxBarOff=false;
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
    await mxPut('mixdata:'+it.id,{stems});
    // stills from the song's video (splitter v5), for the chord check
+   // the phone-sized copy of the video (splitter v7), for playing along with the chords in time
+   try{const v=await gh('/contents/video.mp4?ref=r-'+it.id,{raw:true,ok404:true});if(v&&v.size){await mxPut('mixvideo:'+it.id,{blob:new Blob([v],{type:'video/mp4'}),at:Date.now(),from:'split'});it.hasVid=true}}catch(e){}
    try{const j=await gh('/contents/stills.json?ref=r-'+it.id,{raw:true,ok404:true});if(j){const m=JSON.parse(await j.text());if(m&&m.n){const bin=await gh('/contents/stills.bin?ref=r-'+it.id,{raw:true});await mxPut('mixstills:'+it.id,{every:m.every,idx:m.idx,bin})}}}catch(e){}
    if(it.drive){try{await dsCollect(it)}catch(e){}}it.state='ready';it.at=Date.now();it.sess='queued';mxDel('mixsrc:'+it.id).catch(()=>{});
    try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
@@ -6615,10 +6643,10 @@ function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practis
  if(sh)return sh.lib?{a:'lib',v:sh.lib,l:'Practise from the chord sheet',s:'Open your sheet'}:sh.draft?{a:'draft',v:'',l:'Finish the chord sheet',s:'Your unfinished sheet'}:{u:sh.url,l:'Practise from the chord sheet',s:'Open it in Drive'};
  if(g.r.lesson.length)return {u:g.r.lesson[0].url,l:'Practise with the video lesson',s:g.r.lesson[0].label||'Watch it'};
  return null}
-function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
+function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g=sesSong();
  if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
  const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
- let G=null;if(g.r.analysis.length){try{const k=g.r.analysis[0].key,d=loadSong(k);if(d&&d.segs&&d.segs.length){const sh=sesSheet(g);G=gdBuild(gdFit(d,sh.chords.length||sh.capo!=null?sh:null,k))}}catch(e){try{console.error('guide',e)}catch(x){}}}
+ let G=null,GD=null,GK='';if(g.r.analysis.length){try{const k=g.r.analysis[0].key,d=loadSong(k);if(d&&d.segs&&d.segs.length){const sh=sesSheet(g);GD=gdFit(d,sh.chords.length||sh.capo!=null?sh:null,k);GK=k;G=gdBuild(GD)}}catch(e){try{console.error('guide',e)}catch(x){}}}
  if(!gdMode||sesKey._g!==g.title){gdMode=gdDefault();sesKey._g=g.title}
  const info=[tn?`Tuning: ${tn}`:'',f.capo?`Capo ${f.capo}`:f.capo===0?'No capo':'',f.bpm?`${f.bpm} BPM`:''].filter(Boolean);
  const has=LKINDS.filter(([k])=>g.r[k].length);
@@ -6645,7 +6673,9 @@ function renderSession(){const box=$('sesBox');if(!box)return;const g=sesSong();
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
  const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(g.r.analysis[0].key,+c.dataset.gdcapo);renderSession();return}
-  const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;gb.innerHTML=gdHTML(G,gdMode)});
+  const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;karaStop();gb.innerHTML=gdHTML(G,gdMode);karaMount(G,GD,GK)});
+ // the video with its chords in time (Full, when the song has a video)
+ if(G)karaMount(G,GD,GK);
  const go=$('sesGo');if(go&&pr&&pr.u)go.onclick=()=>window.open(pr.u,'_blank','noopener');
  box.querySelectorAll('[data-jam]').forEach(b=>b.onclick=async()=>{mxView(true);await mxOpen(g.r.mix[0].mix);try{mxPreset(b.dataset.jam)}catch(e){}});
  box.querySelectorAll('[data-dssave]').forEach(b=>b.onclick=()=>dsSaveLater(b.dataset.dssave));
@@ -6752,7 +6782,7 @@ function gdBuild(d){const keep=A;A=d;try{
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
+ return {bpm,tun,capo,capoBy:cb,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
 function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
@@ -6791,9 +6821,9 @@ function gdHTML(G,mode){const easy=mode==='easy',capo=easy?G.eCapo:G.capo,tn=tNa
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
   <p class="tip">Times are from the ${G.src==='guitars'?'guitars-only part':'file you analysed'}.</p></div>
  <div class="gdblock"><h4>Chords</h4><div class="seschords">${chords.slice(0,12).map(sesDiagram).join('')}</div></div>
- <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">Each box: strummed in most bars or not${G.share<.85?'; it varies between parts (see the song map)':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
- <div class="gdblock"><h4>Song map</h4><ol class="gdmap">${G.secs.map(s=>`<li><span class="gdt">${mmss(s.t)}</span><b>${esc(s.name)}</b><span class="gdch">${mapCh(s).map(esc).join(' · ')||'no guitar'}${s.times>1&&mapCh(s).length?` <em>×${s.times}</em>`:''}</span>${!easy&&s.pat&&/[DU]/.test(s.pat)&&s.patBars>=2?`<span class="gdsp">${s.pat.replace(/·/g,' ').replace(/(..)/g,'$1 ').trim()}</span>`:''}<small>${s.bars} bar${s.bars>1?'s':''}</small></li>`).join('')}</ol>
-  <p class="tip">Parts, times and chords only: lyrics are never shown.</p></div>`}
+ <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">Each box: strummed in most bars or not${G.share<.85?'; it varies between parts':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
+ ${!easy&&karaHas(G.mix)?karaHTML(G):`<div class="gdblock"><h4>Song map</h4><ol class="gdmap">${G.secs.map(s=>`<li><span class="gdt">${mmss(s.t)}</span><b>${esc(s.name)}</b><span class="gdch">${mapCh(s).map(esc).join(' · ')||'no guitar'}${s.times>1&&mapCh(s).length?` <em>×${s.times}</em>`:''}</span>${!easy&&s.pat&&/[DU]/.test(s.pat)&&s.patBars>=2?`<span class="gdsp">${s.pat.replace(/·/g,' ').replace(/(..)/g,'$1 ').trim()}</span>`:''}<small>${s.bars} bar${s.bars>1?'s':''}</small></li>`).join('')}</ol>
+  <p class="tip">Parts, times and chords only: lyrics are never shown.</p></div>`}`}
 window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null},fit:(k,ref)=>{const d=loadSong(k);return d?gdBuild(gdFit(d,ref,k)):null},bars:k=>{const keep=A;A=loadSong(k);try{const M=lessonModel();return M.bars.map(b=>({t0:+b.t0.toFixed(2),ch:b.slots.map(x=>x.g?nameOf(x.g):'-').join(' ')}))}finally{A=keep}}};// test hooks
 /* ================= Backup and restore: everything the app keeps on this phone, in one file ================= */
 // The file is a plain ZIP (stored, not compressed): manifest.json, local.json (the small data: tuner.* and guitaring.* keys)
@@ -6801,7 +6831,7 @@ window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null}
 // Restore: "Add what's missing" (default) never overwrites anything; "Replace everything" replaces only the kinds the file has.
 // Before restoring, a safety copy of the small data is kept in the database (backup:pre-*, 30 days).
 const BK_SECRET=[KP+'apiKey',KG+'gh'];// the Claude key and the GitHub key (left out unless asked)
-const bkIsPart=k=>/^mix(data|src|stills):/.test(k);// Band breakdown audio parts and video stills (big; can be split again)
+const bkIsPart=k=>/^mix(data|src|stills|video):/.test(k);// Band breakdown audio parts, video stills and the song's video (big; can be split or loaded again)
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crcAdd(c,u8){for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return c}
 async function crcBlob(b){let c=0xFFFFFFFF;const S=1<<23;for(let o=0;o<b.size;o+=S){c=crcAdd(c,new Uint8Array(await b.slice(o,o+S).arrayBuffer()));await tick()}return (c^0xFFFFFFFF)>>>0}
@@ -7022,6 +7052,90 @@ function bkLastTxt(){const last=store.get('lastBackup',null);return last?`Last b
 function renderBackupDate(){const s=document.querySelector('#bkBox > summary');const last=store.get('lastBackup',null);if(s&&last)s.innerHTML=`Backup and restore <span class="libcount">${esc(bkDate(last.at))}</span>`;const l=$('bkLast');if(l)l.innerHTML=bkLastTxt()}
 renderBackup();
 window.__bk={make:bkMake,open:bkOpen,restore:bkRestore,keys:idbKeys,raw:idbRaw,get:mxGet,put:mxPut,del:mxDel,safety:safetyCopy,beta:BETA};// test hooks
+/* ===== Play along with the video (V2): the song's video with its chords in time, karaoke style (the guide's Full tab) ===== */
+// In Full, a song with a video shows it here instead of the song map: the video, the chord now (big, with its shape) and the next
+// one counting down in beats, and a lane of chords sliding under a fixed "now" line, sized by how long each lasts, with beats and
+// bar lines. Timing: the chord changes come from the analysis, snapped to the song's beat (from the drums when the song has them);
+// the video's own clock drives the lane; and the video's sound is matched once against the song's strums, so a video that runs a
+// little ahead or behind the audio the chords came from is lined up (the offset is kept with the analysis).
+// The video: the phone-sized copy GitHub made during the split (splitter v7), kept on the phone; a song split before that loads its
+// video from Drive once (a tap; kept on the phone too). Easy keeps the song map (its chords and capo can differ from the video).
+let KA=null;
+const KA_PPS=72;// lane pixels per second
+const karaItem=mix=>mix?mxIdx.find(x=>x.id===mix):null;
+const karaHas=mix=>{const it=karaItem(mix);return !!(it&&(it.hasVid||(it.drive&&it.drive.video)))};
+function karaStop(){kaGen++;if(!KA)return;cancelAnimationFrame(KA.raf);try{KA.v.pause()}catch(e){}if(KA.url)URL.revokeObjectURL(KA.url);KA=null}
+// the chord blocks: as named in Full (the shapes with the capo), each change snapped to the nearest beat when it's close to one
+function karaBlocks(d){const keep=A;A=d;try{const B=(d.beats||[]).slice().sort((a,b)=>a-b),dif=B.slice(1).map((v,i)=>v-B[i]).sort((a,b)=>a-b),bp=dif[dif.length>>1]||60/(d.bpm||90);
+  const snap=t=>{if(!B.length)return t;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi)>>1;if(B[m]<t)lo=m+1;else hi=m}const c=[B[lo],B[lo-1]].filter(x=>x!=null).sort((a,b)=>Math.abs(a-t)-Math.abs(b-t))[0];return Math.abs(c-t)<.4*bp?c:t};// within 0.4 of a beat (a chord pushed to the "&", half a beat, stays)
+  const out=[];for(const g of d.segs){if(g.c>=NS)continue;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)continue;const l=out[out.length-1];
+   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;continue}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1})}
+  let bars=[];try{bars=lessonModel().bars.map(b=>b.t0)}catch(e){}
+  return {blocks:out,beats:B,bp,bars}}finally{A=keep}}
+// how far the video runs behind the analysis' audio (seconds, ±3): first by the harmony (which notes sound, every 0.09 s: a beat-long
+// shift doesn't match there, as it can in the strums of a song that repeats every beat), then within ±0.15 s by the strums
+// (every 0.023 s). 0 when unsure.
+async function karaOffset(blob,d){try{
+ const x=await decodeFile(new File([blob],'video',{type:blob.type||'video/mp4'}));
+ let coarse=0;
+ if(d.feat&&d.feat.c){const r=await analyse(x,()=>{},null),gc=b64u8(d.feat.c),vc=b64u8(r.feat.c),gn=d.feat.n,vn=r.feat.n,hop=(d.feat.hop||HOP)/SR,L=Math.round(3/hop);
+  const cos=(a,i,b,j)=>{let s=0,na=0,nb=0;for(let k=0;k<12;k++){const p=a[i*12+k],q=b[j*12+k];s+=p*q;na+=p*p;nb+=q*q}return na&&nb?s/Math.sqrt(na*nb):0};
+  const n=Math.min(gn,Math.round(150/hop)),cs=[];let best=-1e9,bl=0;
+  for(let l=-L;l<=L;l++){let c=0,k=0;for(let i=Math.max(0,-l);i<n&&i+l<vn;i+=2){c+=cos(gc,i,vc,i+l);k++}c=k?c/k:0;cs.push(c);if(c>best){best=c;bl=l}}
+  const m=cs.reduce((p,q)=>p+q,0)/cs.length,sd=Math.sqrt(cs.reduce((p,q)=>p+(q-m)**2,0)/cs.length)||1;if(best<.75||(best-m)/sd<1.5)return 0;coarse=bl*hop}// the same song (its harmony matches well) and a peak that stands out
+ if(!d.ons||!d.ons.d)return +coarse.toFixed(3);
+ const e=beatTimes(x).env;if(!e||e.length<400)return +coarse.toFixed(3);
+ const a=b64u8(d.ons.d),fh=256/SR,n=Math.min(a.length,e.length,Math.round(150/fh)),c0=Math.round(coarse/fh),W=Math.round(.15/fh);
+ const z=(v,len)=>{let m=0;for(let i=0;i<len;i++)m+=v[i];m/=len;let s=0;for(let i=0;i<len;i++)s+=(v[i]-m)**2;s=Math.sqrt(s/len)||1;const o=new Float32Array(len);for(let i=0;i<len;i++)o[i]=(v[i]-m)/s;return o};
+ const A2=z(a,n),E2=z(e,e.length);let best=-1e9,bl=c0;
+ for(let l=c0-W;l<=c0+W;l++){let c=0,k=0;for(let i=Math.max(0,-l);i<n&&i+l<E2.length;i++){c+=A2[i]*E2[i+l];k++}c=k?c/k:0;if(c>best){best=c;bl=l}}
+ return +(bl*fh).toFixed(3)}catch(e){return 0}}
+// the song's video from Drive (a song split before the phone copy existed), kept on the phone; a tap asks Drive
+async function karaLoadDrive(it,onP){await gdTokenFull();const v=await vlFind(it,gdFullTok);if(!v)throw {code:'none'};
+ const r=await fetch(`${VL_GD}/${v.id}?alt=media&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});if(!r.ok)throw {code:'gd_http',status:r.status};
+ const len=+r.headers.get('content-length')||0,rd=r.body&&r.body.getReader?r.body.getReader():null;let blob;
+ if(rd){const parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onP&&onP(got,len)}blob=new Blob(parts,{type:'video/mp4'})}else blob=await r.blob();
+ await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return blob}
+// the card in the guide (Full): filled in once the video is on the phone
+function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
+ <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
+let kaGen=0;
+async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
+ let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}
+ if(gen!==kaGen||!host.isConnected)return;// the guide was redrawn meanwhile
+ if(!rec||!rec.blob){if(!(it&&it.drive&&it.drive.video)){body.innerHTML='<p class="tip">This song has no video on the phone.</p>';return}
+  body.innerHTML=`<p class="tip">The song’s video is in your Drive. Load it once to play along with the chords; it stays on this phone.</p><button type="button" class="btn wide" id="kaLoad">Load the song’s video</button><p class="tip" id="kaMsg" role="status"></p>`;
+  $('kaLoad').onclick=async()=>{const b=$('kaLoad'),m=$('kaMsg');b.disabled=true;m.textContent='Opening Google…';
+   try{await karaLoadDrive(it,(g,l)=>{m.textContent=`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});karaMount(G,d,key)}
+   catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
+ const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
+ body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video><button type="button" class="kbig" aria-label="Play">▶</button></div>
+  <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
+  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk" data-i="${i}" style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
+  <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
+  <p class="tip kof" hidden></p>`;
+ const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
+ v.src=url;KA={v,url,M,off:+(d.vOff||0),cur:-2,raf:0,host};
+ // line the video up with the analysis once (kept with the analysis)
+ if(d.vOff==null){const p0=body.querySelector('.kof');p0.hidden=false;p0.textContent='Lining the video up with the chords…';karaOffset(rec.blob,d).then(o=>{if(!KA||KA.v!==v)return;body.querySelector('.kof').hidden=!o;KA.off=o;try{const s=loadSong(key);if(s){s.vOff=o;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(s)))}}catch(e){}
+  if(o){const p=body.querySelector('.kof');p.hidden=false;p.textContent=`The video runs ${Math.abs(o).toFixed(2)} s ${o>0?'behind':'ahead of'} the song’s audio; the chords are lined up with it.`}})}
+ const toggle=()=>{if(v.paused)v.play().catch(()=>{});else v.pause()};big.onclick=toggle;v.onclick=toggle;
+ v.onplay=()=>{big.hidden=true;host.classList.add('on')};v.onpause=()=>{big.hidden=false;host.classList.remove('on')};
+ body.querySelector('.kspeed').onclick=e=>{const b=e.target.closest('[data-kr]');if(!b)return;v.playbackRate=+b.dataset.kr;try{v.preservesPitch=true}catch(err){}body.querySelectorAll('[data-kr]').forEach(x=>x.setAttribute('aria-pressed',x===b))};
+ $('kaFull').onclick=()=>{const f=host.requestFullscreen||host.webkitRequestFullscreen;if(f)f.call(host).catch(()=>{})};
+ // tap the lane to jump there
+ lane.onclick=e=>{const r=lane.getBoundingClientRect(),hx=r.width*.3,t=karaT()+(e.clientX-r.left-hx)/KA_PPS;v.currentTime=Math.max(0,t+KA.off)};
+ const karaT=()=>v.currentTime-KA.off;
+ const tick=()=>{if(!KA||KA.v!==v)return;if(!host.isConnected||host.offsetParent===null){karaStop();return}
+  const t=karaT(),r=lane.clientWidth*.3;strip.style.transform=`translateX(${(r-t*KA_PPS).toFixed(1)}px)`;
+  const B=M.blocks;let i=-1;for(let k=0;k<B.length;k++){if(B[k].t0<=t+.02){if(t<B[k].t1)i=k}else break}
+  let n=B.findIndex(b=>b.t0>t+.02);
+  if(i!==KA.cur){const old=strip.querySelector('.kblk.cur');if(old)old.classList.remove('cur');if(i>=0){strip.querySelector(`.kblk[data-i="${i}"]`).classList.add('cur')}
+   KA.cur=i;now.textContent=i>=0?B[i].n:'–';dg.innerHTML=i>=0?sesDiagram(B[i].n):''}
+  if(n>=0){nx.textContent=B[n].n;const beats=Math.max(0,Math.ceil((B[n].t0-t)/M.bp-.05));nxIn.textContent=beats<=8?`in ${beats}`:''}else{nx.textContent='–';nxIn.textContent=''}
+  KA.raf=requestAnimationFrame(tick)};
+ KA.raf=requestAnimationFrame(tick)}
+window.__ka={offset:async(k)=>{const d=loadSong(k),r=await mxGet("mixvideo:"+d.mix);return karaOffset(r.blob,d)},state:()=>KA&&{t:KA.v.currentTime,off:KA.off,cur:KA.cur,blocks:KA.M.blocks.length,name:KA.cur>=0?KA.M.blocks[KA.cur].n:''},blocks:k=>{const d=loadSong(k);return d?karaBlocks(d):null}};// test hooks
 /* ================= V2 shell: Home, the sections (Learn · Write · Jam · Gear), header pages (Tuner · My Library · My profile), onboarding ================= */
 // Sections sit on top of the V1 panes: Learn and Write are the Songs pane (data-seg), Gear is the gear pane, Tuner the tuner pane,
 // My chords the chord-book pane. Home, Jam, My Library and My profile are new panes. V1 elements are moved, never rebuilt (ids and handlers stay).
