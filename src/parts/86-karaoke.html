@@ -1,0 +1,84 @@
+/* ===== Play along with the video (V2): the song's video with its chords in time, karaoke style (the guide's Full tab) ===== */
+// In Full, a song with a video shows it here instead of the song map: the video, the chord now (big, with its shape) and the next
+// one counting down in beats, and a lane of chords sliding under a fixed "now" line, sized by how long each lasts, with beats and
+// bar lines. Timing: the chord changes come from the analysis, snapped to the song's beat (from the drums when the song has them);
+// the video's own clock drives the lane; and the video's sound is matched once against the song's strums, so a video that runs a
+// little ahead or behind the audio the chords came from is lined up (the offset is kept with the analysis).
+// The video: the phone-sized copy GitHub made during the split (splitter v7), kept on the phone; a song split before that loads its
+// video from Drive once (a tap; kept on the phone too). Easy keeps the song map (its chords and capo can differ from the video).
+let KA=null;
+const KA_PPS=72;// lane pixels per second
+const karaItem=mix=>mix?mxIdx.find(x=>x.id===mix):null;
+const karaHas=mix=>{const it=karaItem(mix);return !!(it&&(it.hasVid||(it.drive&&it.drive.video)))};
+function karaStop(){kaGen++;if(!KA)return;cancelAnimationFrame(KA.raf);try{KA.v.pause()}catch(e){}if(KA.url)URL.revokeObjectURL(KA.url);KA=null}
+// the chord blocks: as named in Full (the shapes with the capo), each change snapped to the nearest beat when it's close to one
+function karaBlocks(d){const keep=A;A=d;try{const B=(d.beats||[]).slice().sort((a,b)=>a-b),dif=B.slice(1).map((v,i)=>v-B[i]).sort((a,b)=>a-b),bp=dif[dif.length>>1]||60/(d.bpm||90);
+  const snap=t=>{if(!B.length)return t;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi)>>1;if(B[m]<t)lo=m+1;else hi=m}const c=[B[lo],B[lo-1]].filter(x=>x!=null).sort((a,b)=>Math.abs(a-t)-Math.abs(b-t))[0];return Math.abs(c-t)<.4*bp?c:t};// within 0.4 of a beat (a chord pushed to the "&", half a beat, stays)
+  const out=[];for(const g of d.segs){if(g.c>=NS)continue;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)continue;const l=out[out.length-1];
+   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;continue}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1})}
+  let bars=[];try{bars=lessonModel().bars.map(b=>b.t0)}catch(e){}
+  return {blocks:out,beats:B,bp,bars}}finally{A=keep}}
+// how far the video runs behind the analysis' audio (seconds, ±3): first by the harmony (which notes sound, every 0.09 s: a beat-long
+// shift doesn't match there, as it can in the strums of a song that repeats every beat), then within ±0.15 s by the strums
+// (every 0.023 s). 0 when unsure.
+async function karaOffset(blob,d){try{
+ const x=await decodeFile(new File([blob],'video',{type:blob.type||'video/mp4'}));
+ let coarse=0;
+ if(d.feat&&d.feat.c){const r=await analyse(x,()=>{},null),gc=b64u8(d.feat.c),vc=b64u8(r.feat.c),gn=d.feat.n,vn=r.feat.n,hop=(d.feat.hop||HOP)/SR,L=Math.round(3/hop);
+  const cos=(a,i,b,j)=>{let s=0,na=0,nb=0;for(let k=0;k<12;k++){const p=a[i*12+k],q=b[j*12+k];s+=p*q;na+=p*p;nb+=q*q}return na&&nb?s/Math.sqrt(na*nb):0};
+  const n=Math.min(gn,Math.round(150/hop)),cs=[];let best=-1e9,bl=0;
+  for(let l=-L;l<=L;l++){let c=0,k=0;for(let i=Math.max(0,-l);i<n&&i+l<vn;i+=2){c+=cos(gc,i,vc,i+l);k++}c=k?c/k:0;cs.push(c);if(c>best){best=c;bl=l}}
+  const m=cs.reduce((p,q)=>p+q,0)/cs.length,sd=Math.sqrt(cs.reduce((p,q)=>p+(q-m)**2,0)/cs.length)||1;if(best<.75||(best-m)/sd<1.5)return 0;coarse=bl*hop}// the same song (its harmony matches well) and a peak that stands out
+ if(!d.ons||!d.ons.d)return +coarse.toFixed(3);
+ const e=beatTimes(x).env;if(!e||e.length<400)return +coarse.toFixed(3);
+ const a=b64u8(d.ons.d),fh=256/SR,n=Math.min(a.length,e.length,Math.round(150/fh)),c0=Math.round(coarse/fh),W=Math.round(.15/fh);
+ const z=(v,len)=>{let m=0;for(let i=0;i<len;i++)m+=v[i];m/=len;let s=0;for(let i=0;i<len;i++)s+=(v[i]-m)**2;s=Math.sqrt(s/len)||1;const o=new Float32Array(len);for(let i=0;i<len;i++)o[i]=(v[i]-m)/s;return o};
+ const A2=z(a,n),E2=z(e,e.length);let best=-1e9,bl=c0;
+ for(let l=c0-W;l<=c0+W;l++){let c=0,k=0;for(let i=Math.max(0,-l);i<n&&i+l<E2.length;i++){c+=A2[i]*E2[i+l];k++}c=k?c/k:0;if(c>best){best=c;bl=l}}
+ return +(bl*fh).toFixed(3)}catch(e){return 0}}
+// the song's video from Drive (a song split before the phone copy existed), kept on the phone; a tap asks Drive
+async function karaLoadDrive(it,onP){await gdTokenFull();const v=await vlFind(it,gdFullTok);if(!v)throw {code:'none'};
+ const r=await fetch(`${VL_GD}/${v.id}?alt=media&supportsAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});if(!r.ok)throw {code:'gd_http',status:r.status};
+ const len=+r.headers.get('content-length')||0,rd=r.body&&r.body.getReader?r.body.getReader():null;let blob;
+ if(rd){const parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onP&&onP(got,len)}blob=new Blob(parts,{type:'video/mp4'})}else blob=await r.blob();
+ await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return blob}
+// the card in the guide (Full): filled in once the video is on the phone
+function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
+ <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
+let kaGen=0;
+async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
+ let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}
+ if(gen!==kaGen||!host.isConnected)return;// the guide was redrawn meanwhile
+ if(!rec||!rec.blob){if(!(it&&it.drive&&it.drive.video)){body.innerHTML='<p class="tip">This song has no video on the phone.</p>';return}
+  body.innerHTML=`<p class="tip">The song’s video is in your Drive. Load it once to play along with the chords; it stays on this phone.</p><button type="button" class="btn wide" id="kaLoad">Load the song’s video</button><p class="tip" id="kaMsg" role="status"></p>`;
+  $('kaLoad').onclick=async()=>{const b=$('kaLoad'),m=$('kaMsg');b.disabled=true;m.textContent='Opening Google…';
+   try{await karaLoadDrive(it,(g,l)=>{m.textContent=`Loading the video… ${l?Math.round(g/l*100)+'%':Math.round(g/1048576)+' MB'}`});karaMount(G,d,key)}
+   catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
+ const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
+ body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video><button type="button" class="kbig" aria-label="Play">▶</button></div>
+  <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
+  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk" data-i="${i}" style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
+  <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
+  <p class="tip kof" hidden></p>`;
+ const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
+ v.src=url;KA={v,url,M,off:+(d.vOff||0),cur:-2,raf:0,host};
+ // line the video up with the analysis once (kept with the analysis)
+ if(d.vOff==null){const p0=body.querySelector('.kof');p0.hidden=false;p0.textContent='Lining the video up with the chords…';karaOffset(rec.blob,d).then(o=>{if(!KA||KA.v!==v)return;body.querySelector('.kof').hidden=!o;KA.off=o;try{const s=loadSong(key);if(s){s.vOff=o;localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(s)))}}catch(e){}
+  if(o){const p=body.querySelector('.kof');p.hidden=false;p.textContent=`The video runs ${Math.abs(o).toFixed(2)} s ${o>0?'behind':'ahead of'} the song’s audio; the chords are lined up with it.`}})}
+ const toggle=()=>{if(v.paused)v.play().catch(()=>{});else v.pause()};big.onclick=toggle;v.onclick=toggle;
+ v.onplay=()=>{big.hidden=true;host.classList.add('on')};v.onpause=()=>{big.hidden=false;host.classList.remove('on')};
+ body.querySelector('.kspeed').onclick=e=>{const b=e.target.closest('[data-kr]');if(!b)return;v.playbackRate=+b.dataset.kr;try{v.preservesPitch=true}catch(err){}body.querySelectorAll('[data-kr]').forEach(x=>x.setAttribute('aria-pressed',x===b))};
+ $('kaFull').onclick=()=>{const f=host.requestFullscreen||host.webkitRequestFullscreen;if(f)f.call(host).catch(()=>{})};
+ // tap the lane to jump there
+ lane.onclick=e=>{const r=lane.getBoundingClientRect(),hx=r.width*.3,t=karaT()+(e.clientX-r.left-hx)/KA_PPS;v.currentTime=Math.max(0,t+KA.off)};
+ const karaT=()=>v.currentTime-KA.off;
+ const tick=()=>{if(!KA||KA.v!==v)return;if(!host.isConnected||host.offsetParent===null){karaStop();return}
+  const t=karaT(),r=lane.clientWidth*.3;strip.style.transform=`translateX(${(r-t*KA_PPS).toFixed(1)}px)`;
+  const B=M.blocks;let i=-1;for(let k=0;k<B.length;k++){if(B[k].t0<=t+.02){if(t<B[k].t1)i=k}else break}
+  let n=B.findIndex(b=>b.t0>t+.02);
+  if(i!==KA.cur){const old=strip.querySelector('.kblk.cur');if(old)old.classList.remove('cur');if(i>=0){strip.querySelector(`.kblk[data-i="${i}"]`).classList.add('cur')}
+   KA.cur=i;now.textContent=i>=0?B[i].n:'–';dg.innerHTML=i>=0?sesDiagram(B[i].n):''}
+  if(n>=0){nx.textContent=B[n].n;const beats=Math.max(0,Math.ceil((B[n].t0-t)/M.bp-.05));nxIn.textContent=beats<=8?`in ${beats}`:''}else{nx.textContent='–';nxIn.textContent=''}
+  KA.raf=requestAnimationFrame(tick)};
+ KA.raf=requestAnimationFrame(tick)}
+window.__ka={offset:async(k)=>{const d=loadSong(k),r=await mxGet("mixvideo:"+d.mix);return karaOffset(r.blob,d)},state:()=>KA&&{t:KA.v.currentTime,off:KA.off,cur:KA.cur,blocks:KA.M.blocks.length,name:KA.cur>=0?KA.M.blocks[KA.cur].n:''},blocks:k=>{const d=loadSong(k);return d?karaBlocks(d):null}};// test hooks

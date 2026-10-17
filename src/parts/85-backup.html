@@ -4,7 +4,7 @@
 // Restore: "Add what's missing" (default) never overwrites anything; "Replace everything" replaces only the kinds the file has.
 // Before restoring, a safety copy of the small data is kept in the database (backup:pre-*, 30 days).
 const BK_SECRET=[KP+'apiKey',KG+'gh'];// the Claude key and the GitHub key (left out unless asked)
-const bkIsPart=k=>/^mix(data|src|stills):/.test(k);// Band breakdown audio parts and video stills (big; can be split again)
+const bkIsPart=k=>/^mix(data|src|stills|video):/.test(k);// Band breakdown audio parts, video stills and the song's video (big; can be split or loaded again)
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crcAdd(c,u8){for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return c}
 async function crcBlob(b){let c=0xFFFFFFFF;const S=1<<23;for(let o=0;o<b.size;o+=S){c=crcAdd(c,new Uint8Array(await b.slice(o,o+S).arrayBuffer()));await tick()}return (c^0xFFFFFFFF)>>>0}
