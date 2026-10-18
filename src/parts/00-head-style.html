@@ -1183,7 +1183,28 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .gdkara .kb{position:absolute;top:4px;width:2px;height:6px;margin-left:-1px;border-radius:1px;background:rgba(255,255,255,.22)}.gdkara .kbar{position:absolute;top:2px;bottom:2px;width:2px;margin-left:-1px;background:rgba(255,255,255,.1)}
 .gdkara .khead{position:absolute;top:0;bottom:0;left:30%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 10px var(--accent)}
 .gdkara .kctl{display:flex;gap:8px;align-items:center;margin-top:10px}.gdkara .kspeed{flex:1;grid-template-columns:repeat(3,1fr)}
-.gdkara:fullscreen{background:#0d1113;padding:16px;overflow:auto}.gdkara:fullscreen .kvid{max-height:62vh;aspect-ratio:auto}
+/* the karaoke full screen (Oct 2026): the video as big as it fits, the chords big under it; sideways, the video on the left and
+   the chords on the right. Also without the browser's full screen (iPhone): the card covers the screen */
+.gdkara .kx{display:none}
+.gdkara.kfull{position:fixed;inset:0;z-index:60;margin:0;border:0;border-radius:0;background:#0d1113;display:flex;flex-direction:column;
+ padding:calc(env(safe-area-inset-top,0px) + 10px) calc(env(safe-area-inset-right,0px) + 12px) calc(env(safe-area-inset-bottom,0px) + 10px) calc(env(safe-area-inset-left,0px) + 12px);overflow:hidden}
+.gdkara.kfull>h4,.gdkara.kfull>.tip,.gdkara.kfull .kof,.gdkara.kfull .kanote,.gdkara.kfull #kaFull{display:none}
+.gdkara.kfull .kx{display:flex;position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:2;width:44px;height:44px;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(13,17,19,.7);color:#fff;font:600 20px var(--body);cursor:pointer}
+.gdkara.kfull .kbody{flex:1;min-height:0;display:flex;flex-direction:column}
+.gdkara.kfull .kvid{flex:1;min-height:0;aspect-ratio:auto;border-radius:10px}
+.gdkara.kfull .know{margin:10px 0 6px}.gdkara.kfull .kcur b{font-size:56px}.gdkara.kfull .knx b{font-size:34px}.gdkara.kfull .kdg{width:96px}
+.gdkara.kfull .klane{height:64px;flex:none}.gdkara.kfull .kblk{font-size:18px;height:40px;top:12px}
+.gdkara.kfull .ktrans{padding:8px 0 2px}.gdkara.kfull .kctl{margin-top:6px}
+@media (orientation:landscape){
+ .gdkara.kfull .kbody{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);grid-template-rows:auto auto 1fr auto auto;column-gap:16px;align-content:stretch}
+ .gdkara.kfull .kvid{grid-column:1;grid-row:1/-1;height:100%}
+ .gdkara.kfull .know{grid-column:2;grid-row:1;margin:4px 48px 4px 0;grid-template-columns:1fr auto;grid-template-areas:"cur dg" "nx dg";row-gap:8px}
+ .gdkara.kfull .kcur{grid-area:cur}.gdkara.kfull .kdg{grid-area:dg;width:88px}.gdkara.kfull .knx{grid-area:nx;text-align:left}
+ .gdkara.kfull .kcur b{font-size:50px}.gdkara.kfull .knx b{font-size:28px}
+ .gdkara.kfull .klane{grid-column:2;grid-row:2;height:56px}.gdkara.kfull .kblk{height:34px;top:11px;font-size:16px}
+ .gdkara.kfull .ktrans{grid-column:2;grid-row:4;padding:4px 0 0}.gdkara.kfull .kctl{grid-column:2;grid-row:5}
+ .gdkara.kfull .dswarn{grid-column:2}}
+body.kopen #bnav,body.kopen #mxBar{visibility:hidden}
 .gdsrc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gdsrc li{display:flex;gap:8px;font-size:13.5px;line-height:1.35}.gdsrc li span{flex:0 0 16px;font-weight:800;color:var(--accent)}.gdsrc li.n{color:var(--muted)}.gdsrc li.n span{color:var(--muted)}
 .gdcapo{display:flex;flex-direction:column;gap:6px;margin-top:10px}.gdcapo small{color:var(--muted);font-size:12.5px}
 .gdcapo .seg{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.gdcapo .seg button{min-width:0;padding:8px 0;font-size:13px}

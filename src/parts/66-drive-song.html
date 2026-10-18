@@ -144,6 +144,8 @@ function dsProgHTML(it,info){const c=dsCalc(it,info),k=c.k,pct=c.pct,left=c.left
 async function dsShowProgress(id){const d=$('dsDlg');if(!d)return;d.hidden=false;document.body.classList.add('wopen');dsShown=id;clearInterval(dsTimer);
  const close=()=>{dsShown='';clearInterval(dsTimer);d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen');dsStatusUI()};
  const draw=async(fetchInfo)=>{if(dsShown!==id)return;const it=mxIdx.find(x=>x.id===id);if(!it)return close();
+  // its session is built: straight to the song's session (no "Ready" step in between, Oct 2026)
+  if(it.state==='ready'&&it.sess==='done'){close();asOpenSong(id);return}
   let html;
   if(it.state==='ready'&&AS_ON.includes(it.sess))html=dsProgHTML(it);
   else if(it.state==='ready')html=`<div class="dshead"><h3>Ready</h3><button type="button" class="pickx" id="dsX" aria-label="Close">✕</button></div><p class="dsname" dir="auto">${esc(it.name)}</p><div class="dsbar dsfull" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i style="width:100%"></i></div>
@@ -187,4 +189,4 @@ function dsRows(g){const rows=[];for(const m of g.r.mix){const it=mxIdx.find(x=>
   if(it.state==='ready'&&!d.ok)rows.push(`<div class="lit miss"><span class="ltt"><b>The MP3s aren’t in Drive yet</b><small>Google’s sign-in ran out while GitHub worked</small></span><button type="button" data-dssave="${esc(it.id)}">Save them</button></div>`)}
  return rows.join('')}
 {const b=$('addSong');if(b)b.onclick=()=>openAddSong()}
-window.__ds={fileId:dsFileId,open:openAddSong};// test hooks
+window.__ds={fileId:dsFileId,open:openAddSong,progress:dsShowProgress};// test hooks

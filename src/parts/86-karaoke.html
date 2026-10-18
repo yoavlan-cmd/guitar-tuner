@@ -10,7 +10,7 @@ let KA=null;const KA_NOTE={};// a note per song for this visit (the video wasn't
 const KA_PPS=72;// lane pixels per second
 const karaItem=mix=>mix?mxIdx.find(x=>x.id===mix):null;
 const karaHas=mix=>{const it=karaItem(mix);return !!(it&&(it.hasVid||(it.drive&&it.drive.video)))};
-function karaStop(){kaGen++;if(!KA)return;cancelAnimationFrame(KA.raf);try{KA.v.pause()}catch(e){}if(KA.url)URL.revokeObjectURL(KA.url);KA=null}
+function karaStop(){kaGen++;karaFull(false);if(!KA)return;cancelAnimationFrame(KA.raf);try{KA.v.pause()}catch(e){}if(KA.url)URL.revokeObjectURL(KA.url);KA=null}
 // the chord blocks: as named in Full (the shapes with the capo), each change snapped to the nearest beat when it's close to one
 function karaBlocks(d){const keep=A;A=d;try{const B=(d.beats||[]).slice().sort((a,b)=>a-b),dif=B.slice(1).map((v,i)=>v-B[i]).sort((a,b)=>a-b),bp=dif[dif.length>>1]||60/(d.bpm||90);
   const snap=t=>{if(!B.length)return t;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi)>>1;if(B[m]<t)lo=m+1;else hi=m}const c=[B[lo],B[lo-1]].filter(x=>x!=null).sort((a,b)=>Math.abs(a-t)-Math.abs(b-t))[0];return Math.abs(c-t)<.4*bp?c:t};// within 0.4 of a beat (a chord pushed to the "&", half a beat, stays)
@@ -46,9 +46,21 @@ async function karaLoadDrive(it,onP){await gdTokenFull();const v=await vlFind(it
  try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
  try{await mxPut('mixvideo:'+it.id,{blob,at:Date.now(),from:'drive'});it.hasVid=true;await mxIdxSave();return {blob,kept:true}}
  catch(e){KA_MEM[it.id]=blob;return {blob,kept:false}}}
+// full screen: the card covers the screen (and the browser's full screen when the phone allows it, sideways when it can turn);
+// turning the phone sideways while the karaoke is on screen opens it, and turning it back closes what turning opened
+let kaFullBy='';
+function karaFull(on,by='tap'){const h=$('gdKara');if(!h)return;if(!!on===h.classList.contains('kfull'))return;
+ h.classList.toggle('kfull',!!on);document.body.classList.toggle('kopen',!!on);kaFullBy=on?by:'';
+ if(on&&by==='tap'){const f=h.requestFullscreen||h.webkitRequestFullscreen;if(f)try{const r=f.call(h);if(r&&r.then)r.then(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}}).catch(()=>{})}catch(e){}}
+ if(!on){try{screen.orientation.unlock()}catch(e){}}
+ if(!on&&(document.fullscreenElement||document.webkitFullscreenElement)){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document).catch(()=>{})}catch(e){}}
+ const x=$('kaExit');if(x)x.onclick=()=>karaFull(false)}
+document.addEventListener('fullscreenchange',()=>{const h=$('gdKara');if(!document.fullscreenElement&&h&&h.classList.contains('kfull')&&kaFullBy==='tap')karaFull(false)});
+try{matchMedia('(orientation: landscape)').addEventListener('change',e=>{const h=$('gdKara');if(!h||!KA||KA.host!==h)return;
+ if(e.matches){const r=h.getBoundingClientRect();if(h.offsetParent!==null&&r.bottom>0&&r.top<innerHeight)karaFull(true,'turn')}else if(kaFullBy==='turn')karaFull(false)})}catch(e){}
 const KA_MEM={};// videos too big to keep on the phone, for this visit
 // the card in the guide (Full): filled in once the video is on the phone
-function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
+function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><button type="button" class="kx" id="kaExit" aria-label="Exit full screen">✕</button><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
  <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
 let kaGen=0;
 async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
@@ -80,11 +92,11 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
  v.onplay=()=>pUI(true);v.onpause=()=>pUI(false);
  body.querySelectorAll('[data-kj]').forEach(b=>b.onclick=()=>{v.currentTime=Math.max(0,Math.min(v.duration||1e9,v.currentTime+ +b.dataset.kj))});
  body.querySelector('.kspeed').onclick=e=>{const b=e.target.closest('[data-kr]');if(!b)return;v.playbackRate=+b.dataset.kr;try{v.preservesPitch=true}catch(err){}body.querySelectorAll('[data-kr]').forEach(x=>x.setAttribute('aria-pressed',x===b))};
- $('kaFull').onclick=()=>{const f=host.requestFullscreen||host.webkitRequestFullscreen;if(f)f.call(host).catch(()=>{})};
+ $('kaFull').onclick=()=>karaFull(true);
  // tap the lane to jump there
  lane.onclick=e=>{const r=lane.getBoundingClientRect(),hx=r.width*.3,t=karaT()+(e.clientX-r.left-hx)/KA_PPS;v.currentTime=Math.max(0,t+KA.off)};
  const karaT=()=>v.currentTime-KA.off;
- const tick=()=>{if(!KA||KA.v!==v)return;if(!host.isConnected||host.offsetParent===null){karaStop();return}
+ const tick=()=>{if(!KA||KA.v!==v)return;if(!host.isConnected||(host.offsetParent===null&&!host.classList.contains('kfull'))){karaStop();return}
   const t=karaT(),r=lane.clientWidth*.3;strip.style.transform=`translateX(${(r-t*KA_PPS).toFixed(1)}px)`;
   const B=M.blocks;let i=-1;for(let k=0;k<B.length;k++){if(B[k].t0<=t+.02){if(t<B[k].t1)i=k}else break}
   let n=B.findIndex(b=>b.t0>t+.02);
