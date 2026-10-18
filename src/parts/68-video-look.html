@@ -45,7 +45,7 @@ const VL_T={n:4,cols:2,W:720,H:405};
 // the video is read once per recording: the reading (Claude's answer) is kept with the song's analysis and reused on every rebuild,
 // so the Full guide comes out the same each time (Oct 2026). Bump VL_VER when the reading itself changes (its questions, the stills);
 // the next rebuild then reads the video again.
-const VL_VER=1;
+const VL_VER=2;// 2: large close-ups of the end of the neck for the capo
 const vlRaw=r=>r?{capo:r.capo,capo_conf:r.capo_conf,frames:r.frames,looked:r.looked,clear:r.clear,who:r.who,others:r.others,nohand:r.nohand}:null;
 function vlKept(it,vkey){if(window.__vlFresh)return null;try{const v=(loadSong('mix_'+it.id)||{}).video;return v&&v.raw&&v.vkey===vkey&&v.ver===VL_VER?v.raw:null}catch(e){return null}}
 const vlKeep=(a,res,vkey,reused)=>{if(a.video&&!a.video.skip)Object.assign(a.video,{raw:vlRaw(res),vkey,ver:VL_VER,...(reused?{reused:true}:{})})};
@@ -59,23 +59,27 @@ async function vlFind1(title,sheets){
  const prompt=`These ${sheets.length} images are contact sheets of stills from a video of the song "${title}". Each sheet has up to ${VL_T.n} tiles numbered 1–${VL_T.n} (left to right, top to bottom).
 There may be more than one guitarist (for example one on an acoustic guitar and one on an electric). List only the tiles where a guitarist's fretting hand on the neck is clearly visible, and in each, every such guitarist: sharp, not blocked, close enough to see which strings and frets the fingers press. For each, say which guitar it is ("acoustic" or "electric", or "guitar" if you can't tell), give a box around the fretting hand and the part of the neck around it, as fractions of the tile [x0, y0, x1, y1] (0,0 is the tile's top left), and how clear it is. Leave out tiles with no clear fretting hand.
 Don't read lyrics or any other text on screen.
-Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}]}]}`;
+Also, for the capo: in any tile where the end of a guitar's neck by the headstock (the nut and the first 5 frets, where a capo would sit) is clearly visible, add "neck" to that tile, a box around the nut and those frets (list the tile even if no hand is clear in it).
+Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}], "neck": {"box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}}]}`;
  // room for a long answer: with the 720 px tiles many hands are seen (an answer cut short can't be read)
  return await sampleFn.json(prompt,{images:sheets.map(x=>x.blob),maxTokens:8000})}
 // (2) read: the hand and the neck cut from the full still (with room around it), up to 768 wide
-async function vlCrop(f,box){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
+async function vlCrop(f,box,maxW=768){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
  x0=Math.max(0,x0-mx);y0=Math.max(0,y0-my);x1=Math.min(1,x1+mx);y1=Math.min(1,y1+my);const sw=(x1-x0)*im.width,sh=(y1-y0)*im.height;if(sw<8||sh<8)return f.blob;
- const sc=Math.min(768/sw,3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
+ const sc=Math.min(maxW/sw,3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
  g.drawImage(im,x0*im.width,y0*im.height,sw,sh,0,0,cv.width,cv.height);return await vlJpg(cv,.85)}
 // both steps; frames: [{t, blob}] at the candidate moments. Returns Claude's reading of the close-ups, or {nohand} when none was clear.
 // With more than one guitarist, the one whose hand is clear most often (usually the one strumming the chords) is read; the others
 // are named (a lead line or a different voicing on another guitar shouldn't decide the chords).
 async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r1=await vlFind1(title,sheets),ok=x=>x==='high'||x==='medium';
- const all=[];(Array.isArray(r1&&r1.tiles)?r1.tiles:[]).forEach(x=>{const sh=sheets[(+x.sheet||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.tile);if(!tl)return;
+ const all=[],necks=[],frac=(b,tl)=>[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v)));
+ (Array.isArray(r1&&r1.tiles)?r1.tiles:[]).forEach(x=>{const sh=sheets[(+x.sheet||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.tile);if(!tl)return;
+  // the end of the neck (nut and first frets), for the capo
+  const nk=x.neck;if(nk&&Array.isArray(nk.box)&&nk.box.length===4&&ok(nk.quality)){const bx=frac(nk.box.map(Number),tl);if(bx[2]>bx[0]&&bx[3]>bx[1])necks.push({f:tl.f,box:bx,q:nk.quality,area:(bx[2]-bx[0])*(bx[3]-bx[1])})}
   const hands=Array.isArray(x.hands)?x.hands:x.clear&&x.box?[{guitar:'guitar',box:x.box,quality:x.quality}]:[];
   hands.forEach(h=>{if(!h||!Array.isArray(h.box)||h.box.length!==4||!ok(h.quality))return;
    // the box is in the tile; the still sits inside it (letterboxed): into the still's own fractions
-   const b=h.box.map(Number),bx=[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v)));
+   const bx=frac(h.box.map(Number),tl);
    const who=/acoustic/i.test(h.guitar)?'acoustic':/electric/i.test(h.guitar)?'electric':'guitar';
    if(bx[2]>bx[0]&&bx[3]>bx[1])all.push({f:tl.f,box:bx,q:h.quality,who})})});
  if(!all.length)return {nohand:true,looked:frames.length};
@@ -85,15 +89,19 @@ async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r
  picks.sort((a,b)=>a.f.t-b.f.t);const hi=picks.filter(p=>p.q==='high'),pool=hi.length>=Math.min(VL_MAX,picks.length)?hi:picks,n=Math.min(VL_MAX,pool.length);
  const use=[...new Set([...Array(n)].map((_,i)=>Math.round(i*(pool.length-1)/Math.max(1,n-1))))].map(i=>pool[i]);
  const crops=[];for(const p of use)crops.push({t:p.f.t,blob:await vlCrop(p.f,p.box)});
- const res=await vlAsk(title,crops,use[0].f,who);res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
+ // the capo: up to 2 large close-ups of the end of the neck (the biggest in the frame, at two different moments), cut from the full
+ // still; without them, a whole still as before
+ necks.sort((a,b)=>(b.q==='high')-(a.q==='high')||b.area-a.area);const nk=[];for(const n of necks)if(nk.length<2&&!nk.some(x=>x.f.t===n.f.t))nk.push(n);
+ const capoShots=[];for(const n of nk)capoShots.push({t:n.f.t,blob:await vlCrop(n.f,n.box,1024)});
+ const res=await vlAsk(title,crops,capoShots.length?null:use[0].f,who,capoShots);res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
 // ask Claude what it sees (it isn't told what the sound heard, so it can't just agree)
-async function vlAsk(title,frames,whole,who){const gw=who&&who!=='guitar'?`the ${who} guitarist’s`:'the guitarist’s';
- const prompt=`${whole?`The first image is a whole still from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:`These ${frames.length} images are stills from a video of a guitarist playing the song "${title}"`}, taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
-1. Capo: look at the guitar's neck. If you can see the neck clearly, give the fret the capo is on, or 0 if you can clearly see there is no capo. If you can't see the neck well enough, give null.
-2. For each ${whole?'close-up':'image'}, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
+async function vlAsk(title,frames,whole,who,capoShots=[]){const gw=who&&who!=='guitar'?`the ${who} guitarist’s`:'the guitarist’s',nc=capoShots.length;
+ const prompt=`${nc?`The first ${nc===1?'image is a close-up':nc+' images are close-ups'} of the end of the guitar's neck by the headstock (the nut and the first frets), from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:whole?`The first image is a whole still from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:`These ${frames.length} images are stills from a video of a guitarist playing the song "${title}"`}, taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
+1. Capo: ${nc?`look at the neck close-up${nc>1?'s':''}. A capo is a clamp across all the strings. Count the frets from the nut (the first fret is the space right after the nut) and give the fret the capo sits in`:'look at the guitar\'s neck. If you can see the neck clearly, give the fret the capo is on'}, or 0 if you can clearly see there is no capo. If you can't see the neck well enough, give null.
+2. For each ${whole||nc?'fretting-hand close-up':'image'}, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
 Don't read lyrics or any other text on screen.
 Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low"|null, "frames": [{"t": seconds, "shape": chord name or null, "conf": "high"|"medium"|"low"|null}]}`;
- const ims=(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
+ const ims=capoShots.map(x=>x.blob).concat(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
 // a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
 const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
