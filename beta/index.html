@@ -5417,16 +5417,20 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
 async function dsUnused(it,g){if(!gdFullTok)return null;
  const used=new Set([it.drive&&it.drive.file,it.drive&&it.drive.video&&it.drive.video.id].filter(Boolean));
  // already has the guitarist's hands from a video: nothing to add
- let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(st&&st.idx&&st.idx.length)return null;
+ let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(st&&st.idx&&st.idx.length)return {has:true};
  const mine=f=>dsKind(f)&&!/\((full|guitars only)\)\.mp3$/i.test(f.name);let fs=[];
  if(it.drive&&it.drive.folder){const q=encodeURIComponent(`'${it.drive.folder}' in parents and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
   const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
   if(r.ok)fs=((await r.json()).files||[]).filter(mine)}
- else{// split from the phone: the song's files anywhere in your Drive, by its name
-  const t=String(g.title||'').trim();if(!t)return null;const q=encodeURIComponent(`name contains '${t.replace(/\\/g,'').replace(/'/g,"\\'")}' and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
-  const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
-  const k=vlKey(t);if(r.ok)fs=((await r.json()).files||[]).filter(f=>mine(f)&&k&&vlKey(f.name).includes(k))}
- const vid=fs.find(f=>dsKind(f)==='video'&&!used.has(f.id));if(!vid)return null;
+ else{// split from the phone: the song's files anywhere in your Drive whose name holds the song's name. Drive's name search
+  // matches words from their start (a file named "Artist -Song.mp4" can be missed), so it searches by the song's longest word,
+  // and then, if that finds nothing, among your newest 200 videos and audio files; the name is checked here
+  const t=String(g.title||'').trim(),k=vlKey(t);if(!k)return null;
+  const list=async q=>{const r=await fetch(`${GD_API}?q=${encodeURIComponent(q+" and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')")}&orderBy=modifiedTime desc&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+   if(!r.ok)throw {code:'gd_http',status:r.status};return ((await r.json()).files||[]).filter(f=>mine(f)&&vlKey(f.name).includes(k))};
+  const w=k.split(' ').sort((x,y)=>y.length-x.length)[0].replace(/'/g,"\\'");
+  fs=await list(`name contains '${w}'`);if(!fs.some(f=>dsKind(f)==='video'))fs=fs.concat(await list(`'me' in owners`))}
+ const vid=fs.find(f=>dsKind(f)==='video'&&!used.has(f.id));if(!vid)return {none:true};
  const folder=(vid.parents||[])[0]||(it.drive&&it.drive.folder)||'',key=n=>vlKey(String(n||'').replace(/\.[a-z0-9]+$/i,''));
  const aud=fs.find(f=>dsKind(f)==='audio'&&(f.parents||[])[0]===folder&&key(f.name)===key(vid.name))||(it.drive&&it.drive.file&&fs.find(f=>f.id===it.drive.file));
  return folder?{vid,src:aud||vid,folder}:null}
@@ -7182,13 +7186,19 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
  // and first, the song's material in Drive the session hasn't used (a new video is split on GitHub: dsUnused); Drive is asked for
  // straight from the tap
- const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;
-  if((it.drive||gdOn())&&mxGh()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
-   if(ok){toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){}
-    if(u){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:u.src,vid:u.vid,folder:u.folder,base:cleanName(u.src.name),song});
-     if(n.state!=='failed'){toast(`Found “${esc(u.vid.name)}” in your Drive, not used yet: your GitHub splits it again and takes stills of the guitarist’s hands (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}
-    else{const t=$('toast');if(t)t.hidden=true}}}
+ const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;let said='';
+  // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
+  // needs this)
+  if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   if(!ok)said='Couldn’t open your Drive, so the guide was built again from the guitars-only part only.';
+   else{toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){said='Couldn’t search your Drive this time, so the guide was built again from the guitars-only part only.'}
+    if(u&&u.vid){if(!mxGh())said=`Found “${esc(u.vid.name)}” in your Drive, but GitHub isn’t connected, so it can’t be split. Connect GitHub (My profile › Connections) and rebuild again.`;
+     else{const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:u.src,vid:u.vid,folder:u.folder,base:cleanName(u.src.name),song});
+      if(n.state!=='failed'){toast(`Found “${esc(u.vid.name)}” in your Drive, not used yet: your GitHub splits it again and takes stills of the guitarist’s hands (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}
+      said=`Found “${esc(u.vid.name)}” but couldn’t send it to GitHub${n.err?': '+esc(n.err):''}. The guide was built again from the guitars-only part.`}}
+    else if(u&&u.none)said='No video of this song in your Drive that wasn’t used yet (its name must contain the song’s name). The guide was built again from the guitars-only part.'}}
   else if(it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}
+  if(said)toast(said);else{const t=$('toast');if(t&&/Looking in your Drive/.test(t.textContent))t.hidden=true}
   asStart(id);renderSession()};
  if(g.r.mix.length){try{gdPreload(true)}catch(e){}}
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;

@@ -58,13 +58,19 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
  // and first, the song's material in Drive the session hasn't used (a new video is split on GitHub: dsUnused); Drive is asked for
  // straight from the tap
- const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;
-  if((it.drive||gdOn())&&mxGh()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
-   if(ok){toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){}
-    if(u){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:u.src,vid:u.vid,folder:u.folder,base:cleanName(u.src.name),song});
-     if(n.state!=='failed'){toast(`Found “${esc(u.vid.name)}” in your Drive, not used yet: your GitHub splits it again and takes stills of the guitarist’s hands (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}
-    else{const t=$('toast');if(t)t.hidden=true}}}
+ const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;let said='';
+  // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
+  // needs this)
+  if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   if(!ok)said='Couldn’t open your Drive, so the guide was built again from the guitars-only part only.';
+   else{toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){said='Couldn’t search your Drive this time, so the guide was built again from the guitars-only part only.'}
+    if(u&&u.vid){if(!mxGh())said=`Found “${esc(u.vid.name)}” in your Drive, but GitHub isn’t connected, so it can’t be split. Connect GitHub (My profile › Connections) and rebuild again.`;
+     else{const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:u.src,vid:u.vid,folder:u.folder,base:cleanName(u.src.name),song});
+      if(n.state!=='failed'){toast(`Found “${esc(u.vid.name)}” in your Drive, not used yet: your GitHub splits it again and takes stills of the guitarist’s hands (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}
+      said=`Found “${esc(u.vid.name)}” but couldn’t send it to GitHub${n.err?': '+esc(n.err):''}. The guide was built again from the guitars-only part.`}}
+    else if(u&&u.none)said='No video of this song in your Drive that wasn’t used yet (its name must contain the song’s name). The guide was built again from the guitars-only part.'}}
   else if(it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}
+  if(said)toast(said);else{const t=$('toast');if(t&&/Looking in your Drive/.test(t.textContent))t.hidden=true}
   asStart(id);renderSession()};
  if(g.r.mix.length){try{gdPreload(true)}catch(e){}}
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;
