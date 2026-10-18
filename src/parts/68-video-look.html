@@ -142,7 +142,10 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
   const sure=Object.entries(v).reduce((s,[k,w])=>s+(vl3(+k)===t3?w:0),0)>=3&&!Object.keys(v).some(k=>vl3(+k)&&vl3(+k)!==t3);
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3&&(sure||soft(g,t3))){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
- const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
+ // Full is the song as he plays it: the capo seen, and the guitar's tuning (a half or whole step down) when the shapes say so;
+ // Easy has it in standard tuning (Oct 2026, the user). A guitar tuned up keeps the standard-tuning capo.
+ if(shift&&shift.seenCapo!=null&&tshift(shift.tun0,0)===0){const n=shift.seenCapo-shift.capo,t=n===1?'half':n===2?'whole':'';if(t){a.play.tun=t;shift.tun=t}}
+ const vcap=shift?(shift.tun?shift.seenCapo:shift.capo):vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}

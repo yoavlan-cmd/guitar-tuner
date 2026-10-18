@@ -63,6 +63,21 @@ execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`testsrc=size=320x180
  ok(await p.$eval('#gdKara .kbig',e=>e.classList.contains('mixplay')&&!e.closest('.kvid')&&e.textContent==='❚❚'&&e.getAttribute('aria-label')==='Pause'),'the play button is the player’s, under the video: ❚❚ while it plays');
  {const a0=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);await p.tap('#gdKara [data-kj="-5"]');await p.waitForTimeout(150);const a1=await p.evaluate(()=>document.querySelector('#gdKara video').currentTime);ok(a1<a0-4,'−5s goes back 5 seconds');}
  await p.screenshot({path:path.join(OUT,'karaoke.png'),fullPage:false});
+ // full screen (Oct 2026): the card covers the screen, the video big, the chords and the lane under it; sideways, the video on the
+ // left and the chords on the right; ✕ closes it; turning the phone sideways opens it, turning it back closes it
+ const fs1=async()=>p.evaluate(()=>{const h=document.getElementById('gdKara'),r=x=>{const b=h.querySelector(x).getBoundingClientRect();return {x:Math.round(b.left),y:Math.round(b.top),w:Math.round(b.width),h:Math.round(b.height)}};
+  return {on:h.classList.contains('kfull'),cover:Math.round(h.getBoundingClientRect().width)===innerWidth&&Math.round(h.getBoundingClientRect().height)===innerHeight,vid:r('.kvid'),now:r('.know'),lane:r('.klane'),play:r('.kbig'),x:r('#kaExit'),nav:getComputedStyle(document.getElementById('bnav')).visibility,W:innerWidth,H:innerHeight}});
+ await p.tap('#kaFull');await p.waitForTimeout(300);let F=await fs1();console.log('  full screen:',JSON.stringify(F));
+ ok(F.on&&F.cover&&F.nav==='hidden'&&F.vid.h>F.H*.4&&F.now.y>=F.vid.y+F.vid.h-1&&F.lane.y+F.lane.h<=F.H&&F.play.y+F.play.h<=F.H,'Full screen: the card covers the screen, the video big, the chords, lane and play button under it, all on screen');
+ ok(await p.evaluate(()=>window.__ka.state()&&window.__ka.state().blocks>0),'…and the karaoke keeps running in it');
+ await p.screenshot({path:path.join(OUT,'karaoke_full.png')});
+ await p.setViewportSize({width:844,height:390});await p.waitForTimeout(300);F=await fs1();console.log('  sideways:',JSON.stringify(F));
+ ok(F.on&&F.cover&&F.vid.x<F.now.x&&F.vid.h>F.H*.7&&F.lane.x>=F.vid.x+F.vid.w&&F.play.y+F.play.h<=F.H&&F.lane.y+F.lane.h<=F.H,'sideways: the video on the left (most of the height), the chords, lane and play button on the right, all on screen');
+ await p.screenshot({path:path.join(OUT,'karaoke_full_side.png')});
+ await p.tap('#kaExit');await p.waitForTimeout(200);F=await fs1();ok(!F.on&&F.nav==='visible','✕ closes it');
+ await p.setViewportSize({width:390,height:844});await p.waitForTimeout(200);await p.evaluate(()=>document.getElementById('gdKara').scrollIntoView());
+ await p.setViewportSize({width:844,height:390});await p.waitForTimeout(300);ok((await fs1()).on,'turning the phone sideways with the karaoke on screen opens it full screen');
+ await p.setViewportSize({width:390,height:844});await p.waitForTimeout(300);ok(!(await fs1()).on,'…and turning it back closes it');
  await p.tap('#gdKara .kbig');await p.waitForTimeout(150);ok(await p.$eval('#gdKara .kbig',e=>e.textContent==='▶'),'tapping it pauses (▶)');
  // leaving the page stops it
  await p.tap('#bnav [data-sec=home]');await p.waitForTimeout(400);ok(await p.evaluate(()=>!window.__ka.state())&&await p.evaluate(()=>{const v=document.querySelector('#gdKara video');return !v||v.paused}),'leaving the page stops the video');

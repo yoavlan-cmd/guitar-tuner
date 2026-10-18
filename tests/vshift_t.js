@@ -1,7 +1,8 @@
 // The capo from the video and the sound together (Oct 2026, "שאריות של החיים" live: capo on fret 3, guitar tuned a half step down).
 // The video shows where the capo sits but the hand's shapes can't be read at that size; sound first: near a capo the hand plays
-// open shapes, so the capo is where the chords heard become open shapes (capo 2 in standard tuning: Cadd9 · Am7 · Em · Fmaj7 …),
-// not the barre-like B · Abm · Ebm the capo seen would give. The same every build (no Claude needed for it). Shapes read clearly
+// open shapes, so the tuning is the one where the chords heard become open shapes with the capo seen. Full is the song as he plays
+// it: half step down, capo 3, Cadd9 · Am7 · Em · Fmaj7 … (not the barre-like B · Abm · Ebm of capo 3 in standard tuning); Easy has
+// it in standard tuning (capo 2 = the same sound and shapes). The same every build (no Claude needed for it). Shapes read clearly
 // that agree with the capo seen keep it; a song really played with barre shapes (or with no capo) keeps the capo seen.
 // The chords are this recording's as heard (sounding pitch), without its audio.
 const {chromium}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
@@ -19,17 +20,24 @@ const song=seq=>({title:'שאריות של החיים - אמיר דדון',artis
  const ctx=await b.newContext();await ctx.route(/^https:\/\//,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(APP);await p.waitForTimeout(400);
  const run=(a,res)=>p.evaluate(([a,res])=>{localStorage.setItem('tuner.song.vs0',JSON.stringify(a));const x=window.__vl.apply('vs0',res,'vs1'),G=window.__gd.build('vs1');
-  return {play:x.play,video:x.video,full:G.full,capo:G.capo,why:(G.sure.find(s=>s.k==='Capo and shapes')||{}).why}},[a,res]);
+  const h=document.createElement('div');h.innerHTML=window.__gd.html('vs1');
+  const e=document.createElement('div');e.innerHTML=window.__gd.html('vs1','easy');
+  return {easy:(e.querySelector('.gdbig')||{}).textContent||'',easyCh:G.easy,play:x.play,video:x.video,full:G.full,capo:G.capo,tun:G.tun,why:(G.sure.find(s=>s.k==='Capo and shapes')||{}).why,src:G.sources.map(s=>s[1]).find(t=>/The video/.test(t))||'',like:(h.querySelector('.gdlike')||{}).textContent||''}},[a,res]);
  // 1. capo 3 seen, no shape readable: capo 2 in standard tuning, from the open shapes the sound becomes
  let r=await run(song(SEQ),{capo:3,capo_conf:'high',frames:[]});console.log('  capo 3 seen:',r.capo,'|',r.full.join(' '),'|',JSON.stringify(r.video.shift));
- ok(r.capo===2&&r.play.tun==='std'&&r.video.shift&&r.video.shift.seenCapo===3&&r.video.capo===2,'capo 3 seen, the hand unreadable: capo 2 in standard tuning (the guitar tuned a half step down)');
+ ok(r.capo===3&&r.tun==='half'&&r.play.tun==='half'&&r.video.shift&&r.video.shift.seenCapo===3&&r.video.capo===3,'capo 3 seen, the hand unreadable: Full is as he plays it, tuned a half step down with capo 3');
  ok(['Cadd9','Am7','Em','Gadd9','Fmaj7','C','Dm','Dsus2'].every(n=>r.full.includes(n))&&!r.full.some(n=>/^(B|Ab|Eb|F#|C#)/.test(n)),'Full: the open shapes he plays (Cadd9 · Am7 · Em · Fmaj7 · Dsus2…), not B · Abm · Ebm');
- ok(/capo in the video sits on fret 3, but the song sounds a half step lower/.test(r.why)&&/with capo 2 the chords heard are the open shapes/.test(r.why),'How sure explains it: capo 3 in the video, tuned a half step down, the open shapes ('+r.why.slice(0,80)+'…)');
+ ok(/capo sits on fret 3, and the song sounds a half step lower than that gives in standard tuning: the guitar is tuned a half step down/.test(r.why)&&/Easy has it in standard tuning \(capo 2/.test(r.why),'How sure explains it: capo 3 in the video, tuned a half step down, the open shapes ('+r.why.slice(0,80)+'…)');
+ console.log('  built from:',r.src);console.log('  before you play:',r.like);
+ ok(/capo on fret 3 \(the guitar tuned a half step down\)/.test(r.src),'Built from says what the video shows: capo on fret 3, tuned a half step down');
+ ok(/Tune every string a half step down first/.test(r.like)&&!/capo 2/.test(r.like),'Full’s Before you play: tune a half step down first (no standard-tuning alternative in Full)');
+ console.log('  easy:',r.easy,'|',r.easyCh.join(' '));
+ ok(/^Capo 2Standard tuning/.test(r.easy)&&['C','Am','Em','G','Fmaj7'].every(n=>r.easyCh.includes(n)),'Easy: standard tuning, capo 2, basic shapes (C · Am · Em · G · Fmaj7, the open F)');
  const r2=await run(song(SEQ),{capo:3,capo_conf:'high',frames:[]});ok(JSON.stringify(r2.full)===JSON.stringify(r.full)&&r2.capo===r.capo,'the same on every build');
  // 2. the hand's shapes read clearly and agree with capo 3 (barre shapes): capo 3 stays
  const fr=[[1,'B'],[4,'Abm7'],[7,'Ebm'],[13,'Abm7']].map(([t,s])=>({t,shape:s,conf:'high'}));
  r=await run(song(SEQ),{capo:3,capo_conf:'high',frames:fr});console.log('  shapes agree with capo 3:',r.capo,'|',r.full.slice(0,4).join(' '));
- ok(r.capo===3&&!r.video.shift,'clear shapes that agree with the capo seen keep it (capo 3)');
+ ok(r.capo===3&&!r.video.shift&&!r.like,'clear shapes that agree with the capo seen keep it (capo 3), nothing to explain');
  // 3. a song in an open key with no capo seen: stays without a capo
  const r3=await run(song(['G','C','D','Em','G','C','D','Em']),{capo:0,capo_conf:'high',frames:[]});console.log('  no capo, open key:',r3.capo,'|',r3.full.join(' '));
  ok(r3.capo===0&&!r3.video.shift&&r3.full.join(' ')==='G C D Em','no capo seen and open chords: no capo, nothing moved');

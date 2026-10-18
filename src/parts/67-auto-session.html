@@ -39,6 +39,7 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;
+  if(document.hidden)asReady={id,at:Date.now()};
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
   toast(`“${esc(it.name)}”: the session is ready. <button type="button" class="tlink" id="asOpen">Open the song</button>`,'ok');
   const o=$('asOpen');if(o)o.onclick=()=>{const t=$('toast');if(t)t.hidden=true;asOpenSong(id)}}
@@ -95,7 +96,11 @@ function asFuse(a,w){const gE=gdThirds(a),wE=gdThirds({feat:w.feat});if(!gE||!wE
   const gFaint=gm===0||go/gm>=.6,wOther=wo>0&&(wm===0||wm/wo<=.5);
   if(gFaint&&wOther){const k=chordName(g.c)+' → '+chordName(r*NT+flip[q]);fixed.add(k);g.c=r*NT+flip[q]}}
  a.mfeat={n:w.feat.n,c:w.feat.c,hop:w.feat.hop,off:w.feat.off};a.whole={agree:tot?+(same/tot).toFixed(2):0,fixed:[...fixed]}}
-function asOpenSong(id){const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
+function asOpenSong(id){asReady=null;try{const d=$('dsDlg');if(d&&!d.hidden){dsShown='';clearInterval(dsTimer);d.hidden=true;d.innerHTML='';document.body.classList.remove('wopen')}}catch(e){}
+ const g=learnSongs().find(x=>x.r.mix.some(m=>m.mix===id));if(g)openSession(g);else goSec('learn')}
+// a session that got ready while Guitaring was in the background (you were told by a notification): coming back to the app opens it
+let asReady=null;
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!asReady)return;const r=asReady;asReady=null;if(Date.now()-r.at<30*60e3)asOpenSong(r.id)});
 // build one by hand (the song's page offers it for a split with no guide, or when the build failed)
 function asStart(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='ready')return;if(!AS_ON.includes(it.sess)){it.sess='queued';mxIdxSave();try{dsStatusUI()}catch(e){}}asBuild(id)}
 // after a restart: finish what was being built; a song added from Drive before sessions built themselves gets its session now

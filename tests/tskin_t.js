@@ -38,4 +38,14 @@ const G=[{id:'g1',name:'Epiphone Les Paul Muse',brand:'Epiphone',model:'Les Paul
  const s1=await q.evaluate(()=>document.getElementById('paneTune').dataset.skin);await q.evaluate(()=>document.querySelector('#inst [data-g="electric"]').click());await q.waitForTimeout(200);
  const s2=await q.evaluate(()=>document.getElementById('paneTune').dataset.skin);ok(s1==='wood'&&s2==='gloss','no guitars: Acoustic → wood, Electric → gloss '+s1+'/'+s2);
  await c2.close();
+ // the whole tuner fits the screen (Oct 2026): Listen above the bottom bar without scrolling, on a tall and a short phone; the
+ // string buttons don't overlap; Settings sits in the title row
+ for(const [w,h] of [[412,740],[360,640]]){const c3=await b.newContext({...devices['Pixel 7'],viewport:{width:w,height:h}});await c3.route(/^https:\/\//,r=>r.abort());const t=await c3.newPage();
+  await t.addInitScript(G=>{localStorage.setItem('tuner.profile',JSON.stringify({name:'Yoav',onboarding:{done:true}}));localStorage.setItem('tuner.instruments',JSON.stringify(G));localStorage.setItem('tuner.tuneInst','"g3"')},G);
+  await t.goto(APP);await t.waitForTimeout(700);await t.evaluate(()=>window.__v2.goSec('tuner'));await t.waitForTimeout(500);
+  const F=await t.evaluate(()=>{const r=s=>document.querySelector(s).getBoundingClientRect(),P=[...document.querySelectorAll('#strings .peg')].map(e=>e.getBoundingClientRect());
+   let lap=0;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],c=P[j];const x=Math.min(a.right,c.right)-Math.max(a.left,c.left),y=Math.min(a.bottom,c.bottom)-Math.max(a.top,c.top);if(x>2&&y>2)lap++}
+   return {scrollY,listen:Math.round(r('#listen').bottom),bnav:Math.round(r('#bnav').top),lap,set:Math.round(r('#tuneSettings summary').top),bar:Math.round(r('#paneTune .pagebar').top),peg:Math.round(P[0].height)}});
+  console.log('  '+w+'×'+h+':',JSON.stringify(F));
+  ok(F.listen<=F.bnav&&!F.lap&&Math.abs(F.set-F.bar)<4&&F.peg>=24,`${w}×${h}: Listen shows above the bottom bar without scrolling, the string buttons don’t overlap, Settings in the title row`);await c3.close()}
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
