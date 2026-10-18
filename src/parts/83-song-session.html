@@ -59,7 +59,9 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  // and first, the song's material in Drive the session hasn't used (a new video is split on GitHub: dsUnused); Drive is asked for
  // straight from the tap
  const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;let said='';
-  if(it.drive||gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+  // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
+  // needs this)
+  if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
    if(!ok)said='Couldn’t open your Drive, so the guide was built again from the guitars-only part only.';
    else{toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){said='Couldn’t search your Drive this time, so the guide was built again from the guitars-only part only.'}
     if(u&&u.vid){if(!mxGh())said=`Found “${esc(u.vid.name)}” in your Drive, but GitHub isn’t connected, so it can’t be split. Connect GitHub (My profile › Connections) and rebuild again.`;
