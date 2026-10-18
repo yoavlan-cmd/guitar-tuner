@@ -625,6 +625,11 @@ body.wopen{overflow:hidden}
 /* headstock */
 #paneTune .strings{padding:10px 8px}
 #paneTune .hs{position:relative;width:100%;max-width:380px;margin:0 auto;aspect-ratio:360/350}
+#paneTune{position:relative}
+/* Settings sits in the title row (top right), so Listen is the last thing on the screen; it opens under Listen */
+#paneTune>#tuneSettings{border-top:0;padding-top:0}#paneTune>#tuneSettings>summary{position:absolute;top:0;right:0;height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;gap:8px}
+#paneTune>#tuneSettings[open]{border-top:1px solid var(--line);padding-top:10px}
+#paneTune.tsfit .hs{max-width:var(--tsHW,380px)}#paneTune.tsfit .peg{min-width:var(--tsPW,52px);aspect-ratio:1.35;border-radius:12px}#paneTune.tsfit .peg b{font-size:var(--tsPF,22px)}#paneTune.tsfit .peg sup{font-size:9px}#paneTune.tsfit .screen svg.gauge{max-width:var(--tsGW,330px)}#paneTune.tsfit .note{font-size:var(--tsNF,64px);margin-top:4px}#paneTune.tsfit{gap:7px}#paneTune.tsfit .pagebar h2{display:none}#paneTune.tsfit>#gtrLine{position:absolute;top:0;left:52px;height:40px;margin:0;align-items:center;max-width:calc(100% - 52px - 128px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#paneTune.tsfit .pagebar{min-height:40px}#paneTune.tsfit .pagebar{margin-bottom:0}#paneTune.tsfit .strings{padding:6px 8px}#paneTune.tsfit .screen{padding-bottom:8px;padding-top:36px}#paneTune.tsfit .status{margin-top:2px}#paneTune.tsfit .note sub{margin-top:24px;font-size:20px}
 #paneTune .hsart{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
 #paneTune .hsbody{fill:url(#hsWood);stroke:#33353C;stroke-width:1.2}
 #paneTune .hsedge{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1.5}
@@ -2454,8 +2459,23 @@ function tsArt(){const k=tsKind(),G=tsGeo(),sh=tsShape(k),e=s=>esc(String(s||'')
  <rect class="tsnut" x="141" y="298" width="78" height="8" rx="2" fill="url(#tsNut)"/>
  ${hw}`}}
 // meter skin + headstock: set when the guitar changes (applyGtr in 20-core-tuner)
-function tsApply(){const p=$('paneTune');if(!p)return;let id='wood';try{id=tsKind().id}catch(e){}if(p.dataset.skin!==id)p.dataset.skin=id;try{renderStrings()}catch(e){}}
-window.__tskin={kind:()=>tsKind(),apply:tsApply};// test hooks
+function tsApply(){const p=$('paneTune');if(!p)return;let id='wood';try{id=tsKind().id}catch(e){}if(p.dataset.skin!==id)p.dataset.skin=id;try{renderStrings()}catch(e){}requestAnimationFrame(tsFit)}
+// the whole tuner fits the screen (Oct 2026): no scrolling to reach Listen. When it doesn't fit, the meter and the headstock get
+// smaller together (never below a readable size) until Listen sits above the bottom bar (Settings is in the title row)
+function tsFit(){const p=$('paneTune');if(!p||p.hidden||!p.offsetParent)return;const st=p.style;['--tsGW','--tsHW','--tsNF','--tsPW','--tsPF'].forEach(k=>st.removeProperty(k));p.classList.remove('tsfit');
+ const g=p.querySelector('#screen svg.gauge'),hs=p.querySelector('#strings .hs'),set=$('listen');if(!g||!hs||!set||p.querySelector('#tuneSettings[open]'))return;
+ const bn=$('bnav'),over=()=>set.getBoundingClientRect().bottom+scrollY-((bn&&bn.getBoundingClientRect().height&&getComputedStyle(bn).visibility!=='hidden'?bn.getBoundingClientRect().top:innerHeight)-8);
+ const G0=g.getBoundingClientRect().width,H0=hs.getBoundingClientRect().width;if(over()<=0)return;
+ // first the compact top (the guitar in the title row, tighter gaps), then smaller meter and headstock if still needed
+ st.setProperty('--tsGW',Math.round(G0)+'px');st.setProperty('--tsHW',Math.round(H0)+'px');p.classList.add('tsfit');
+ // a few rounds: the cards' padding and text don't shrink, so measure again after each step
+ for(let n=0;n<5;n++){const o=over();if(o<=0)break;const G=g.getBoundingClientRect(),H=hs.getBoundingClientRect(),k=(G.height+H.height-o-4)/(G.height+H.height);
+  const gw=Math.max(G0*.38,G.width*k),hw=Math.max(H0*.5,H.width*k);st.setProperty('--tsGW',Math.round(gw)+'px');st.setProperty('--tsHW',Math.round(hw)+'px');
+  st.setProperty('--tsNF',Math.round(Math.max(40,64*Math.min(1,gw/G0+.15)))+'px');
+  const hr=Math.min(1,hw/Math.min(H0,380));st.setProperty('--tsPW',Math.round(Math.max(36,52*hr*1.15))+'px');st.setProperty('--tsPF',Math.round(Math.max(15,22*Math.min(1,hr*1.15)))+'px');if(gw<=G0*.38&&hw<=H0*.5)break}}
+try{new ResizeObserver(()=>tsFit()).observe(document.getElementById('paneTune'))}catch(e){}addEventListener('resize',()=>tsFit());
+try{const ts=document.getElementById('tuneSettings');if(ts)ts.addEventListener('toggle',()=>{if(!ts.open)tsFit()})}catch(e){}
+window.__tskin={kind:()=>tsKind(),apply:tsApply,fit:tsFit};// test hooks
 /* ================= Learn a song ================= */
 const CH=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const TYPES=[
@@ -5842,7 +5862,10 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
   const sure=Object.entries(v).reduce((s,[k,w])=>s+(vl3(+k)===t3?w:0),0)>=3&&!Object.keys(v).some(k=>vl3(+k)&&vl3(+k)!==t3);
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3&&(sure||soft(g,t3))){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
- const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
+ // Full is the song as he plays it: the capo seen, and the guitar's tuning (a half or whole step down) when the shapes say so;
+ // Easy has it in standard tuning (Oct 2026, the user). A guitar tuned up keeps the standard-tuning capo.
+ if(shift&&shift.seenCapo!=null&&tshift(shift.tun0,0)===0){const n=shift.seenCapo-shift.capo,t=n===1?'half':n===2?'whole':'';if(t){a.play.tun=t;shift.tun=t}}
+ const vcap=shift?(shift.tun?shift.seenCapo:shift.capo):vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
@@ -7429,6 +7452,7 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Numb
 // the capo set from the shapes the hand plays in the video, or (when the shapes can't be read) from the open shapes the sound
 // becomes near the capo seen (68-video-look vlApply)
 function gdShiftWhy(x){const c=x.capo,sc=x.seenCapo,n=sc!=null?sc-c:0,hs=k=>Math.abs(k)===1?'a half step':Math.abs(k)+' half steps';
+ if(x.tun)return `In the video the capo sits on fret ${sc}, and the song sounds ${hs(n)} lower than that gives in standard tuning: the guitar is tuned ${hs(n)} down. ${x.open!=null?`With that tuning the chords heard are the open shapes a hand plays near a capo (${Math.round(x.open*100)}% of the song, against ${Math.round(x.open0*100)}% in standard tuning).`:'The shapes the guitarist’s hand plays in the video match it.'} Full shows it as he plays it; Easy has it in standard tuning (capo ${c} gives the same sound with the same shapes).`;
  return `${x.open!=null?`Set from the capo in the video and the sound: with capo ${c} the chords heard are the open shapes a hand plays near a capo (${Math.round(x.open*100)}% of the song, against ${Math.round(x.open0*100)}% with capo ${sc}).`:'Set from the chord shapes the guitarist’s hand plays in the video, so the shapes here are the ones you see.'}${sc!=null&&n?` The capo in the video sits on fret ${sc}, but the song sounds ${hs(n)} ${n>0?'lower':'higher'} than that would give: the guitar is most likely tuned ${hs(n)} ${n>0?'down':'up'}. ${c?'Capo '+c:'No capo'} in standard tuning gives the same sound with the same shapes.`:''}`}
 // the video's capo isn't the one shown (the guitar in the video is tuned down or up): both ways to play it with the same shapes
 function gdLikeVideo(x){const n=x.seenCapo-x.capo,hs=Math.abs(n)===1?'a half step':Math.abs(n)+' half steps',fr=c=>c?'on fret '+c:'off';
@@ -7442,7 +7466,9 @@ function gdBuild(d){const keep=A;A=d;try{
  const full=[...dur.keys()].filter(n=>dur.get(n)>=.25),fullMain=full.filter(n=>dur.get(n)/tot>=.02);
  // Easy: basic chords, passing chords shorter than a beat left out, and the friendliest capo (standard tuning)
  const ew=new Map();d.segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<bp*.9)return;const n=nameOf(g);ew.set(n,(ew.get(n)||0)+g.t1-g.t0)});
- const en=[...ew.keys()],eVers=tun==='std'?gdEasyVers(en,en.map(n=>ew.get(n)),capo):[{capo,cost:0,hard:[]}],eCapo=eVers[eVers.length-1].capo,eAt=(n,k)=>gdEasyPick(gdShift(n,capo-k)),eName=n=>eAt(n,eCapo);
+ // Easy is in standard tuning, also when Full is tuned a half or whole step down (the same sound, no retuning)
+ const simple=['std','half','whole'].includes(tun),base=simple?tshift(tun,capo):capo,eTun=simple?'std':tun;
+ const en=[...ew.keys()],eVers=simple?gdEasyVers(en,en.map(n=>ew.get(n)),base):[{capo,cost:0,hard:[]}],eCapo=eVers[eVers.length-1].capo,eAt=(n,k)=>gdEasyPick(gdShift(n,base-k)),eName=n=>eAt(n,eCapo);
  // song map: the parts with their times and chords (never lyrics)
  const secs=gdParts(M).map((s,i,all)=>{const bars=M.bars.filter(b=>b.t0>=s.t-.01&&b.t0<(all[i+1]?all[i+1].t-.01:1e9));
   // the part's progression once (its first 4 bars, each bar's main chord) and how many times it goes round
@@ -7466,7 +7492,7 @@ function gdBuild(d){const keep=A;A=d;try{
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
- return {bpm,tun,capo,capoBy:cb,shift:d.video&&d.video.shift&&d.video.shift.seenCapo!=null?d.video.shift:null,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,eVers,eAt,eSrc:en,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:d.from==='guitars'||/guitars/i.test(d.title||'')?'guitars':'song'}}
+ return {bpm,tun,eTun,capo,capoBy:cb,shift:d.video&&d.video.shift&&d.video.shift.seenCapo!=null?d.video.shift:null,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,eVers,eAt,eSrc:en,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:d.from==='guitars'||/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
 function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
@@ -7478,7 +7504,7 @@ function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
    [1,`${S.sides.length>1?S.sides.length+' guitars sit apart':'One guitar sits apart'}: `+S.sides.map(x=>`${POS[x.pos]} (${pc(x.share)} of the guitars) ${x.notes<1.8?`plays mostly single notes (a riff or a lead line, about ${x.notes} at once)`:`${x.notes<2.3?'plays a mix of chords and single notes':'strums'} ${x.chords.map(c=>nameOf({c,t0:0,t1:1})).join(' · ')||'–'} (about ${x.notes} notes at once), the same roots as the guitars part ${pc(x.agree)} of the time`}`).join('; ')])}
  if(d.from==='guitars')o.push(W&&!W.skip?[1,`The whole song: hears the same roots ${Math.round(W.agree*100)}% of the time${W.fixed.length?`; where the guitar’s 3rd was faint, it showed ${W.fixed.map(x=>x.split(' → ')[1]).join(', ')}`:''}`]:[0,'The whole song: not listened to'+(W&&W.skip==='parts'?' (its parts aren’t on this phone)':' (rebuild to add it)')]);
  // the video helps only when the hand (or the capo) was seen: looked at but nothing clear is shown as not helping
- o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`${V.who&&V.who!=='guitar'?`the ${V.who} guitarist’s hand`:'the hand'} was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} moments, but the guitarist’s fretting hand isn’t shown clearly in any`}${V.shift&&V.shift.seenCapo!=null?`, capo on fret ${V.shift.seenCapo} (the guitar tuned ${Math.abs(V.shift.seenCapo-V.shift.capo)===1?'a half step':Math.abs(V.shift.seenCapo-V.shift.capo)+' half steps'} ${V.shift.seenCapo>V.shift.capo?'down':'up'}: capo ${V.shift.capo} in standard tuning)`:V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
+ o.push(V&&!V.skip?[V.frames.length||V.capo!=null?1:0,`The video: ${V.frames.length?`${V.who&&V.who!=='guitar'?`the ${V.who} guitarist’s hand`:'the hand'} was clear at ${V.frames.length} of ${V.asked} moments`:`looked at ${V.asked} moments, but the guitarist’s fretting hand isn’t shown clearly in any`}${V.shift&&V.shift.seenCapo!=null?`, capo on fret ${V.shift.seenCapo} (the guitar tuned ${Math.abs(V.shift.seenCapo-V.shift.capo)===1?'a half step':Math.abs(V.shift.seenCapo-V.shift.capo)+' half steps'} ${V.shift.seenCapo>V.shift.capo?'down':'up'}${V.shift.tun?'':`: capo ${V.shift.capo} in standard tuning`})`:V.capo!=null?`, ${V.capo?'capo on fret '+V.capo:'no capo'}`:''}`]:
   [0,'The video: '+(!V?'none for this song':V.skip==='claude'?'needs your Claude key (My profile › Claude features)':V.skip==='drive'?'needs your Drive (Rebuild asks for it)':V.skip==='none'?'none found in the song’s Drive folder':V.skip==='few'?'too few chords to look at':'couldn’t be read this time'+vlErrWhy(V.code))]);
  o.push(F&&!F.legacy?[1,`Your chord sheet, as a check (${F.chords.join(' · ')})`]:[0,'A chord sheet: none for this song']);
  return o}
@@ -7498,15 +7524,16 @@ function gdPatOf(bars){const B=bars.filter(b=>b.slots.some(x=>x.g));if(!B.length
 function gdPat(p){const lab=['1','&','2','&','3','&','4','&'];return `<div class="gdpat" role="img" aria-label="Strumming: ${esc(p.split('').map((c,i)=>c==='·'?'':(c==='D'?'down':'up')+' on '+lab[i]).filter(Boolean).join(', '))}">${[...p].map((c,i)=>`<span class="${c==='·'?'rest':c==='D'?'dn':'up'}"><b>${c==='·'?'':c==='D'?'↓':'↑'}</b><small>${lab[i]}</small></span>`).join('')}</div>`}
 let gdMode=null;// 'easy' | 'full', per visit; the profile picks the first one
 function gdDefault(){try{const l=profGet().level;return l==='beginner'||l==='improving'?'easy':'full'}catch(e){return 'easy'}}
-function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.capo,tn=tName(G.tun),eN=n=>G.eAt?G.eAt(n,ek):G.eName(n),nm=n=>easy?eN(n):n,lv=x=>`<span class="gdlv ${x}">${GD_LV[x]}</span>`;
+function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.capo,tn=tName(easy?G.eTun||G.tun:G.tun),eN=n=>G.eAt?G.eAt(n,ek):G.eName(n),nm=n=>easy?eN(n):n,lv=x=>`<span class="gdlv ${x}">${GD_LV[x]}</span>`;
  const EV=G.eVers||[],ev=EV.find(v=>v.capo===ek)||{hard:[]};
  const chords=easy?(G.eSrc?[...new Set(G.eSrc.map(eN))]:G.easy):G.full,mapCh=s=>{const o=[];s.chords.forEach(n=>{const v=nm(n);if(o[o.length-1]!==v)o.push(v)});return o.slice(0,10)};
  const beat='D·D·D·D·'.split('').join('');
  return `<div class="gdtabs seg" role="tablist"><button type="button" role="tab" data-gd="easy" aria-pressed="${easy}">Easy</button><button type="button" role="tab" data-gd="full" aria-pressed="${!easy}">Full</button></div>
  ${easy&&EV.length>1?`<div class="gdever seg" role="radiogroup" aria-label="Easy version">${EV.map(v=>`<button type="button" role="radio" data-gdever="${v.capo}" aria-checked="${v.capo===ek}" aria-pressed="${v.capo===ek}">${v.capo?'With capo '+v.capo:'No capo'}</button>`).join('')}</div>`:''}
- <p class="tip gdintro">${easy?(ek?`The easier version: capo ${ek} with basic shapes, one strum on every beat. It sounds the same as the recording.`:`Basic chord shapes${G.capo?' without a capo':''}, one strum on every beat: play along today.${G.capo?' It sounds the same as the recording.':''}`)+(ev.hard.length?` Still a barre in this version: ${ev.hard.join(', ')}${EV.length>1&&!ek?` (capo ${EV[1].capo} avoids ${EV[1].hard.length?'some of them':'them'})`:''}.`:''):'As it’s played in the recording: its chords, capo and strumming.'}</p>
+ <p class="tip gdintro">${easy?(ek?`The easier version: capo ${ek} with basic shapes, one strum on every beat. It sounds the same as the recording.`:`Basic chord shapes${G.capo?' without a capo':''}, one strum on every beat: play along today.${G.capo?' It sounds the same as the recording.':''}`)+(ev.hard.length?` Still a barre in this version: ${ev.hard.join(', ')}${EV.length>1&&!ek?` (capo ${EV[1].capo} avoids ${EV[1].hard.length?'some of them':'them'})`:''}.`:'')+(G.eTun&&G.eTun!==G.tun?' In standard tuning: no retuning needed.':''):'As it’s played in the recording: its tuning, capo, chords and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
-  ${!easy&&G.shift&&G.shift.capo===G.capo?gdLikeVideo(G.shift):''}
+  ${!easy&&G.shift&&!G.shift.tun&&G.shift.capo===G.capo?gdLikeVideo(G.shift):''}
+  ${!easy&&G.tun!=='std'&&G.eTun==='std'?`<p class="tip gdlike">Tune every string ${G.tun==='whole'?'a whole step':'a half step'} down first (Tuner › ${esc(tName(G.tun))}). Easy has the same song in standard tuning.</p>`:''}
   ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. It may be another version: the Full guide follows this recording.</p>`:''}
   ${''/* no capo picker: the Full guide is the same on every build of the same recording, nothing you set changes it (Oct 2026) */}
   ${easy&&ek!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; ${ek?'capo '+ek:'no capo'} gives the same song with ${ek?'easier':'these'} shapes. Full shows it as played.</p>`:''}</div>
@@ -7517,7 +7544,7 @@ function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.c
  <div class="gdblock"><h4>Strumming</h4>${easy?`${gdPat(beat)}<p class="tip">One down-strum on every beat. When that feels easy, try Full.</p>`:G.pat&&/[DU]/.test(G.pat)?`${gdPat(G.pat)}<p class="tip">Each box: strummed in most bars or not${G.share<.85?'; it varies between parts':''}.</p>`:`${gdPat(beat)}<p class="tip">No clear pattern was heard; start with one strum per beat.</p>`}</div>
  ${!easy&&karaHas(G.mix)?karaHTML(G):`<div class="gdblock"><h4>Song map</h4><ol class="gdmap">${G.secs.map(s=>`<li><span class="gdt">${mmss(s.t)}</span><b>${esc(s.name)}</b><span class="gdch">${mapCh(s).map(esc).join(' · ')||'no guitar'}${s.times>1&&mapCh(s).length?` <em>×${s.times}</em>`:''}</span>${!easy&&s.pat&&/[DU]/.test(s.pat)&&s.patBars>=2?`<span class="gdsp">${s.pat.replace(/·/g,' ').replace(/(..)/g,'$1 ').trim()}</span>`:''}<small>${s.bars} bar${s.bars>1?'s':''}</small></li>`).join('')}</ol>
   <p class="tip">Parts, times and chords only: lyrics are never shown.</p></div>`}`}
-window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null},html:k=>{const d=loadSong(k);return d?gdHTML(gdBuild(gdFit(d,null)),'full'):''},fit:(k,ref)=>{const d=loadSong(k);return d?gdBuild(gdFit(d,ref,k)):null},bars:k=>{const keep=A;A=loadSong(k);try{const M=lessonModel();return M.bars.map(b=>({t0:+b.t0.toFixed(2),ch:b.slots.map(x=>x.g?nameOf(x.g):'-').join(' ')}))}finally{A=keep}}};// test hooks
+window.__gd={build:k=>{const d=loadSong(k);return d?gdBuild(gdFit(d,null)):null},html:(k,m)=>{const d=loadSong(k);return d?gdHTML(gdBuild(gdFit(d,null)),m||'full'):''},fit:(k,ref)=>{const d=loadSong(k);return d?gdBuild(gdFit(d,ref,k)):null},bars:k=>{const keep=A;A=loadSong(k);try{const M=lessonModel();return M.bars.map(b=>({t0:+b.t0.toFixed(2),ch:b.slots.map(x=>x.g?nameOf(x.g):'-').join(' ')}))}finally{A=keep}}};// test hooks
 /* ================= Backup and restore: everything the app keeps on this phone, in one file ================= */
 // The file is a plain ZIP (stored, not compressed): manifest.json, local.json (the small data: tuner.* and guitaring.* keys)
 // and idb/<n>.json (+ idb/<n>-<i>.bin for files, photos and audio parts) for each item of the phone database.

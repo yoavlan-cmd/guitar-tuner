@@ -62,5 +62,20 @@ function tsArt(){const k=tsKind(),G=tsGeo(),sh=tsShape(k),e=s=>esc(String(s||'')
  <rect class="tsnut" x="141" y="298" width="78" height="8" rx="2" fill="url(#tsNut)"/>
  ${hw}`}}
 // meter skin + headstock: set when the guitar changes (applyGtr in 20-core-tuner)
-function tsApply(){const p=$('paneTune');if(!p)return;let id='wood';try{id=tsKind().id}catch(e){}if(p.dataset.skin!==id)p.dataset.skin=id;try{renderStrings()}catch(e){}}
-window.__tskin={kind:()=>tsKind(),apply:tsApply};// test hooks
+function tsApply(){const p=$('paneTune');if(!p)return;let id='wood';try{id=tsKind().id}catch(e){}if(p.dataset.skin!==id)p.dataset.skin=id;try{renderStrings()}catch(e){}requestAnimationFrame(tsFit)}
+// the whole tuner fits the screen (Oct 2026): no scrolling to reach Listen. When it doesn't fit, the meter and the headstock get
+// smaller together (never below a readable size) until Listen sits above the bottom bar (Settings is in the title row)
+function tsFit(){const p=$('paneTune');if(!p||p.hidden||!p.offsetParent)return;const st=p.style;['--tsGW','--tsHW','--tsNF','--tsPW','--tsPF'].forEach(k=>st.removeProperty(k));p.classList.remove('tsfit');
+ const g=p.querySelector('#screen svg.gauge'),hs=p.querySelector('#strings .hs'),set=$('listen');if(!g||!hs||!set||p.querySelector('#tuneSettings[open]'))return;
+ const bn=$('bnav'),over=()=>set.getBoundingClientRect().bottom+scrollY-((bn&&bn.getBoundingClientRect().height&&getComputedStyle(bn).visibility!=='hidden'?bn.getBoundingClientRect().top:innerHeight)-8);
+ const G0=g.getBoundingClientRect().width,H0=hs.getBoundingClientRect().width;if(over()<=0)return;
+ // first the compact top (the guitar in the title row, tighter gaps), then smaller meter and headstock if still needed
+ st.setProperty('--tsGW',Math.round(G0)+'px');st.setProperty('--tsHW',Math.round(H0)+'px');p.classList.add('tsfit');
+ // a few rounds: the cards' padding and text don't shrink, so measure again after each step
+ for(let n=0;n<5;n++){const o=over();if(o<=0)break;const G=g.getBoundingClientRect(),H=hs.getBoundingClientRect(),k=(G.height+H.height-o-4)/(G.height+H.height);
+  const gw=Math.max(G0*.38,G.width*k),hw=Math.max(H0*.5,H.width*k);st.setProperty('--tsGW',Math.round(gw)+'px');st.setProperty('--tsHW',Math.round(hw)+'px');
+  st.setProperty('--tsNF',Math.round(Math.max(40,64*Math.min(1,gw/G0+.15)))+'px');
+  const hr=Math.min(1,hw/Math.min(H0,380));st.setProperty('--tsPW',Math.round(Math.max(36,52*hr*1.15))+'px');st.setProperty('--tsPF',Math.round(Math.max(15,22*Math.min(1,hr*1.15)))+'px');if(gw<=G0*.38&&hw<=H0*.5)break}}
+try{new ResizeObserver(()=>tsFit()).observe(document.getElementById('paneTune'))}catch(e){}addEventListener('resize',()=>tsFit());
+try{const ts=document.getElementById('tuneSettings');if(ts)ts.addEventListener('toggle',()=>{if(!ts.open)tsFit()})}catch(e){}
+window.__tskin={kind:()=>tsKind(),apply:tsApply,fit:tsFit};// test hooks
