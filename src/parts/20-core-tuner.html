@@ -76,28 +76,17 @@ window.__tunerTest={state:()=>({goal:needleGoal,ang:needleNow,cents:$('cents').t
 function renderTunings(){
  $('tunings').innerHTML=TUNINGS.map(t=>`<button class="chip" data-id="${t.id}" aria-pressed="${t===tuning}">${t.name}<small>${shortName(t)}</small></button>`).join('');
 }
-/* headstock: 3 pegs per side, strings fan to the nut; i=0 is the low string (string 6) */
-// laid out like a 3+3 headstock seen from the front, nut on the right: top G B E (3 2 1), bottom D A E (4 5 6)
-const HS={top:[3,4,5].map((k,j)=>({str:k,x:66+j*76})),bot:[2,1,0].map((k,j)=>({str:k,x:66+j*76}))};
-const NUTY=[64,73,82,92,101,110];// y at the nut for string 1..6
-const HSW=360,HSH=174,PEGY={top:40,bot:134};
+/* headstock: the guitar's own (21-tuner-skins), seen from the front, nut at the bottom; 3 keys per side, low E bottom-left;
+   each string runs from its post to the nut; i=0 is the low string (string 6). A note label next to each key: tap it to tune
+   that string, tap it again for automatic */
 const SUP={1:'¹',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶'};
-function renderStrings(){
- const all=[...HS.top.map(o=>({...o,top:true})),...HS.bot.map(o=>({...o,top:false}))];
- const peg=o=>{const i=o.str,m=tuning.n[i],sn=6-i,on=i===target,cls=`str peg${o.top?' up':' down'}${on?' target':''}${i===locked?' locked':''}${done.has(i)?' tuned':''}`;
-  return `<button type="button" class="${cls}" data-i="${i}" style="left:${(o.x/HSW*100).toFixed(2)}%;top:${(PEGY[o.top?'top':'bot']/HSH*100).toFixed(2)}%" aria-pressed="${on}" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}${done.has(i)?', in tune':''}"><b>${nm(m)}<sup>${SUP[sn]}</sup></b><i class="ok" aria-hidden="true">✓</i><span class="turn" aria-hidden="true"></span></button>`};
- const post=o=>{const y=PEGY[o.top?'top':'bot'];return `<circle class="post" cx="${o.x}" cy="${y}" r="7"/>`};
- const strLine=o=>{const i=o.str,y=PEGY[o.top?'top':'bot'],ny=NUTY[5-i];return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${o.x} ${y} L296 ${ny} L360 ${ny}"/>`};
- $('strings').innerHTML=`<div class="hs" role="group" aria-label="Guitar headstock — tap a peg to tune that string, tap it again for automatic">
-  <svg class="hsart" viewBox="0 0 ${HSW} ${HSH}" aria-hidden="true">
-   <defs><linearGradient id="hsWood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C2E34"/><stop offset=".5" stop-color="#202227"/><stop offset="1" stop-color="#17181C"/></linearGradient>
-   <linearGradient id="hsNut" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9E4D6"/><stop offset="1" stop-color="#B8B2A2"/></linearGradient></defs>
-   <path class="hsbody" d="M12 87 C12 40 26 14 58 12 L262 20 Q282 22 296 52 L296 122 Q282 152 262 154 L58 162 C26 160 12 134 12 87 Z"/>
-   <path class="hsedge" d="M58 12 L262 20 Q282 22 296 52"/>
-   <rect class="board" x="302" y="56" width="58" height="62"/><line class="fret" x1="334" y1="56" x2="334" y2="118"/>
-   <rect class="nut" x="296" y="54" width="6" height="66" rx="1.5" fill="url(#hsNut)"/>
-   ${all.map(strLine).join('')}${all.map(post).join('')}
-  </svg>${all.map(peg).join('')}</div>`;
+function renderStrings(){const G=tsGeo(),A=tsArt();
+ const peg=i=>{const m=tuning.n[i],sn=6-i,on=i===target,[x,y]=G.label(i),cls=`str peg ${i<3?'l':'r'} up${on?' target':''}${i===locked?' locked':''}${done.has(i)?' tuned':''}`;
+  return `<button type="button" class="${cls}" data-i="${i}" style="left:${(x/G.W*100).toFixed(2)}%;top:${(y/G.H*100).toFixed(2)}%" aria-pressed="${on}" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}${done.has(i)?', in tune':''}"><b>${nm(m)}<sup>${SUP[sn]}</sup></b><i class="ok" aria-hidden="true">✓</i><span class="turn" aria-hidden="true"></span></button>`};
+ const strLine=i=>{const [px,py]=G.post(i),nx=G.nutX(i);return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${px} ${py} L${nx} ${G.nutY} L${nx} ${G.H}"/>`};
+ const I=[0,1,2,3,4,5];
+ $('strings').innerHTML=`<div class="hs ${A.k.id}" role="group" aria-label="Guitar headstock — tap a note to tune that string, tap it again for automatic">
+  <svg class="hsart" viewBox="0 0 ${G.W} ${G.H}" aria-hidden="true">${A.svg}${I.map(strLine).join('')}${I.map(i=>{const [px,py]=G.post(i);return `<circle class="tspostcap" cx="${px}" cy="${py}" r="3"/>`}).join('')}</svg>${I.map(peg).join('')}</div>`;
  setHeadState($('strings').dataset.state||'');updateModeChip();
 }
 function updateModeChip(){const c=$('modeChip');if(!c)return;c.textContent=locked!=null?`String ${6-locked} · ${nm(tuning.n[locked])}  ✕`:'Auto';c.classList.toggle('on',locked!=null);c.setAttribute('aria-label',locked!=null?'Tuning one string. Tap to go back to automatic':'Automatic string detection')}
@@ -117,7 +106,7 @@ $('tunings').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b
 const myGuitars=()=>(store.get('instruments',null)||[]).filter(g=>!/amp$/.test(g.type));
 let tuneGtr=store.get('tuneInst','');
 function curGtr(){return myGuitars().find(g=>g.id===tuneGtr)||null}
-function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst)}
+function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst);try{tsApply()}catch(e){}}
 function renderInstPick(){
  const l=myGuitars();if(l.length&&!curGtr()&&tuneGtr!=='acoustic'&&tuneGtr!=='electric'){tuneGtr=l[0].id;store.set('tuneInst',tuneGtr)}
  const opts=l.length?l.map(g=>[g.id,g.name]):[['acoustic','Acoustic'],['electric','Electric']];
