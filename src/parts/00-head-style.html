@@ -1,6 +1,6 @@
 <title>Guitaring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Chewy&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 [hidden]{display:none!important}
 /* Layout: one-hand phone tool — tuning chips, a dark pedal-style display with needle, six string keys, one big listen button */
@@ -1253,22 +1253,26 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
    font; a low flame glow along the bottom of a dark card; "Another one" is a small pill and the bubble pops when the joke changes */
 .homehero{position:relative;overflow:hidden;flex-direction:row;align-items:flex-start;gap:12px;color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow-card);
  background:radial-gradient(90% 60% at 20% 118%,rgba(255,122,26,.42),rgba(216,67,21,.16) 55%,rgba(216,67,21,0) 75%),radial-gradient(70% 50% at 95% 120%,rgba(255,171,0,.22),rgba(255,171,0,0) 70%),var(--surface)}
-.hjpick{flex:0 0 auto;width:54px;height:54px;border-radius:14px;margin-top:4px;transform:rotate(-8deg);box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.hjav{flex:0 0 auto;width:104px;height:auto;margin:6px -6px 0 -8px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));transform-origin:50% 85%}
+/* a new comment: the avatar shakes with laughter */
+.hjav.laugh{animation:hjlaugh .7s ease-in-out}@keyframes hjlaugh{0%,100%{transform:none}15%{transform:rotate(-5deg) translateY(-2px)}30%{transform:rotate(4deg)}45%{transform:rotate(-4deg) translateY(-2px)}60%{transform:rotate(3deg)}80%{transform:rotate(-1deg)}}
+@media (prefers-reduced-motion:reduce){.hjav.laugh{animation:none}}
 .hjcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
 .hhey{font:800 21px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;color:#FF9A4A;margin:2px 0 0}
 .hjbub{position:relative;background:#FFF3E2;color:#1C120D;border-radius:16px 16px 16px 6px;padding:11px 14px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .hjbub::before{content:"";position:absolute;left:-7px;top:14px;border:8px solid transparent;border-right-color:#FFF3E2;border-left:0}
-.hjbub .hjoke{background:none;border-radius:0;padding:0;margin:0;min-height:0;color:inherit;font:500 15.5px/1.42 var(--body)}
+/* the avatar's voice: Chewy (bold, bouncy); Hebrew falls back to the body font */
+.hjbub .hjoke{background:none;border-radius:0;padding:0;margin:0;min-height:0;color:inherit;font:400 17px/1.35 'Chewy',var(--body);letter-spacing:.01em}
 .hjbub.pop{animation:hjpop .32s ease-out}@keyframes hjpop{0%{transform:scale(.96);opacity:.4}100%{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.hjbub.pop{animation:none}}
 .hmore{align-self:flex-end;border:1px solid rgba(255,154,74,.45);background:rgba(255,122,26,.1);color:#FFB27A;border-radius:999px;padding:5px 12px;font:600 13px var(--body);opacity:1}
 .hmore span{display:inline-block;transition:transform .3s}.hmore:active span{transform:rotate(180deg)}
 #paneHome .homehero{padding:12px 14px 10px;gap:12px}
 #paneHome .hhey{font-size:19px}
-#paneHome .hjbub .hjoke{padding:0;background:none;min-height:0;font-size:15px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+#paneHome .hjbub .hjoke{padding:0;background:none;min-height:0;font-size:16px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 #paneHome .hmore{padding:4px 12px;font-size:13px}
 @media (max-height:700px){#paneHome .hjbub .hjoke{-webkit-line-clamp:3}}
-@media (max-height:620px){#paneHome .hjbub .hjoke{-webkit-line-clamp:2}#paneHome .hjpick{width:44px;height:44px}}
+@media (max-height:620px){#paneHome .hjbub .hjoke{-webkit-line-clamp:2}#paneHome .hjav{width:84px}}
 /* Home tiles: the one-word titles (Learn, Write, Jam) about twice as big, as tall as the two lines of "Check my gear", so all four
    titles and their lines sit at the same height. Only with the display font loaded (html.fdisp): a wider fallback font keeps the normal size */
 #paneHome .htile{container-type:inline-size}

@@ -34,11 +34,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-sec]');if(
 try{document.fonts.load('800 40px "Big Shoulders Display"').then(f=>{if(f&&f.length)document.documentElement.classList.add('fdisp')}).catch(()=>{})}catch(e){}
 function homeName(){const p=profGet();return p.name||store.get('userName','')}
 function renderHome(){const h=$('homeHero');if(!h)return;const n=homeName();
- // the pick says it: Guitaring's pick with a speech bubble, the greeting above it, "Another one" under it
- h.innerHTML=`<svg class="hjpick" viewBox="0 0 512 512" aria-hidden="true"><use href="#appLogo"/></svg><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
+ // the avatar says it (89-avatar): Guitaring's laughing rock monster with a speech bubble, the greeting above it, "Another one" under it
+ h.innerHTML=`<img class="hjav" src="${AVATAR}" alt="" aria-hidden="true"><div class="hjcol"><p class="hhey">${n?`Hey, ${esc(n)}.`:'Hey there.'}</p><div class="hjbub"></div><button type="button" class="hmore" id="hMore">Another one <span aria-hidden="true">↻</span></button></div>`;
  // the comment: a joke, or now and then a song reminder (92-song-remind)
  homeLineShow(h);
- $('hMore').onclick=()=>{homeLineShow(h);const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
+ $('hMore').onclick=()=>{homeLineShow(h);const av=h.querySelector('.hjav');av.classList.remove('laugh');void av.offsetWidth;av.classList.add('laugh');const b=h.querySelector('.hjbub');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')};
  renderHomeCont()}
 // Continue: refreshed on its own (the joke stays)
 function renderHomeCont(){
