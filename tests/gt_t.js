@@ -16,8 +16,8 @@ const PEDALS=[{id:'g1',kind:'pedal',type:'distortion',name:'DS-1',brand:'Boss',m
   await p.addInitScript(([ins,gx,video])=>{if(sessionStorage.x)return;sessionStorage.x=1;const S=(k,v)=>localStorage.setItem('tuner.'+k,JSON.stringify(v));
    S('userName','Yoav');S('profile',{name:'Yoav',onboarding:{done:true}});S('learnLang','en');S('instruments',ins);S('gearExtra',gx);
    const segs=[];for(let i=0;i<16;i++)segs.push([i*3,i*3+3,[0,56,72,80][i%4]]);
-   S('song.mix_m1',{title:'Test Song - Test Band',artist:'Test Band',dur:48,bpm:80,offset:0,tuning:{id:'std',conf:'high'},segs,play:{tun:'std',capo:2,capoBy:'you'},v:2,at:Date.now(),from:'guitars',mix:'m1',
-    ...(video?{video:{asked:12,frames:[{t:3,shape:'C'}],who:video,others:[],fixed:[],capo:null}}:{}),tone:{cent:900,dist:.6,drive:'crunch'}});S('songs',['mix_m1'])},[ins,gx,video]);
+   S('song.mix_m1',{title:'Test Song - Test Band',artist:'Test Band',dur:48,bpm:80,offset:0,tuning:{id:'std',conf:'high'},segs,play:{tun:'std',capo:2,capoBy:'video'},video:{at:1,name:'v.mp4',capo:2,frames:[{t:1,shape:'C',conf:'high',heard:'D',seen:'D'}],asked:4,agree:1,differ:[],fixed:[]},v:2,at:Date.now(),from:'guitars',mix:'m1',
+    ...(video?{video:{asked:12,frames:[{t:3,shape:'C'}],who:video,others:[],fixed:[],capo:2}}:{}),tone:{cent:900,dist:.6,drive:'crunch'}});S('songs',['mix_m1'])},[ins,gx,video]);
   await p.goto(APP);await p.waitForTimeout(500);await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(300);
   await p.tap('#learnList .lrow:has-text("Test Song")');await p.waitForTimeout(500);return {p,ctx,errs}};
  const card=p=>p.$eval('#sesGear',e=>({open:e.querySelector('details').open,_:(e.dataset.wasOpen=e.querySelector('details').open)&&0,txt:(()=>{const d=e.querySelector('details'),o=d.open;d.open=true;const t=e.innerText.replace(/\s+/g,' ');d.open=o;return t})(),lines:Object.fromEntries([...e.querySelectorAll('.gtl dt')].map(dt=>[dt.textContent,dt.nextElementSibling.textContent])),bonus:[...e.querySelectorAll('.gtbonus li')].map(x=>x.textContent)}));

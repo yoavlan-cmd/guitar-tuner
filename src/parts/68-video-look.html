@@ -42,6 +42,13 @@ const vlJpg=(cv,q=.82)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
 // (1) find: contact sheets of up to 4 numbered tiles (2 × 2, each 720 wide: a hand in a wide shot stays big enough to spot; 9 tiles of
 // 480 shrank it too far, Oct 2026); Claude says which show the fretting hand clearly, and where
 const VL_T={n:4,cols:2,W:720,H:405};
+// the video is read once per recording: the reading (Claude's answer) is kept with the song's analysis and reused on every rebuild,
+// so the Full guide comes out the same each time (Oct 2026). Bump VL_VER when the reading itself changes (its questions, the stills);
+// the next rebuild then reads the video again.
+const VL_VER=1;
+const vlRaw=r=>r?{capo:r.capo,capo_conf:r.capo_conf,frames:r.frames,looked:r.looked,clear:r.clear,who:r.who,others:r.others,nohand:r.nohand}:null;
+function vlKept(it,vkey){if(window.__vlFresh)return null;try{const v=(loadSong('mix_'+it.id)||{}).video;return v&&v.raw&&v.vkey===vkey&&v.ver===VL_VER?v.raw:null}catch(e){return null}}
+const vlKeep=(a,res,vkey,reused)=>{if(a.video&&!a.video.skip)Object.assign(a.video,{raw:vlRaw(res),vkey,ver:VL_VER,...(reused?{reused:true}:{})})};
 async function vlContact(frames){const out=[],{n:N,cols:C,W,H}=VL_T;for(let i=0;i<frames.length;i+=N){const part=frames.slice(i,i+N),cv=document.createElement('canvas');cv.width=W*C;cv.height=H*Math.ceil(N/C);const g=cv.getContext('2d');
   g.fillStyle='#000';g.fillRect(0,0,cv.width,cv.height);const tiles=[];
   for(let k=0;k<part.length;k++){const im=await vlImg(part[k].blob),sc=Math.min(W/im.width,H/im.height),w=im.width*sc,h=im.height*sc,x=(k%C)*W+(W-w)/2,y=Math.floor(k/C)*H+(H-h)/2;
@@ -92,7 +99,7 @@ const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
 function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
- const capo=a.play.capoBy==='you'?+a.play.capo||0:vc!=null?vc:0;
+ const capo=vc!=null?vc:0;
  // each clear frame: the chord the hand's shape gives with this capo and tuning (sh) against the chord heard at that moment
  const look=sh=>{const seen=[],votes={},differ=[];let agree=0;
   (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
@@ -105,7 +112,7 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  // the hand's shapes are what's played: when most clear frames are off from what's heard by the same steady step, the capo (or the
  // tuning guess) is off by it, so the capo is set where the shapes match the sound, in standard tuning. A guitar tuned down a half
  // step with capo 3 plays the same shapes, at the same pitch, as capo 2 in standard tuning (Oct 2026: "שאריות של החיים").
- if(a.play.capoBy!=='you'&&L.seen.length>=3&&L.agree<L.seen.length*.4){const off={};L.differ.forEach(d=>{const k=(d.hr-d.r+12)%12;off[k]=(off[k]||0)+1});
+ if(L.seen.length>=3&&L.agree<L.seen.length*.4){const off={};L.differ.forEach(d=>{const k=(d.hr-d.r+12)%12;off[k]=(off[k]||0)+1});
   const top=Object.entries(off).sort((x,y)=>y[1]-x[1])[0];
   if(top&&top[1]>=L.seen.length*.6){const c=(tshift(a.play.tun,capo)+(+top[0]))%12;
    if(c<=7){const L2=look(c);if(L2.agree>=L.seen.length*.6){shift={capo:c,seenCapo:vc,tun0:a.play.tun,frames:L2.agree};L=L2;a.play.tun='std'}}}}
@@ -113,7 +120,7 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
- const vcap=shift?shift.capo:vc;if(vcap!=null&&a.play.capoBy!=='you'){a.play.capo=vcap;a.play.capoBy='video'}
+ const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
@@ -121,13 +128,18 @@ function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of 
 // The stills from the split come first (no download, no Drive sign-in needed); an older song without them reads the video from Drive.
 async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(!st&&!it.drive)return;
  const vname=it.drive&&it.drive.video&&it.drive.video.name||'',vurl=it.drive&&it.drive.video&&it.drive.video.url||'';
+ // a reading kept from an earlier build of this recording is reused first: no Claude, no Drive, the same result (nothing you turn
+ // on or off changes it)
+ try{const pts=vlTimes(a.segs,VL_CAND),vk=st&&st.idx&&st.idx.length?'stills:'+st.idx.length:it.drive&&it.drive.video&&it.drive.video.id?'drive:'+it.drive.video.id:'',kept=vk&&pts.length>=2&&vlKept(it,vk);
+  if(kept){const S=vk.startsWith('stills');vlApply(a,kept,S?{name:vname||'the song’s video',url:vurl}:it.drive.video,pts,0);if(S)a.video.from='stills';vlKeep(a,kept,vk,true);return}}catch(e){}
  if(!claudeReads()){if(st||(it.drive&&it.drive.video))a.video={skip:'claude',name:vname};return}
  try{const pts=vlTimes(a.segs,VL_CAND);if(pts.length<2){a.video={skip:'few'};return}
-  if(st&&st.idx&&st.idx.length){const fr=vlStills(st,pts.map(p=>p.t));const res=await vlLookFrames(a.title,fr);vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';return}
+  if(st&&st.idx&&st.idx.length){const vkey='stills:'+st.idx.length,kept=vlKept(it,vkey),res=kept||await vlLookFrames(a.title,vlStills(st,pts.map(p=>p.t)));vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';vlKeep(a,res,vkey,!!kept);return}
   const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
   const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
+  const vkey='drive:'+v.id,kept=vlKept(it,vkey);if(kept){vlApply(a,kept,v,pts,0);vlKeep(a,kept,vkey,true);return}
   const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
-  const res=await vlLookFrames(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
+  const res=await vlLookFrames(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb);vlKeep(a,res,vkey,false)}
  catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:vname};try{console.error('video look',e)}catch(_){}}}
 // why the video couldn't be looked at, in a few words (kept as video.code)
 const vlErrWhy=c=>c===403||c===404?' (Drive refused it)':c==='video_decode'||c==='video_timeout'?' (the phone couldn’t open it)':c==='invalid_json'?' (Claude’s answer was cut short or couldn’t be read)':c==='rate_limited'?' (Claude was busy: try again in a minute)':c==='network'?' (no connection to Claude)':c==='bad_key'?' (your Claude key was refused)':c==='no_credit'?' (no Claude credit left)':c==='api_error'?' (Claude returned an error)':'';

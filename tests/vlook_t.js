@@ -80,6 +80,11 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  ok(/video shows something else at \d:\d\d \(heard E, the hand plays B\)/.test(lv['Chords and order'][1]),'How sure names where the video disagrees: '+lv['Chords and order'][1]);
  ok(/Checked against the video: the hand was clear at \d+ of \d+ moments; capo on fret 4/.test(await p.$eval('.vlnote',e=>e.textContent).catch(()=>'')),'the guide says it was checked against the video');
  await p.screenshot({path:path.join(OUT,'vlook.png'),fullPage:true});
+ // ---- 2b. rebuilt again: the reading kept with the song is reused (no Claude, no Drive): the same capo and chords every build ----
+ {const c0=calls.claude,m0=calls.media,before2=JSON.stringify({p:a.play,s:a.segs});await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);const a2=await ana();
+  ok(calls.claude===c0&&calls.media===m0&&a2.video.reused&&JSON.stringify({p:a2.play,s:a2.segs})===before2,'rebuilt again: the video’s reading is reused (no Claude call, no download), the same capo and chords');}
+ // (the scenarios below change what the stand-in Claude says, so they read the video afresh)
+ await p.evaluate(()=>{window.__vlFresh=true});
  // ---- 3. a video where the guitarist's hand is never shown clearly: one Claude call only (no close-ups), and the guide says so ----
  calls.nohand=true;const before3=calls.claude;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
  const a3=await ana();console.log('  no hand:',JSON.stringify(a3.video&&{nohand:a3.video.nohand,asked:a3.video.asked,frames:a3.video.frames.length}));

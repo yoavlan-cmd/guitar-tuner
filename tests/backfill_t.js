@@ -44,7 +44,8 @@ const GTR=path.join(OUT,'backfill_gtr.flac');execFileSync('ffmpeg',['-y','-v','e
  await p.waitForFunction(()=>!!document.getElementById('sesGuide'),null,{timeout:180000}).catch(()=>{});
  ok(!!await p.$('#sesGuide')&&!await p.$('#sesBuild'),'when it is built the page shows the guide');
  s=await st();ok(s.o1==='done','the older split is now marked done');
- // rebuild: an existing guide can be built again (with the latest listening); a capo you set stays
+ // rebuild: an existing guide can be built again (with the latest listening); nothing set by hand is carried over (the Full guide is
+ // the same on every build of the same recording, Oct 2026)
  await p.evaluate(()=>{const k='tuner.song.mix_o1',d=JSON.parse(localStorage.getItem(k));d.play.capo=3;d.play.capoBy='you';d.segs=d.segs.slice(0,2);localStorage.setItem(k,JSON.stringify(d))});
  await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("Old Song")');await p.waitForTimeout(400);
  ok(!!await p.$('#sesRebuild'),'a split song with a guide offers “Rebuild the guide from the guitars-only part”');
@@ -53,8 +54,8 @@ const GTR=path.join(OUT,'backfill_gtr.flac');execFileSync('ffmpeg',['-y','-v','e
  await p.waitForFunction(()=>{const it=window.__mxTest.idx().find(x=>x.id==='o1');return it&&(it.sess==='done'||it.sess==='failed')},null,{timeout:180000}).catch(()=>{});
  await p.waitForTimeout(300);
  const re=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_o1')));
- ok(re.segs.length>2&&re.play.capo===3&&re.play.capoBy==='you','it is built again from the guitars-only part, and the capo you set stays');
- ok(!!await p.$('#sesRebuild')&&/Capo 3/.test(await p.$eval('#sesGuide .gdbig b',e=>e.textContent).catch(()=>'')),'when done, the page shows the new guide again (with your capo)');
+ ok(re.segs.length>2&&re.play.capo===0&&re.play.capoBy!=='you','it is built again from the guitars-only part; a capo set by hand isn’t carried over');
+ ok(!!await p.$('#sesRebuild')&&/No capo/.test(await p.$eval('#sesGuide .gdbig b',e=>e.textContent).catch(()=>'')),'when done, the page shows the new guide again (as detected)');
  await p.screenshot({path:path.join(OUT,'backfill.png'),fullPage:true});
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
