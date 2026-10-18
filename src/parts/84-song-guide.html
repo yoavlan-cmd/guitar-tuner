@@ -3,6 +3,12 @@
 // Like the reference guides: "Before you play" (capo, tempo, why), "How sure is this" per item, a song map with times,
 // chord shapes with fingers, the strumming, and an easier version.
 const GD_LV={solid:'Solid',likely:'Likely',guess:'A guess'};
+// a chord heard with less than this confidence (analysis.conf: how far it stands above the closest other chord) is named in How sure
+// and drawn dashed in the play-along: check it by ear (or in the video)
+const GD_UNSURE=.35;
+function gdUnsure(d){const cf=d.conf;if(!cf||cf.length!==d.segs.length)return [];const by=new Map();
+ d.segs.forEach((g,i)=>{if(g.c>=NS||g.t1-g.t0<1||cf[i]>=GD_UNSURE)return;const n=nameOf(g),x=by.get(n)||{n,ts:[],c:1};x.ts.push(g.t0);x.c=Math.min(x.c,cf[i]);by.set(n,x)});
+ return [...by.values()].sort((a,b)=>a.c-b.c).slice(0,3)}
 // Easy shapes: the basic major / minor chord of each (Cadd9 → C, Asus2 → A, Fmaj7 → F, Am7 → Am, D/F# → D)
 function gdEasyName(n){const m=String(n||'').match(/^([A-G][#b]?)([^/]*)/);if(!m)return n;return m[1]+(/^(m(?!aj)|min|dim)/.test(m[2])?'m':'')}
 const GD_R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],GD_ALT={'Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab','A#':'Bb'};
@@ -102,17 +108,17 @@ function gdBuild(d){const keep=A;A=d;try{
   const PA=gdPatOf(M.bars);
  // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
- const V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
+ const U=gdUnsure(d),V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
  const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||(V&&vSeen>=2&&!vDiff.length)||(d.fit&&d.fit.match>=.9&&!(d.fit.clash||[]).length&&rep>=.6)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
  const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':sc===capo?'likely':'guess';
  const share=PA.share,strumLv=!d.ons||!PA.n?'guess':share>=.85?'solid':share>=.72?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
- const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
+ const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)+(U.length?` Least sure: ${U.map(x=>`${x.n} at ${x.ts.slice(0,2).map(mmss).join(', ')}`).join('; ')}. Check ${U.length>1?'these':'it'} by ear${d.video&&!d.video.skip?' or in the video':''} (dashed in the play-along).`:'')},
   {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
-  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
-  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
+  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':d.beatFrom==='model'?' The beat is from Beat This!, a beat-tracking model your GitHub runs during the split.':'')},
+  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':d.beatFrom==='model'?'Measured by Beat This!, a beat-tracking model, during the split.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
  return {bpm,tun,eTun,capo,capoBy:cb,shift:d.video&&d.video.shift&&d.video.shift.seenCapo!=null?d.video.shift:null,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,eVers,eAt,eSrc:en,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:d.from==='guitars'||/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)

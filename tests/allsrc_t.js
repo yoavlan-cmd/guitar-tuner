@@ -23,7 +23,7 @@ const DRM=path.join(OUT,'all_drm.flac');execFileSync('ffmpeg',['-y','-v','error'
 // the stills, made by the splitter's own step on a generated video
 const W=path.join(OUT,'all_wf');fs.mkdirSync(path.join(W,'job'),{recursive:true});fs.mkdirSync(path.join(W,'res'),{recursive:true});
 execFileSync('ffmpeg',['-y','-v','error','-f','lavfi','-i',`testsrc=size=320x240:rate=10:duration=${seq.length*4.6}`,'-c:v','libx264','-pix_fmt','yuv420p',path.join(W,'job','song.mp4')]);
-{const wf=fs.readFileSync(path.join(__dirname,'..','src','parts','15-splitter-workflow.html'),'utf8'),i=wf.indexOf('- name: Take stills from the video'),run=wf.slice(i,wf.indexOf('- name: Report a failure',i));
+{const wf=fs.readFileSync(path.join(__dirname,'..','src','parts','15-splitter-workflow.html'),'utf8'),i=wf.indexOf('- name: Take stills from the video'),run=wf.slice(i,wf.indexOf('- name:',i+8));
  const py=run.slice(run.indexOf("<<'PY' 2>&1 | tee -a log.txt\n")+29,run.lastIndexOf('PY')).split('\n').map(l=>l.slice(10)).join('\n');fs.writeFileSync(path.join(W,'stills.py'),py);
  execFileSync('python3',['-I',path.join(W,'stills.py')],{cwd:W})}
 const STJ=JSON.parse(fs.readFileSync(path.join(W,'res','stills.json'))),STB=fs.readFileSync(path.join(W,'res','stills.bin'));

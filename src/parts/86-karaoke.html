@@ -14,8 +14,8 @@ function karaStop(){kaGen++;karaFull(false);if(!KA)return;cancelAnimationFrame(K
 // the chord blocks: as named in Full (the shapes with the capo), each change snapped to the nearest beat when it's close to one
 function karaBlocks(d){const keep=A;A=d;try{const B=(d.beats||[]).slice().sort((a,b)=>a-b),dif=B.slice(1).map((v,i)=>v-B[i]).sort((a,b)=>a-b),bp=dif[dif.length>>1]||60/(d.bpm||90);
   const snap=t=>{if(!B.length)return t;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi)>>1;if(B[m]<t)lo=m+1;else hi=m}const c=[B[lo],B[lo-1]].filter(x=>x!=null).sort((a,b)=>Math.abs(a-t)-Math.abs(b-t))[0];return Math.abs(c-t)<.4*bp?c:t};// within 0.4 of a beat (a chord pushed to the "&", half a beat, stays)
-  const out=[];for(const g of d.segs){if(g.c>=NS)continue;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)continue;const l=out[out.length-1];
-   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;continue}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1})}
+  const out=[],cf=d.conf&&d.conf.length===d.segs.length?d.conf:null;d.segs.forEach((g,i)=>{if(g.c>=NS)return;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)return;const l=out[out.length-1],u=!!cf&&cf[i]<GD_UNSURE&&g.t1-g.t0>=1;
+   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;l.u=l.u&&u;return}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1,...(u?{u:true}:{})})});
   let bars=[];try{bars=lessonModel().bars.map(b=>b.t0)}catch(e){}
   return {blocks:out,beats:B,bp,bars}}finally{A=keep}}
 // how far the video runs behind the analysis' audio (seconds, ±3): first by the harmony (which notes sound, every 0.09 s: a beat-long
@@ -74,7 +74,7 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
  body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
   <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
-  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk" data-i="${i}" style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
+  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk${b.u?' unsure':''}" data-i="${i}"${b.u?' title="Not sure of this chord: check it by ear"':''} style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
   <div class="mixbtns ktrans"><button type="button" class="mixback" data-kj="-5" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay kbig" aria-label="Play">▶</button><button type="button" class="mixback" data-kj="5" aria-label="Forward 5 seconds">+5s</button></div>
   <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
   <p class="tip kof" hidden></p>`;
