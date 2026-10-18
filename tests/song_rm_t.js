@@ -1,7 +1,7 @@
 // Remove a song from my songs (Oct 2026): from the song's page; by default it's only hidden (everything kept, "Hidden songs" at the
 // end of Learn shows it again, Undo too); "Also delete what's saved on this phone" deletes its jam track (parts, video, stills),
 // chord analyses, phone sheets and video lesson links; Drive files stay (the song stays hidden then); kept after a reload;
-// Home's "Back to your jam" leaves a hidden song out; adding the song again shows it again.
+// Home has no "Back to your jam" card (removed Oct 2026); adding the song again shows it again.
 const {chromium,devices}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(__dirname,'out');fs.mkdirSync(OUT,{recursive:true});
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':'application/octet-stream'});r.end(d)})}).listen(0);
@@ -26,7 +26,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const learn=async()=>{await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(300)};
  const open=async t=>{await learn();await p.tap(`#learnList .lrow:has-text("${t}")`);await p.waitForTimeout(400)};
  await p.evaluate(()=>window.__v2.goSec('learn'));await p.evaluate(()=>window.__v2.goSec('home'));await p.waitForTimeout(300);console.log('  home:',await p.$eval('#homeCont',e=>e.textContent));
- ok(/Back to your jam/.test(await p.$eval('#homeCont',e=>e.textContent)),'Home: “Back to your jam” for Good Riddance');
+ ok(!/Back to your jam/.test(await p.$eval('#homeCont',e=>e.textContent)),'Home: no “Back to your jam” card (removed Oct 2026)');
  await learn();ok((await rows()).length===3,'three songs in Learn '+JSON.stringify(await rows()));
  // 1. hide (the default): kept, hidden, shown again; Undo
  await open('Wonderwall');ok(!!await p.$('#sesRm'),'a song’s page has “Remove from my songs”');
