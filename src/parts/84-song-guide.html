@@ -42,9 +42,9 @@ function gdThirds(d){const F=d.feat;if(!F||!F.c)return null;let c;try{c=b64u8(F.
  return g=>{const r=Math.floor(g.c/NT);let M=0,m=0;const f0=Math.max(0,Math.floor((g.t0*SR-off)/hop)),f1=Math.min(n,Math.ceil((g.t1*SR-off)/hop));
   for(let f=f0;f<f1;f++){M+=c[f*12+(r+4)%12];m+=c[f*12+(r+3)%12]}return {M,m}}}
 const gd3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
-function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoBy==='you',vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
- // the capo: yours, else the one seen in the video, else none (the chords as they sound); a sheet's capo is only offered
- const by=you?'you':vc!=null?'video':'none',capo=you?+v.play.capo||0:by==='video'?vc:0;
+function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
+ // the capo: the one seen in the video, else none (the chords as they sound); nothing you set changes it, and a sheet's capo is only shown
+ const by=vc!=null?'video':'none',capo=by==='video'?vc:0;
  let fit=null;
  if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0),S=[];
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
@@ -69,8 +69,9 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoB
  // keep it (a chord the sheet settled, the capo's source), so the play-along shows the same
  if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by||(fit&&fit.tuned.length)))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
  return v}
-// set the capo you see in the video (Full): it wins over the sheet and is kept with the analysis
-function gdSetCapo(key,c){const d=loadSong(key);if(!d)return;d.play={...d.play,capo:c,capoBy:'you'};try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(d)))}catch(e){}}
+// the capo set from the shapes the hand plays in the video (68-video-look vlApply: the shapes didn't match the sound with the capo seen)
+function gdShiftWhy(x){const c=x.capo,sc=x.seenCapo,n=sc!=null?sc-c:0,hs=k=>Math.abs(k)===1?'a half step':Math.abs(k)+' half steps';
+ return `Set from the chord shapes the guitarist’s hand plays in the video, so the shapes here are the ones you see.${sc!=null&&n?` The capo in the video sits on fret ${sc}, but the song sounds ${hs(n)} ${n>0?'lower':'higher'} than that would give: the guitar is most likely tuned ${hs(n)} ${n>0?'down':'up'}. ${c?'Capo '+c:'No capo'} in standard tuning gives the same sound with the same shapes.`:''}`}
 // the guide's data for one analysis (A is borrowed for the analysis helpers, then put back)
 function gdBuild(d){const keep=A;A=d;try{
  const M=lessonModel(),bp=M.bp,bpm=Math.round(d.bpm||60/bp),tun=d.play.tun,capo=+d.play.capo||0;
@@ -100,7 +101,7 @@ function gdBuild(d){const keep=A;A=d;try{
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
  const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
-  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
+  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
@@ -143,8 +144,8 @@ function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.c
  ${easy&&EV.length>1?`<div class="gdever seg" role="radiogroup" aria-label="Easy version">${EV.map(v=>`<button type="button" role="radio" data-gdever="${v.capo}" aria-checked="${v.capo===ek}" aria-pressed="${v.capo===ek}">${v.capo?'With capo '+v.capo:'No capo'}</button>`).join('')}</div>`:''}
  <p class="tip gdintro">${easy?(ek?`The easier version: capo ${ek} with basic shapes, one strum on every beat. It sounds the same as the recording.`:`Basic chord shapes${G.capo?' without a capo':''}, one strum on every beat: play along today.${G.capo?' It sounds the same as the recording.':''}`)+(ev.hard.length?` Still a barre in this version: ${ev.hard.join(', ')}${EV.length>1&&!ek?` (capo ${EV[1].capo} avoids ${EV[1].hard.length?'some of them':'them'})`:''}.`:''):'As it’s played in the recording: its chords, capo and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
-  ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo&&G.capoBy!=='you'?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. <button type="button" class="tlink" data-gdcapo="${G.sheetCapo}">Use ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}</button></p>`:''}
-  ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
+  ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. It may be another version: the Full guide follows this recording.</p>`:''}
+  ${''/* no capo picker: the Full guide is the same on every build of the same recording, nothing you set changes it (Oct 2026) */}
   ${easy&&ek!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; ${ek?'capo '+ek:'no capo'} gives the same song with ${ek?'easier':'these'} shapes. Full shows it as played.</p>`:''}</div>
  <div class="gdblock"><h4>Built from</h4><ul class="gdsrc">${G.sources.map(([y,t])=>`<li class="${y?'y':'n'}"><span aria-hidden="true">${y?'✓':'–'}</span>${esc(t)}</li>`).join('')}</ul></div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>

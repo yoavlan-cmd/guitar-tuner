@@ -22,9 +22,9 @@ function song(o){const bpm=o.bpm,b=60/bpm,beats=[],segs=[];let t=1.0;
  return {title:o.title,dur,bpm,offset:0,tuning:{id:'std',conf:o.conf||'high',why:''},segs,play:{tun:'std',capo:o.capo},beats,ons:{h,d:Buffer.from(e).toString('base64')},v:2,at:Date.now()}}
 const REF=song({title:'שאריות של החיים - אמיר דדון',bpm:108,capo:2,pat:'D·DU·UDU',
  prog:{V:[['C','add9',4],['A','sus2',4],['F','maj7',4],['G','',4]],C:[['F','maj7',4],['G','',4],['C','add9',4],['A','sus2',4]]},form:['V','V','V','V','C','C','C','C','V','V','V','V','C','C','C','C']});
-REF.play.capoBy='you';// capo 2 as set from the video (a capo can't be heard; without it the guide says no capo)
+REF.play.capoBy='video';REF.video={at:1,name:'v.mp4',capo:2,frames:[{t:1,shape:'C',conf:'high',heard:'D',seen:'D'}],asked:4,agree:1,differ:[],fixed:[]};// capo 2 seen in the video (a capo can't be heard; without it the guide says no capo)
 // a player who varies: the same D · D U · U D U, but every bar has one strum added or left out (exact repeats are rare)
-const VARY=song({title:'Varied strums',bpm:96,capo:0,pat:'D·DU·UDU',vary:true,prog:{V:[['G','',4],['C','',4],['D','',4],['E','m',4]]},form:['V','V','V','V','V','V']});VARY.play.capoBy='you';
+const VARY=song({title:'Varied strums',bpm:96,capo:0,pat:'D·DU·UDU',vary:true,prog:{V:[['G','',4],['C','',4],['D','',4],['E','m',4]]},form:['V','V','V','V','V','V']});VARY.play.capoBy='video';VARY.video={at:1,name:'v.mp4',capo:0,frames:[],asked:4,agree:0,differ:[],fixed:[]};
 // a messy one: chords that never repeat, no beat detail
 const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:'D·D·D·D·',prog:{X:[['C','',1],['E','m7',1],['Bb','sus4',2],['F','m',1],['D','7',3],['Ab','',1],['B','m',2]]},form:['X','X']});delete s.beats;delete s.ons;return s})();
 (async()=>{const b=await chromium.launch({...(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{})});

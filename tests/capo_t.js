@@ -1,5 +1,5 @@
-// Sound first, video second, the chord sheet only as a sanity check (V2 phase 4). A capo can't be heard, so it comes from you or the
-// video, else none; a sheet's capo is only offered. The sheet settles a chord only where the sound's 3rd was too faint to tell minor
+// Sound first, video second, the chord sheet only as a sanity check (V2 phase 4). A capo can't be heard, so it comes from the video,
+// else none; nothing you set changes the Full guide (Oct 2026: no capo picker), and a sheet's capo is only mentioned. The sheet settles a chord only where the sound's 3rd was too faint to tell minor
 // from major (and the video didn't show it), never a root; where a clear recording differs, the guide says so and keeps the recording.
 // The fixture is "במקום בו אני גר" as heard (C#m · C# · A · Asus2 · E · Eadd9 · F#m · F#, saved with capo 4) with its saved notes:
 // the C# has a clear major 3rd (this recording plays it), the F# a faint one (too faint to tell); its sheet: F#m · E · C#m · A.
@@ -72,18 +72,17 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  ok(/I have one/.test(await p.evaluate(()=>document.body.innerText)),'My profile shows it');
  await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("במקום בו אני גר")');await p.waitForTimeout(400);
  await full(p);
- // you set the capo you see in the video
- await p.tap('[data-gdcapo="4"]');await p.waitForTimeout(300);await full(p);L=await look(p);console.log('  capo 4 set:',L.capo,'|',L.ch.join(' '));
- ok(L.capo==='Capo 4'&&['Am','Dm'].every(n=>L.ch.includes(n))&&L.lv['Capo and shapes'][0]==='solid'&&/You set/.test(L.lv['Capo and shapes'][1]),'setting capo 4 from the video shows the shapes with capo 4, marked as yours');
- ok(/Capo 4/.test(await p.$eval('.sesinfo',e=>e.textContent)),'the song’s header follows the capo you set');
+ // Full can't be changed by anything you set: no capo picker; an old capo set by hand (before Oct 2026) is ignored
+ ok(!await p.$('[data-gdcapo]')&&!await p.$('.gdcapo'),'Full has no capo picker (the same on every build)');
+ const f0=await look(p);await p.evaluate(()=>{const k='tuner.song.mix_d1',d=JSON.parse(localStorage.getItem(k));d.play.capo=4;d.play.capoBy='you';localStorage.setItem(k,JSON.stringify(d))});
+ await p.reload();await p.waitForTimeout(500);await p.tap('#bnav [data-sec=learn]');await p.waitForTimeout(200);await p.tap('#learnList .lrow:has-text("במקום בו אני גר")');await p.waitForTimeout(400);await full(p);L=await look(p);
+ ok(L.capo===f0.capo&&L.ch.join(' ')===f0.ch.join(' '),'a capo set by hand earlier doesn’t change Full ('+L.capo+' | '+L.ch.join(' ')+')');
  await p.screenshot({path:path.join(OUT,'capo_sheet.png'),fullPage:true});
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  // ---- 2. a sheet with capo 2 (perhaps another version): offered, not applied ----
  ({p,ctx,errs}=await run(mk(),{...SHEET,capo:2,chords:['Em','D','Bm','G']}));L=await look(p);console.log('  sheet capo 2:',L.capo,'|',L.lv['Capo and shapes'][1]);
  ok(L.capo==='No capo'&&/Your chord sheet says capo 2 \(it may be another version\)/.test(L.lv['Capo and shapes'][1]),'a sheet’s capo 2 isn’t applied; How sure mentions it');
- ok(!!await p.$('#gdBody .tip [data-gdcapo="2"]'),'“Use capo 2” is offered');
- await p.tap('#gdBody .tip [data-gdcapo="2"]');await p.waitForTimeout(300);await full(p);L=await look(p);
- ok(L.capo==='Capo 2'&&/You set/.test(L.lv['Capo and shapes'][1]),'tapping it uses capo 2 (as yours)');
+ ok(!await p.$('#gdBody [data-gdcapo]')&&/Your chord sheet says capo 2\. It may be another version: the Full guide follows this recording/.test(await p.$eval('#gdBody',e=>e.textContent)),'the sheet’s capo is mentioned, with no button to apply it');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  // ---- 3. the video saw the hand on the F#: the video wins, the sheet doesn't settle it ----
  {const a=mk();a.video={at:Date.now(),name:'v.mp4',capo:null,frames:[{t:30,shape:'F#',conf:'high',heard:'F#',seen:'F#'}],asked:8,agree:1,differ:[],fixed:[]};
@@ -100,6 +99,6 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  // ---- 5. no sheet: the chords as heard, no capo, “can’t be heard” ----
  ({p,ctx,errs}=await run(mk(),null));L=await look(p);console.log('  no sheet:',L.capo,'|',L.ch.join(' '));
  ok(L.capo==='No capo'&&L.ch.includes('F#')&&L.ch.includes('C#')&&!L.ch.includes('Am'),'without a sheet: no capo, the chords as heard');
- ok(L.lv['Capo and shapes'][0]==='guess'&&/can’t be heard/.test(L.lv['Capo and shapes'][1])&&!!await p.$('[data-gdcapo]'),'it says a capo can’t be heard and offers to set it from the video');
+ ok(L.lv['Capo and shapes'][0]==='guess'&&/can’t be heard/.test(L.lv['Capo and shapes'][1])&&/taken from the song’s video/.test(L.lv['Capo and shapes'][1])&&!await p.$('[data-gdcapo]'),'it says a capo can’t be heard and comes from the song’s video (nothing to set)');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
