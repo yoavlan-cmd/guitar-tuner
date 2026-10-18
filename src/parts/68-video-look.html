@@ -92,18 +92,29 @@ const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
 function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
- const capo=a.play.capoBy==='you'?+a.play.capo||0:vc!=null?vc:0,sh=tshift(a.play.tun,capo);
- const seen=[],votes={},differ=[];let agree=0;
- (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
-  const g=a.segs.find(s=>s.c<NS&&t>=s.t0&&t<s.t1);if(!p||!ok(f.conf)||!g)return;
-  let q=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(q<0)q=p.iv.includes(3)?1:0;const r=(p.root+sh)%12,hr=Math.floor(g.c/NT);
-  seen.push({t,shape:String(f.shape),conf:f.conf,heard:chordName(g.c),seen:CH[r]+TYPES[q].id});
-  if(r===hr){agree++;(votes[r]=votes[r]||{})[q]=(votes[r][q]||0)+(f.conf==='high'?2:1)}else differ.push({t,heard:chordName(g.c),seen:CH[r]+TYPES[q].id})});
+ const capo=a.play.capoBy==='you'?+a.play.capo||0:vc!=null?vc:0;
+ // each clear frame: the chord the hand's shape gives with this capo and tuning (sh) against the chord heard at that moment
+ const look=sh=>{const seen=[],votes={},differ=[];let agree=0;
+  (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
+   const g=a.segs.find(s=>s.c<NS&&t>=s.t0&&t<s.t1);if(!p||!ok(f.conf)||!g)return;
+   let q=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(q<0)q=p.iv.includes(3)?1:0;const r=(p.root+sh)%12,hr=Math.floor(g.c/NT);
+   seen.push({t,shape:String(f.shape),conf:f.conf,heard:chordName(g.c),seen:CH[r]+TYPES[q].id});
+   if(r===hr){agree++;(votes[r]=votes[r]||{})[q]=(votes[r][q]||0)+(f.conf==='high'?2:1)}else differ.push({t,heard:chordName(g.c),seen:CH[r]+TYPES[q].id,hr,r})});
+  return {seen,votes,differ,agree}};
+ let L=look(tshift(a.play.tun,capo)),shift=null;
+ // the hand's shapes are what's played: when most clear frames are off from what's heard by the same steady step, the capo (or the
+ // tuning guess) is off by it, so the capo is set where the shapes match the sound, in standard tuning. A guitar tuned down a half
+ // step with capo 3 plays the same shapes, at the same pitch, as capo 2 in standard tuning (Oct 2026: "שאריות של החיים").
+ if(a.play.capoBy!=='you'&&L.seen.length>=3&&L.agree<L.seen.length*.4){const off={};L.differ.forEach(d=>{const k=(d.hr-d.r+12)%12;off[k]=(off[k]||0)+1});
+  const top=Object.entries(off).sort((x,y)=>y[1]-x[1])[0];
+  if(top&&top[1]>=L.seen.length*.6){const c=(tshift(a.play.tun,capo)+(+top[0]))%12;
+   if(c<=7){const L2=look(c);if(L2.agree>=L.seen.length*.6){shift={capo:c,seenCapo:vc,tun0:a.play.tun,frames:L2.agree};L=L2;a.play.tun='std'}}}}
+ const {seen,votes,differ}=L,agree=L.agree;differ.forEach(d=>{delete d.hr;delete d.r});
  // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
- if(vc!=null&&a.play.capoBy!=='you'){a.play.capo=vc;a.play.capoBy='video'}
- a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vc,frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
+ const vcap=shift?shift.capo:vc;if(vcap!=null&&a.play.capoBy!=='you'){a.play.capo=vcap;a.play.capoBy='video'}
+ a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead

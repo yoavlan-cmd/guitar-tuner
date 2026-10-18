@@ -33,7 +33,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
    calls.prompt=txt;
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));let lastE=-1;ts.forEach((t,i)=>{if(seq[Math.floor(t/4.6)]==='E')lastE=i});
    const frames=ts.map((t,i)=>({t,shape:i===lastE?'G':SHAPE[seq[Math.floor(t/4.6)]],conf:'high'}));
-   return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:4,capo_conf:'high',frames})}]})})}
+   return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({capo:calls.capoSeen||4,capo_conf:'high',frames})}]})})}
   return r.abort()});
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{window.__mxPollMs=1e9;window.__notes=[];window.Notification=class{static get permission(){return 'granted'}static requestPermission(){return Promise.resolve('granted')}constructor(t){window.__notes.push(t)}};
@@ -66,7 +66,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
   ok(calls.sheetSize==='1440x810'&&calls.tilesSaid==='4'&&calls.sheets===Math.ceil(asked/4),'the hand is looked for on sheets of 4 tiles, each 720 wide (a hand in a wide shot stays big enough)');}
  ok(calls.list===1&&calls.media===1&&calls.claude===2&&calls.find===1,`the video was found in the song’s folder, read once; two Claude calls (find the hand, then read the close-ups), ${calls.images} pictures in all`);
  ok(!/heard|C#m|E · |\bF#\b(?!m)/.test(calls.prompt)&&(calls.prompt.match(/F#m/g)||[]).length===1,'Claude isn’t told what the sound heard (only the example shape name is in the question)');
- ok(a.video.capo===4&&a.play.capoBy==='video','the capo comes from the video: 4');
+ ok(a.video.capo===4&&a.play.capoBy==='video'&&!a.video.shift,'the capo comes from the video: 4 (the shapes match the sound with it)');
  const R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],T=['','m','7','m7','maj7','sus2','sus4','add9'],nm=c=>R[Math.floor(c/8)]+T[c%8];
  const names=[...new Set(a.segs.filter(s=>s[2]<96).map(s=>nm(s[2])))];console.log('  chords now:',names.join(' '));
  ok(names.includes('F#m')&&!names.includes('F#')&&a.video.fixed.some(x=>/F# → F#m/.test(x)),'the hand shows F#m where the sound heard F#: set to F#m');
@@ -92,5 +92,15 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
  {const a4=await ana();const v4=(await p.$$eval('.gdsrc li',l=>l.map(x=>x.textContent))).find(x=>/The video/.test(x))||'';console.log('  cut short:',v4);
   ok(a4.video&&a4.video.skip==='err'&&a4.video.code==='invalid_json'&&/couldn’t be read this time \(Claude’s answer was cut short or couldn’t be read\)/.test(v4),'an answer cut short: Built from says why the video couldn’t be read');}
+ // ---- 5. the capo in the video sits a fret higher than the sound allows (a guitar tuned down a half step, capo 5): the hand's shapes
+ // (Am F C Dm) only match the sound with capo 4, so the guide uses capo 4 in standard tuning and says why ----
+ calls.cut=false;calls.capoSeen=5;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
+ {const a5=await ana();console.log('  detuned:',JSON.stringify(a5.video&&{capo:a5.video.capo,shift:a5.video.shift,agree:a5.video.agree,differ:a5.video.differ.length}),a5.play);
+  ok(a5.play.capo===4&&a5.play.capoBy==='video'&&a5.play.tun==='std'&&a5.video.shift&&a5.video.shift.seenCapo===5&&a5.video.agree>=3,'capo 5 in the video but the shapes match the sound with capo 4: capo 4, standard tuning');
+  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
+  const ch5=await p.$$eval('#gdBody .seschords svg .dgName',l=>l.map(x=>x.textContent)),cp5=await p.$eval('.gdbig b',e=>e.textContent);console.log('  guide:',cp5,'|',ch5.join(' '));
+  ok(cp5==='Capo 4'&&['Am','F','C','Dm'].every(n=>ch5.includes(n)),'Full: Capo 4 · Am F C Dm, the shapes in the video');
+  const why=await p.$$eval('.gdsure li',l=>(l.find(x=>/Capo and shapes/.test(x.textContent))||{}).textContent||'');console.log('  why:',why);
+  ok(/capo in the video sits on fret 5/.test(why)&&/tuned a half step down/.test(why)&&/Capo 4 in standard tuning/.test(why),'How sure says why: capo 5 in the video, tuned a half step down, capo 4 in standard tuning');}
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
