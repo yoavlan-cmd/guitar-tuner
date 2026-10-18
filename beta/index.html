@@ -5765,8 +5765,8 @@ window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTime
 /* ================= Welcome screen ================= */
 const JOKES=[
  "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
- "Metallica paused their world tour when they heard {n} started practising. They might be available soon.",
- "Breaking: guitar shops report a sudden shortage of picks. Sources point to {n}.",
+ "Metallica paused their world tour when they heard you started practising. They might be available soon.",
+ "Breaking: guitar shops report a sudden shortage of picks. Sources point to you.",
  "Your neighbours asked for a set list, {n}. Mostly so they know when to leave.",
  "Slash heard about you, {n}. He's considering a second hat.",
  "Eric Clapton wrote “Tears in Heaven”. Your F chord wrote “Tears in the Living Room”. Let's fix that, {n}.",
@@ -5794,7 +5794,7 @@ const JOKES=[
  "Your F barre chord has been buzzing since 2019, {n}. Today's the day.",
  "Your amp misses you, {n}. It's been humming to itself just to stay busy.",
  "Spotify Wrapped will never know you played “Knockin' on Heaven's Door” 400 times. I will, {n}.",
- "Breaking: local guitarist {n} discovers there are more than four chords. Markets react calmly.",
+ "Breaking: a local guitarist (you) discovers there are more than four chords. Markets react calmly.",
  "The metronome isn't judging you, {n}. Okay, it is. Practise anyway.",
  "Berry Sakharof makes it look effortless. That's because he practised while you were scrolling, {n}.",
  "Your picks have a group chat, {n}. They're planning an escape under the couch.",
@@ -8069,7 +8069,10 @@ function homeLine(){const R=remLast?[]:remSongs(),J=allJokes().length;
 function homeLineShow(h){const L=homeLine(),b=h.querySelector('.hjbub');b.classList.toggle('hrem',!!L.rem);
  b.innerHTML=`<p class="hjoke" id="hJoke" dir="auto">${L.html}</p>${L.rem?`<div class="hremact"><button type="button" class="hremgo" id="hRemGo">Practise it <span aria-hidden="true">›</span></button><button type="button" class="hremok" id="hRemOk">I can play it ✓</button></div>`:''}`;
  if(L.rem){$('hRemGo').onclick=()=>remGo(L.rem);
-  $('hRemOk').onclick=()=>{songTouch(L.rem,{status:'learned'});toast(`“${L.rem.title}” is now Learned. Nice!`,'ok');try{renderLibPage()}catch(e){}homeLineShow(h)}}}
+  $('hRemOk').onclick=()=>{songTouch(L.rem,{status:'learned'});toast(`“${L.rem.title}” is now Learned. Nice!`,'ok');try{renderLibPage()}catch(e){}homeLineShow(h)}}
+ homeFit(b);try{document.fonts.ready.then(()=>homeFit(b))}catch(e){}}
+// the whole comment always shows (a cut-off joke loses its punchline): the text gets a little smaller until it fits its lines
+function homeFit(b){try{const j=b.querySelector('.hjoke');if(!j)return;j.style.fontSize='';for(let k=0;k<8&&j.scrollHeight>j.clientHeight+1;k++){const fs=parseFloat(getComputedStyle(j).fontSize);if(fs<=13.5)break;j.style.fontSize=(fs-1)+'px'}}catch(e){}}
 // Practise: the song session if it has a play-along or a jam track, else its chord sheet (one of them is there for a listed song)
 function remGo(g){g=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x))||g;
  if(g.r.analysis.length||g.r.mix.length)return openSession(g);
