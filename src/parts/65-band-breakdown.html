@@ -532,7 +532,9 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});
+   // the beat and chord models' results (splitter v9: Beat This!, BTC), for the session build; none from older splitters
+   let models=null;try{const j=await gh('/contents/models.json?ref=r-'+it.id,{raw:true,ok404:true});if(j){const m=JSON.parse(await j.text());if(m&&(m.beats||m.btc))models={beats:m.beats||null,btc:m.btc||null,v:m.v||1}}}catch(e){}
+   await mxPut('mixdata:'+it.id,{stems,...(models?{models}:{})});it.models=!!models;
    // stills from the song's video (splitter v5), for the chord check
    // the phone-sized copy of the video (splitter v7), for playing along with the chords in time
    try{const v=await gh('/contents/video.mp4?ref=r-'+it.id,{raw:true,ok404:true});if(v&&v.size){await mxPut('mixvideo:'+it.id,{blob:new Blob([v],{type:'video/mp4'}),at:Date.now(),from:'split'});it.hasVid=true}}catch(e){}

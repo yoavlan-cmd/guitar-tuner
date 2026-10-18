@@ -1,6 +1,6 @@
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v8
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v9
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
@@ -8,6 +8,8 @@
 # v6: the stills are 960 pixels wide (sharp enough to cut a close-up of the fretting hand from).
 # v7: a phone-sized copy of the video (480p, video.mp4) is handed back too, for playing along with the chords in time.
 # v8: stills 1440 pixels wide every 3 seconds (hands in wide shots are small), about the same size as before.
+# v9: two music models read the song (models.json): Beat This! (CPJKU, MIT) the beat and the bars from the whole song, BTC (MIT)
+# the chords from the song without its vocals and drums; the app uses them with its own reading. A model that fails never stops the split.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -39,7 +41,7 @@ jobs:
             ~/.cache/pip
             ~/.cache/huggingface
             ~/.cache/torch
-          key: guitaring-demucs-4.1.0-torch-2.5.1
+          key: guitaring-demucs-4.1.0-torch-2.5.1-models1
       - name: Install the separation model
         run: |
           set -o pipefail
@@ -163,6 +165,50 @@ jobs:
           else:
               print('phone video', os.path.getsize('res/video.mp4'))
           PY
+      - name: Read the beat and the chords
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          {
+            pip install -q einops soxr tqdm librosa==0.10.2.post1 pyyaml mir_eval soundfile
+            pip install -q --no-deps rotary-embedding-torch "git+https://github.com/CPJKU/beat_this.git@b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c"
+            git clone -q https://github.com/jayg996/BTC-ISMIR19 btc && git -C btc checkout -q 2682317be668032e6e4b269ded36adaa2ad57df0
+            sed -i 's/yaml.load(f)/yaml.safe_load(f)/' btc/utils/hparams.py
+            grep -rl "np\.float\b\|np\.int\b" --include=*.py btc | xargs -r sed -i 's/np\.float\b/float/g; s/np\.int\b/int/g'
+            python - <<'PY'
+          import json, os, subprocess, sys, time, numpy as np, soundfile as sf, torch
+          song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', song, '-vn', '-ac', '1', '-ar', '44100', 'full.wav'], check=True)
+          xs = [sf.read('res/%s.flac' % k)[0] for k in ('guitar', 'bass', 'other', 'piano')]
+          n = min(len(x) for x in xs)
+          sf.write('nodv.wav', sum(x[:n] for x in xs), 44100)
+          out = {'v': 1}
+          t = time.time()
+          from beat_this.inference import File2Beats
+          b, d = File2Beats(checkpoint_path='final0', device='cpu', dbn=False)('full.wav')
+          out['beats'] = {'beats': [round(float(x), 3) for x in b], 'downbeats': [round(float(x), 3) for x in d]}
+          print('beats', len(b), 'downbeats', len(d), '%.0fs' % (time.time() - t))
+          t = time.time()
+          sys.path.insert(0, 'btc')
+          from btc_model import BTC_model
+          from utils.hparams import HParams
+          from utils.mir_eval_modules import audio_file_to_features
+          cfg = HParams.load('btc/run_config.yaml')
+          cfg.feature['large_voca'] = True; cfg.model['num_chords'] = 170; cfg.model['probs_out'] = True
+          m = BTC_model(config=cfg.model); ck = torch.load('btc/test/btc_model_large_voca.pt', map_location='cpu', weights_only=False)
+          m.load_state_dict(ck['model']); m.eval()
+          f, fps, _ = audio_file_to_features('nodv.wav', cfg)
+          f = (f.T - ck['mean']) / ck['std']; T = cfg.model['timestep']; k = f.shape[0]
+          x = torch.tensor(np.pad(f, ((0, T - k % T), (0, 0))), dtype=torch.float32).unsqueeze(0); P = []
+          with torch.no_grad():
+              for i in range(x.shape[1] // T):
+                  h, _ = m.self_attn_layers(x[:, T * i:T * (i + 1), :]); P.append(torch.softmax(m.output_layer(h).squeeze(0), -1))
+          P = torch.cat(P)[:k].numpy(); top = np.argsort(-P, 1)[:, :4]
+          out['btc'] = {'fps': fps, 'frames': [[[int(i), round(float(P[j, i]), 3)] for i in top[j] if P[j, i] >= .02] for j in range(k)]}
+          print('chords', k, 'frames', '%.0fs' % (time.time() - t))
+          json.dump(out, open('res/models.json', 'w'), separators=(',', ':'))
+          PY
+          } 2>&1 | tee -a log.txt
       - name: Report a failure to the app
         if: failure()
         run: |
