@@ -104,6 +104,9 @@ Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low
  const ims=capoShots.map(x=>x.blob).concat(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
 // a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
 const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
+// how much of the song (by time) is open-position shapes when the chords heard are played with the capo on fret k (standard tuning)
+const VL_OPEN={'':'C D E G A',m:'A D E','7':'A B C D E G',m7:'A D E',maj7:'C D E F G A',sus2:'A C D G',sus4:'A D E',add9:'C D E G A'};
+function vlOpen(segs,k){let o=0,t=0;segs.forEach(g=>{if(g.c>=NS)return;const l=g.t1-g.t0,r=(Math.floor(g.c/NT)-k+120)%12;t+=l;if((VL_OPEN[TYPES[g.c%NT].id]||'').split(' ').includes(CH[r]))o+=l});return t?o/t:0}
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
 function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
@@ -124,10 +127,21 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
   const top=Object.entries(off).sort((x,y)=>y[1]-x[1])[0];
   if(top&&top[1]>=L.seen.length*.6){const c=(tshift(a.play.tun,capo)+(+top[0]))%12;
    if(c<=7){const L2=look(c);if(L2.agree>=L.seen.length*.6){shift={capo:c,seenCapo:vc,tun0:a.play.tun,frames:L2.agree};L=L2;a.play.tun='std'}}}}
+ // the same from the sound, when the hand's shapes can't be read clearly (deterministic): near a capo the hand plays open shapes, so
+ // when the chords heard become clearly more open shapes with the capo a fret or two off (a guitar tuned down a half or a whole step,
+ // or up a half step), that is the capo, in standard tuning. Clear shapes that agree with the capo seen keep it.
+ if(!shift&&vc!=null&&tshift(a.play.tun,0)===0&&!(L.seen.length>=3&&L.agree>=L.seen.length*.4)){const o0=vlOpen(a.segs,vc);
+  const best=[vc-1,vc-2,vc+1].filter(c=>c>=0&&c<=7).map(c=>({c,o:vlOpen(a.segs,c)})).sort((x,y)=>y.o-x.o)[0];
+  if(best&&best.o>=.7&&best.o-o0>=.3){shift={capo:best.c,seenCapo:vc,tun0:a.play.tun,frames:0,open:+best.o.toFixed(2),open0:+o0.toFixed(2)};L=look(best.c);a.play.tun='std'}}
  const {seen,votes,differ}=L,agree=L.agree;differ.forEach(d=>{delete d.hr;delete d.r});
- // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
+ // the quality the hand shows changes the 3rd heard (sound first) where the sound can't tell (the 3rd heard is faint, or no 3rd was
+ // heard and the sound doesn't say the other one), or where the hand is clear: 2+ clear stills (one high, one medium at least) show
+ // it and none shows the other 3rd (a 3rd "heard" can be the root's own overtone). One misread still can't flip a clear 3rd.
+ const th=gdThirds(a),soft=(g,t3)=>{const e=th?th(g):null;if(!e)return true;const h3=vl3(g.c%NT),want=t3==='M'?e.M:e.m,other=t3==='M'?e.m:e.M;
+  if(!h3)return want>=other;const mine=h3==='M'?e.M:e.m,oth=h3==='M'?e.m:e.M;return mine===0||oth/mine>=.6};
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
-  a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
+  const sure=Object.entries(v).reduce((s,[k,w])=>s+(vl3(+k)===t3?w:0),0)>=3&&!Object.keys(v).some(k=>vl3(+k)&&vl3(+k)!==t3);
+  a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3&&(sure||soft(g,t3))){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
  const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
@@ -158,4 +172,4 @@ function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${vlErrWhy(v.code)}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
  if(v.skip)return '';
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
-window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s)};// test hooks
+window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks

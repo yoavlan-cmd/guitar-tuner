@@ -1,6 +1,7 @@
 // Sound first, video second, the chord sheet only as a sanity check (V2 phase 4). A capo can't be heard, so it comes from the video,
-// else none; nothing you set changes the Full guide (Oct 2026: no capo picker), and a sheet's capo is only mentioned. The sheet settles a chord only where the sound's 3rd was too faint to tell minor
-// from major (and the video didn't show it), never a root; where a clear recording differs, the guide says so and keeps the recording.
+// else none; nothing you set changes the Full guide (Oct 2026: no capo picker), and a sheet's capo is only mentioned. The sheet never
+// changes a chord (it may be another version): where the sound's 3rd is too faint to be sure, or a clear recording differs, the guide
+// says so and keeps the recording.
 // The fixture is "במקום בו אני גר" as heard (C#m · C# · A · Asus2 · E · Eadd9 · F#m · F#, saved with capo 4) with its saved notes:
 // the C# has a clear major 3rd (this recording plays it), the F# a faint one (too faint to tell); its sheet: F#m · E · C#m · A.
 const {chromium,devices}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
@@ -46,13 +47,13 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  let {p,ctx,errs}=await run(mk(),SHEET);let L=await look(p);
  console.log('  with the sheet:',L.capo,'|',L.ch.join(' '));console.log('  chords:',L.lv['Chords and order'][1]);console.log('  capo:',L.lv['Capo and shapes'].join(' · '));
  ok(L.capo==='No capo','no capo: a capo can’t be heard, and the saved capo 4 was only a guess');
- ok(L.ch.includes('F#m')&&!L.ch.includes('F#'),'the F# whose 3rd was too faint to tell is settled by the sheet: F#m');
+ ok(L.ch.includes('F#'),'the F# whose 3rd is too faint to tell stays as heard: the sheet (maybe another version) doesn’t change it');
  ok(L.ch.includes('C#')&&L.ch.includes('C#m'),'the C# with a clear major 3rd stays C#: the recording wins over the sheet');
  ok(L.ch.includes('Asus2')&&L.ch.includes('Eadd9'),'the recording’s own voicings stay (Asus2, Eadd9): the sheet doesn’t replace chords');
- ok(/too faint to hear, your chord sheet settled it: F# → F#m/.test(L.lv['Chords and order'][1])&&/Your chord sheet has C#m, but this recording clearly plays C#/.test(L.lv['Chords and order'][1]),'How sure says what the sheet settled and where the recording differs from it');
+ ok(/Your chord sheet has F#m where this recording’s 3rd is too faint to be sure; the guide keeps what it heard \(F#\)/.test(L.lv['Chords and order'][1])&&/Your chord sheet has C#m, but this recording clearly plays C#/.test(L.lv['Chords and order'][1])&&!/settled/.test(L.lv['Chords and order'][1]),'How sure says where the sheet differs (a faint 3rd, a clear one) and that the guide keeps the recording');
  ok(L.lv['Capo and shapes'][0]==='likely'&&/your chord sheet has no capo either/.test(L.lv['Capo and shapes'][1]),'capo: “likely”, as the sheet also has no capo');
  const saved=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_d1')));const sn=[...new Set(saved.segs.map(s=>s[2]).filter(c=>c<96))].map(nm);
- ok(saved.play.capo===0&&saved.play.capoBy==='none'&&sn.includes('F#m')&&!sn.includes('F#')&&sn.includes('C#'),'saved: no capo, F# settled to F#m, C# kept ('+sn.join(' ')+')');
+ ok(saved.play.capo===0&&saved.play.capoBy==='none'&&sn.includes('F#')&&sn.includes('C#'),'saved: no capo, F# and C# kept as heard ('+sn.join(' ')+')');
  // Easy: the capo version
  await p.tap('[data-gd=easy]');await p.waitForTimeout(150);L=await look(p);const ei=await p.$eval('.gdintro',e=>e.textContent);console.log('  easy:',L.capo,'|',L.ch.join(' '));
  ok(/^Capo [1-7]$/.test(L.capo)&&/easier version: capo \d/.test(ei),'Easy opens with the easiest version, with a capo ('+L.capo+')');
