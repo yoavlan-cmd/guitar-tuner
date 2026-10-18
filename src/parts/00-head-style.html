@@ -1,6 +1,6 @@
 <title>Guitaring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Chewy&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Chewy&family=Dancing+Script:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 [hidden]{display:none!important}
 /* Layout: one-hand phone tool — tuning chips, a dark pedal-style display with needle, six string keys, one big listen button */
@@ -609,7 +609,7 @@ body.wopen{overflow:hidden}
 #paneTune .screen.locked{border-color:var(--tm-ok);box-shadow:0 0 0 2px var(--tm-ok),0 0 26px 3px rgba(102,187,106,.45);animation:none}
 /* headstock */
 #paneTune .strings{padding:10px 8px}
-#paneTune .hs{position:relative;width:100%;max-width:400px;margin:0 auto;aspect-ratio:360/174}
+#paneTune .hs{position:relative;width:100%;max-width:380px;margin:0 auto;aspect-ratio:360/350}
 #paneTune .hsart{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
 #paneTune .hsbody{fill:url(#hsWood);stroke:#33353C;stroke-width:1.2}
 #paneTune .hsedge{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1.5}
@@ -1312,4 +1312,54 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .hremact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .hremact button{border-radius:999px;font:700 12.5px var(--body);padding:6px 11px;white-space:nowrap;cursor:pointer;border:0}
 .hremgo{background:#2F8A3B;color:#fff}.hremok{background:transparent;color:#24612C;box-shadow:inset 0 0 0 1.5px #7FC77A}
+
+/* ===== tuner skins (21-tuner-skins): the headstock and the meter follow the guitar you tune ===== */
+#paneTune{--ts-ok:#00CC7A}
+#paneTune[data-skin]{--tm-ok:var(--ts-ok)}
+#paneTune .tsshadow{fill:#000;opacity:.4}
+#paneTune .tsedge{fill:none;stroke:rgba(255,255,255,.12);stroke-width:1.5}
+#paneTune .tsedge.lp{stroke:#3A3A3F;stroke-width:2}#paneTune .tsedge.wood{stroke:#2E180C;stroke-width:1.5}#paneTune .tsedge.lava{stroke:#2A2C30;stroke-width:1.5}
+#paneTune .tsgloss{fill:#fff;opacity:.06}
+#paneTune .tsbrand.lp{fill:url(#tsSilver);font:italic 700 25px Georgia,'Times New Roman',serif;stroke:#000;stroke-width:.4}
+#paneTune .tsbrand.gloss{fill:url(#tsSilver);font:italic 700 24px Georgia,'Times New Roman',serif}
+#paneTune .tsbrand.wood{fill:#F7F2E7;font:700 30px 'Dancing Script',Georgia,serif;paint-order:stroke;stroke:rgba(0,0,0,.25);stroke-width:1}
+#paneTune .tssig{fill:url(#tsGold);font:700 28px 'Dancing Script',Georgia,serif}
+#paneTune .tssigm{fill:#C9A04A;font:700 7px var(--body);letter-spacing:.2em}
+#paneTune .tstruss{fill:#F3F0E8;stroke:#CFC8B8;stroke-width:1}
+#paneTune .tscover{fill:#1A1A1A;font:700 15px 'Dancing Script',Georgia,serif}
+#paneTune .tsdeboss{fill:#222426;font:800 19px var(--body);letter-spacing:.32em}#paneTune .tsdeboss.hi{fill:rgba(255,255,255,.16)}
+#paneTune .tsplate{fill:#151515;stroke:#000;stroke-width:1}#paneTune .tsscrew{fill:#A9AEB4}
+#paneTune .tsboard{fill:#1C1410}#paneTune .hs.lava .tsboard{fill:#232425}#paneTune .tsfret{stroke:#B8BBC0;stroke-width:2.2}
+#paneTune .tsshaft{fill:#8A9098}#paneTune .tswasher{fill:#5B6068;stroke:#2C2F33;stroke-width:1}
+#paneTune .tspost{fill:url(#tsChrome);stroke:#3B3F44;stroke-width:1}#paneTune .tspostcap{fill:#2B2E33}
+#paneTune .tskey{fill:url(#tsChrome);stroke:#4A4F55;stroke-width:1}#paneTune .tskeyhi{fill:#fff;opacity:.75}
+#paneTune .hs.lava .tskey{fill:#1E1F21;stroke:#0E0F10}#paneTune .hs.lava .tsshaft{fill:#2A2B2D}#paneTune .hs.lava .tspost{fill:#9A9EA4}
+#paneTune .hs.wood .tskey,#paneTune .hs.gloss .tskey{fill:url(#tsChrome)}
+#paneTune .sline{stroke:#C9CDD2;stroke-width:1.5;opacity:.85}
+#paneTune .hs.lava .sline{stroke:#C88E55}#paneTune .hs.wood .sline{stroke:#D0A462}
+#paneTune .sline.on{stroke:var(--ts-ok);stroke-width:3;opacity:1;filter:drop-shadow(0 0 4px var(--ts-ok))}
+#paneTune .sline.fin{stroke:color-mix(in srgb,var(--ts-ok) 55%,#C9CDD2)}
+#paneTune .peg{width:14%;min-width:44px;max-width:54px;border-radius:14px}
+#paneTune .peg b{font-size:19px}
+#paneTune .peg.target{border-color:var(--ts-ok);background:color-mix(in srgb,var(--ts-ok) 18%,#1A1D1B);box-shadow:0 0 0 1px var(--ts-ok),0 0 16px color-mix(in srgb,var(--ts-ok) 60%,transparent)}
+#paneTune .peg.up .turn{top:calc(100% + 3px)}
+/* the meter, per guitar */
+#paneTune[data-skin=lp] .screen,#paneTune[data-skin=gloss] .screen{background:radial-gradient(120% 80% at 50% 0%,rgba(255,255,255,.07),rgba(255,255,255,0) 55%),repeating-linear-gradient(45deg,#1B1C1F 0 3px,#151619 3px 6px),repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0 3px,rgba(0,0,0,.05) 3px 6px),#17181B;
+ border:3px solid #0A0A0B;box-shadow:0 0 0 1px #4A4D55,inset 0 0 0 1px rgba(255,255,255,.12),inset 0 18px 30px rgba(255,255,255,.05),0 12px 28px rgba(0,0,0,.5)}
+#paneTune[data-skin=lp] .screen::before,#paneTune[data-skin=lp] .screen::after,#paneTune[data-skin=gloss] .screen::before,#paneTune[data-skin=gloss] .screen::after{content:"";position:absolute;top:58px;width:16px;height:96px;border-radius:6px;background:radial-gradient(circle,#050505 1.2px,transparent 1.6px) 0 0/5px 5px,#26272B;box-shadow:inset 0 0 4px #000;pointer-events:none}
+#paneTune[data-skin=lp] .screen::before,#paneTune[data-skin=gloss] .screen::before{left:8px}#paneTune[data-skin=lp] .screen::after,#paneTune[data-skin=gloss] .screen::after{right:8px}
+#paneTune[data-skin=lava] .screen{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.1)),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.035) 1px 2px),#3A3D42;
+ border:3px solid #7A7E85;box-shadow:inset 0 0 0 1px #2C2E32,inset 0 2px 0 rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.45);border-radius:28px}
+#paneTune[data-skin=lava] .tick:not(.major):not(.zero){opacity:.35}
+#paneTune[data-skin=lava] .nbody{fill:#D7DADF}#paneTune[data-skin=lava] .screen.ok .nbody{fill:var(--ts-ok)}
+#paneTune[data-skin=wood] .screen{border:10px solid transparent;border-radius:30px;
+ background:radial-gradient(90% 70% at 50% 25%,#4A2E1C 0%,#2E1C12 60%,#21140D 100%) padding-box,
+  linear-gradient(160deg,rgba(255,220,180,.25),rgba(0,0,0,0) 30%,rgba(0,0,0,.35)) border-box,
+  repeating-linear-gradient(115deg,#5A311C 0 5px,#6E3F25 5px 8px,#4E2A18 8px 12px,#7A4A2C 12px 14px,#5F3520 14px 19px) border-box;
+ box-shadow:0 12px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 22px rgba(0,0,0,.55),0 0 0 1px #2A170C}
+#paneTune[data-skin=wood] .note{color:#F2B24A}#paneTune[data-skin=wood] .tlab{fill:#D9A35A}#paneTune[data-skin=wood] .tick.major{stroke:#E0B070}
+#paneTune[data-skin=wood] .screen.ok .note{color:var(--ts-ok)}
+/* the headstock card, per guitar */
+#paneTune[data-skin=lava] .strings{background:linear-gradient(180deg,#2E3034,#232528)}
+#paneTune[data-skin=wood] .strings{background:linear-gradient(180deg,#22160F,#170F0A)}
 </style>

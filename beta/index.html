@@ -15,7 +15,7 @@
 <body>
 <title>Guitaring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Chewy&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Chewy&family=Dancing+Script:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 [hidden]{display:none!important}
 /* Layout: one-hand phone tool — tuning chips, a dark pedal-style display with needle, six string keys, one big listen button */
@@ -624,7 +624,7 @@ body.wopen{overflow:hidden}
 #paneTune .screen.locked{border-color:var(--tm-ok);box-shadow:0 0 0 2px var(--tm-ok),0 0 26px 3px rgba(102,187,106,.45);animation:none}
 /* headstock */
 #paneTune .strings{padding:10px 8px}
-#paneTune .hs{position:relative;width:100%;max-width:400px;margin:0 auto;aspect-ratio:360/174}
+#paneTune .hs{position:relative;width:100%;max-width:380px;margin:0 auto;aspect-ratio:360/350}
 #paneTune .hsart{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
 #paneTune .hsbody{fill:url(#hsWood);stroke:#33353C;stroke-width:1.2}
 #paneTune .hsedge{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1.5}
@@ -1327,6 +1327,56 @@ body.hasbar .mkpill{bottom:calc(var(--bnh) + 96px + env(safe-area-inset-bottom,0
 .hremact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .hremact button{border-radius:999px;font:700 12.5px var(--body);padding:6px 11px;white-space:nowrap;cursor:pointer;border:0}
 .hremgo{background:#2F8A3B;color:#fff}.hremok{background:transparent;color:#24612C;box-shadow:inset 0 0 0 1.5px #7FC77A}
+
+/* ===== tuner skins (21-tuner-skins): the headstock and the meter follow the guitar you tune ===== */
+#paneTune{--ts-ok:#00CC7A}
+#paneTune[data-skin]{--tm-ok:var(--ts-ok)}
+#paneTune .tsshadow{fill:#000;opacity:.4}
+#paneTune .tsedge{fill:none;stroke:rgba(255,255,255,.12);stroke-width:1.5}
+#paneTune .tsedge.lp{stroke:#3A3A3F;stroke-width:2}#paneTune .tsedge.wood{stroke:#2E180C;stroke-width:1.5}#paneTune .tsedge.lava{stroke:#2A2C30;stroke-width:1.5}
+#paneTune .tsgloss{fill:#fff;opacity:.06}
+#paneTune .tsbrand.lp{fill:url(#tsSilver);font:italic 700 25px Georgia,'Times New Roman',serif;stroke:#000;stroke-width:.4}
+#paneTune .tsbrand.gloss{fill:url(#tsSilver);font:italic 700 24px Georgia,'Times New Roman',serif}
+#paneTune .tsbrand.wood{fill:#F7F2E7;font:700 30px 'Dancing Script',Georgia,serif;paint-order:stroke;stroke:rgba(0,0,0,.25);stroke-width:1}
+#paneTune .tssig{fill:url(#tsGold);font:700 28px 'Dancing Script',Georgia,serif}
+#paneTune .tssigm{fill:#C9A04A;font:700 7px var(--body);letter-spacing:.2em}
+#paneTune .tstruss{fill:#F3F0E8;stroke:#CFC8B8;stroke-width:1}
+#paneTune .tscover{fill:#1A1A1A;font:700 15px 'Dancing Script',Georgia,serif}
+#paneTune .tsdeboss{fill:#222426;font:800 19px var(--body);letter-spacing:.32em}#paneTune .tsdeboss.hi{fill:rgba(255,255,255,.16)}
+#paneTune .tsplate{fill:#151515;stroke:#000;stroke-width:1}#paneTune .tsscrew{fill:#A9AEB4}
+#paneTune .tsboard{fill:#1C1410}#paneTune .hs.lava .tsboard{fill:#232425}#paneTune .tsfret{stroke:#B8BBC0;stroke-width:2.2}
+#paneTune .tsshaft{fill:#8A9098}#paneTune .tswasher{fill:#5B6068;stroke:#2C2F33;stroke-width:1}
+#paneTune .tspost{fill:url(#tsChrome);stroke:#3B3F44;stroke-width:1}#paneTune .tspostcap{fill:#2B2E33}
+#paneTune .tskey{fill:url(#tsChrome);stroke:#4A4F55;stroke-width:1}#paneTune .tskeyhi{fill:#fff;opacity:.75}
+#paneTune .hs.lava .tskey{fill:#1E1F21;stroke:#0E0F10}#paneTune .hs.lava .tsshaft{fill:#2A2B2D}#paneTune .hs.lava .tspost{fill:#9A9EA4}
+#paneTune .hs.wood .tskey,#paneTune .hs.gloss .tskey{fill:url(#tsChrome)}
+#paneTune .sline{stroke:#C9CDD2;stroke-width:1.5;opacity:.85}
+#paneTune .hs.lava .sline{stroke:#C88E55}#paneTune .hs.wood .sline{stroke:#D0A462}
+#paneTune .sline.on{stroke:var(--ts-ok);stroke-width:3;opacity:1;filter:drop-shadow(0 0 4px var(--ts-ok))}
+#paneTune .sline.fin{stroke:color-mix(in srgb,var(--ts-ok) 55%,#C9CDD2)}
+#paneTune .peg{width:14%;min-width:44px;max-width:54px;border-radius:14px}
+#paneTune .peg b{font-size:19px}
+#paneTune .peg.target{border-color:var(--ts-ok);background:color-mix(in srgb,var(--ts-ok) 18%,#1A1D1B);box-shadow:0 0 0 1px var(--ts-ok),0 0 16px color-mix(in srgb,var(--ts-ok) 60%,transparent)}
+#paneTune .peg.up .turn{top:calc(100% + 3px)}
+/* the meter, per guitar */
+#paneTune[data-skin=lp] .screen,#paneTune[data-skin=gloss] .screen{background:radial-gradient(120% 80% at 50% 0%,rgba(255,255,255,.07),rgba(255,255,255,0) 55%),repeating-linear-gradient(45deg,#1B1C1F 0 3px,#151619 3px 6px),repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0 3px,rgba(0,0,0,.05) 3px 6px),#17181B;
+ border:3px solid #0A0A0B;box-shadow:0 0 0 1px #4A4D55,inset 0 0 0 1px rgba(255,255,255,.12),inset 0 18px 30px rgba(255,255,255,.05),0 12px 28px rgba(0,0,0,.5)}
+#paneTune[data-skin=lp] .screen::before,#paneTune[data-skin=lp] .screen::after,#paneTune[data-skin=gloss] .screen::before,#paneTune[data-skin=gloss] .screen::after{content:"";position:absolute;top:58px;width:16px;height:96px;border-radius:6px;background:radial-gradient(circle,#050505 1.2px,transparent 1.6px) 0 0/5px 5px,#26272B;box-shadow:inset 0 0 4px #000;pointer-events:none}
+#paneTune[data-skin=lp] .screen::before,#paneTune[data-skin=gloss] .screen::before{left:8px}#paneTune[data-skin=lp] .screen::after,#paneTune[data-skin=gloss] .screen::after{right:8px}
+#paneTune[data-skin=lava] .screen{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.1)),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.035) 1px 2px),#3A3D42;
+ border:3px solid #7A7E85;box-shadow:inset 0 0 0 1px #2C2E32,inset 0 2px 0 rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.45);border-radius:28px}
+#paneTune[data-skin=lava] .tick:not(.major):not(.zero){opacity:.35}
+#paneTune[data-skin=lava] .nbody{fill:#D7DADF}#paneTune[data-skin=lava] .screen.ok .nbody{fill:var(--ts-ok)}
+#paneTune[data-skin=wood] .screen{border:10px solid transparent;border-radius:30px;
+ background:radial-gradient(90% 70% at 50% 25%,#4A2E1C 0%,#2E1C12 60%,#21140D 100%) padding-box,
+  linear-gradient(160deg,rgba(255,220,180,.25),rgba(0,0,0,0) 30%,rgba(0,0,0,.35)) border-box,
+  repeating-linear-gradient(115deg,#5A311C 0 5px,#6E3F25 5px 8px,#4E2A18 8px 12px,#7A4A2C 12px 14px,#5F3520 14px 19px) border-box;
+ box-shadow:0 12px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 22px rgba(0,0,0,.55),0 0 0 1px #2A170C}
+#paneTune[data-skin=wood] .note{color:#F2B24A}#paneTune[data-skin=wood] .tlab{fill:#D9A35A}#paneTune[data-skin=wood] .tick.major{stroke:#E0B070}
+#paneTune[data-skin=wood] .screen.ok .note{color:var(--ts-ok)}
+/* the headstock card, per guitar */
+#paneTune[data-skin=lava] .strings{background:linear-gradient(180deg,#2E3034,#232528)}
+#paneTune[data-skin=wood] .strings{background:linear-gradient(180deg,#22160F,#170F0A)}
 </style>
 
 <div class="lesson" id="lesson" hidden>
@@ -2058,28 +2108,17 @@ window.__tunerTest={state:()=>({goal:needleGoal,ang:needleNow,cents:$('cents').t
 function renderTunings(){
  $('tunings').innerHTML=TUNINGS.map(t=>`<button class="chip" data-id="${t.id}" aria-pressed="${t===tuning}">${t.name}<small>${shortName(t)}</small></button>`).join('');
 }
-/* headstock: 3 pegs per side, strings fan to the nut; i=0 is the low string (string 6) */
-// laid out like a 3+3 headstock seen from the front, nut on the right: top G B E (3 2 1), bottom D A E (4 5 6)
-const HS={top:[3,4,5].map((k,j)=>({str:k,x:66+j*76})),bot:[2,1,0].map((k,j)=>({str:k,x:66+j*76}))};
-const NUTY=[64,73,82,92,101,110];// y at the nut for string 1..6
-const HSW=360,HSH=174,PEGY={top:40,bot:134};
+/* headstock: the guitar's own (21-tuner-skins), seen from the front, nut at the bottom; 3 keys per side, low E bottom-left;
+   each string runs from its post to the nut; i=0 is the low string (string 6). A note label next to each key: tap it to tune
+   that string, tap it again for automatic */
 const SUP={1:'¹',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶'};
-function renderStrings(){
- const all=[...HS.top.map(o=>({...o,top:true})),...HS.bot.map(o=>({...o,top:false}))];
- const peg=o=>{const i=o.str,m=tuning.n[i],sn=6-i,on=i===target,cls=`str peg${o.top?' up':' down'}${on?' target':''}${i===locked?' locked':''}${done.has(i)?' tuned':''}`;
-  return `<button type="button" class="${cls}" data-i="${i}" style="left:${(o.x/HSW*100).toFixed(2)}%;top:${(PEGY[o.top?'top':'bot']/HSH*100).toFixed(2)}%" aria-pressed="${on}" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}${done.has(i)?', in tune':''}"><b>${nm(m)}<sup>${SUP[sn]}</sup></b><i class="ok" aria-hidden="true">✓</i><span class="turn" aria-hidden="true"></span></button>`};
- const post=o=>{const y=PEGY[o.top?'top':'bot'];return `<circle class="post" cx="${o.x}" cy="${y}" r="7"/>`};
- const strLine=o=>{const i=o.str,y=PEGY[o.top?'top':'bot'],ny=NUTY[5-i];return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${o.x} ${y} L296 ${ny} L360 ${ny}"/>`};
- $('strings').innerHTML=`<div class="hs" role="group" aria-label="Guitar headstock — tap a peg to tune that string, tap it again for automatic">
-  <svg class="hsart" viewBox="0 0 ${HSW} ${HSH}" aria-hidden="true">
-   <defs><linearGradient id="hsWood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C2E34"/><stop offset=".5" stop-color="#202227"/><stop offset="1" stop-color="#17181C"/></linearGradient>
-   <linearGradient id="hsNut" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9E4D6"/><stop offset="1" stop-color="#B8B2A2"/></linearGradient></defs>
-   <path class="hsbody" d="M12 87 C12 40 26 14 58 12 L262 20 Q282 22 296 52 L296 122 Q282 152 262 154 L58 162 C26 160 12 134 12 87 Z"/>
-   <path class="hsedge" d="M58 12 L262 20 Q282 22 296 52"/>
-   <rect class="board" x="302" y="56" width="58" height="62"/><line class="fret" x1="334" y1="56" x2="334" y2="118"/>
-   <rect class="nut" x="296" y="54" width="6" height="66" rx="1.5" fill="url(#hsNut)"/>
-   ${all.map(strLine).join('')}${all.map(post).join('')}
-  </svg>${all.map(peg).join('')}</div>`;
+function renderStrings(){const G=tsGeo(),A=tsArt();
+ const peg=i=>{const m=tuning.n[i],sn=6-i,on=i===target,[x,y]=G.label(i),cls=`str peg ${i<3?'l':'r'} up${on?' target':''}${i===locked?' locked':''}${done.has(i)?' tuned':''}`;
+  return `<button type="button" class="${cls}" data-i="${i}" style="left:${(x/G.W*100).toFixed(2)}%;top:${(y/G.H*100).toFixed(2)}%" aria-pressed="${on}" aria-label="String ${sn}, ${nm(m)}${oc(m)}${i===locked?', locked':''}${done.has(i)?', in tune':''}"><b>${nm(m)}<sup>${SUP[sn]}</sup></b><i class="ok" aria-hidden="true">✓</i><span class="turn" aria-hidden="true"></span></button>`};
+ const strLine=i=>{const [px,py]=G.post(i),nx=G.nutX(i);return `<path class="sline${i===target?' on':''}${done.has(i)?' fin':''}" data-s="${i}" d="M${px} ${py} L${nx} ${G.nutY} L${nx} ${G.H}"/>`};
+ const I=[0,1,2,3,4,5];
+ $('strings').innerHTML=`<div class="hs ${A.k.id}" role="group" aria-label="Guitar headstock — tap a note to tune that string, tap it again for automatic">
+  <svg class="hsart" viewBox="0 0 ${G.W} ${G.H}" aria-hidden="true">${A.svg}${I.map(strLine).join('')}${I.map(i=>{const [px,py]=G.post(i);return `<circle class="tspostcap" cx="${px}" cy="${py}" r="3"/>`}).join('')}</svg>${I.map(peg).join('')}</div>`;
  setHeadState($('strings').dataset.state||'');updateModeChip();
 }
 function updateModeChip(){const c=$('modeChip');if(!c)return;c.textContent=locked!=null?`String ${6-locked} · ${nm(tuning.n[locked])}  ✕`:'Auto';c.classList.toggle('on',locked!=null);c.setAttribute('aria-label',locked!=null?'Tuning one string. Tap to go back to automatic':'Automatic string detection')}
@@ -2099,7 +2138,7 @@ $('tunings').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b
 const myGuitars=()=>(store.get('instruments',null)||[]).filter(g=>!/amp$/.test(g.type));
 let tuneGtr=store.get('tuneInst','');
 function curGtr(){return myGuitars().find(g=>g.id===tuneGtr)||null}
-function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst)}
+function applyGtr(){const g=curGtr();inst=g?(g.type==='electric'?'electric':'acoustic'):(tuneGtr==='electric'?'electric':'acoustic');store.set('inst',inst);try{tsApply()}catch(e){}}
 function renderInstPick(){
  const l=myGuitars();if(l.length&&!curGtr()&&tuneGtr!=='acoustic'&&tuneGtr!=='electric'){tuneGtr=l[0].id;store.set('tuneInst',tuneGtr)}
  const opts=l.length?l.map(g=>[g.id,g.name]):[['acoustic','Acoustic'],['electric','Electric']];
@@ -2330,6 +2369,72 @@ function stopListening(why){listening=false;setHeadState('');$('live').hidden=tr
  $('listen').classList.remove('on');$('listenTxt').textContent='Listen';needleGoal=0;needleNow=0;drawNeedle();$('screen').classList.remove('ok');$('status').className='status';$('status').textContent=why==='playing'?'Sounds like you’re playing · Listen off':why==='quiet'?'No string heard for a while · Listen off':'Tap Listen to start';$('hz').textContent='—';$('cents').textContent='—';meter(0,0.004);showTarget()}
 $('listen').onclick=()=>listening?stopListening():startListening();
 
+/* ===== Tuner skins (Oct 2026): the guitar you tune gets its own headstock and meter look ===== */
+// The skin comes from the guitar's entry in My gear (brand, model, type, name), so it works for any player's guitars:
+//  lp    – a Les Paul (Epiphone / Gibson): gloss black open-book headstock, chrome keys, brand in silver, "Les Paul" in gold
+//          script, a white bell truss-rod cover with the model; meter: gloss black chrome bezel, carbon dial
+//  lava  – a Lava guitar: one-piece matte space-gray headstock, debossed name, slate keys; meter: matte brushed gray, slate dial
+//  wood  – any acoustic / classical: natural mahogany grain, white brand, black truss plate, nickel keys, ivory nut (a Taylor
+//          gets the crown notch); meter: mahogany ring, warm bronze dial, amber markers
+//  gloss – any other electric: gloss black headstock with the brand, nickel keys; meter like lp
+// Brand names are written as plain text from your own entry (no logo artwork). Strings glow #00CC7A when in tune.
+// Functions only (no top-level const): renderStrings in 20-core-tuner can run before this part's statements.
+function tsKind(){let g=null;try{g=curGtr()}catch(e){}
+ const t=(g&&g.type)||(typeof tuneGtr!=='undefined'&&tuneGtr==='electric'?'electric':'acoustic'),all=g?[g.brand,g.model,g.name].filter(Boolean).join(' '):'';
+ const brand=g?(g.brand||String(g.name||'').trim().split(/\s+/)[0]||''):'',model=g?String(g.model||'').trim():'';
+ if(/\blava\b/i.test(all))return {id:'lava',text:/lava\s*me/i.test(all)?'LAVA ME':(brand||'LAVA').toUpperCase()};
+ if(/les\s?paul|\blp\b/i.test(all)||(/gibson|epiphone/i.test(all)&&t==='electric'&&!/\bsg\b|\bes-?\d/i.test(all))){
+  const cover=model.replace(/les\s?paul|\blp\b/ig,'').trim().split(/\s+/)[0]||'';return {id:'lp',brand:/epiphone/i.test(all)?'Epiphone':/gibson/i.test(all)?'Gibson':brand,sig:'Les Paul',cover}}
+ if(t==='electric')return {id:'gloss',brand};
+ return {id:'wood',brand,crown:/taylor/i.test(all)}}
+// the headstock seen from the front, nut at the bottom; i=0 is the low string (string 6): low E bottom-left … high E bottom-right
+function tsGeo(){const L=126,R=234,Y=[222,160,98];
+ return {W:360,H:350,nutY:300,post:i=>i<3?[L,Y[i]]:[R,Y[5-i]],key:i=>i<3?[84,Y[i]]:[276,Y[5-i]],label:i=>i<3?[34,Y[i]]:[326,Y[5-i]],nutX:i=>152+i*11.2}}
+function tsShape(k){
+ if(k.id==='lp')return 'M145 300 C138 262 110 228 104 178 C98 128 94 76 100 36 Q102 18 122 20 C142 23 164 26 180 40 C196 26 218 23 238 20 Q258 18 260 36 C266 76 262 128 256 178 C250 228 222 262 215 300 Z';
+ if(k.id==='lava')return 'M148 300 C142 256 112 222 108 168 C104 116 106 66 120 40 C138 10 222 10 240 40 C254 66 256 116 252 168 C248 222 218 256 212 300 Z';
+ if(k.id==='wood'&&k.crown)return 'M145 300 C140 262 110 226 106 176 L102 44 Q102 24 122 22 L166 20 L180 38 L194 20 L238 22 Q258 24 258 44 L254 176 C250 226 220 262 215 300 Z';
+ return 'M145 300 C140 262 110 226 106 176 L102 50 Q102 22 130 21 L230 21 Q258 22 258 50 L254 176 C250 226 220 262 215 300 Z'}
+function tsArt(){const k=tsKind(),G=tsGeo(),sh=tsShape(k),e=s=>esc(String(s||''));
+ const fin={lp:'url(#tsLp)',lava:'url(#tsLava)',wood:'url(#tsWood)',gloss:'url(#tsLp)'}[k.id];
+ const keyShape=(x,y,left)=>k.id==='lava'?`<rect class="tskey" x="${x-13}" y="${y-7}" width="26" height="14" rx="6"/>`
+  :k.id==='lp'?`<path class="tskey" d="M${x} ${y-10} L${x+(left?-12:12)} ${y-7} L${x+(left?-12:12)} ${y+7} L${x} ${y+10} Q${x+(left?6:-6)} ${y} ${x} ${y-10} Z"/><ellipse class="tskeyhi" cx="${x+(left?-4:4)}" cy="${y-3}" rx="3" ry="2"/>`
+  :`<ellipse class="tskey" cx="${x}" cy="${y}" rx="12" ry="10"/><ellipse class="tskeyhi" cx="${x+(left?-3:3)}" cy="${y-3.5}" rx="4" ry="2.4"/>`;
+ let hw='';for(let i=0;i<6;i++){const [px,py]=G.post(i),[kx,ky]=G.key(i),left=i<3;
+  hw+=`<rect class="tsshaft" x="${Math.min(px,kx)}" y="${py-2.5}" width="${Math.abs(px-kx)}" height="5" rx="2"/>${keyShape(kx,ky,left)}`+
+   (k.id==='lava'?`<circle class="tspost" cx="${px}" cy="${py}" r="5.5"/>`:`<circle class="tswasher" cx="${px}" cy="${py}" r="10"/><circle class="tspost" cx="${px}" cy="${py}" r="6.5"/>`)}
+ // branding (plain text from your gear entry) and the truss-rod cover
+ let brand='';
+ if(k.id==='lp')brand=`<text class="tsbrand lp" x="180" y="${k.brand.length>8?70:72}" text-anchor="middle" textLength="${Math.min(118,k.brand.length*15)}" lengthAdjust="spacingAndGlyphs">${e(k.brand)}</text>
+  <text class="tssig" x="182" y="168" text-anchor="middle" transform="rotate(-62 182 168)">${e(k.sig)}</text><text class="tssigm" x="198" y="196" text-anchor="middle" transform="rotate(-62 198 196)">MODEL</text>
+  <path class="tstruss" d="M164 292 L164 262 Q164 236 180 230 Q196 236 196 262 L196 292 Z"/>${k.cover?`<text class="tscover" x="181" y="270" text-anchor="middle" transform="rotate(-90 181 270)">${e(k.cover)}</text>`:''}`;
+ else if(k.id==='lava')brand=`<text class="tsdeboss hi" x="180" y="${70+1.2}" text-anchor="middle">${e(k.text)}</text><text class="tsdeboss" x="180" y="70" text-anchor="middle">${e(k.text)}</text>`;
+ else if(k.id==='wood')brand=`${k.brand?`<text class="tsbrand wood" x="180" y="78" text-anchor="middle">${e(k.brand)}</text>`:''}
+  <path class="tsplate" d="M166 296 L166 270 Q166 252 180 248 Q194 252 194 270 L194 296 Z"/><circle class="tsscrew" cx="180" cy="258" r="2.4"/><circle class="tsscrew" cx="180" cy="288" r="2.4"/>`;
+ else brand=k.brand?`<text class="tsbrand gloss" x="180" y="72" text-anchor="middle">${e(k.brand)}</text>`:'';
+ return {k,svg:`<defs>
+  <clipPath id="tsClip"><path d="${sh}"/></clipPath>
+  <linearGradient id="tsLp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A2A2E"/><stop offset=".45" stop-color="#151517"/><stop offset="1" stop-color="#0C0C0D"/></linearGradient>
+  <linearGradient id="tsLava" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#55585E"/><stop offset=".5" stop-color="#4A4D52"/><stop offset="1" stop-color="#35373B"/></linearGradient>
+  <linearGradient id="tsWood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4A2817"/><stop offset=".3" stop-color="#6B3E26"/><stop offset=".6" stop-color="#7A4A2C"/><stop offset="1" stop-color="#4A2817"/></linearGradient>
+  <linearGradient id="tsChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FAFBFC"/><stop offset=".45" stop-color="#9EA4AC"/><stop offset=".55" stop-color="#6E747C"/><stop offset="1" stop-color="#D9DDE2"/></linearGradient>
+  <linearGradient id="tsGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7E2A0"/><stop offset=".5" stop-color="#C9A04A"/><stop offset="1" stop-color="#8E6B25"/></linearGradient>
+  <linearGradient id="tsSilver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#B9BEC5"/><stop offset="1" stop-color="#E6E9ED"/></linearGradient>
+  <linearGradient id="tsNut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${k.id==='lava'?'#3A3A3A':'#F1EDE2'}"/><stop offset="1" stop-color="${k.id==='lava'?'#232323':'#C9C2B1'}"/></linearGradient>
+  <filter id="tsGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${k.id==='wood'?'0.006 0.16':'0.9'}" numOctaves="3" seed="7"/>
+   <feColorMatrix values="${k.id==='wood'?'0 0 0 0 0.16  0 0 0 0 0.07  0 0 0 0 0.03  0 0 0 2.2 -0.7':'0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.52  0 0 0 0.35 0'}"/></filter>
+ </defs>
+ <path class="tsshadow" d="${sh}" transform="translate(0 6)"/>
+ <g clip-path="url(#tsClip)"><rect x="0" y="0" width="360" height="300" fill="${fin}"/>${k.id==='wood'||k.id==='lava'?`<rect x="0" y="0" width="360" height="300" filter="url(#tsGrain)" opacity="${k.id==='wood'?.85:.5}"/>`:''}
+  ${k.id==='lp'||k.id==='gloss'?'<path class="tsgloss" d="M90 0 L170 0 L80 300 L0 300 Z"/>':''}</g>
+ <path class="tsedge ${k.id}" d="${sh}"/>
+ ${brand}
+ <rect class="tsboard" x="143" y="304" width="74" height="46"/><line class="tsfret" x1="143" y1="336" x2="217" y2="336"/>
+ <rect class="tsnut" x="141" y="298" width="78" height="8" rx="2" fill="url(#tsNut)"/>
+ ${hw}`}}
+// meter skin + headstock: set when the guitar changes (applyGtr in 20-core-tuner)
+function tsApply(){const p=$('paneTune');if(!p)return;let id='wood';try{id=tsKind().id}catch(e){}if(p.dataset.skin!==id)p.dataset.skin=id;try{renderStrings()}catch(e){}}
+window.__tskin={kind:()=>tsKind(),apply:tsApply};// test hooks
 /* ================= Learn a song ================= */
 const CH=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const TYPES=[

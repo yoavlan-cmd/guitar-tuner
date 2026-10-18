@@ -136,7 +136,12 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 **UI (hardware style, dark brushed metal in both light and dark themes):**
 - Meter card `#screen`: `AUTO` pill (`#modeChip`, shows "String N · X ✕" when locked) top-left; ♭/♯ indicators (`#flatInd`/`#sharpInd`) top-right light amber/blue; semicircular gauge with gradient track amber `#FFB74D` → mint `#66BB6A` → blue `#4FC3F7`; tapered needle with spring physics (`needleStep`, critically damped, respects `prefers-reduced-motion`); jewel pivot; big note (`#note`, e.g. E₂); uppercase status (`#status`); live badge; lock ✓ badge + vibration when in tune.
 - **Gauge scale is non-linear** (`centsAng`): ±15¢ fills 60% of the arc (fine tuning), 15–50¢ compressed into the ends. Ticks every 1¢ to ±15, labels −15/+15/−50/+50.
-- Headstock card `#strings`: 3+3 metal peg buttons (`.peg`, `data-i` = string index 0 = low string) — top row G³ B² E¹, bottom row D⁴ A⁵ E⁶ (superscript = string number); **labels follow the selected tuning** (Drop D shows D⁶). Active peg: mint border `#66BB6A`, background `#243026`, glow; turns amber/blue when flat/sharp with "↻ tighten / ↺ loosen" hint; ✓ badge when that string was tuned. Strings drawn from pegs to the nut.
+- Headstock card `#strings`: **a vertical headstock seen from the front, nut at the bottom** (Oct 2026), 3+3 tuner keys with a note button beside each (`.peg`, `data-i` = string index 0 = low string): left side from the top D⁴ A⁵ E⁶, right side G³ B² E¹ (superscript = string number; low E bottom-left, high E bottom-right); **labels follow the selected tuning** (Drop D shows D⁶). Active string: its button and string glow green `#00CC7A`; amber/blue when flat/sharp with "↻ tighten / ↺ loosen" hint; ✓ badge when that string was tuned. Strings run from each post to its nut slot.
+- **Tuner skins** (Oct 2026, part `21-tuner-skins`, spec from the user): the guitar picked in `#gtrLine` sets the headstock and the meter (`#paneTune[data-skin]`, `tsKind` from the My gear entry's brand/model/type/name, so it works for any player's guitars; brand names are plain text from the entry, no logo artwork):
+  - `lp` (a Les Paul: Epiphone/Gibson): gloss jet-black open-book headstock, chrome keys, the brand in silver, "Les Paul MODEL" in gold script, a white bell truss-rod cover with the model ("Muse"), nickel strings; meter: gloss black chrome bezel with speaker-mesh sides, carbon-fibre dial.
+  - `lava` (a Lava): one-piece matte space-gray headstock (`#4A4D52`→`#35373B`), debossed "LAVA ME", slate keys, no truss plate, phosphor-bronze strings; meter: matte brushed gray bezel, slate dial, fewer ticks, light-gray needle turning green in tune.
+  - `wood` (any acoustic or classical; a Taylor gets the crown notch): mahogany grain (`#6B3E26`→`#4A2817`), white script brand, black truss plate with two screws, nickel keys, ivory nut, bronze strings; meter: mahogany wood ring, warm bronze dial, amber note and markers.
+  - `gloss` (any other electric): gloss black headstock with the brand, chrome keys; meter as lp. No guitars in My gear: Acoustic → wood, Electric → gloss.
 - Tuning chips `#tunings` (12 tunings, `TUNINGS`): Standard, Drop D, Half step down, D Standard, Drop C♯, Drop C, Drop B, DADGAD, Open D, Open G, Open E, Open C.
 - Guitar line `#gtrLine` / picker: choose which of the user's guitars is being tuned (from My gear); selecting a guitar with a saved tuning switches to it; when all 6 strings are done, the guitar's `tuning` and `lastTuned` are saved.
 - Settings (`#tuneSettings`, collapsed): guitar, noise filter (Normal / Strong (default) / Noisy room → `NF`), reference pitch A4 430–450 (`setA4`), Repeat tone (plays the target note; electric gets a light overdrive).
@@ -396,6 +401,7 @@ Since V2 phase 0 the source is split into parts (`src/parts/`, joined in name or
 | `10-markup` | HTML of every screen (welcome, tabs, panes, sheets, pickers) |
 | `15-splitter-workflow` | the GitHub Actions workflow text the app installs (`#mxWf`) |
 | `20-core-tuner` | app script starts: icons (`PDI`/`SK`), tunings, **storage names** (`KP`, `KG`, `IDBN`, `BETA`, `betaCopyLive`), `store`, tuner |
+| `21-tuner-skins` | the headstock and meter look per guitar (`tsKind`, `tsGeo`, `tsShape`, `tsArt`, `tsApply`) |
 | `30-song-analysis` | chord vocabulary, audio analysis, Basic Pitch, song view, Claude via API key |
 | `40-sheet-drive` | chord sheet, My songs, PDF, Drive |
 | `45-writer-ocr-catalog` | writer, chord finder, screenshots/PDF → sheet, sheet catalog |
@@ -468,6 +474,7 @@ bash tools/release.sh    # build + bump sw.js guitaring-vNN -> guitaring-v(NN+1)
 
 | Test | Checks |
 |---|---|
+| `tskin_t.js` | tuner skins: Les Paul Muse → lp (Epiphone, Les Paul, Muse), Lava Me 3 → lava (LAVA ME), Taylor 314ce → wood with crown, Fender Strat → gloss, Yamaha classical → wood without crown, no guitars → wood / gloss; switching guitars switches the look; six string buttons (low E bottom-left), tapping one picks it; fits 360 px |
 | `tun_ui.js` | tuner renders (light/dark), peg labels, lock chip, needle spring settles at the right angle, Drop D labels |
 | `tun_mic.js` | fake mic (A +8¢) → correct string, status, ♯ lit, lock/unlock, stop |
 | `tun_real.js <mp3…>` (env `HP=0,250,400`, `RATE`) | real guitar recordings through a phone-like highpass; octave errors |
