@@ -1,21 +1,21 @@
 {
  "v": 1,
- "at": "2026-10-17T02:55:29Z",
- "date": "2026-10-17",
+ "at": "2026-10-18T02:55:07Z",
+ "date": "2026-10-18",
  "index": {
   "artists": [
-   "Green Day",
-   "Rockfour",
-   "Oasis",
-   "RHCP",
-   "Jack Johnson",
-   "Eviatar Banai",
-   "Amir dadon",
-   "Ivri lider",
-   "Tuna",
    "Jimbo J",
-   "Beri Saharof",
+   "Eviatar Banai",
+   "Green Day",
+   "Tuna",
+   "Amir dadon",
    "Nirvana",
+   "Jack Johnson",
+   "Beri Saharof",
+   "Oasis",
+   "Rockfour",
+   "RHCP",
+   "Ivri lider",
    "Foo"
   ],
   "songs": [
@@ -42,13 +42,40 @@
     ]
    },
    {
+    "a": "Eviatar Banai",
+    "t": "עד מתי",
+    "ch": [
+     "Dm",
+     "F",
+     "Gm",
+     "Bb",
+     "Am",
+     "C"
+    ]
+   },
+   {
+    "a": "Eviatar Banai",
+    "t": "תחרות כלבים",
+    "ch": [
+     "F#m",
+     "C#m",
+     "G#m",
+     "A",
+     "E",
+     "Bm",
+     "F#m7",
+     "F#m6",
+     "D"
+    ]
+   },
+   {
     "a": "Green Day",
     "t": "Good Riddance (Time Of Your Life)",
     "ch": [
      "G",
      "Cadd9",
-     "D",
      "C",
+     "D",
      "Em"
     ]
    },
@@ -78,8 +105,8 @@
     "ch": [
      "Bbm",
      "Ebm",
-     "B",
-     "Abm"
+     "Abm",
+     "B"
     ]
    },
    {
@@ -88,11 +115,11 @@
     "ch": [
      "Bm",
      "A",
-     "G",
-     "D",
      "F#m",
      "Em",
-     "F#"
+     "F#",
+     "G",
+     "D"
     ]
    },
    {
@@ -152,34 +179,10 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "C",
+     "Bm",
      "D",
-     "Bm"
-    ]
-   },
-   {
-    "a": "Eviatar Banai",
-    "t": "עד מתי",
-    "ch": [
      "Dm",
-     "F",
-     "C",
-     "Gm",
-     "Bb",
-     "Am"
-    ]
-   },
-   {
-    "a": "Eviatar Banai",
-    "t": "תחרות כלבים",
-    "ch": [
-     "F#m",
-     "C#m",
-     "G#m",
-     "D",
-     "A",
-     "E",
-     "Bm"
+     "C"
     ]
    },
    {
@@ -188,14 +191,14 @@
     "ch": [
      "G/B",
      "Am",
-     "F",
-     "C",
      "Dm7",
      "Dm",
      "Eb",
      "Bb",
      "Cm",
-     "Ddim"
+     "Ddim",
+     "F",
+     "C"
     ],
     "capo": 1
    },
@@ -208,21 +211,21 @@
      "F#",
      "Cmaj7",
      "Am7",
+     "C",
      "E",
-     "Am",
      "Dm",
+     "Am",
      "Ebdim",
-     "B7",
-     "C"
+     "B7"
     ]
    },
    {
     "a": "Oasis",
     "t": "Wanderwall",
     "ch": [
+     "Cadd9",
      "Em7",
      "G",
-     "Cadd9",
      "D4",
      "G/F#",
      "E"
@@ -237,11 +240,11 @@
      "Bb",
      "Am",
      "Eb",
+     "F#m",
+     "A",
      "G",
      "C",
-     "F#m",
-     "D",
-     "A"
+     "D"
     ]
    },
    {
@@ -272,6 +275,8 @@
      "A",
      "D",
      "C",
+     "Asus2/B",
+     "A/B",
      "D/F#"
     ],
     "tuning": "Drop D"
@@ -283,168 +288,107 @@
    }
   ]
  },
- "level": "Comfortable intermediate: open chords, full barre chords in flat keys (Bbm, Ebm, Abm), maj7 and slash chords, plus capo and Drop D.",
+ "level": "Intermediate: comfortable with full barre chords in flat keys, maj7 and slash chords, capo and Drop D.",
  "suggestions": [
   {
-   "title": "גשם",
-   "artist": "מאיר בנאי",
-   "style": "Israeli rock ballad",
+   "title": "ממעמקים",
+   "artist": "הפרויקט של עידן רייכל",
+   "style": "Israeli pop",
    "difficulty": 3,
-   "chords": [
-    "Dm",
-    "Am",
-    "F",
-    "G",
-    "C",
-    "Fm7b5",
-    "G/Ab"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "You already play his 'אצלך בעולם'; mostly familiar chords, with Fm7b5 as one new colour chord."
+   "why": "A second song by an artist already in the folder; a slow, flowing ballad to work on smooth chord changes."
   },
   {
-   "title": "דרך",
-   "artist": "מוש בן ארי",
-   "style": "Israeli groove / folk-rock",
+   "title": "לבכות לך",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
    "difficulty": 2,
-   "chords": [
-    "A9",
-    "D9",
-    "F",
-    "G"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Easy, laid-back groove; the A9 and D9 shapes are new and add colour to your strumming."
+   "why": "A classic sing-along ballad; a relaxed song to polish arpeggio picking."
   },
   {
-   "title": "יומולדת",
+   "title": "שפל רוח",
    "artist": "ברי סחרוף",
    "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "D9",
-    "Bm",
-    "G",
-    "D",
-    "A",
-    "E"
-   ],
+   "difficulty": 3,
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A relaxed Berry classic after 'חם על הירח', almost all open chords you know: a good easy one."
+   "why": "More Berry Sakharof after Hot on the Moon; a moodier rock groove to tighten strumming."
   },
   {
-   "title": "השם ירחם",
+   "title": "לרגע קטן",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Ivri Lider song in the same melodic style; good practice for dynamics between verse and chorus."
+  },
+  {
+   "title": "על הרכבת",
    "artist": "טונה",
-   "style": "Israeli hip-hop / pop",
+   "style": "Israeli hip hop",
    "difficulty": 3,
-   "chords": [
-    "Cmaj7",
-    "Bm7",
-    "Em",
-    "Asus2",
-    "E"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A fourth Tuna song for your folder; Bm7 and Asus2 are new, smooth shapes over a steady rhythm."
+   "why": "Tuna again, in a groove-based song; keeps the rhythm hand busy under fast lyrics."
   },
   {
-   "title": "לבד",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock ballad",
+   "title": "מבול",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
    "difficulty": 3,
-   "chords": [
-    "Am",
-    "Aadd9",
-    "Aadd9/F#",
-    "G",
-    "C",
-    "C/B",
-    "F",
-    "F#m",
-    "Em",
-    "E",
-    "D"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Your most-played artist; the add9 shapes and walking bass (C/B) are a small step up in finger-picking detail."
+   "why": "A deeper cut from an artist he plays a lot; a good next step after the other Banai songs."
   },
   {
-   "title": "כל כיוון",
-   "artist": "רוקפור",
-   "style": "Israeli alt-rock",
-   "difficulty": 3,
-   "chords": [
-    "D",
-    "C#m",
-    "C",
-    "F",
-    "F#m",
-    "Am",
-    "Bb",
-    "G",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Rockfour after 'הכעס'; quick moves between unrelated chords like C#m to C train your chord changes."
-  },
-  {
-   "title": "Live Forever",
+   "title": "Half the World Away",
    "artist": "Oasis",
    "style": "Britpop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A gentler Oasis song after Wonderwall; practise a steady picked-strum pattern."
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alternative rock",
+   "difficulty": 4,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A small step up from My Friends: funkier rhythm and smoother chord transitions."
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
    "difficulty": 2,
-   "chords": [
-    "G",
-    "D",
-    "Am",
-    "C",
-    "Em"
-   ],
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy Oasis anthem in open chords: a natural next song after Wonderwall."
+   "why": "A short, easy Foo Fighters song to sit next to My Hero; quick to learn and fun to sing."
   },
   {
-   "title": "Holiday",
-   "artist": "Green Day",
-   "style": "Punk rock",
-   "difficulty": 3,
-   "chords": [
-    "Fm",
-    "Db",
-    "Ab",
-    "Eb",
-    "C",
-    "Bbm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "You already play Basket Case in flat keys; this one adds palm-muted power-chord drive."
-  },
-  {
-   "title": "All Apologies",
-   "artist": "Nirvana",
-   "style": "Grunge / acoustic",
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "style": "Acoustic rock",
    "difficulty": 3,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Your Nirvana folder is still empty; the Unplugged version is a mellow, repetitive song to start it with."
-  },
-  {
-   "title": "Flake",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-pop",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Follows Better Together; the step up is Jack's muted, percussive 'chucking' strum."
+   "why": "A new artist close to his grunge taste; a fingerpicked acoustic piece for clean picking."
   }
  ],
  "history": [
@@ -847,6 +791,56 @@
    "title": "Flake",
    "artist": "Jack Johnson",
    "date": "2026-10-17"
+  },
+  {
+   "title": "ממעמקים",
+   "artist": "הפרויקט של עידן רייכל",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "לבכות לך",
+   "artist": "אביב גפן",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "שפל רוח",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "לרגע קטן",
+   "artist": "עברי לידר",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "על הרכבת",
+   "artist": "טונה",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "מבול",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "Half the World Away",
+   "artist": "Oasis",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "date": "2026-10-18"
+  },
+  {
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "date": "2026-10-18"
   }
  ],
  "sheets": [
@@ -859,13 +853,24 @@
     "Am",
     "Em",
     "Em7",
-    "Cadd9",
-    "C",
-    "D"
+    "Cadd9"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
    "at": "2026-10-10T23:07:35.424Z"
+  },
+  {
+   "title": "יא",
+   "artist": "Tuna",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "Cm",
+    "C#"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
+   "at": "2026-10-12T05:44:13.178Z"
   },
   {
    "title": "במקום-טסט שיר",
@@ -875,8 +880,7 @@
    "chords": [
     "F#m",
     "E",
-    "C#m",
-    "A"
+    "C#m"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
@@ -890,26 +894,11 @@
    "chords": [
     "F#m",
     "E",
-    "C#m",
-    "A"
+    "C#m"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
    "at": "2026-10-11T20:50:16.168Z"
-  },
-  {
-   "title": "יא",
-   "artist": "Tuna",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "Cm",
-    "C",
-    "C#"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
-   "at": "2026-10-12T05:44:13.178Z"
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -919,9 +908,7 @@
    "chords": [
     "C",
     "D",
-    "Em",
-    "G",
-    "Cadd9"
+    "Em"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
@@ -940,12 +927,7 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab",
-    "Bbm/Ab",
-    "Eb/G",
-    "Ab/Gb",
-    "Db/F",
-    "Eb"
+    "Ab"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
@@ -959,13 +941,9 @@
    "chords": [
     "Bmaj7",
     "E",
-    "Abm",
-    "Emaj7",
-    "F#",
-    "Ebm",
-    "F"
+    "Abm"
    ],
-   "level": 5,
+   "level": 2,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
    "at": "2026-10-12T04:21:21.095Z"
   },
@@ -1029,10 +1007,9 @@
     "F#m",
     "Em",
     "F#",
-    "G",
-    "D"
+    "G"
    ],
-   "level": 4,
+   "level": 3,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
    "at": "2026-10-11T19:18:19.408Z"
   },
@@ -1049,11 +1026,9 @@
     "Eb",
     "Bb",
     "Cm",
-    "Ddim",
-    "F",
-    "C"
+    "Ddim"
    ],
-   "level": 5,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
    "at": "2026-10-10T17:10:42.560Z"
   },
@@ -1122,12 +1097,9 @@
    "chords": [
     "Cadd9",
     "Em7",
-    "E",
-    "G",
-    "D4",
-    "G/F#"
+    "E"
    ],
-   "level": 2,
+   "level": 1,
    "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
    "at": "2026-10-11T04:04:56.240Z"
   },
@@ -1144,8 +1116,7 @@
     "E",
     "Bm",
     "F#m7",
-    "F#m6",
-    "D"
+    "F#m6"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
@@ -1161,8 +1132,7 @@
     "Cmaj7",
     "Bm",
     "D",
-    "Dm",
-    "C"
+    "Dm"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
@@ -1178,13 +1148,9 @@
     "Bb",
     "Am",
     "Eb",
-    "F#m",
-    "A",
-    "G",
-    "C",
-    "D"
+    "F#m"
    ],
-   "level": 4,
+   "level": 3,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
    "at": "2026-10-10T19:13:35.115Z"
   },
@@ -1199,10 +1165,9 @@
     "Dm",
     "Bb",
     "Bb/A",
-    "Gm",
-    "C"
+    "Gm"
    ],
-   "level": 5,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
    "at": "2026-10-11T04:46:28.822Z"
   },
@@ -1225,9 +1190,7 @@
     "A/B",
     "F#add9/B",
     "G",
-    "C",
-    "D/F#",
-    "F"
+    "C"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
@@ -1282,7 +1245,23 @@
   {
    "text": "Hadag Nahash learned to groove one strum at a time. Your right hand is next in line, {n}.",
    "date": "2026-10-16"
+  },
+  {
+   "text": "Kurt Cobain played a left-handed guitar upside down at times. You're allowed to play yours the right way up, {n}. Today would be nice.",
+   "date": "2026-10-18"
+  },
+  {
+   "text": "Your E string and your B string stopped talking to each other, {n}. Tap Listen and play peacemaker.",
+   "date": "2026-10-18"
+  },
+  {
+   "text": "The Edge built a whole sound out of delay pedals. Your practice routine is built out of delay too, {n}. Let's flip that.",
+   "date": "2026-10-18"
+  },
+  {
+   "text": "Rockfour toured the world on hard work and loud amps. You only need the hard work part tonight, {n}.",
+   "date": "2026-10-18"
   }
  ],
- "jokesDate": "2026-10-16"
+ "jokesDate": "2026-10-18"
 }
