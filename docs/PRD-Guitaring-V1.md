@@ -296,6 +296,7 @@ Each feature lists behaviour, key code, and acceptance criteria (AC). AC are wha
 ### 5.11 Welcome jokes (on Home since V2 phase 1)
 - 46 built-in jokes (`JOKES`, `{n}` = user's name) + extras from `ideas.json.jokes` (`jokesExtra`). Fresh extras are shown first, once each (`jokesSeen`), then random (never the same twice in a row). "Another one ↻".
 - On Home, song reminders (§4 My profile, `92-song-remind`: `homeLine`) are part of the same random pick, in a green frame with a Practise button.
+- **The comments talk to you** (Oct 2026): Home greets you by name right above them, so a joke uses `{n}` only to address you ("…, {n}.") and says "you" everywhere else (the three built-in jokes that talked about "{n}" were rewritten; the daily job's prompt has the same rule). **A comment is never cut off**: when it's longer than its lines, the text gets a little smaller until it fits (`homeFit`, down to 13.5 px).
 
 ### 5.12 Claude features (optional)
 - Phone: Songs › Claude features → paste key → test → on. Used for: reading written chords/hand shapes in videos, chord-sheet title/artist order check, song notes / better versions / taste, gear photo fill + gear chat, song ideas re-pick.
