@@ -1199,6 +1199,7 @@ body.mxon .mixplay::before{opacity:1;animation:mxbreathe 2.4s ease-in-out infini
 .gdkara .klane{position:relative;height:58px;overflow:hidden;border-radius:12px;background:rgba(255,255,255,.04);cursor:pointer;touch-action:manipulation}
 .gdkara .kstrip{position:absolute;left:0;top:0;height:100%;will-change:transform}
 .gdkara .kblk{position:absolute;top:14px;height:36px;display:flex;align-items:center;padding:0 8px;border-radius:9px;background:#2a3036;color:var(--ink);font:700 15px var(--body);white-space:nowrap;overflow:hidden;box-sizing:border-box;direction:ltr}
+.gdkara .kblk.unsure{background:transparent;border:1.5px dashed rgba(255,255,255,.45)}.gdkara .kblk.unsure.cur{border-style:dashed;border-color:#0d1113}
 .gdkara .kblk.cur{background:var(--accent);color:#0d1113;box-shadow:0 0 14px rgba(65,226,186,.45)}
 .gdkara .kb{position:absolute;top:4px;width:2px;height:6px;margin-left:-1px;border-radius:1px;background:rgba(255,255,255,.22)}.gdkara .kbar{position:absolute;top:2px;bottom:2px;width:2px;margin-left:-1px;background:rgba(255,255,255,.1)}
 .gdkara .khead{position:absolute;top:0;bottom:0;left:30%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 10px var(--accent)}
@@ -1868,7 +1869,7 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
 <div class="mxsheet" id="mxSheet" hidden><div class="mxdim" id="mxDim"></div><section class="mxpanel" id="mxPanel" role="dialog" aria-label="Practice mixer"><div class="mxgrab" aria-hidden="true"></div><div class="mixview" id="mixView"></div></section></div>
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v8
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v9
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
@@ -1876,6 +1877,8 @@ For a chords-only part (intro, solo, ending), use the buttons below."></textarea
 # v6: the stills are 960 pixels wide (sharp enough to cut a close-up of the fretting hand from).
 # v7: a phone-sized copy of the video (480p, video.mp4) is handed back too, for playing along with the chords in time.
 # v8: stills 1440 pixels wide every 3 seconds (hands in wide shots are small), about the same size as before.
+# v9: two music models read the song (models.json): Beat This! (CPJKU, MIT) the beat and the bars from the whole song, BTC (MIT)
+# the chords from the song without its vocals and drums; the app uses them with its own reading. A model that fails never stops the split.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -1907,7 +1910,7 @@ jobs:
             ~/.cache/pip
             ~/.cache/huggingface
             ~/.cache/torch
-          key: guitaring-demucs-4.1.0-torch-2.5.1
+          key: guitaring-demucs-4.1.0-torch-2.5.1-models1
       - name: Install the separation model
         run: |
           set -o pipefail
@@ -2031,6 +2034,58 @@ jobs:
           else:
               print('phone video', os.path.getsize('res/video.mp4'))
           PY
+      - name: Read the beat and the chords
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          {
+            pip install -q torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+            pip install -q einops soxr tqdm librosa==0.10.2.post1 pyyaml mir_eval soundfile
+            pip install -q --no-deps rotary-embedding-torch "git+https://github.com/CPJKU/beat_this.git@b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c"
+            git clone -q https://github.com/jayg996/BTC-ISMIR19 btc && git -C btc checkout -q 2682317be668032e6e4b269ded36adaa2ad57df0
+            sed -i 's/yaml.load(f)/yaml.safe_load(f)/' btc/utils/hparams.py
+            grep -rl "np\.float\b\|np\.int\b" --include=*.py btc | xargs -r sed -i 's/np\.float\b/float/g; s/np\.int\b/int/g'
+            python - <<'PY'
+          import json, os, subprocess, sys, time, numpy as np, soundfile as sf, torch
+          song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
+          subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', song, '-vn', '-ac', '1', '-ar', '44100', 'full.wav'], check=True)
+          xs = [sf.read('res/%s.flac' % k)[0] for k in ('guitar', 'bass', 'other', 'piano')]
+          n = min(len(x) for x in xs)
+          sf.write('nodv.wav', sum(x[:n] for x in xs), 44100)
+          out = {'v': 1, 'errors': []}
+          def beats():
+              from beat_this.inference import File2Beats
+              b, d = File2Beats(checkpoint_path='final0', device='cpu', dbn=False)('full.wav')
+              out['beats'] = {'beats': [round(float(x), 3) for x in b], 'downbeats': [round(float(x), 3) for x in d]}
+              return '%d beats, %d downbeats' % (len(b), len(d))
+          def chords():
+              sys.path.insert(0, 'btc')
+              from btc_model import BTC_model
+              from utils.hparams import HParams
+              from utils.mir_eval_modules import audio_file_to_features
+              cfg = HParams.load('btc/run_config.yaml')
+              cfg.feature['large_voca'] = True; cfg.model['num_chords'] = 170; cfg.model['probs_out'] = True
+              m = BTC_model(config=cfg.model); ck = torch.load('btc/test/btc_model_large_voca.pt', map_location='cpu', weights_only=False)
+              m.load_state_dict(ck['model']); m.eval()
+              f, fps, _ = audio_file_to_features('nodv.wav', cfg)
+              f = (f.T - ck['mean']) / ck['std']; T = cfg.model['timestep']; k = f.shape[0]
+              x = torch.tensor(np.pad(f, ((0, T - k % T), (0, 0))), dtype=torch.float32).unsqueeze(0); P = []
+              with torch.no_grad():
+                  for i in range(x.shape[1] // T):
+                      h, _ = m.self_attn_layers(x[:, T * i:T * (i + 1), :]); P.append(torch.softmax(m.output_layer(h).squeeze(0), -1))
+              P = torch.cat(P)[:k].numpy(); top = np.argsort(-P, 1)[:, :4]
+              out['btc'] = {'fps': fps, 'frames': [[[int(i), round(float(P[j, i]), 3)] for i in top[j] if P[j, i] >= .02] for j in range(k)]}
+              return '%d chord frames' % k
+          for name, run in (('beats', beats), ('chords', chords)):
+              t = time.time()
+              try:
+                  print(name + ':', run(), '%.0fs' % (time.time() - t))
+              except Exception as e:
+                  out['errors'].append('%s: %s' % (name, str(e)[:200]))
+                  print(name, 'failed:', e)
+          json.dump(out, open('res/models.json', 'w'), separators=(',', ':'))
+          PY
+          } 2>&1 | tee -a log.txt
       - name: Report a failure to the app
         if: failure()
         run: |
@@ -2583,7 +2638,7 @@ function diagram(sh,label){
 
 /* ---- audio analysis ---- */
 const SR=11025,FN=8192,FNC=4096,HOP=1024;
-const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17};
+const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17,btcW:.3,confM:.08};
 function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
  for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
  return (re,im)=>{for(let i=0;i<n;i++){const j=rv[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -2632,7 +2687,9 @@ function notesToChroma(nt,nF){
  return {chroma,bass};
 }
 const NTUNE={on:.3,pow:1,bassOn:.35,bassRest:.25,drone:0,win:1,mean:0,mix:.5,bmix:.65,force:0};
-async function analyse(x,prog,notes){
+// opts (from the GitHub split, splitter v9; none = as before): beats – Beat This!'s beats [{beats, downbeats}] (the beat grid, its
+// tempo); btc – BTC's chord probabilities per frame [{fps, frames:[[[class, p]…]…]}] (170 chords, MIT), one more voice in the decoder
+async function analyse(x,prog,notes,opts){opts=opts||{};
  const fB=makeFFT(FN),fC=makeFFT(FNC);
  const hB=new Float64Array(FN),hC=new Float64Array(FNC);for(let i=0;i<FN;i++)hB[i]=.5-.5*Math.cos(2*Math.PI*i/(FN-1));for(let i=0;i<FNC;i++)hC[i]=.5-.5*Math.cos(2*Math.PI*i/(FNC-1));
  const reB=new Float64Array(FN),imB=new Float64Array(FN),mB=new Float64Array(FN/2),reC=new Float64Array(FNC),imC=new Float64Array(FNC),mC=new Float64Array(FNC/2);
@@ -2678,9 +2735,14 @@ async function analyse(x,prog,notes){
  for(let f=0;f<nF;f++){const sil=rms[f]<thr,c=chroma[f],b=bass[f],cn=Math.hypot(...c)||1,bm=Math.max(...b)||1,o=f*(NS+1);
   for(let s=0;s<NS;s++){if(sil){EM[o+s]=0;continue}const T=TPL[s];let d=0;for(let i=0;i<12;i++)d+=T[i]*c[i];let bt=0;for(const [pc,w] of TONES[s]){const v=w*b[pc]/bm;if(v>bt)bt=v}EM[o+s]=d/cn+TYPES[s%NT].prior+TUNE.bassW*bt}
   EM[o+NS]=sil?1:.3}
+ // BTC's view of each frame: its probability of each of our chords (its qualities mapped to ours; it has no add9, so its major
+ // chord speaks for both and the templates and the notes' power decide), weighted into the template match
+ if(opts.btc&&opts.btc.frames&&TUNE.btcW){const B=opts.btc,M=btcMap();for(let f=0;f<nF;f++){const t=(f*HOP+(FN-HOP)/2)/SR,k=Math.min(B.frames.length-1,Math.round(t/B.fps)),o=f*(NS+1);if(k<0)continue;
+  const pr=new Float32Array(NS+1);for(const [i,pv] of B.frames[k]){const m=M[i];if(m==null)continue;if(m<0)pr[NS]+=pv;else for(const s2 of m)pr[s2]+=pv}
+  if(rms[f]>=thr)for(let s2=0;s2<=NS;s2++)EM[o+s2]+=TUNE.btcW*pr[s2]}}
  // decode beat by beat: chords change on beats, so each beat gets one chord (falls back to short fixed steps without a clear beat)
  prog(.72,'Finding the beat…');await tick();
- const bt=beatTimes(x),fOfT=t=>Math.max(0,Math.min(nF,Math.round((t*SR-FN/2)/HOP)));
+ const bt0=beatTimes(x),bt=opts.beats&&opts.beats.beats&&opts.beats.beats.length>8?{...bt0,beats:opts.beats.beats.slice(),bpm:Math.round(60/medianDiff(opts.beats.beats))}:bt0,fOfT=t=>Math.max(0,Math.min(nF,Math.round((t*SR-FN/2)/HOP)));
  let cuts=[0];if(TUNE.beatSync&&bt.beats.length>8){const bs=[];bt.beats.forEach((tb,i)=>{bs.push(tb);if(TUNE.halfBeats&&i+1<bt.beats.length)bs.push((tb+bt.beats[i+1])/2)});for(const tb of bs){const f=fOfT(tb);if(f>cuts[cuts.length-1]&&f<nF)cuts.push(f)}}else{for(let f=2;f<nF;f+=2)cuts.push(f)}cuts.push(nF);
  const U=cuts.length-1,S=NS+1,UE=new Float32Array(U*S);
  // how chord-like each beat sounds: talking, tapping and silence score low and lean to "not playing"
@@ -2731,8 +2793,10 @@ async function analyse(x,prog,notes){
  // chord's prior otherwise hides it (Oct 2026: "שאריות של החיים" was heard as F where the hand plays Fmaj7)
  if(TUNE.sev)sevFit(segs,chroma,rms,thr);
  if(segs.length){segs[0].t0=0;segs[segs.length-1].t1=dur}segs=cleanSegs(segs);
+ // how sure each chord is: how far it stands above the closest other chord (another root, or the other 3rd), over its frames
+ const conf=segConf(segs,EM,nF,rms,thr);
  const bpm=bt.bpm||tempo(x);
- return {dur,offset,hist:[...hist],segs,bpm,beats:bt.beats,env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
+ return {dur,offset,hist:[...hist],segs,conf,bpm,beats:bt.beats,...(opts.beats&&opts.beats.downbeats?{downbeats:opts.beats.downbeats}:{}),env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
 }
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const b64u8=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
@@ -2760,6 +2824,18 @@ function keyFit(segs,chroma,rms,thr,ft){const K=songKey(chroma,rms,thr),T=id=>TY
   let maj=0,min=0;for(let f=f0(g.t0);f<Math.min(nF,f0(g.t1));f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;maj+=c[(r+4)%12]/m;min+=c[(r+3)%12]/m}
   const mj=isMaj(q),mine=mj?maj:min,other=mj?min:maj;
   if(mine>0&&other/mine>=TUNE.keyFix)g.c=alt}}
+const medianDiff=a=>{const d=a.slice(1).map((v,i)=>v-a[i]).sort((x,y)=>x-y);return d[d.length>>1]||.5};
+// BTC's 170 classes (root × min maj dim aug min6 maj6 min7 minmaj7 maj7 7 dim7 hdim7 sus2 sus4, then X, N) → our chord indices
+let BTC_M=null;function btcMap(){if(BTC_M)return BTC_M;const T=id=>TYPES.findIndex(x=>x.id===id),Q=['m','','m','','m','','m7','m','maj7','7','m','m7','sus2','sus4'];
+ BTC_M=[];for(let i=0;i<168;i++){const r=Math.floor(i/14),q=Q[i%14],t=T(q);BTC_M.push(q===''?[r*NT+t,r*NT+T('add9')]:[r*NT+t])}BTC_M.push(null,-1);return BTC_M}
+// each chord's margin (template match, plus BTC when it spoke) over the best chord with another root or the other 3rd, averaged over
+// its sounding frames: 0 = a toss-up … 1 = clear (a margin of TUNE.confM or more); kept as analysis.conf, one value per segment
+function segConf(segs,EM,nF,rms,thr){const S=NS+1,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP))),th=q=>{const iv=TYPES[q].iv;return iv.includes(3)?1:iv.includes(4)?2:0};
+ return segs.map(g=>{if(g.c>=NS)return 1;const r=Math.floor(g.c/NT),t3=th(g.c%NT);let m=0,k=0;
+  for(let f=f0(g.t0);f<f0(g.t1);f++){if(rms[f]<thr)continue;const o=f*S,v=EM[o+g.c];let b=-1e9;for(let s2=0;s2<NS;s2++){if(Math.floor(s2/NT)===r&&th(s2%NT)===t3)continue;if(EM[o+s2]>b)b=EM[o+s2]}m+=v-b;k++}
+  // the chord itself (root and 3rd) only: its extras (7, 9, sus) are settled after this by the notes' own rules (sevFit, add9P…)
+  return k?+Math.max(0,Math.min(1,m/k/TUNE.confM)).toFixed(2):0})}
+window.__an={tune:o=>Object.assign(TUNE,o||{})};// test hook: try other settings (benchmark)
 function beatFit(segs,chroma,rms,thr,beats){const nF=chroma.length,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP)));
  const mean=(t0,t1)=>{const v=new Float64Array(12);let k=0;for(let f=f0(t0);f<f0(t1);f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;for(let i=0;i<12;i++)v[i]+=c[i]/m;k++}return k>=2?v:null};
  const sc=(s2,v)=>{const T=TPL[s2],n=Math.hypot(...v)||1;let d=0;for(let i=0;i<12;i++)d+=T[i]*v[i];return d/n+TYPES[s2%NT].prior};
@@ -5363,7 +5439,9 @@ async function mxCollect(it){mxBarOff=false;
   const done=JSON.parse(await (await gh('/contents/done.json?ref=r-'+it.id,{raw:true})).text());
   if(!done.ok){it.state='failed';it.err=done.error||'The split failed on GitHub.';toast(`Couldn’t split “${esc(it.name)}”. <button type="button" class="tlink" id="mxToastOpen">See why</button>`,'err');const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxSheetUI2()}}
   else{const stems={},ext=done.format==='flac'?'flac':'mp3';for(const s of MX.STEMS)stems[s]=await gh('/contents/'+s+'.'+ext+'?ref=r-'+it.id,{raw:true});
-   await mxPut('mixdata:'+it.id,{stems});
+   // the beat and chord models' results (splitter v9: Beat This!, BTC), for the session build; none from older splitters
+   let models=null;try{const j=await gh('/contents/models.json?ref=r-'+it.id,{raw:true,ok404:true});if(j){const m=JSON.parse(await j.text());if(m&&(m.beats||m.btc))models={beats:m.beats||null,btc:m.btc||null,v:m.v||1}}}catch(e){}
+   await mxPut('mixdata:'+it.id,{stems,...(models?{models}:{})});it.models=!!models;
    // stills from the song's video (splitter v5), for the chord check
    // the phone-sized copy of the video (splitter v7), for playing along with the chords in time
    try{const v=await gh('/contents/video.mp4?ref=r-'+it.id,{raw:true,ok404:true});if(v&&v.size){await mxPut('mixvideo:'+it.id,{blob:new Blob([v],{type:'video/mp4'}),at:Date.now(),from:'split'});it.hasVid=true}}catch(e){}
@@ -5624,16 +5702,18 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   const nm=it.song&&it.song.t?it.song:songFromName(songClean(it.name).s)||{t:it.name,a:''},file=new File([blob],it.name+' (guitars).flac',{type:'audio/flac'});
   // 1. the guitars-only part: the chords, their roots and timing, the beat and the strumming
   it.sessStep='guitar';try{dsStatusUI()}catch(e){}
-  const x=await decodeFile(file),r=await analyse(x,()=>{},null),tuning=guessTuning(r.hist,r.segs);
+  // the models' results from the split (splitter v9: Beat This! beats, BTC chord probabilities), when it has them
+  const mo=d.models||{};
+  const x=await decodeFile(file),r=await analyse(x,()=>{},null,{beats:mo.beats,btc:mo.btc}),tuning=guessTuning(r.hist,r.segs);
   // the guitars' sound (bright / warm, clean / crunch / distorted, acoustic?) for the song's gear tip (77-gear-tip)
   let tone=null;try{tone=await asTone(x)}catch(e){}
-  // the beat from the drums part, when the song has drums: kick and snare mark the beat (and the tempo) more clearly than the guitar's
+  // the beat: Beat This!'s from the split when it has one (the most reliable); else from the drums part, when the song has drums: kick and snare mark the beat (and the tempo) more clearly than the guitar's
   // own accents, which can lock it half a beat off or at the wrong tempo; the strums are read against it. No drums (an acoustic song:
   // the split's drums part is nearly silent): the guitar's beat stays.
-  let beatFrom='';try{const db=d.stems.drums;if(db){const y=await decodeFile(new File([db],'drums.flac',{type:'audio/flac'}));
+  let beatFrom=mo.beats&&mo.beats.beats&&mo.beats.beats.length>8?'model':'';try{const db=!beatFrom&&d.stems.drums;if(db){const y=await decodeFile(new File([db],'drums.flac',{type:'audio/flac'}));
    let e=0;for(let i=0;i<y.length;i+=16)e+=y[i]*y[i];const rms=Math.sqrt(e/Math.max(1,y.length/16));
    if(rms>.01){const bt=beatTimes(y);if(bt.beats.length>8&&bt.bpm){r.beats=bt.beats;r.bpm=bt.bpm;beatFrom='drums'}}}}catch(e){}
-  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''},...(tone?{tone}:{})};
+  const a={title:nm.a?`${nm.t} - ${nm.a}`:nm.t,artist:nm.a||'',dur:r.dur,bpm:r.bpm,offset:+r.offset.toFixed(1),tuning,segs:r.segs,play:{tun:tuning.id,capo:0},feat:r.feat,...rhythmOf(r),...(r.downbeats?{downbeats:r.downbeats}:{}),...(r.conf?{conf:r.conf}:{}),beatFrom,v:2,at:Date.now(),from:'guitars',mix:id,song:{t:nm.t,a:nm.a||''},...(tone?{tone}:{})};
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;
@@ -7317,6 +7397,12 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  // and first, the song's material in Drive the session hasn't used (a new video is split on GitHub: dsUnused); Drive is asked for
  // straight from the tap
  const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;let said='';
+  // a song split from Drive before the beat and chord models (splitter v9): split once more from the same Drive files, so the guide
+  // gets the beat grid and BTC's chords (about 15 minutes, once); after that, Rebuild is quick again
+  if(it.drive&&it.drive.file&&mxGh()&&gdOn()){let d=null;try{d=await mxGet('mixdata:'+id)}catch(e){}
+   if(d&&d.stems&&!d.models){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+    if(ok){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:{id:it.drive.file,name:it.drive.name||it.name},vid:it.drive.video,folder:it.drive.folder,base:it.name,song});
+     if(n.state!=='failed'){toast('Your GitHub splits this song once more with the new beat and chord models (about 15 minutes). The guide rebuilds itself when it’s back.','ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
   // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
   // needs this)
   if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
@@ -7382,6 +7468,12 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
 // Like the reference guides: "Before you play" (capo, tempo, why), "How sure is this" per item, a song map with times,
 // chord shapes with fingers, the strumming, and an easier version.
 const GD_LV={solid:'Solid',likely:'Likely',guess:'A guess'};
+// a chord heard with less than this confidence (analysis.conf: how far it stands above the closest other chord) is named in How sure
+// and drawn dashed in the play-along: check it by ear (or in the video)
+const GD_UNSURE=.35;
+function gdUnsure(d){const cf=d.conf;if(!cf||cf.length!==d.segs.length)return [];const by=new Map();
+ d.segs.forEach((g,i)=>{if(g.c>=NS||g.t1-g.t0<1||cf[i]>=GD_UNSURE)return;const n=nameOf(g),x=by.get(n)||{n,ts:[],c:1};x.ts.push(g.t0);x.c=Math.min(x.c,cf[i]);by.set(n,x)});
+ return [...by.values()].sort((a,b)=>a.c-b.c).slice(0,3)}
 // Easy shapes: the basic major / minor chord of each (Cadd9 → C, Asus2 → A, Fmaj7 → F, Am7 → Am, D/F# → D)
 function gdEasyName(n){const m=String(n||'').match(/^([A-G][#b]?)([^/]*)/);if(!m)return n;return m[1]+(/^(m(?!aj)|min|dim)/.test(m[2])?'m':'')}
 const GD_R=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],GD_ALT={'Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab','A#':'Bb'};
@@ -7481,17 +7573,17 @@ function gdBuild(d){const keep=A;A=d;try{
   const PA=gdPatOf(M.bars);
  // how sure: chords (does the progression repeat, did you check it), capo (the tuning guess), strumming (how steady the pattern is), tempo
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
- const V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
+ const U=gdUnsure(d),V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
  const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||(V&&vSeen>=2&&!vDiff.length)||(d.fit&&d.fit.match>=.9&&!(d.fit.clash||[]).length&&rep>=.6)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
  const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':sc===capo?'likely':'guess';
  const share=PA.share,strumLv=!d.ons||!PA.n?'guess':share>=.85?'solid':share>=.72?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
- const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
+ const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)+(U.length?` Least sure: ${U.map(x=>`${x.n} at ${x.ts.slice(0,2).map(mmss).join(', ')}`).join('; ')}. Check ${U.length>1?'these':'it'} by ear${d.video&&!d.video.skip?' or in the video':''} (dashed in the play-along).`:'')},
   {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
-  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
-  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
+  {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':d.beatFrom==='model'?' The beat is from Beat This!, a beat-tracking model your GitHub runs during the split.':'')},
+  {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':d.beatFrom==='model'?'Measured by Beat This!, a beat-tracking model, during the split.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
  return {bpm,tun,eTun,capo,capoBy:cb,shift:d.video&&d.video.shift&&d.video.shift.seenCapo!=null?d.video.shift:null,sheetCapo:sc,sources:gdSources(d),mix:d.mix||'',eCapo,eVers,eAt,eSrc:en,full:fullMain.length?fullMain:full,easy:[...new Set(en.map(eName))],eName,secs:d.ons?secs:secs.map(x=>({...x,pat:''})),pat:d.ons?PA.pat:'',share,sure,src:d.from==='guitars'||/guitars/i.test(d.title||'')?'guitars':'song'}}
  finally{A=keep}}
 // what the guide was built from: the guitars-only part, the whole song, the video, a chord sheet (and why one is missing)
@@ -7789,8 +7881,8 @@ function karaStop(){kaGen++;karaFull(false);if(!KA)return;cancelAnimationFrame(K
 // the chord blocks: as named in Full (the shapes with the capo), each change snapped to the nearest beat when it's close to one
 function karaBlocks(d){const keep=A;A=d;try{const B=(d.beats||[]).slice().sort((a,b)=>a-b),dif=B.slice(1).map((v,i)=>v-B[i]).sort((a,b)=>a-b),bp=dif[dif.length>>1]||60/(d.bpm||90);
   const snap=t=>{if(!B.length)return t;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi)>>1;if(B[m]<t)lo=m+1;else hi=m}const c=[B[lo],B[lo-1]].filter(x=>x!=null).sort((a,b)=>Math.abs(a-t)-Math.abs(b-t))[0];return Math.abs(c-t)<.4*bp?c:t};// within 0.4 of a beat (a chord pushed to the "&", half a beat, stays)
-  const out=[];for(const g of d.segs){if(g.c>=NS)continue;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)continue;const l=out[out.length-1];
-   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;continue}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1})}
+  const out=[],cf=d.conf&&d.conf.length===d.segs.length?d.conf:null;d.segs.forEach((g,i)=>{if(g.c>=NS)return;const n=nameOf(g),t0=snap(g.t0),t1=snap(g.t1);if(t1-t0<.12)return;const l=out[out.length-1],u=!!cf&&cf[i]<GD_UNSURE&&g.t1-g.t0>=1;
+   if(l&&l.n===n&&t0-l.t1<.3){l.t1=t1;l.u=l.u&&u;return}if(l&&t0<l.t1)l.t1=t0;out.push({n,t0,t1,...(u?{u:true}:{})})});
   let bars=[];try{bars=lessonModel().bars.map(b=>b.t0)}catch(e){}
   return {blocks:out,beats:B,bp,bars}}finally{A=keep}}
 // how far the video runs behind the analysis' audio (seconds, ±3): first by the harmony (which notes sound, every 0.09 s: a beat-long
@@ -7849,7 +7941,7 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
  body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
   <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
-  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk" data-i="${i}" style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
+  <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk${b.u?' unsure':''}" data-i="${i}"${b.u?' title="Not sure of this chord: check it by ear"':''} style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
   <div class="mixbtns ktrans"><button type="button" class="mixback" data-kj="-5" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay kbig" aria-label="Play">▶</button><button type="button" class="mixback" data-kj="5" aria-label="Forward 5 seconds">+5s</button></div>
   <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
   <p class="tip kof" hidden></p>`;

@@ -105,7 +105,7 @@ function diagram(sh,label){
 
 /* ---- audio analysis ---- */
 const SR=11025,FN=8192,FNC=4096,HOP=1024;
-const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17,btcW:.3};
+const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17,btcW:.3,confM:.08};
 function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
  for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
  return (re,im)=>{for(let i=0;i<n;i++){const j=rv[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -260,8 +260,10 @@ async function analyse(x,prog,notes,opts){opts=opts||{};
  // chord's prior otherwise hides it (Oct 2026: "שאריות של החיים" was heard as F where the hand plays Fmaj7)
  if(TUNE.sev)sevFit(segs,chroma,rms,thr);
  if(segs.length){segs[0].t0=0;segs[segs.length-1].t1=dur}segs=cleanSegs(segs);
+ // how sure each chord is: how far it stands above the closest other chord (another root, or the other 3rd), over its frames
+ const conf=segConf(segs,EM,nF,rms,thr);
  const bpm=bt.bpm||tempo(x);
- return {dur,offset,hist:[...hist],segs,bpm,beats:bt.beats,...(opts.beats&&opts.beats.downbeats?{downbeats:opts.beats.downbeats}:{}),env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
+ return {dur,offset,hist:[...hist],segs,conf,bpm,beats:bt.beats,...(opts.beats&&opts.beats.downbeats?{downbeats:opts.beats.downbeats}:{}),env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
 }
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const b64u8=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
@@ -293,6 +295,13 @@ const medianDiff=a=>{const d=a.slice(1).map((v,i)=>v-a[i]).sort((x,y)=>x-y);retu
 // BTC's 170 classes (root × min maj dim aug min6 maj6 min7 minmaj7 maj7 7 dim7 hdim7 sus2 sus4, then X, N) → our chord indices
 let BTC_M=null;function btcMap(){if(BTC_M)return BTC_M;const T=id=>TYPES.findIndex(x=>x.id===id),Q=['m','','m','','m','','m7','m','maj7','7','m','m7','sus2','sus4'];
  BTC_M=[];for(let i=0;i<168;i++){const r=Math.floor(i/14),q=Q[i%14],t=T(q);BTC_M.push(q===''?[r*NT+t,r*NT+T('add9')]:[r*NT+t])}BTC_M.push(null,-1);return BTC_M}
+// each chord's margin (template match, plus BTC when it spoke) over the best chord with another root or the other 3rd, averaged over
+// its sounding frames: 0 = a toss-up … 1 = clear (a margin of TUNE.confM or more); kept as analysis.conf, one value per segment
+function segConf(segs,EM,nF,rms,thr){const S=NS+1,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP))),th=q=>{const iv=TYPES[q].iv;return iv.includes(3)?1:iv.includes(4)?2:0};
+ return segs.map(g=>{if(g.c>=NS)return 1;const r=Math.floor(g.c/NT),t3=th(g.c%NT);let m=0,k=0;
+  for(let f=f0(g.t0);f<f0(g.t1);f++){if(rms[f]<thr)continue;const o=f*S,v=EM[o+g.c];let b=-1e9;for(let s2=0;s2<NS;s2++){if(Math.floor(s2/NT)===r&&th(s2%NT)===t3)continue;if(EM[o+s2]>b)b=EM[o+s2]}m+=v-b;k++}
+  // the chord itself (root and 3rd) only: its extras (7, 9, sus) are settled after this by the notes' own rules (sevFit, add9P…)
+  return k?+Math.max(0,Math.min(1,m/k/TUNE.confM)).toFixed(2):0})}
 window.__an={tune:o=>Object.assign(TUNE,o||{})};// test hook: try other settings (benchmark)
 function beatFit(segs,chroma,rms,thr,beats){const nF=chroma.length,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP)));
  const mean=(t0,t1)=>{const v=new Float64Array(12);let k=0;for(let f=f0(t0);f<f0(t1);f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;for(let i=0;i<12;i++)v[i]+=c[i]/m;k++}return k>=2?v:null};
