@@ -5555,8 +5555,7 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   // no capo is guessed (it can't be heard): the guide takes it from you or the song's chord sheet (gdFit)
   // kept like a song-video analysis (the last 8 are kept), named after the split
   const key='mix_'+id;
-  // built again: a capo you set from the video stays
-  try{const old=loadSong(key);if(old&&old.play&&old.play.capoBy==='you'){a.play.capo=old.play.capo;a.play.capoBy='you'}}catch(e){}
+  // built again: nothing you set is carried over; the Full guide is the same on every build of the same recording (Oct 2026)
   // 1b. several guitars: the guitars part split by where each one sits (left / centre / right, as the jam track does), and each
   // side with enough of the guitars analysed alone. Measured and shown in the guide for now: the chords still come from the
   // whole guitars part (step 1, Oct 2026).
@@ -5676,6 +5675,13 @@ const vlJpg=(cv,q=.82)=>new Promise(ok=>cv.toBlob(ok,'image/jpeg',q));
 // (1) find: contact sheets of up to 4 numbered tiles (2 × 2, each 720 wide: a hand in a wide shot stays big enough to spot; 9 tiles of
 // 480 shrank it too far, Oct 2026); Claude says which show the fretting hand clearly, and where
 const VL_T={n:4,cols:2,W:720,H:405};
+// the video is read once per recording: the reading (Claude's answer) is kept with the song's analysis and reused on every rebuild,
+// so the Full guide comes out the same each time (Oct 2026). Bump VL_VER when the reading itself changes (its questions, the stills);
+// the next rebuild then reads the video again.
+const VL_VER=2;// 2: large close-ups of the end of the neck for the capo
+const vlRaw=r=>r?{capo:r.capo,capo_conf:r.capo_conf,frames:r.frames,looked:r.looked,clear:r.clear,who:r.who,others:r.others,nohand:r.nohand}:null;
+function vlKept(it,vkey){if(window.__vlFresh)return null;try{const v=(loadSong('mix_'+it.id)||{}).video;return v&&v.raw&&v.vkey===vkey&&v.ver===VL_VER?v.raw:null}catch(e){return null}}
+const vlKeep=(a,res,vkey,reused)=>{if(a.video&&!a.video.skip)Object.assign(a.video,{raw:vlRaw(res),vkey,ver:VL_VER,...(reused?{reused:true}:{})})};
 async function vlContact(frames){const out=[],{n:N,cols:C,W,H}=VL_T;for(let i=0;i<frames.length;i+=N){const part=frames.slice(i,i+N),cv=document.createElement('canvas');cv.width=W*C;cv.height=H*Math.ceil(N/C);const g=cv.getContext('2d');
   g.fillStyle='#000';g.fillRect(0,0,cv.width,cv.height);const tiles=[];
   for(let k=0;k<part.length;k++){const im=await vlImg(part[k].blob),sc=Math.min(W/im.width,H/im.height),w=im.width*sc,h=im.height*sc,x=(k%C)*W+(W-w)/2,y=Math.floor(k/C)*H+(H-h)/2;
@@ -5686,23 +5692,27 @@ async function vlFind1(title,sheets){
  const prompt=`These ${sheets.length} images are contact sheets of stills from a video of the song "${title}". Each sheet has up to ${VL_T.n} tiles numbered 1–${VL_T.n} (left to right, top to bottom).
 There may be more than one guitarist (for example one on an acoustic guitar and one on an electric). List only the tiles where a guitarist's fretting hand on the neck is clearly visible, and in each, every such guitarist: sharp, not blocked, close enough to see which strings and frets the fingers press. For each, say which guitar it is ("acoustic" or "electric", or "guitar" if you can't tell), give a box around the fretting hand and the part of the neck around it, as fractions of the tile [x0, y0, x1, y1] (0,0 is the tile's top left), and how clear it is. Leave out tiles with no clear fretting hand.
 Don't read lyrics or any other text on screen.
-Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}]}]}`;
+Also, for the capo: in any tile where the end of a guitar's neck by the headstock (the nut and the first 5 frets, where a capo would sit) is clearly visible, add "neck" to that tile, a box around the nut and those frets (list the tile even if no hand is clear in it).
+Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acoustic"|"electric"|"guitar", "box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}], "neck": {"box": [x0, y0, x1, y1], "quality": "high"|"medium"|"low"}}]}`;
  // room for a long answer: with the 720 px tiles many hands are seen (an answer cut short can't be read)
  return await sampleFn.json(prompt,{images:sheets.map(x=>x.blob),maxTokens:8000})}
 // (2) read: the hand and the neck cut from the full still (with room around it), up to 768 wide
-async function vlCrop(f,box){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
+async function vlCrop(f,box,maxW=768){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
  x0=Math.max(0,x0-mx);y0=Math.max(0,y0-my);x1=Math.min(1,x1+mx);y1=Math.min(1,y1+my);const sw=(x1-x0)*im.width,sh=(y1-y0)*im.height;if(sw<8||sh<8)return f.blob;
- const sc=Math.min(768/sw,3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
+ const sc=Math.min(maxW/sw,3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
  g.drawImage(im,x0*im.width,y0*im.height,sw,sh,0,0,cv.width,cv.height);return await vlJpg(cv,.85)}
 // both steps; frames: [{t, blob}] at the candidate moments. Returns Claude's reading of the close-ups, or {nohand} when none was clear.
 // With more than one guitarist, the one whose hand is clear most often (usually the one strumming the chords) is read; the others
 // are named (a lead line or a different voicing on another guitar shouldn't decide the chords).
 async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r1=await vlFind1(title,sheets),ok=x=>x==='high'||x==='medium';
- const all=[];(Array.isArray(r1&&r1.tiles)?r1.tiles:[]).forEach(x=>{const sh=sheets[(+x.sheet||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.tile);if(!tl)return;
+ const all=[],necks=[],frac=(b,tl)=>[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v)));
+ (Array.isArray(r1&&r1.tiles)?r1.tiles:[]).forEach(x=>{const sh=sheets[(+x.sheet||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.tile);if(!tl)return;
+  // the end of the neck (nut and first frets), for the capo
+  const nk=x.neck;if(nk&&Array.isArray(nk.box)&&nk.box.length===4&&ok(nk.quality)){const bx=frac(nk.box.map(Number),tl);if(bx[2]>bx[0]&&bx[3]>bx[1])necks.push({f:tl.f,box:bx,q:nk.quality,area:(bx[2]-bx[0])*(bx[3]-bx[1])})}
   const hands=Array.isArray(x.hands)?x.hands:x.clear&&x.box?[{guitar:'guitar',box:x.box,quality:x.quality}]:[];
   hands.forEach(h=>{if(!h||!Array.isArray(h.box)||h.box.length!==4||!ok(h.quality))return;
    // the box is in the tile; the still sits inside it (letterboxed): into the still's own fractions
-   const b=h.box.map(Number),bx=[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v)));
+   const bx=frac(h.box.map(Number),tl);
    const who=/acoustic/i.test(h.guitar)?'acoustic':/electric/i.test(h.guitar)?'electric':'guitar';
    if(bx[2]>bx[0]&&bx[3]>bx[1])all.push({f:tl.f,box:bx,q:h.quality,who})})});
  if(!all.length)return {nohand:true,looked:frames.length};
@@ -5712,45 +5722,65 @@ async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r
  picks.sort((a,b)=>a.f.t-b.f.t);const hi=picks.filter(p=>p.q==='high'),pool=hi.length>=Math.min(VL_MAX,picks.length)?hi:picks,n=Math.min(VL_MAX,pool.length);
  const use=[...new Set([...Array(n)].map((_,i)=>Math.round(i*(pool.length-1)/Math.max(1,n-1))))].map(i=>pool[i]);
  const crops=[];for(const p of use)crops.push({t:p.f.t,blob:await vlCrop(p.f,p.box)});
- const res=await vlAsk(title,crops,use[0].f,who);res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
+ // the capo: up to 2 large close-ups of the end of the neck (the biggest in the frame, at two different moments), cut from the full
+ // still; without them, a whole still as before
+ necks.sort((a,b)=>(b.q==='high')-(a.q==='high')||b.area-a.area);const nk=[];for(const n of necks)if(nk.length<2&&!nk.some(x=>x.f.t===n.f.t))nk.push(n);
+ const capoShots=[];for(const n of nk)capoShots.push({t:n.f.t,blob:await vlCrop(n.f,n.box,1024)});
+ const res=await vlAsk(title,crops,capoShots.length?null:use[0].f,who,capoShots);res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
 // ask Claude what it sees (it isn't told what the sound heard, so it can't just agree)
-async function vlAsk(title,frames,whole,who){const gw=who&&who!=='guitar'?`the ${who} guitarist’s`:'the guitarist’s';
- const prompt=`${whole?`The first image is a whole still from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:`These ${frames.length} images are stills from a video of a guitarist playing the song "${title}"`}, taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
-1. Capo: look at the guitar's neck. If you can see the neck clearly, give the fret the capo is on, or 0 if you can clearly see there is no capo. If you can't see the neck well enough, give null.
-2. For each ${whole?'close-up':'image'}, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
+async function vlAsk(title,frames,whole,who,capoShots=[]){const gw=who&&who!=='guitar'?`the ${who} guitarist’s`:'the guitarist’s',nc=capoShots.length;
+ const prompt=`${nc?`The first ${nc===1?'image is a close-up':nc+' images are close-ups'} of the end of the guitar's neck by the headstock (the nut and the first frets), from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:whole?`The first image is a whole still from a video of a guitarist playing the song "${title}" (for the capo). The next ${frames.length} images are close-ups of ${gw} fretting hand and the neck of that guitar`:`These ${frames.length} images are stills from a video of a guitarist playing the song "${title}"`}, taken at ${frames.map(f=>f.t.toFixed(1)+'s').join(', ')}.
+1. Capo: ${nc?`look at the neck close-up${nc>1?'s':''}. A capo is a clamp across all the strings. Count the frets from the nut (the first fret is the space right after the nut) and give the fret the capo sits in`:'look at the guitar\'s neck. If you can see the neck clearly, give the fret the capo is on'}, or 0 if you can clearly see there is no capo. If you can't see the neck well enough, give null.
+2. For each ${whole||nc?'fretting-hand close-up':'image'}, look at the guitarist's fretting hand. If you can clearly see which chord shape is being held, name it as the guitarist forms it (with a capo, a C shape is "C"; a barre F sharp minor shape is "F#m"). If the hand isn't visible, is moving, or you can't tell, give null. Don't guess.
 Don't read lyrics or any other text on screen.
 Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low"|null, "frames": [{"t": seconds, "shape": chord name or null, "conf": "high"|"medium"|"low"|null}]}`;
- const ims=(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
+ const ims=capoShots.map(x=>x.blob).concat(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
 // a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
 const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
 function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
- const capo=a.play.capoBy==='you'?+a.play.capo||0:vc!=null?vc:0,sh=tshift(a.play.tun,capo);
- const seen=[],votes={},differ=[];let agree=0;
- (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
-  const g=a.segs.find(s=>s.c<NS&&t>=s.t0&&t<s.t1);if(!p||!ok(f.conf)||!g)return;
-  let q=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(q<0)q=p.iv.includes(3)?1:0;const r=(p.root+sh)%12,hr=Math.floor(g.c/NT);
-  seen.push({t,shape:String(f.shape),conf:f.conf,heard:chordName(g.c),seen:CH[r]+TYPES[q].id});
-  if(r===hr){agree++;(votes[r]=votes[r]||{})[q]=(votes[r][q]||0)+(f.conf==='high'?2:1)}else differ.push({t,heard:chordName(g.c),seen:CH[r]+TYPES[q].id})});
+ const capo=vc!=null?vc:0;
+ // each clear frame: the chord the hand's shape gives with this capo and tuning (sh) against the chord heard at that moment
+ const look=sh=>{const seen=[],votes={},differ=[];let agree=0;
+  (Array.isArray(res&&res.frames)?res.frames:[]).forEach((f,i)=>{const t=Number.isFinite(+f.t)?+f.t:pts[i]&&pts[i].t;const p=f.shape&&parseChord(String(f.shape));
+   const g=a.segs.find(s=>s.c<NS&&t>=s.t0&&t<s.t1);if(!p||!ok(f.conf)||!g)return;
+   let q=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(q<0)q=p.iv.includes(3)?1:0;const r=(p.root+sh)%12,hr=Math.floor(g.c/NT);
+   seen.push({t,shape:String(f.shape),conf:f.conf,heard:chordName(g.c),seen:CH[r]+TYPES[q].id});
+   if(r===hr){agree++;(votes[r]=votes[r]||{})[q]=(votes[r][q]||0)+(f.conf==='high'?2:1)}else differ.push({t,heard:chordName(g.c),seen:CH[r]+TYPES[q].id,hr,r})});
+  return {seen,votes,differ,agree}};
+ let L=look(tshift(a.play.tun,capo)),shift=null;
+ // the hand's shapes are what's played: when most clear frames are off from what's heard by the same steady step, the capo (or the
+ // tuning guess) is off by it, so the capo is set where the shapes match the sound, in standard tuning. A guitar tuned down a half
+ // step with capo 3 plays the same shapes, at the same pitch, as capo 2 in standard tuning (Oct 2026: "שאריות של החיים").
+ if(L.seen.length>=3&&L.agree<L.seen.length*.4){const off={};L.differ.forEach(d=>{const k=(d.hr-d.r+12)%12;off[k]=(off[k]||0)+1});
+  const top=Object.entries(off).sort((x,y)=>y[1]-x[1])[0];
+  if(top&&top[1]>=L.seen.length*.6){const c=(tshift(a.play.tun,capo)+(+top[0]))%12;
+   if(c<=7){const L2=look(c);if(L2.agree>=L.seen.length*.6){shift={capo:c,seenCapo:vc,tun0:a.play.tun,frames:L2.agree};L=L2;a.play.tun='std'}}}}
+ const {seen,votes,differ}=L,agree=L.agree;differ.forEach(d=>{delete d.hr;delete d.r});
  // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
   a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
- if(vc!=null&&a.play.capoBy!=='you'){a.play.capo=vc;a.play.capoBy='video'}
- a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vc,frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
+ const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
+ a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
 // The stills from the split come first (no download, no Drive sign-in needed); an older song without them reads the video from Drive.
 async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(!st&&!it.drive)return;
  const vname=it.drive&&it.drive.video&&it.drive.video.name||'',vurl=it.drive&&it.drive.video&&it.drive.video.url||'';
+ // a reading kept from an earlier build of this recording is reused first: no Claude, no Drive, the same result (nothing you turn
+ // on or off changes it)
+ try{const pts=vlTimes(a.segs,VL_CAND),vk=st&&st.idx&&st.idx.length?'stills:'+st.idx.length:it.drive&&it.drive.video&&it.drive.video.id?'drive:'+it.drive.video.id:'',kept=vk&&pts.length>=2&&vlKept(it,vk);
+  if(kept){const S=vk.startsWith('stills');vlApply(a,kept,S?{name:vname||'the song’s video',url:vurl}:it.drive.video,pts,0);if(S)a.video.from='stills';vlKeep(a,kept,vk,true);return}}catch(e){}
  if(!claudeReads()){if(st||(it.drive&&it.drive.video))a.video={skip:'claude',name:vname};return}
  try{const pts=vlTimes(a.segs,VL_CAND);if(pts.length<2){a.video={skip:'few'};return}
-  if(st&&st.idx&&st.idx.length){const fr=vlStills(st,pts.map(p=>p.t));const res=await vlLookFrames(a.title,fr);vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';return}
+  if(st&&st.idx&&st.idx.length){const vkey='stills:'+st.idx.length,kept=vlKept(it,vkey),res=kept||await vlLookFrames(a.title,vlStills(st,pts.map(p=>p.t)));vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';vlKeep(a,res,vkey,!!kept);return}
   const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
   const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
+  const vkey='drive:'+v.id,kept=vlKept(it,vkey);if(kept){vlApply(a,kept,v,pts,0);vlKeep(a,kept,vkey,true);return}
   const fr=await vlFrames(v,tok,pts.map(p=>p.t));if(!fr.frames.length)throw {code:'video_decode'};
-  const res=await vlLookFrames(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb)}
+  const res=await vlLookFrames(a.title,fr.frames);vlApply(a,res,v,pts,fr.mb);vlKeep(a,res,vkey,false)}
  catch(e){a.video={skip:'err',code:e&&(e.code||e.status)||'',name:vname};try{console.error('video look',e)}catch(_){}}}
 // why the video couldn't be looked at, in a few words (kept as video.code)
 const vlErrWhy=c=>c===403||c===404?' (Drive refused it)':c==='video_decode'||c==='video_timeout'?' (the phone couldn’t open it)':c==='invalid_json'?' (Claude’s answer was cut short or couldn’t be read)':c==='rate_limited'?' (Claude was busy: try again in a minute)':c==='network'?' (no connection to Claude)':c==='bad_key'?' (your Claude key was refused)':c==='no_credit'?' (no Claude credit left)':c==='api_error'?' (Claude returned an error)':'';
@@ -7208,7 +7238,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
    if(a)coverFor(t,a,{force:true}).then(()=>{if(curSec==='session')renderSession()}).catch(()=>{});try{renderLearn()}catch(e){}renderSession()}};
  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{songTouch(g,{status:b.dataset.st});renderSession();try{renderLibPage()}catch(e){}});
  box.querySelectorAll('[data-la]').forEach(b=>b.onclick=e=>{e.preventDefault();if(b.dataset.la==='guide'){const s=$('sesGuide');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});return}learnAct(g,b.dataset.la,b.dataset.v||'')});
- const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{const c=e.target.closest('[data-gdcapo]');if(c){gdSetCapo(GK,+c.dataset.gdcapo);renderSession();return}
+ const gb=$('gdBody');if(gb&&G)gb.addEventListener('click',e=>{
   // the Easy version you play (with or without a capo): kept in your profile, so every song opens with it
   const ev=e.target.closest('[data-gdever]');if(ev){try{const P=profGet();P.capo=+ev.dataset.gdever?'yes':'no';profSet(P)}catch(x){}gb.innerHTML=gdHTML(G,gdMode);return}
   const t=e.target.closest('[data-gd]');if(!t)return;gdMode=t.dataset.gd;karaStop();gb.innerHTML=gdHTML(G,gdMode);karaMount(G,GD,GK)});
@@ -7281,9 +7311,9 @@ function gdThirds(d){const F=d.feat;if(!F||!F.c)return null;let c;try{c=b64u8(F.
  return g=>{const r=Math.floor(g.c/NT);let M=0,m=0;const f0=Math.max(0,Math.floor((g.t0*SR-off)/hop)),f1=Math.min(n,Math.ceil((g.t1*SR-off)/hop));
   for(let f=f0;f<f1;f++){M+=c[f*12+(r+4)%12];m+=c[f*12+(r+3)%12]}return {M,m}}}
 const gd3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
-function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoBy==='you',vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
- // the capo: yours, else the one seen in the video, else none (the chords as they sound); a sheet's capo is only offered
- const by=you?'you':vc!=null?'video':'none',capo=you?+v.play.capo||0:by==='video'?vc:0;
+function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
+ // the capo: the one seen in the video, else none (the chords as they sound); nothing you set changes it, and a sheet's capo is only shown
+ const by=vc!=null?'video':'none',capo=by==='video'?vc:0;
  let fit=null;
  if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0),S=[];
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
@@ -7308,8 +7338,9 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),you=v.play.capoB
  // keep it (a chord the sheet settled, the capo's source), so the play-along shows the same
  if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by||(fit&&fit.tuned.length)))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
  return v}
-// set the capo you see in the video (Full): it wins over the sheet and is kept with the analysis
-function gdSetCapo(key,c){const d=loadSong(key);if(!d)return;d.play={...d.play,capo:c,capoBy:'you'};try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(d)))}catch(e){}}
+// the capo set from the shapes the hand plays in the video (68-video-look vlApply: the shapes didn't match the sound with the capo seen)
+function gdShiftWhy(x){const c=x.capo,sc=x.seenCapo,n=sc!=null?sc-c:0,hs=k=>Math.abs(k)===1?'a half step':Math.abs(k)+' half steps';
+ return `Set from the chord shapes the guitarist’s hand plays in the video, so the shapes here are the ones you see.${sc!=null&&n?` The capo in the video sits on fret ${sc}, but the song sounds ${hs(n)} ${n>0?'lower':'higher'} than that would give: the guitar is most likely tuned ${hs(n)} ${n>0?'down':'up'}. ${c?'Capo '+c:'No capo'} in standard tuning gives the same sound with the same shapes.`:''}`}
 // the guide's data for one analysis (A is borrowed for the analysis helpers, then put back)
 function gdBuild(d){const keep=A;A=d;try{
  const M=lessonModel(),bp=M.bp,bpm=Math.round(d.bpm||60/bp),tun=d.play.tun,capo=+d.play.capo||0;
@@ -7339,7 +7370,7 @@ function gdBuild(d){const keep=A;A=d;try{
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
  const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)},
-  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`:sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. If the video shows a capo, set it below.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
+  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
@@ -7382,8 +7413,8 @@ function gdHTML(G,mode){const easy=mode==='easy',ek=gdEasyAt(G),capo=easy?ek:G.c
  ${easy&&EV.length>1?`<div class="gdever seg" role="radiogroup" aria-label="Easy version">${EV.map(v=>`<button type="button" role="radio" data-gdever="${v.capo}" aria-checked="${v.capo===ek}" aria-pressed="${v.capo===ek}">${v.capo?'With capo '+v.capo:'No capo'}</button>`).join('')}</div>`:''}
  <p class="tip gdintro">${easy?(ek?`The easier version: capo ${ek} with basic shapes, one strum on every beat. It sounds the same as the recording.`:`Basic chord shapes${G.capo?' without a capo':''}, one strum on every beat: play along today.${G.capo?' It sounds the same as the recording.':''}`)+(ev.hard.length?` Still a barre in this version: ${ev.hard.join(', ')}${EV.length>1&&!ek?` (capo ${EV[1].capo} avoids ${EV[1].hard.length?'some of them':'them'})`:''}.`:''):'As it’s played in the recording: its chords, capo and strumming.'}</p>
  <div class="gdblock"><h4>Before you play</h4><div class="gdbig"><div><b>${capo?'Capo '+capo:'No capo'}</b><small>${esc(tn)} tuning${capo?`, capo on the ${capo===1?'1st':capo===2?'2nd':capo===3?'3rd':capo+'th'} fret. The chord names are the shapes you hold with the capo on.`:'.'}</small></div><div><b>${G.bpm||'?'}</b><small>Beats per minute${G.bpm?', '+gdTempoWord(G.bpm):''}.</small></div></div>
-  ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo&&G.capoBy!=='you'?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. <button type="button" class="tlink" data-gdcapo="${G.sheetCapo}">Use ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}</button></p>`:''}
-  ${easy?'':`<div class="gdcapo"><small>Capo in the video:</small><div class="seg">${[0,1,2,3,4,5,6,7].map(c=>`<button type="button" data-gdcapo="${c}" aria-pressed="${G.capoBy==='you'&&G.capo===c}">${c?c:'None'}</button>`).join('')}</div></div>`}
+  ${!easy&&G.sheetCapo!=null&&G.sheetCapo!==G.capo?`<p class="tip">Your chord sheet says ${G.sheetCapo?'capo '+G.sheetCapo:'no capo'}. It may be another version: the Full guide follows this recording.</p>`:''}
+  ${''/* no capo picker: the Full guide is the same on every build of the same recording, nothing you set changes it (Oct 2026) */}
   ${easy&&ek!==G.capo?`<p class="tip">The recording is played with ${G.capo?'capo '+G.capo:'no capo'}; ${ek?'capo '+ek:'no capo'} gives the same song with ${ek?'easier':'these'} shapes. Full shows it as played.</p>`:''}</div>
  <div class="gdblock"><h4>Built from</h4><ul class="gdsrc">${G.sources.map(([y,t])=>`<li class="${y?'y':'n'}"><span aria-hidden="true">${y?'✓':'–'}</span>${esc(t)}</li>`).join('')}</ul></div>
  <div class="gdblock"><h4>How sure is this</h4><ul class="gdsure">${G.sure.filter(x=>easy?x.k!=='Exact voicings':true).map(x=>`<li><span>${esc(x.k)}</span>${lv(x.lv)}<small>${esc(x.why)}</small></li>`).join('')}</ul>
