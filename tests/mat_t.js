@@ -1,7 +1,7 @@
 // Material the session hasn't used (Oct 2026; Google sign-in, Drive and GitHub mocked): a song first split from a file on the
 // phone, then its MP4 put in Drive. "Rebuild the guide" first looks in Drive (by the song's name), finds the video the session
-// never saw, and sends it to GitHub like a new song (drive.json: the video as the source and for the stills, its folder) instead of
-// only listening again. Another song's video isn't taken. With nothing new in Drive, Rebuild just rebuilds (no GitHub job).
+// never saw (also when Drive's name search misses it), and sends it to GitHub like a new song (drive.json: the video as the source and for the stills, its folder) instead of
+// only listening again. Another song's video isn't taken. With nothing new in Drive, Rebuild just rebuilds (no GitHub job) and says so.
 const {chromium}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
 const ROOT=path.resolve(__dirname,'..');
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':'application/octet-stream'});r.end(d)})}).listen(0);
@@ -15,7 +15,8 @@ const T='שאריות של החיים',A='אמיר דדון';
  let driveHas=true,searches=[];
  await ctx.route(/^https:\/\/www\.googleapis\.com\//,async r=>{const q=r.request(),u=q.url();if(q.method()==='OPTIONS')return r.fulfill({status:204,headers:H});
   if(/drive\/v3\/files\?q=/.test(u)){const qq=decodeURIComponent(u);searches.push(qq);
-   const files=driveHas&&/name contains/.test(qq)?[{id:'vidS1234567890',name:'אמיר דדון -שאריות של החיים.mp4',mimeType:'video/mp4',parents:['folderS'],webViewLink:'https://drive.google.com/file/d/vidS1234567890/view'},
+   // like Drive, the name search can miss "Artist -Song.mp4" (words matched from their start): only the newest-files list has it
+   const files=driveHas&&/'me' in owners/.test(qq)?[{id:'vidS1234567890',name:'אמיר דדון -שאריות של החיים.mp4',mimeType:'video/mp4',parents:['folderS'],webViewLink:'https://drive.google.com/file/d/vidS1234567890/view'},
     {id:'otherVid123456',name:'שאריות אחרות - Someone.mp4',mimeType:'video/mp4',parents:['folderX']}]:[];
    return r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({files})})}
   return r.fulfill({status:404,headers:H,body:'{}'})});
@@ -46,7 +47,7 @@ const T='שאריות של החיים',A='אמיר דדון';
  ok(!!await p.$('#sesRebuild')&&/looks in your Drive/.test(await p.$eval('#sesGuide',e=>e.textContent)),'the song’s page: Rebuild, saying it first looks in Drive for unused video or audio');
  await p.tap('#sesRebuild');await p.waitForTimeout(1500);
  const ids=Object.keys(jobs),job=ids.length&&JSON.parse(jobs[ids[0]].body||'{}');console.log('  job:',JSON.stringify(job&&{file:job.file,video:job.video,folder:job.folder,base:job.base}));
- ok(searches.some(q=>q.includes("name contains '"+T+"'")),'it looked for the song’s files in Drive by its name (the jam track came from the phone)');
+ ok(searches.some(q=>q.includes("name contains 'שאריות'"))&&searches.some(q=>/'me' in owners/.test(q)),'it looked for the song’s files in Drive by its longest word, then among the newest files (the name search missed it)');
  ok(ids.length===1&&job.file==='vidS1234567890'&&job.folder==='folderS'&&dispatches===1,'the unused MP4 is sent to GitHub: split from its sound, stills from its picture, in its own folder');
  const idx=await p.evaluate(()=>window.__bk.get('mixIndex'));const n=(idx||[]).find(x=>x.id!=='m1');
  ok(n&&n.drive&&n.drive.file==='vidS1234567890'&&n.song&&n.song.t===T,'a new split of the song is on its way (the same song, from the video)');
@@ -57,5 +58,6 @@ const T='שאריות של החיים',A='אמיר דדון';
  await p.tap('#sesRebuild');await p.waitForTimeout(1200);
  const it=(await p.evaluate(()=>window.__bk.get('mixIndex'))).find(x=>x.id==='m1');
  ok(Object.keys(jobs).length===before&&it&&it.sess!=='done','nothing new in Drive: no GitHub job, the guide is simply rebuilt ('+(it&&it.sess)+')');
+ ok(/No video of this song in your Drive/.test(await p.$eval('#toast',e=>e.textContent)),'…and it says so (no silent fallback)');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));
  console.log(fail?`${fail} FAILED`:'all passed');await b.close();srv.close();process.exit(fail?1:0)})();
