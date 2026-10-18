@@ -66,6 +66,26 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
    $('dsT').focus();$('dsOk').onclick=async()=>{const t=$('dsT').value.trim(),a=$('dsA').value.trim();if(!t){$('dsT').focus();return}$('dsOk').disabled=true;
     try{await send({t,a,by:'you'})}catch(e){go.disabled=false;msg.textContent='Couldn’t send it to GitHub.'}};return}
   catch(e){go.disabled=false;msg.innerHTML=e&&e.code==='gd_http'?esc(e.message):gdErr(e).replace(/Save to Google Drive/g,'Make the song’s session')}}}
+// ---- material the song's session hasn't used (Oct 2026): a rebuild first looks in Drive for the song's video and audio. A video
+// the session never saw (added to the folder later, or the song was first split from a file on the phone) is broken down on GitHub
+// like a new song: the parts from the folder's matching audio (or from the video's own sound), stills of the guitarist's hands from
+// its picture, the MP3s saved next to it; the session then builds itself from it (the newest split's). Nothing new: a plain rebuild.
+async function dsUnused(it,g){if(!gdFullTok)return null;
+ const used=new Set([it.drive&&it.drive.file,it.drive&&it.drive.video&&it.drive.video.id].filter(Boolean));
+ // already has the guitarist's hands from a video: nothing to add
+ let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(st&&st.idx&&st.idx.length)return null;
+ const mine=f=>dsKind(f)&&!/\((full|guitars only)\)\.mp3$/i.test(f.name);let fs=[];
+ if(it.drive&&it.drive.folder){const q=encodeURIComponent(`'${it.drive.folder}' in parents and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
+  const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+  if(r.ok)fs=((await r.json()).files||[]).filter(mine)}
+ else{// split from the phone: the song's files anywhere in your Drive, by its name
+  const t=String(g.title||'').trim();if(!t)return null;const q=encodeURIComponent(`name contains '${t.replace(/\\/g,'').replace(/'/g,"\\'")}' and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
+  const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+  const k=vlKey(t);if(r.ok)fs=((await r.json()).files||[]).filter(f=>mine(f)&&k&&vlKey(f.name).includes(k))}
+ const vid=fs.find(f=>dsKind(f)==='video'&&!used.has(f.id));if(!vid)return null;
+ const folder=(vid.parents||[])[0]||(it.drive&&it.drive.folder)||'',key=n=>vlKey(String(n||'').replace(/\.[a-z0-9]+$/i,''));
+ const aud=fs.find(f=>dsKind(f)==='audio'&&(f.parents||[])[0]===folder&&key(f.name)===key(vid.name))||(it.drive&&it.drive.file&&fs.find(f=>f.id===it.drive.file));
+ return folder?{vid,src:aud||vid,folder}:null}
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
 async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString(36);
  const it={id,name:base,at:Date.now(),src:'cloud',state:'up',...(song&&song.t?{song}:{}),drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
