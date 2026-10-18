@@ -5410,6 +5410,26 @@ function openAddSong(fresh){const d=$('dsDlg');if(!d)return;
    $('dsT').focus();$('dsOk').onclick=async()=>{const t=$('dsT').value.trim(),a=$('dsA').value.trim();if(!t){$('dsT').focus();return}$('dsOk').disabled=true;
     try{await send({t,a,by:'you'})}catch(e){go.disabled=false;msg.textContent='Couldn’t send it to GitHub.'}};return}
   catch(e){go.disabled=false;msg.innerHTML=e&&e.code==='gd_http'?esc(e.message):gdErr(e).replace(/Save to Google Drive/g,'Make the song’s session')}}}
+// ---- material the song's session hasn't used (Oct 2026): a rebuild first looks in Drive for the song's video and audio. A video
+// the session never saw (added to the folder later, or the song was first split from a file on the phone) is broken down on GitHub
+// like a new song: the parts from the folder's matching audio (or from the video's own sound), stills of the guitarist's hands from
+// its picture, the MP3s saved next to it; the session then builds itself from it (the newest split's). Nothing new: a plain rebuild.
+async function dsUnused(it,g){if(!gdFullTok)return null;
+ const used=new Set([it.drive&&it.drive.file,it.drive&&it.drive.video&&it.drive.video.id].filter(Boolean));
+ // already has the guitarist's hands from a video: nothing to add
+ let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(st&&st.idx&&st.idx.length)return null;
+ const mine=f=>dsKind(f)&&!/\((full|guitars only)\)\.mp3$/i.test(f.name);let fs=[];
+ if(it.drive&&it.drive.folder){const q=encodeURIComponent(`'${it.drive.folder}' in parents and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
+  const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=100&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+  if(r.ok)fs=((await r.json()).files||[]).filter(mine)}
+ else{// split from the phone: the song's files anywhere in your Drive, by its name
+  const t=String(g.title||'').trim();if(!t)return null;const q=encodeURIComponent(`name contains '${t.replace(/\\/g,'').replace(/'/g,"\\'")}' and trashed=false and (mimeType contains 'video/' or mimeType contains 'audio/')`);
+  const r=await fetch(`${GD_API}?q=${q}&fields=files(id,name,mimeType,size,parents,webViewLink)&pageSize=50&supportsAllDrives=true&includeItemsFromAllDrives=true`,{headers:{Authorization:'Bearer '+gdFullTok}});
+  const k=vlKey(t);if(r.ok)fs=((await r.json()).files||[]).filter(f=>mine(f)&&k&&vlKey(f.name).includes(k))}
+ const vid=fs.find(f=>dsKind(f)==='video'&&!used.has(f.id));if(!vid)return null;
+ const folder=(vid.parents||[])[0]||(it.drive&&it.drive.folder)||'',key=n=>vlKey(String(n||'').replace(/\.[a-z0-9]+$/i,''));
+ const aud=fs.find(f=>dsKind(f)==='audio'&&(f.parents||[])[0]===folder&&key(f.name)===key(vid.name))||(it.drive&&it.drive.file&&fs.find(f=>f.id===it.drive.file));
+ return folder?{vid,src:aud||vid,folder}:null}
 // send the job: a drive.json on branch j-<id> (no song file); GitHub fetches it from Drive
 async function dsSubmit({src,vid,folder,base,song}){const id=Date.now().toString(36);
  const it={id,name:base,at:Date.now(),src:'cloud',state:'up',...(song&&song.t?{song}:{}),drive:{file:src.id,name:src.name,folder,video:vid?{id:vid.id,url:vid.webViewLink||`https://drive.google.com/file/d/${vid.id}/view`,name:vid.name}:null}};
@@ -7150,7 +7170,7 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   ${pr?`<button type="button" class="btn sesgo" id="sesGo"${pr.a?` data-la="${pr.a}" data-v="${esc(pr.v)}"`:''}><b>${esc(pr.l)}</b><small>${esc(pr.s)}</small></button>`:`<p class="tip sesnone">Nothing to practise from yet. Add a chord sheet, a video lesson or a jam track below.</p>`}
   <div class="lstbtns" role="group" aria-label="Status">${SONG_ST.map(([k,l])=>`<button type="button" data-st="${k}" aria-pressed="${st===k}">${l}</button>`).join('')}</div>
  </section>
- ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(GK)}">▶ Play along with the chords, in time</button>${g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{};return AS_ON.includes(it.sess)?`<p class="tip gdre">Building the guide again from the guitars-only part: about a minute; you can keep using Guitaring.</p>`:it.state==='ready'?`<button type="button" class="btn ghost wide gdre" id="sesRebuild">Rebuild the guide from the guitars-only part${it.drive&&claudeReads()?' and the video':''}</button>`:''})():''}${g.r.analysis.length?(()=>{try{return vlNote(loadSong(GK))}catch(e){return ''}})():''}</section>`:''}
+ ${G?`<section class="card sessec sesguide" id="sesGuide"><h3>Song guide</h3><div id="gdBody">${gdHTML(G,gdMode)}</div><button type="button" class="btn wide gdplay" data-la="ana" data-v="${esc(GK)}">▶ Play along with the chords, in time</button>${g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{};return AS_ON.includes(it.sess)?`<p class="tip gdre">Building the guide again from the guitars-only part: about a minute; you can keep using Guitaring.</p>`:it.state==='ready'?`<button type="button" class="btn ghost wide gdre" id="sesRebuild">Rebuild the guide from the guitars-only part${it.drive&&claudeReads()?' and the video':''}</button><p class="tip gdre">Rebuild first looks in your Drive for this song’s video or audio that wasn’t used yet, and uses it.</p>`:''})():''}${g.r.analysis.length?(()=>{try{return vlNote(loadSong(GK))}catch(e){return ''}})():''}</section>`:''}
  ${!G&&g.r.mix.length?(()=>{const it=mxIdx.find(x=>x.id===g.r.mix[0].mix)||{},on=AS_ON.includes(it.sess);return `<section class="card sessec" id="sesBuild"><h3>Song guide</h3>${on?`<p class="tip">Building the song’s session from its guitars-only part: the chords, the strumming and the Easy / Full guide. About a minute; you can keep using Guitaring.</p>`:`<p class="tip">${it.sess==='failed'?'The session couldn’t be built from the guitars-only part last time.':'This song has a jam track but no guide yet.'} Guitaring can work out its chords and strumming from the guitars-only part (about a minute, on this phone).</p><button type="button" class="btn wide" id="sesMake">${it.sess==='failed'?'Try again':'Build the song guide'}</button>`}</section>`})():''}
  ${!G&&f.chords.length?`<section class="card sessec"><h3>Chords in this song</h3><div class="seschords">${f.chords.slice(0,12).map(sesDiagram).join('')}</div>${f.capo?`<p class="tip">Shapes with capo ${f.capo}.</p>`:''}</section>`:''}
  ${g.r.mix.length?`<section class="card sessec"><h3>Jam along</h3><div class="sesjam"><button type="button" class="btn ghost" data-jam="gtr">Guitars only</button><button type="button" class="btn ghost" data-jam="nogtr">Without the guitars</button><button type="button" class="btn ghost" data-jam="drums">Drums only (rhythm)</button><button type="button" class="btn ghost" data-jam="drumsvox">Drums + vocals</button><button type="button" class="btn ghost" data-jam="all">The whole band</button></div></section>`:''}
@@ -7160,8 +7180,17 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
  <section class="card sessec"><h3>My notes</h3><textarea id="sesNotes" class="textin" rows="3" dir="auto" placeholder="Anything to remember: the strumming, a tricky change, where you are">${esc(rec.notes||'')}</textarea></section>
  ${songHid(g)?`<section class="card sessec sesrm"><p class="tip">This song is hidden from your songs.</p><button type="button" class="btn wide" id="sesShow">Show it in my songs again</button></section>`:`<section class="sesrm"><button type="button" class="btn ghost wide sesrmb" id="sesRm">Remove from my songs</button></section>`}`;
  // building: when the song has a Drive video and Claude is on, Drive is asked for straight from the tap (so the video can be looked at)
- const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(it&&it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}asStart(id);renderSession()};
- if(g.r.mix.length){const it=mxIdx.find(x=>x.id===g.r.mix[0].mix);if(it&&it.drive)try{gdPreload(true)}catch(e){}}
+ // and first, the song's material in Drive the session hasn't used (a new video is split on GitHub: dsUnused); Drive is asked for
+ // straight from the tap
+ const goBuild=async()=>{const id=g.r.mix[0].mix,it=mxIdx.find(x=>x.id===id);if(!it)return;
+  if((it.drive||gdOn())&&mxGh()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   if(ok){toast('Looking in your Drive for this song’s video and audio…');let u=null;try{u=await dsUnused(it,g)}catch(e){}
+    if(u){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:u.src,vid:u.vid,folder:u.folder,base:cleanName(u.src.name),song});
+     if(n.state!=='failed'){toast(`Found “${esc(u.vid.name)}” in your Drive, not used yet: your GitHub splits it again and takes stills of the guitarist’s hands (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}
+    else{const t=$('toast');if(t)t.hidden=true}}}
+  else if(it.drive&&claudeReads()&&!vlTok()){try{await gdTokenFull()}catch(e){}}
+  asStart(id);renderSession()};
+ if(g.r.mix.length){try{gdPreload(true)}catch(e){}}
  const mk=$('sesMake');if(mk)mk.onclick=goBuild;const vk=$('vlCheck');if(vk&&g.r.mix.length)vk.onclick=goBuild;
  // rebuild: the chords are heard again with the latest listening (a capo you set stays)
  const rb=$('sesRebuild');if(rb)rb.onclick=goBuild;
