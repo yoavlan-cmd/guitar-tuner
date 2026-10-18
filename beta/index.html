@@ -2542,7 +2542,7 @@ function diagram(sh,label){
 
 /* ---- audio analysis ---- */
 const SR=11025,FN=8192,FNC=4096,HOP=1024;
-const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2};
+const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6};
 function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
  for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
  return (re,im)=>{for(let i=0;i<n;i++){const j=rv[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
@@ -2678,6 +2678,9 @@ async function analyse(x,prog,notes){
  // a faint third: when a chord's 3rd is too weak to tell major from minor (a guitar sounding mostly root and 5th; the root's own
  // overtone sits on the major 3rd), take the quality that fits the song's key (F# → F#m in E major / C# minor). A clear 3rd wins.
  if(TUNE.keyFix)keyFit(segs,chroma,rms,thr,ft);
+ // a 7th that rings through a whole major chord (an open string, a held note: the open Fmaj7, xx3210) makes it maj7 / 7; the plain
+ // chord's prior otherwise hides it (Oct 2026: "שאריות של החיים" was heard as F where the hand plays Fmaj7)
+ if(TUNE.sev)sevFit(segs,chroma,rms,thr);
  if(segs.length){segs[0].t0=0;segs[segs.length-1].t1=dur}segs=cleanSegs(segs);
  const bpm=bt.bpm||tempo(x);
  return {dur,offset,hist:[...hist],segs,bpm,beats:bt.beats,env:bt.env,feat:{...packFeat(chroma,bass,rms,thr),hop:HOP,off:(FN-HOP)/2}};
@@ -2708,6 +2711,12 @@ function keyFit(segs,chroma,rms,thr,ft){const K=songKey(chroma,rms,thr),T=id=>TY
   let maj=0,min=0;for(let f=f0(g.t0);f<Math.min(nF,f0(g.t1));f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;maj+=c[(r+4)%12]/m;min+=c[(r+3)%12]/m}
   const mj=isMaj(q),mine=mj?maj:min,other=mj?min:maj;
   if(mine>0&&other/mine>=TUNE.keyFix)g.c=alt}}
+function sevFit(segs,chroma,rms,thr){const T=id=>TYPES.findIndex(x=>x.id===id),MJ=T(''),J7=T('maj7'),D7=T('7'),nF=chroma.length,f0=t=>Math.max(0,Math.round((t*SR-(FN-HOP)/2)/HOP));
+ for(const g of segs){if(g.c>=NS||g.c%NT!==MJ||g.t1-g.t0<1)continue;const r=Math.floor(g.c/NT),v=new Float64Array(12);let k=0;
+  for(let f=f0(g.t0+.2);f<Math.min(nF,f0(g.t1-.2));f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;for(let i=0;i<12;i++)v[i]+=c[i]/m;k++}
+  if(k<4)continue;const base=Math.min(v[r],v[(r+4)%12],v[(r+7)%12]),rest=[1,3,5,6,8].map(i=>v[(r+i)%12]).sort((a,b)=>a-b)[2];
+  // the 7th: as strong as most of the chord's own notes, and clearly above the notes that aren't in it
+  for(const [i,q] of [[11,J7],[10,D7]])if(v[(r+i)%12]>=TUNE.sev*base&&v[(r+i)%12]>=.45*v[r]&&v[(r+i)%12]>=1.6*rest&&v[(r+i)%12]>v[(r+21-i)%12]*1.3){g.c=r*NT+q;break}}}
 const sameChord=(a,b)=>a.c===b.c&&(a.q??null)===(b.q??null)&&(a.b??null)===(b.b??null);
 function cleanSegs(segs){
  let out=[];for(const g of segs){const d=g.t1-g.t0;if(out.length&&d<.5){out[out.length-1].t1=g.t1;continue}if(out.length&&sameChord(out[out.length-1],g)){out[out.length-1].t1=g.t1;continue}out.push({...g})}
@@ -5741,6 +5750,9 @@ Reply with only JSON: {"capo": number or null, "capo_conf": "high"|"medium"|"low
  const ims=capoShots.map(x=>x.blob).concat(whole?[whole.blob]:[]).concat(frames.map(f=>f.blob)).slice(0,Math.max(1,imgLimit));return await sampleFn.json(prompt,{images:ims,maxTokens:4000})}
 // a chord type's 3rd: 'm' (minor), 'M' (major) or '' (none: sus, 5)
 const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
+// how much of the song (by time) is open-position shapes when the chords heard are played with the capo on fret k (standard tuning)
+const VL_OPEN={'':'C D E G A',m:'A D E','7':'A B C D E G',m7:'A D E',maj7:'C D E F G A',sus2:'A C D G',sus4:'A D E',add9:'C D E G A'};
+function vlOpen(segs,k){let o=0,t=0;segs.forEach(g=>{if(g.c>=NS)return;const l=g.t1-g.t0,r=(Math.floor(g.c/NT)-k+120)%12;t+=l;if((VL_OPEN[TYPES[g.c%NT].id]||'').split(' ').includes(CH[r]))o+=l});return t?o/t:0}
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
 function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
@@ -5761,10 +5773,21 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
   const top=Object.entries(off).sort((x,y)=>y[1]-x[1])[0];
   if(top&&top[1]>=L.seen.length*.6){const c=(tshift(a.play.tun,capo)+(+top[0]))%12;
    if(c<=7){const L2=look(c);if(L2.agree>=L.seen.length*.6){shift={capo:c,seenCapo:vc,tun0:a.play.tun,frames:L2.agree};L=L2;a.play.tun='std'}}}}
+ // the same from the sound, when the hand's shapes can't be read clearly (deterministic): near a capo the hand plays open shapes, so
+ // when the chords heard become clearly more open shapes with the capo a fret or two off (a guitar tuned down a half or a whole step,
+ // or up a half step), that is the capo, in standard tuning. Clear shapes that agree with the capo seen keep it.
+ if(!shift&&vc!=null&&tshift(a.play.tun,0)===0&&!(L.seen.length>=3&&L.agree>=L.seen.length*.4)){const o0=vlOpen(a.segs,vc);
+  const best=[vc-1,vc-2,vc+1].filter(c=>c>=0&&c<=7).map(c=>({c,o:vlOpen(a.segs,c)})).sort((x,y)=>y.o-x.o)[0];
+  if(best&&best.o>=.7&&best.o-o0>=.3){shift={capo:best.c,seenCapo:vc,tun0:a.play.tun,frames:0,open:+best.o.toFixed(2),open0:+o0.toFixed(2)};L=look(best.c);a.play.tun='std'}}
  const {seen,votes,differ}=L,agree=L.agree;differ.forEach(d=>{delete d.hr;delete d.r});
- // the quality the hand shows wins over a 3rd the sound heard differently (or didn't hear)
+ // the quality the hand shows changes the 3rd heard (sound first) where the sound can't tell (the 3rd heard is faint, or no 3rd was
+ // heard and the sound doesn't say the other one), or where the hand is clear: 2+ clear stills (one high, one medium at least) show
+ // it and none shows the other 3rd (a 3rd "heard" can be the root's own overtone). One misread still can't flip a clear 3rd.
+ const th=gdThirds(a),soft=(g,t3)=>{const e=th?th(g):null;if(!e)return true;const h3=vl3(g.c%NT),want=t3==='M'?e.M:e.m,other=t3==='M'?e.m:e.M;
+  if(!h3)return want>=other;const mine=h3==='M'?e.M:e.m,oth=h3==='M'?e.m:e.M;return mine===0||oth/mine>=.6};
  const fixed=new Set();Object.entries(votes).forEach(([r,v])=>{const q=+Object.entries(v).sort((x,y)=>y[1]-x[1])[0][0],t3=vl3(q);if(!t3)return;
-  a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
+  const sure=Object.entries(v).reduce((s,[k,w])=>s+(vl3(+k)===t3?w:0),0)>=3&&!Object.keys(v).some(k=>vl3(+k)&&vl3(+k)!==t3);
+  a.segs.forEach(g=>{if(g.c>=NS||Math.floor(g.c/NT)!==+r)return;const h3=vl3(g.c%NT);if(h3!==t3&&(sure||soft(g,t3))){fixed.add(chordName(g.c)+' → '+CH[+r]+TYPES[q].id);g.c=+r*NT+q}})});
  const vcap=shift?shift.capo:vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed]};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
@@ -5795,7 +5818,7 @@ function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${vlErrWhy(v.code)}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
  if(v.skip)return '';
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
-window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s)};// test hooks
+window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks
 /* ================= Welcome screen ================= */
 const JOKES=[
  "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
@@ -7312,10 +7335,10 @@ function gdParts(M){if(A.sections&&A.sections.length)return M.secs.map(s=>({t:s.
  const out=[];blocks.forEach((bl,i)=>{const name=lab[i]<0?'No guitar':'Part '+String.fromCharCode(65+Math.min(25,lab[i]));if(!out.length||out[out.length-1].name!==name)out.push({t:bl.t,name})});
  if(out.length)out[0].t=Math.min(out[0].t,0);return out}
 // Three sources, in this order (Oct 2026): the SOUND of the isolated guitar decides the chords, their roots and timing; the VIDEO
-// (when it was looked at) decides the capo and a chord's minor / major where it saw the hand clearly; a CHORD SHEET for the song is
-// only a sanity check, because sheets are informal and often of another version: it settles a chord only where the sound's 3rd was
-// too faint to tell minor from major and the video didn't show it (never a chord's root), its capo is offered, not applied, and
-// where it differs from a clear recording the guide says so and keeps the recording.
+// (when it was looked at) decides the capo, and a chord's minor / major only where the sound's 3rd is too faint to tell; a CHORD
+// SHEET for the song is only a check, because sheets are informal and often of another version: it never changes a chord or the
+// capo; where it differs from the recording (or the recording's 3rd is too faint to be sure), the guide says so and keeps the
+// recording.
 // how strong each 3rd is during a chord, from the analysis' saved notes (feat); null when there are none
 function gdThirds(d){const F=d.feat;if(!F||!F.c)return null;let c;try{c=b64u8(F.c)}catch(e){return null}const hop=F.hop||HOP,off=F.off||0,n=F.n||c.length/12;
  return g=>{const r=Math.floor(g.c/NT);let M=0,m=0;const f0=Math.max(0,Math.floor((g.t0*SR-off)/hop)),f1=Math.min(n,Math.ceil((g.t1*SR-off)/hop));
@@ -7329,7 +7352,7 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Numb
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
    const r=(p.root+d0)%12;if(!S.some(x=>x.r===r&&x.t===t))S.push({r,t,name:CH[r]+TYPES[t].id})});
   const ev=gdThirds(v),wv=v.mfeat?gdThirds({feat:v.mfeat}):null,seen=new Set(((v.video&&v.video.frames)||[]).map(f=>{const p=parseChord(f.seen||'');return p?p.root:-1}));
-  const tuned=new Map(),clash=new Map(),dur=new Map();let tot=0,inSheet=0;
+  const unsure=new Map(),clash=new Map(),dur=new Map();let tot=0,inSheet=0;
   v.segs=v.segs.map(g=>{if(g.c>=NS)return g;const l=g.t1-g.t0,r=Math.floor(g.c/NT),q=g.c%NT,h3=gd3(q);tot+=l;dur.set(r,(dur.get(r)||0)+l);
    const same=S.filter(x=>x.r===r);if(!same.length)return g;inSheet+=l;
    // the sheet only speaks to a 3rd: same root, the other 3rd
@@ -7338,19 +7361,21 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Numb
    const fz=x=>{if(!x)return false;const mine=h3==='M'?x.M:x.m,other=h3==='M'?x.m:x.M;return mine===0||other/mine>=.6};
    const e=ev?ev(g):null,we=wv?wv(g):null,faint=fz(e)&&(!we||fz(we));
    const k=chordName(g.c)+' → '+o.name;
-   if(faint&&!seen.has(r)){tuned.set(k,(tuned.get(k)||0)+l);return {...g,c:r*NT+o.t}}
+   // the sheet never changes a chord (it may be another version): where the recording's 3rd is too faint to tell, it's only said
+   if(faint&&!seen.has(r)){unsure.set(chordName(g.c),o.name);return g}
    clash.set(chordName(g.c),o.name);return g});
   const heard=[...dur].filter(([r,l])=>l/(tot||1)>=.05&&!S.some(x=>x.r===r)).map(([r])=>CH[r]),missing=S.filter(x=>(dur.get(x.r)||0)/(tot||1)<.02).map(x=>x.name);
-  fit={by:'sheet',chords:ref.chords.slice(0,8),capo:ref.capo,match:tot?inSheet/tot:0,tuned:[...tuned.keys()],clash:[...clash].map(([h,s])=>({heard:h,sheet:s})),extra:heard,missing}}
+  fit={by:'sheet',chords:ref.chords.slice(0,8),capo:ref.capo,match:tot?inSheet/tot:0,unsure:[...unsure].map(([h,s])=>({heard:h,sheet:s})),clash:[...clash].map(([h,s])=>({heard:h,sheet:s})),extra:heard,missing}}
  // a guide matched to the sheet by the earlier version (its chords were replaced): say so until it's rebuilt
- if(d.fit&&(d.fit.share!=null||d.fit.legacy))(fit=fit||{by:'sheet',chords:d.fit.chords||[],capo:null,match:0,tuned:[],clash:[],extra:[],missing:[]}).legacy=true;
+ if(d.fit&&(d.fit.share!=null||d.fit.legacy))(fit=fit||{by:'sheet',chords:d.fit.chords||[],capo:null,match:0,unsure:[],clash:[],extra:[],missing:[]}).legacy=true;
  v.play={...v.play,capo,capoBy:by};v.fit=fit;
- // keep it (a chord the sheet settled, the capo's source), so the play-along shows the same
- if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by||(fit&&fit.tuned.length)))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
+ // keep it (the capo and its source), so the play-along shows the same
+ if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
  return v}
-// the capo set from the shapes the hand plays in the video (68-video-look vlApply: the shapes didn't match the sound with the capo seen)
+// the capo set from the shapes the hand plays in the video, or (when the shapes can't be read) from the open shapes the sound
+// becomes near the capo seen (68-video-look vlApply)
 function gdShiftWhy(x){const c=x.capo,sc=x.seenCapo,n=sc!=null?sc-c:0,hs=k=>Math.abs(k)===1?'a half step':Math.abs(k)+' half steps';
- return `Set from the chord shapes the guitarist’s hand plays in the video, so the shapes here are the ones you see.${sc!=null&&n?` The capo in the video sits on fret ${sc}, but the song sounds ${hs(n)} ${n>0?'lower':'higher'} than that would give: the guitar is most likely tuned ${hs(n)} ${n>0?'down':'up'}. ${c?'Capo '+c:'No capo'} in standard tuning gives the same sound with the same shapes.`:''}`}
+ return `${x.open!=null?`Set from the capo in the video and the sound: with capo ${c} the chords heard are the open shapes a hand plays near a capo (${Math.round(x.open*100)}% of the song, against ${Math.round(x.open0*100)}% with capo ${sc}).`:'Set from the chord shapes the guitarist’s hand plays in the video, so the shapes here are the ones you see.'}${sc!=null&&n?` The capo in the video sits on fret ${sc}, but the song sounds ${hs(n)} ${n>0?'lower':'higher'} than that would give: the guitar is most likely tuned ${hs(n)} ${n>0?'down':'up'}. ${c?'Capo '+c:'No capo'} in standard tuning gives the same sound with the same shapes.`:''}`}
 // the guide's data for one analysis (A is borrowed for the analysis helpers, then put back)
 function gdBuild(d){const keep=A;A=d;try{
  const M=lessonModel(),bp=M.bp,bpm=Math.round(d.bpm||60/bp),tun=d.play.tun,capo=+d.play.capo||0;
@@ -7402,7 +7427,8 @@ function gdSources(d){const o=[],V=d.video,W=d.whole,F=d.fit;
  return o}
 // what the chord sheet check found, in plain words
 function gdSheetWhy(f){if(!f||f.by!=='sheet')return '';if(f.legacy)return ' This guide was matched to your chord sheet by an earlier version of Guitaring: rebuild it to hear it from the recording again.';
- const o=[];if(f.tuned.length)o.push(`Where the 3rd was too faint to hear, your chord sheet settled it: ${f.tuned.join(', ')}.`);
+ const o=[];
+ if((f.unsure||[]).length)o.push(`Your chord sheet has ${f.unsure.map(x=>x.sheet).join(', ')} where this recording’s 3rd is too faint to be sure; the guide keeps what it heard (${f.unsure.map(x=>x.heard).join(', ')}).`);
  if(f.clash.length)o.push(`Your chord sheet has ${f.clash.map(x=>x.sheet).join(', ')}, but this recording clearly plays ${f.clash.map(x=>x.heard).join(', ')} (sheets don’t always match this version).`);
  if(f.extra.length)o.push(`Heard but not on your sheet: ${f.extra.join(', ')}.`);if(f.missing.length)o.push(`On your sheet but not heard: ${f.missing.join(', ')}.`);
  if(!o.length)o.push(`Your chord sheet agrees (${f.chords.join(' · ')}).`);return ' '+o.join(' ')}
