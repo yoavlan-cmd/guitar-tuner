@@ -27,7 +27,10 @@ function homeLine(){const R=remLast?[]:remSongs(),J=allJokes().length;
 function homeLineShow(h){const L=homeLine(),b=h.querySelector('.hjbub');b.classList.toggle('hrem',!!L.rem);
  b.innerHTML=`<p class="hjoke" id="hJoke" dir="auto">${L.html}</p>${L.rem?`<div class="hremact"><button type="button" class="hremgo" id="hRemGo">Practise it <span aria-hidden="true">›</span></button><button type="button" class="hremok" id="hRemOk">I can play it ✓</button></div>`:''}`;
  if(L.rem){$('hRemGo').onclick=()=>remGo(L.rem);
-  $('hRemOk').onclick=()=>{songTouch(L.rem,{status:'learned'});toast(`“${L.rem.title}” is now Learned. Nice!`,'ok');try{renderLibPage()}catch(e){}homeLineShow(h)}}}
+  $('hRemOk').onclick=()=>{songTouch(L.rem,{status:'learned'});toast(`“${L.rem.title}” is now Learned. Nice!`,'ok');try{renderLibPage()}catch(e){}homeLineShow(h)}}
+ homeFit(b);try{document.fonts.ready.then(()=>homeFit(b))}catch(e){}}
+// the whole comment always shows (a cut-off joke loses its punchline): the text gets a little smaller until it fits its lines
+function homeFit(b){try{const j=b.querySelector('.hjoke');if(!j)return;j.style.fontSize='';for(let k=0;k<8&&j.scrollHeight>j.clientHeight+1;k++){const fs=parseFloat(getComputedStyle(j).fontSize);if(fs<=13.5)break;j.style.fontSize=(fs-1)+'px'}}catch(e){}}
 // Practise: the song session if it has a play-along or a jam track, else its chord sheet (one of them is there for a listed song)
 function remGo(g){g=learnSongs({all:true}).find(x=>sameSong(x,g)||sameSong(g,x))||g;
  if(g.r.analysis.length||g.r.mix.length)return openSession(g);
