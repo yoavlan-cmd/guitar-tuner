@@ -1,7 +1,8 @@
 // Remove a song from my songs (Oct 2026): from the song's page; by default it's only hidden (everything kept, "Hidden songs" at the
 // end of Learn shows it again, Undo too); "Also delete what's saved on this phone" deletes its jam track (parts, video, stills),
 // chord analyses, phone sheets and video lesson links; Drive files stay (the song stays hidden then); kept after a reload;
-// Home has no "Back to your jam" card (removed Oct 2026); adding the song again shows it again.
+// Home has no "Back to your jam" card (Oct 2026): it moved under the Jam tiles ("Back to your jamming session"), which leaves a
+// hidden song out; adding the song again shows it again.
 const {chromium,devices}=require('playwright');const path=require('path'),fs=require('fs'),http=require('http');
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(__dirname,'out');fs.mkdirSync(OUT,{recursive:true});
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]).replace(/\/$/,'/index.html'));fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':/\.html$/.test(f)?'text/html':'application/octet-stream'});r.end(d)})}).listen(0);
@@ -26,7 +27,12 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  const learn=async()=>{await p.evaluate(()=>window.__v2.goSec('learn'));await p.waitForTimeout(300)};
  const open=async t=>{await learn();await p.tap(`#learnList .lrow:has-text("${t}")`);await p.waitForTimeout(400)};
  await p.evaluate(()=>window.__v2.goSec('learn'));await p.evaluate(()=>window.__v2.goSec('home'));await p.waitForTimeout(300);console.log('  home:',await p.$eval('#homeCont',e=>e.textContent));
- ok(!/Back to your jam/.test(await p.$eval('#homeCont',e=>e.textContent)),'Home: no “Back to your jam” card (removed Oct 2026)');
+ ok(!/Back to your jam/.test(await p.$eval('#homeCont',e=>e.textContent)),'Home: no “Back to your jam” card (moved to Jam)');
+ const jamBack=()=>p.evaluate(()=>{window.__v2.goSec('jam');const b=document.getElementById('jamBack');return b?b.textContent:''});
+ ok(/Back to your jamming session/.test(await jamBack())&&/Good Riddance/.test(await jamBack()),'Jam: “Back to your jamming session” under the tiles, for Good Riddance');
+ await p.tap('#jamBack');await p.waitForTimeout(500);
+ ok(await p.evaluate(()=>{const m=document.getElementById('mxSheet');return !!m&&!m.hidden&&getComputedStyle(m).display!=='none'&&/Good Riddance/.test(m.textContent)}),'tapping it opens that jam in the player');
+ for(const id of ['#mxClose','#mxBarX'])if(await p.$(id+':visible'))await p.click(id);await p.waitForTimeout(300);
  await learn();ok((await rows()).length===3,'three songs in Learn '+JSON.stringify(await rows()));
  // 1. hide (the default): kept, hidden, shown again; Undo
  await open('Wonderwall');ok(!!await p.$('#sesRm'),'a song’s page has “Remove from my songs”');
@@ -51,7 +57,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  console.log('  after:',JSON.stringify(gone));
  ok(!gone.data&&!gone.video&&gone.idx===0&&!gone.ana&&gone.songs.length===0&&gone.lib===0&&gone.vl===0,'its jam track (parts and video), analysis, phone sheet and lesson link are deleted');
  ok(!(await rows()).includes('Good Riddance')&&gone.hid===0,'nothing left for it: it isn’t kept as hidden (adding it again shows it)');
- ok(!/Back to your jam/.test(await p.evaluate(()=>{window.__v2.goSec('home');return document.getElementById('homeCont').textContent})),'Home: no “Back to your jam” for it');
+ ok(!/Good Riddance/.test(await jamBack()),'Jam: no “Back to your jamming session” for it');
  // 3. a song with a Drive sheet: deleting keeps the Drive file, so it stays, hidden
  await open('Hallelujah');await p.tap('#sesRm');await p.waitForTimeout(150);
  ok(/Files in your Google Drive stay where they are/.test(await p.$eval('.sesrm',e=>e.textContent)),'a song with Drive files: the confirm says they stay');

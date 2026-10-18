@@ -56,8 +56,13 @@ function renderHomeCont(){
 function renderJam(){const g=$('jamGrid');if(g&&!$('jamGrid').querySelector('#mixNew')){const m=$('mixNew');if(m)g.appendChild(m);
   const o=document.createElement('button');o.type='button';o.className='drop write addtile';o.id='jamOpen';o.innerHTML=`<i aria-hidden="true">${SK('MIX')}</i><b>Jamming player</b><span class="sub">Your split songs wait here</span>`;o.onclick=()=>{mxView(true);if(!mxBusy){mxCreating=false;mxSheetUI2()}};g.appendChild(o)}
  try{renderMixNew()}catch(e){}
- // picking a split song happens only in the player: no list on the Jam page
- const l=$('jamList');if(l)l.innerHTML=''}
+ // picking a split song happens only in the player; under the tiles, one card back to your last jamming session (it moved here
+ // from Home, Oct 2026); a hidden song's jam track is left out
+ const l=$('jamList');if(!l)return;l.innerHTML='';
+ try{let hid=new Set();try{hid=new Set(learnSongs({all:true}).filter(songHid).flatMap(g=>g.r.mix.map(m=>m.mix)))}catch(e){}
+  const r=(mxIdx||[]).filter(x=>x.state==='ready'&&!hid.has(x.id)).sort((a,b)=>(b.at||0)-(a.at||0))[0];if(!r)return;
+  l.innerHTML=`<button type="button" class="hcont hc-jam" id="jamBack">${SK('MIX')}<span><b>Back to your jamming session</b><small dir="auto">${esc(r.name)}</small></span><i>›</i></button>`;
+  $('jamBack').onclick=()=>{mxView(true);mxOpen(r.id)}}catch(e){}}
 // ---- open lists can always be closed: ✕ on the title (which stays at the top while you scroll) and "Close" at the bottom ----
 function v2Fold(d){if(!d||d._fold)return;d._fold=true;d.classList.add('v2fold');
  const add=()=>{if(d.open&&!d.querySelector(':scope>.foldx')){const b=document.createElement('button');b.type='button';b.className='btn ghost foldx';b.textContent='Close ✕';b.onclick=()=>{d.open=false;d.scrollIntoView({block:'nearest',behavior:'smooth'})};d.appendChild(b)}};
