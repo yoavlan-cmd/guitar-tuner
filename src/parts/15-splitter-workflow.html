@@ -1,6 +1,6 @@
 <script type="text/plain" id="mxWf">
 # Guitaring practice mixer: splits one song into parts (drums, bass, other, vocals, guitar, piano)
-# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v9
+# with Meta's HT-Demucs 6-stem model. Installed and started by the Guitaring app. guitaring-split v10
 # v4: a job can name a file in your Google Drive (drive.json) instead of carrying the song: it is fetched from Drive, and a full MP3
 # and a guitars-only MP3 are saved back into the same Drive folder (and handed to the app too, in case Google's sign-in ran out).
 # v5: when the song has a video (the song itself, or the video named in drive.json), a small still every 2 seconds is handed back
@@ -10,6 +10,7 @@
 # v8: stills 1440 pixels wide every 3 seconds (hands in wide shots are small), about the same size as before.
 # v9: two music models read the song (models.json): Beat This! (CPJKU, MIT) the beat and the bars from the whole song, BTC (MIT)
 # the chords from the song without its vocals and drums; the app uses them with its own reading. A model that fails never stops the split.
+# v10: Google Drive's short-lived key comes as an encrypted Actions secret (DRIVE_<ID>, deleted by the app afterwards), not in drive.json.
 # Best quality: 3 passes with small time shifts averaged together, 50% window overlap, lossless FLAC parts.
 name: Split song
 run-name: split ${{ inputs.id }}
@@ -31,6 +32,7 @@ jobs:
       ID: ${{ inputs.id }}
       REPO: ${{ github.repository }}
       GH_TOKEN: ${{ github.token }}
+      DRIVE_TOKEN: ${{ secrets[format('DRIVE_{0}', inputs.id)] }}
     steps:
       - uses: actions/setup-python@v5
         with:
@@ -59,8 +61,9 @@ jobs:
           if [ -f drive.json ]; then
             set -o pipefail
             python - <<'PY' 2>&1 | tee -a ../log.txt
-          import json, urllib.request, urllib.error
+          import json, os, urllib.request, urllib.error
           d = json.load(open('drive.json'))
+          d['token'] = d.get('token') or os.environ.get('DRIVE_TOKEN', '')
           url = 'https://www.googleapis.com/drive/v3/files/%s?alt=media&supportsAllDrives=true' % d['file']
           try:
               with urllib.request.urlopen(urllib.request.Request(url, headers={'Authorization': 'Bearer ' + d['token']})) as r, open('song.' + d.get('ext', 'mp4'), 'wb') as f:
@@ -92,6 +95,7 @@ jobs:
           python - <<'PY' 2>&1 | tee -a log.txt
           import json, os, subprocess, urllib.request, uuid
           d = json.load(open('job/drive.json'))
+          d['token'] = d.get('token') or os.environ.get('DRIVE_TOKEN', '')
           base = d.get('base') or 'Song'
           song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
           out = {'ok': True, 'files': {}}
@@ -124,6 +128,7 @@ jobs:
           python - <<'PY' 2>&1 | tee -a log.txt
           import glob, json, os, subprocess, urllib.request
           d = json.load(open('job/drive.json')) if os.path.exists('job/drive.json') else {}
+          d['token'] = d.get('token') or os.environ.get('DRIVE_TOKEN', '')
           song = 'job/' + [x for x in os.listdir('job') if x.startswith('song.')][0]
           vid = None
           if d.get('video') and d.get('video') != d.get('file'):
