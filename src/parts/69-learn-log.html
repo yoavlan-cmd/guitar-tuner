@@ -1,0 +1,30 @@
+/* ===== Learning log (Oct 2026) ===== */
+// What Guitaring got wrong or wasn't sure of, kept so it can learn from it (the daily job in guitaring-split, 5:00, reads it with the
+// session copies): your chord edits (the strongest note: the right chord at that moment), where the hand in the video disagrees with
+// the sound, the least sure chords, and chords BTC hears that Guitaring can't name yet (6, dim, aug, m6, mMaj7, dim7, m7b5). Kept
+// under KP+'learn' (backed up and restored with the rest). Each build of a session replaces that session's own automatic notes; your
+// edits are kept. Chords are written as they sound (no capo, standard tuning), times in seconds.
+const LEARN_MAX=800,LEARN_AUTO=['unsure','video','unknown'];
+const learnGet=()=>{const L=store.get('learn',[]);return Array.isArray(L)?L:[]};
+function learnPut(items,replace){let L=learnGet();if(replace)L=L.filter(x=>!(x.song===replace&&LEARN_AUTO.includes(x.kind)));
+ L=L.concat(items.map(x=>({...x,at:x.at||Date.now(),eng:ENGINE_V})));
+ // over the limit: the oldest automatic notes go first, then the oldest edits
+ while(L.length>LEARN_MAX){const i=L.findIndex(x=>x.kind!=='edit');L.splice(i<0?0:i,1)}
+ store.set('learn',L);return L.length}
+// BTC's 14 qualities per root; the ones Guitaring can't name yet (its 8: '' m 7 m7 maj7 sus2 sus4 add9)
+const BTC_Q=['m','','dim','aug','m6','6','m7','mMaj7','maj7','7','dim7','m7b5','sus2','sus4'],BTC_NEW=new Set(['dim','aug','m6','6','mMaj7','dim7','m7b5']);
+function learnFromBuild(key,a,btc){const out=[],segs=(a.segs||[]),r1=x=>+(+x).toFixed(1),title=a.title||'';
+ const nm=g=>nameOf(g,'std',0);
+ // the least sure chords (a second or longer)
+ (a.conf||[]).forEach((c,i)=>{const g=segs[i];if(!g||g.c>=NS||g.t1-g.t0<1||!(c<GD_UNSURE))return;out.push({kind:'unsure',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),conf:c})});
+ // where the hand in the video plays another chord than the one heard
+ ((a.video&&a.video.differ)||[]).forEach(d=>out.push({kind:'video',song:key,title,t:r1(d.t),heard:d.heard,seen:d.seen}));
+ // chords BTC hears that Guitaring can't name yet: over a chord of a second or longer, BTC's mean probability of one such chord
+ if(btc&&btc.fps&&Array.isArray(btc.frames))segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<1)return;const j0=Math.max(0,Math.round(g.t0*btc.fps)),j1=Math.min(btc.frames.length,Math.round(g.t1*btc.fps));if(j1-j0<2)return;
+  const sum={};for(let j=j0;j<j1;j++)(btc.frames[j]||[]).forEach(([i,p])=>{if(i>=168)return;const q=BTC_Q[i%14];if(BTC_NEW.has(q)){const n=CH[Math.floor(i/14)]+q;sum[n]=(sum[n]||0)+p}});
+  const top=Object.entries(sum).sort((x,y)=>y[1]-x[1])[0];if(top&&top[1]/(j1-j0)>=.45)out.push({kind:'unknown',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),btc:top[0],p:+(top[1]/(j1-j0)).toFixed(2)})});
+ return learnPut(out,key)}
+// a chord you changed by hand: what Guitaring heard, and what it is
+function learnEdit(key,g,before){try{if(!key||!g)return;const after=g.c<NS?nameOf(g,'std',0):'N.C.';if(after===before)return;
+ learnPut([{kind:'edit',song:key,title:(A&&A.title)||'',t:+g.t0.toFixed(1),dur:+(g.t1-g.t0).toFixed(1),heard:before,fix:after}])}catch(e){}}
+window.__learn={get:learnGet,fromBuild:(k,a,b)=>learnFromBuild(k,a,b),edit:(k,g,b)=>learnEdit(k,g,b)};// test hooks

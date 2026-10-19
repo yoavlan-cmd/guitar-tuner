@@ -38,6 +38,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   try{const w=await asWhole(d);if(w)asFuse(a,w);else a.whole={skip:'parts'}}catch(e){a.whole={skip:'err'};try{console.error('whole song',e)}catch(_){}}
   // 3. the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
   it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
+  // what this build wasn't sure of goes into the learning log (69-learn-log); the session says which engine made it
+  a.eng=ENGINE_V;try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;

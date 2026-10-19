@@ -51,6 +51,7 @@ const beats=[...Array(51)].map((_,i)=>+(i*.75).toFixed(3)),MODELS={v:1,beats:{be
  ok(md&&md.beats===51&&md.btc,'the split’s models.json is kept with the parts (beats and chords)');
  const a=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_m9')||'null'));console.log('  analysis:',a&&JSON.stringify({bpm:a.bpm,beatFrom:a.beatFrom,beats:a.beats&&a.beats.length,down:a.downbeats&&a.downbeats.length}));
  ok(a&&a.beatFrom==='model'&&a.bpm===80&&a.beats.length===51&&a.downbeats&&a.downbeats.length===13,'the session’s beat and tempo are Beat This!’s (80 BPM, its bars), not the phone’s own guess (100)');
+ {const L=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.learn')||'null'));ok(a&&a.eng===1&&Array.isArray(L),'the session says which engine made it (1), and its build wrote the learning log ('+(L&&L.length)+' notes)')}
  const why=await p.evaluate(()=>{const G=window.__gd.build('mix_m9');return (G.sure.find(s=>s.k==='Tempo')||{}).why||''});console.log('  tempo:',why);
  ok(/Measured by Beat This!/.test(why),'How sure says where the tempo comes from');
  // 2. a song split from Drive before v9 (no models): Rebuild splits it once more from the same Drive files
