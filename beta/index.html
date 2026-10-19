@@ -8469,10 +8469,14 @@ const LN_LV={minor:'Small change',moderate:'Medium change',major:'Big change',no
 function lnEv(e){const p=[];if(e.n.edit)p.push(`your edits ${e.edit}/${e.n.edit}`);if(e.n.video)p.push(`the video ${e.video}/${e.n.video}`);if(e.n.btc)p.push(`the chord model ${e.btc}/${e.n.btc}`);return p.join(' · ')}
 function lnSongHTML(r){if(r.status==='current')return '';
  if(r.status!=='changed')return `<div class="lnsong"><b dir="auto">${esc(r.title)}</b><small>${r.status==='same'?'Built again with the new engine: no chord changes.':r.status==='no-parts'?esc(r.note||''):'Couldn’t be built again today.'}</small></div>`;
- const sp=(r.spans||[]).slice(0,12).map(s=>{const o=lnEv(s.ev.old),n=lnEv(s.ev.new);return `<li><span class="lnt">${lnT(s.t0)}–${lnT(s.t1)}</span> <b class="lnch">${esc(s.from)} → ${esc(s.to)}</b>${o||n?`<small>Agrees with ${n||'nothing'}${o?` (was ${o})`:''}</small>`:'<small>No edit, video or model check here</small>'}</li>`}).join('');
+ // the same change in several places (a chorus that comes back) is one line, with all its times and the evidence added up
+ const grp=[];(r.spans||[]).forEach(s=>{let g=grp.find(x=>x.from===s.from&&x.to===s.to);if(!g){g={from:s.from,to:s.to,at:[],ev:{old:{edit:0,video:0,btc:0,n:{edit:0,video:0,btc:0}},new:{edit:0,video:0,btc:0,n:{edit:0,video:0,btc:0}}}};grp.push(g)}
+  g.at.push(s);for(const w of ['old','new'])for(const k of ['edit','video','btc']){g.ev[w][k]+=s.ev[w][k];g.ev[w].n[k]+=s.ev[w].n[k]}});
+ const sp=grp.slice(0,10).map(g=>{const o=lnEv(g.ev.old),n=lnEv(g.ev.new),ts=g.at.slice(0,6).map(s=>lnT(s.t0)).join(', ')+(g.at.length>6?` +${g.at.length-6}`:'');
+  return `<li><b class="lnch">${esc(g.from)} → ${esc(g.to)}</b> <span class="lnt">${g.at.length>1?g.at.length+'× · ':''}${ts}</span>${o||n?`<small>Agrees with ${n||'nothing'}${o?` (was ${o})`:''}</small>`:'<small>No edit, video or model check here</small>'}</li>`}).join('');
  return `<div class="lnsong"><div class="lnhead"><b dir="auto">${esc(r.title)}</b><span class="lnlv ${r.level}">${LN_LV[r.level]||r.level}</span><span class="lnvd ${r.verdict}">${LN_V[r.verdict]||r.verdict}</span></div>
   <small>${r.share}% of the song’s chords would change${(r.other||[]).length?' · '+r.other.map(esc).join(' · '):''}${r.ed&&r.ed.old.n?` · your edits it gets right: ${r.ed.old.ok} → ${r.ed.new.ok} of ${r.ed.old.n}`:''}</small>
-  ${sp?`<ul class="lnspans">${sp}</ul>`:''}${(r.spans||[]).length>12?`<small>…and ${r.spans.length-12} more places</small>`:''}
+  ${sp?`<ul class="lnspans">${sp}</ul>`:''}${grp.length>10?`<small>…and ${grp.length-10} more changes</small>`:''}
   ${(r.cause||[]).length?`<details><summary>Why it changes</summary><ul>${r.cause.map(c=>`<li>${esc(c.id)}: ${esc(c.plain)}${(c.commits||[]).length?'<br><small>'+c.commits.slice(0,6).map(x=>esc(x.replace(/^\w+ /,''))).join('<br>')+'</small>':''}</li>`).join('')}</ul></details>`:''}</div>`}
 function lnHTML(j){if(!j)return '<p class="tip">No daily check yet. It runs every day at 5:00 once your sessions are copied to your GitHub.</p>';
  const L=j.learned,tr=(j.engine&&j.engine.tried)||[],code=((j.engine&&j.engine.changes)||[]).filter(x=>x.kind==='code');

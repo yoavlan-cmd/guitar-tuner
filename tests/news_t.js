@@ -27,7 +27,7 @@ srv.listen(0,async()=>{const APP=process.env.APP||`http://localhost:${srv.addres
   ok(/New versions of your sessions/.test(card)&&/1 song would change/.test(card),`${w}px: Home shows the card while the list has changes you haven\u2019t opened`);
   await p.tap('#homeCont .hcont:has-text("New versions")');await p.waitForTimeout(500);
   const t=await p.$eval("#lnDlg",e=>e.textContent);
-  ok(/What Guitaring learned/.test(t)&&/keyFix 0\.6 \u2192 0\.66/.test(t)&&/Bm7 \u2192 Am/.test(t)&&/0:03\u20130:06/.test(t)&&/Agrees with your edits 1\/1/.test(t)&&/4\.2% of the song/.test(t)&&/Better/.test(t)&&/Medium change/.test(t),`${w}px: the page says what was learned and why, where the chords change, how much, and the evidence`);
+  ok(/What Guitaring learned/.test(t)&&/keyFix 0\.6 \u2192 0\.66/.test(t)&&/Bm7 \u2192 Am/.test(t)&&/Bm7 \u2192 Am 0:03/.test(t)&&/Agrees with your edits 1\/1/.test(t)&&/4\.2% of the song/.test(t)&&/Better/.test(t)&&/Medium change/.test(t),`${w}px: the page says what was learned and why, where the chords change, how much, and the evidence`);
   ok(/tap Rebuild once/.test(t)&&/Nothing on your phone changes/.test(t),`${w}px: a song without kept parts says what to do; nothing on the phone changes`);
   const ov=await p.evaluate(()=>{const d=document.querySelector('#lnDlg');return d.scrollWidth-d.clientWidth});ok(ov<=1,`${w}px: no sideways scrolling (${ov})`);
   await p.tap('#lnDlg .lnx');await p.waitForTimeout(200);await p.evaluate(()=>window.__v2.goSec('home'));await p.waitForTimeout(200);
