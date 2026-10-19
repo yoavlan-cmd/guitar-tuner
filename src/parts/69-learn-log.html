@@ -1,0 +1,69 @@
+/* ===== Learning log (Oct 2026) ===== */
+// What Guitaring got wrong or wasn't sure of, kept so it can learn from it (the daily job in guitaring-split, 5:00, reads it with the
+// session copies): your chord edits (the strongest note: the right chord at that moment), where the hand in the video disagrees with
+// the sound, the least sure chords, and chords BTC hears that Guitaring can't name yet (6, dim, aug, m6, mMaj7, dim7, m7b5). Kept
+// under KP+'learn' (backed up and restored with the rest). Each build of a session replaces that session's own automatic notes; your
+// edits are kept. Chords are written as they sound (no capo, standard tuning), times in seconds.
+const LEARN_MAX=800,LEARN_AUTO=['unsure','video','unknown'];
+const learnGet=()=>{const L=store.get('learn',[]);return Array.isArray(L)?L:[]};
+function learnPut(items,replace){let L=learnGet();if(replace)L=L.filter(x=>!(x.song===replace&&LEARN_AUTO.includes(x.kind)));
+ L=L.concat(items.map(x=>({...x,at:x.at||Date.now(),eng:engineId()})));
+ // over the limit: the oldest automatic notes go first, then the oldest edits
+ while(L.length>LEARN_MAX){const i=L.findIndex(x=>x.kind!=='edit');L.splice(i<0?0:i,1)}
+ store.set('learn',L);return L.length}
+// BTC's 14 qualities per root; the ones Guitaring can't name yet (its 8: '' m 7 m7 maj7 sus2 sus4 add9)
+const BTC_Q=['m','','dim','aug','m6','6','m7','mMaj7','maj7','7','dim7','m7b5','sus2','sus4'],BTC_NEW=new Set(['dim','aug','m6','6','mMaj7','dim7','m7b5']);
+function learnFromBuild(key,a,btc){const out=[],segs=(a.segs||[]),r1=x=>+(+x).toFixed(1),title=a.title||'';
+ const nm=g=>nameOf(g,'std',0);
+ // the least sure chords (a second or longer)
+ (a.conf||[]).forEach((c,i)=>{const g=segs[i];if(!g||g.c>=NS||g.t1-g.t0<1||!(c<GD_UNSURE))return;out.push({kind:'unsure',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),conf:c})});
+ // where the hand in the video plays another chord than the one heard
+ ((a.video&&a.video.differ)||[]).forEach(d=>out.push({kind:'video',song:key,title,t:r1(d.t),heard:d.heard,seen:d.seen}));
+ // chords BTC hears that Guitaring can't name yet: over a chord of a second or longer, BTC's mean probability of one such chord
+ // (btc.fps is the time per frame, in seconds, as the splitter writes it)
+ if(btc&&btc.fps&&Array.isArray(btc.frames))segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<1)return;const j0=Math.max(0,Math.round(g.t0/btc.fps)),j1=Math.min(btc.frames.length,Math.round(g.t1/btc.fps));if(j1-j0<2)return;
+  const sum={};for(let j=j0;j<j1;j++)(btc.frames[j]||[]).forEach(([i,p])=>{if(i>=168)return;const q=BTC_Q[i%14];if(BTC_NEW.has(q)){const n=CH[Math.floor(i/14)]+q;sum[n]=(sum[n]||0)+p}});
+  const top=Object.entries(sum).sort((x,y)=>y[1]-x[1])[0];if(top&&top[1]/(j1-j0)>=.45)out.push({kind:'unknown',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),btc:top[0],p:+(top[1]/(j1-j0)).toFixed(2)})});
+ return learnPut(out,key)}
+// a chord you changed by hand: what Guitaring heard, and what it is
+function learnEdit(key,g,before){try{if(!key||!g)return;const after=g.c<NS?nameOf(g,'std',0):'N.C.';if(after===before)return;
+ learnPut([{kind:'edit',song:key,title:(A&&A.title)||'',t:+g.t0.toFixed(1),dur:+(g.t1-g.t0).toFixed(1),heard:before,fix:after}])}catch(e){}}
+// ---- the session copies (Oct 2026): every session built from a split, and the learning log, go to your private repository (the
+// GitHub connection's repo, guitaring-split) on its branch "learn": sessions/<key>.json and learn.json. The daily check reads them at
+// 5:00, builds each session again from its kept parts (keep-<id>) with what Guitaring has learned, and lists what would change.
+// Sent a little after a build or an edit, and once a day when Guitaring opens; only what changed makes a commit.
+const LS_BR='learn';let lsT=0,lsBusy=null;
+function lsSessions(){const out={};(typeof mxIdx!=='undefined'?mxIdx:[]).forEach(it=>{if(!it||it.state!=='ready'||!it.anaKey)return;const raw=localStorage.getItem(KP+'song.'+it.anaKey);if(!raw)return;
+  let a;try{a=JSON.parse(raw)}catch(e){return}
+  out['sessions/'+it.anaKey+'.json']=JSON.stringify({v:1,key:it.anaKey,id:it.id,name:it.name,song:it.song||null,keep:!!it.keep,drive:it.drive?{file:it.drive.file||'',video:it.drive.video||'',folder:it.drive.folder||''}:null,eng:a.eng||0,built:a.at||0,session:a})});return out}
+async function lsBranch(cfg){try{return await gh('/git/refs/heads/'+LS_BR,{},cfg)}catch(e){if(e.status!==404)throw e}
+ const repo=await gh('',{},cfg),head=await gh('/git/refs/heads/'+(repo.default_branch||'main'),{},cfg);
+ return await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/'+LS_BR,sha:head.object.sha})},cfg)}
+// one commit with the files given (path → text; null deletes it); nothing when nothing changed
+async function lsPush(files,msg){const cfg=mxGh();if(!cfg)return false;const ref=await lsBranch(cfg),base=await gh('/git/commits/'+ref.object.sha,{},cfg);
+ const tree=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base.tree.sha,tree:Object.entries(files).map(([path,content])=>content==null?{path,mode:'100644',type:'blob',sha:null}:{path,mode:'100644',type:'blob',content})})},cfg);
+ if(tree.sha===base.tree.sha)return true;
+ const com=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:msg,tree:tree.sha,parents:[ref.object.sha]})},cfg);
+ await gh('/git/refs/heads/'+LS_BR,{method:'PATCH',body:JSON.stringify({sha:com.sha})},cfg);return true}
+async function lsSync(){if(!mxGh())return false;if(lsBusy)return lsBusy;
+ lsBusy=(async()=>{try{const files=lsSessions();files['learn.json']=JSON.stringify({v:1,at:Date.now(),eng:engineId(),notes:learnGet()});
+   const gone=store.get('lsGone',[]);gone.forEach(k=>{files['sessions/'+k+'.json']=null});
+   await lsPush(files,'Guitaring: session copies and learning notes');store.set('lsAt',Date.now());if(gone.length)store.set('lsGone',[]);return true}
+  catch(e){try{console.error('session copies',e&&e.message||e)}catch(_){}return false}finally{lsBusy=null}})();return lsBusy}
+// soon after a build or an edit (a burst of edits makes one commit)
+function lsSoon(ms=20000){clearTimeout(lsT);lsT=setTimeout(()=>{lsSync()},window.__lsMs!=null?window.__lsMs:ms)}
+// a removed song: its copy goes on the next sync
+function lsForget(key){const g=store.get('lsGone',[]);if(!g.includes(key)){g.push(key);store.set('lsGone',g)}lsSoon()}
+// once a day when Guitaring opens
+function lsDaily(){const at=store.get('lsAt',0);if(Date.now()-at>20*3600e3)setTimeout(()=>lsSync(),window.__lsMs!=null?window.__lsMs:30000)}
+// ---- the learned engine (Oct 2026): the daily check keeps engine/engine.json on the branch "learn": the detection settings it has
+// learned for this code (ENGINE_V), with a numbered version and a note per change. Guitaring uses them for every new build, and
+// each session says which engine made it ("1.3": code 1, learned step 3). Settings learned for another code version aren't used.
+let ENG={code:ENGINE_V,v:0,tune:{}};const TUNE0={...TUNE};
+const engineId=()=>ENG.code+'.'+(ENG.v||0);
+function engApply(e){if(!e||+e.code!==ENGINE_V||!e.tune||typeof e.tune!=='object')return false;Object.assign(TUNE,TUNE0);
+ for(const [k,v] of Object.entries(e.tune))if(k in TUNE0&&Number.isFinite(+v))TUNE[k]=+v;ENG={code:ENGINE_V,v:+e.v||0,tune:{...e.tune}};return true}
+async function engFetch(){const cfg=mxGh();if(!cfg)return;try{const b=await gh('/contents/engine/engine.json?ref='+LS_BR,{raw:true,ok404:true},cfg);if(!b)return;
+ const j=JSON.parse(await b.text()),e=j&&j.cur;if(e&&engApply(e))store.set('engine',ENG)}catch(e){}}
+function engStart(){if(window.__engine){engApply(window.__engine);return}engApply(store.get('engine',null));setTimeout(()=>engFetch(),window.__lsMs!=null?window.__lsMs:5000)}
+window.__learn={shown:(segs,tun,capo)=>(segs||[]).map(x=>{const g=Array.isArray(x)?{t0:x[0],t1:x[1],c:x[2]}:x;return [g.t0,g.t1,g.c>=NS?'N.C.':nameOf({c:g.c},tun,capo)]}),engine:()=>({...ENG,id:engineId()}),get:learnGet,sync:()=>lsSync(),files:()=>lsSessions(),fromBuild:(k,a,b)=>learnFromBuild(k,a,b),edit:(k,g,b)=>learnEdit(k,g,b)};// test hooks

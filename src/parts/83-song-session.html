@@ -16,10 +16,12 @@ function sesSheet(g){const f={tun:'',capo:null,chords:[]};const addCh=l=>(l||[])
   if(x.lib){const e=libGet(x.lib);const d=e&&e.data;if(d){if(d.play){if(!f.tun)f.tun=d.play.tun||'';if(f.capo==null)f.capo=+d.play.capo||0}addCh((d.lc||[]).flatMap(l=>Object.values(l.ch||{})))}}
   else if(!x.draft){const e=(catalogAll()||[]).find(c=>vlMatch(c.title,g.title));if(e){if(!f.tun&&e.tuning)f.tun=tunFromName(e.tuning);if(f.capo==null&&e.capo!=null)f.capo=+e.capo||0;addCh(e.chords)}}}
  return f}
-// a chord's diagram from the chord library (fingers shown); unknown names just show the name
+// a chord's diagram from the chord library (fingers shown); any other chord is drawn from its own notes by the chord book's shape
+// finder (never a nearby chord's shape); only a name that can't be read shows just the name
 const SES_ENH={'A#':'Bb','Db':'C#','D#':'Eb','Gb':'F#','G#':'Ab'};
 function sesDiagram(name){try{const n=String(name).replace(/^([A-G][#b]?)/,m=>SES_ENH[m]||m);let sh=LIB[n]?{...parseLib(LIB[n]),name:n}:null;
   if(!sh){for(let c=0;c<NS;c++)if(chordName(c)===n){sh=shapeFor(c);break}}
+  if(!sh||!segShapeOk(sh,n,'std')){const v=voicings(n,'std')[0];if(v)sh=v}
   if(sh)return `<div class="sesdg dg">${diagram(sh,name)}</div>`}catch(e){}return `<div class="sesdg none"><b>${esc(name)}</b></div>`}
 // the Practise button: the best thing you have for playing the song now (guides join it in the next step)
 function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practise with the song guide',s:gdDefault()==='easy'?'Easy version first: basic shapes, one strum per beat':'Full version first: the chords and strumming of the recording'};
@@ -62,9 +64,10 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   // a song split from Drive before the beat and chord models (splitter v9): split once more from the same Drive files, so the guide
   // gets the beat grid and BTC's chords (about 15 minutes, once); after that, Rebuild is quick again
   if(it.drive&&it.drive.file&&mxGh()&&gdOn()){let d=null;try{d=await mxGet('mixdata:'+id)}catch(e){}
-   if(d&&d.stems&&!d.models){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   // …and a song whose parts aren't kept on GitHub yet (before Oct 2026), so the daily check can build it again
+   if(d&&d.stems&&(!d.models||!it.keep)){const why=!d.models?'with the new beat and chord models':'so its parts stay in your GitHub for the daily check';let ok=false;try{await gdTokenFull();ok=true}catch(e){}
     if(ok){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:{id:it.drive.file,name:it.drive.name||it.name},vid:it.drive.video,folder:it.drive.folder,base:it.name,song});
-     if(n.state!=='failed'){toast('Your GitHub splits this song once more with the new beat and chord models (about 15 minutes). The guide rebuilds itself when it’s back.','ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
+     if(n.state!=='failed'){toast(`Your GitHub splits this song once more ${why} (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
   // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
   // needs this)
   if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}

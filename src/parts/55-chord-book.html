@@ -51,6 +51,8 @@ function voicings(name,tun){
  function evalV(f,pos){
   const snd=f.map((x,i)=>x>=0?(open[i]+x)%12:null).filter(x=>x!=null);if(snd.length<(pcs.size<=2?3:4))return;
   if(!req.every(r=>snd.includes(r)))return;
+  // the bass is the lowest note heard (an open string can sound below a fretted lower string: A under E-string fret 6)
+  if(Math.min(...f.map((x,i)=>x>=0?open[i]+x:99))%12!==bass)return;
   const frets=f.filter(x=>x>0);if(pos>0&&!frets.includes(pos))return;
   if(frets.length&&Math.max(...frets)-Math.min(...frets)>3)return;
   const fg=fingerize(f);if(!fg)return;

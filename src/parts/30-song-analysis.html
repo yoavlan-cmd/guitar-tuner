@@ -26,7 +26,7 @@ const LIB={C:['x32010','-32-1-'],Cadd9:['x32033','-21-34'],Cmaj7:['x32000','-32-
  A:['x02220','--123-'],Am:['x02210','--231-'],A7:['x02020','--2-3-'],Am7:['x02010','--2-1-'],Amaj7:['x02120','--213-'],Asus2:['x02200','--12--'],Asus4:['x02230','--123-'],
  B7:['x21202','-213-4'],Bm:['x24432','-13421',2],
  // add9: the chord with the 9th (the 2nd) added, so it doesn't draw as the plain chord (Oct 2026: D and Dadd9 looked the same)
- Dadd9:['xx4230','--312-'],Gadd9:['320203','21-3-4'],Aadd9:['x02420','--142-'],Eadd9:['024100','-241--'],Fadd9:['xx3213','--3214']};
+ Dadd9:['x54230','-4312-'],Gadd9:['320203','21-3-4'],Aadd9:['x02420','--142-'],Eadd9:['024100','-241--'],Fadd9:['xx3213','--3214']};
 const ESH={'':[[0,2,2,1,0,0],[1,3,4,2,1,1]],m:[[0,2,2,0,0,0],[1,3,4,1,1,1]],'7':[[0,2,0,1,0,0],[1,3,1,2,1,1]],m7:[[0,2,0,0,0,0],[1,3,1,1,1,1]],sus4:[[0,2,2,2,0,0],[1,2,3,4,1,1]],add9:[[0,-1,2,1,0,2],[1,0,3,2,1,4]]};
 const ASH={'':[[-1,0,2,2,2,0],[0,1,3,3,3,1]],m:[[-1,0,2,2,1,0],[0,1,3,4,2,1]],'7':[[-1,0,2,0,2,0],[0,1,3,1,4,1]],m7:[[-1,0,2,0,1,0],[0,1,3,1,2,1]],maj7:[[-1,0,2,1,2,0],[0,1,3,2,4,1]],sus2:[[-1,0,2,2,0,0],[0,1,3,4,1,1]],sus4:[[-1,0,2,2,3,0],[0,1,2,3,4,1]],add9:[[-1,0,2,4,2,0],[0,1,2,4,3,1]]};
 function parseLib([fr,fi,b]){const f=[...fr].map(ch=>ch==='x'?-1:+ch),fg=[...fi].map(ch=>ch==='-'?0:+ch);return {f,fi:fg,barre:b||0,bFrom:b?f.findIndex(x=>x===b):0,cost:b?2:0}}
@@ -85,9 +85,18 @@ function shapeForSeg(g,tun=curTun(),capo=curCapo()){
   if(g.b!=null){const bp=(g.b-d+24)%12,low=tun==='dropd'?2:4;let fr=(bp-low+12)%12;
    if(fr<=4){out.f[0]=fr;out.fi[0]=fr?(out.fi.includes(2)?(out.fi.includes(3)?4:3):2):0}
    else{fr=(bp-9+12)%12;if(fr<=4){out.f[0]=-1;out.fi[0]=0;out.f[1]=fr;out.fi[1]=fr?(out.fi.includes(2)?3:2):0}}}
+  // the diagram is the chord named, never a nearby one (Oct 2026, the user: "don't use the closest one existing instead"): when the
+  // shape above doesn't sound exactly the chord's notes (a chart's 6, 9, dim…, or a bass the shape can't reach), the chord book's
+  // shape finder draws it from its notes
+  if(!segShapeOk(out,name,tun)){const v=voicings(name,tun==='dropd'?'dropd':'std')[0];if(v){out={...v,f:[...v.f],fi:[...v.fi],name,cost:v.barre?2:0};delete out.note}}
  }
  segShapeCache.set(key,out);return out;
 }
+// a shape sounds the chord when it plays all its notes (the 5th may be left out of a 4-note chord), nothing else, and its bass lowest
+function segShapeOk(sh,name,tun){const p=parseChord(name);if(!p||!sh)return false;const open=tun==='dropd'?[38,45,50,55,59,64]:[40,45,50,55,59,64];
+ const snd=sh.f.map((x,i)=>x>=0?open[i]+x:null).filter(x=>x!=null);if(!snd.length)return false;const pc=new Set(snd.map(x=>x%12));
+ const want=new Set(p.iv.map(i=>(p.root+i)%12)),bass=p.bass??p.root;if(p.bass!=null)want.add(p.bass);const fifth=(p.root+7)%12;
+ return Math.min(...snd)%12===bass&&[...pc].every(x=>want.has(x))&&[...want].every(x=>pc.has(x)||(x===fifth&&p.iv.length>=4))}
 function diagram(sh,label){
  if(!sh)return `<svg viewBox="0 0 120 156" role="img" aria-label="No chord"><text class="dgName" x="60" y="24" text-anchor="middle">N.C.</text><text class="dgNone" x="60" y="94" text-anchor="middle">no chord</text></svg>`;
  const fr=sh.f.filter(x=>x>0),mx=Math.max(0,...fr);const base=mx>4?(sh.barre||Math.min(...fr)):1;
@@ -107,6 +116,9 @@ function diagram(sh,label){
 
 /* ---- audio analysis ---- */
 const SR=11025,FN=8192,FNC=4096,HOP=1024;
+// the detection engine's version: every change to how chords are found gets a new number (and a note in docs/PRD; the daily job
+// in guitaring-split lists which sessions it changes). Sessions and learning notes carry the version they were made with.
+const ENGINE_V=1;
 const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17,btcW:.3,confM:.08};
 function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
  for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
@@ -304,7 +316,7 @@ function segConf(segs,EM,nF,rms,thr){const S=NS+1,f0=t=>Math.max(0,Math.min(nF,M
   for(let f=f0(g.t0);f<f0(g.t1);f++){if(rms[f]<thr)continue;const o=f*S,v=EM[o+g.c];let b=-1e9;for(let s2=0;s2<NS;s2++){if(Math.floor(s2/NT)===r&&th(s2%NT)===t3)continue;if(EM[o+s2]>b)b=EM[o+s2]}m+=v-b;k++}
   // the chord itself (root and 3rd) only: its extras (7, 9, sus) are settled after this by the notes' own rules (sevFit, add9P…)
   return k?+Math.max(0,Math.min(1,m/k/TUNE.confM)).toFixed(2):0})}
-window.__an={tune:o=>Object.assign(TUNE,o||{}),shape:n=>{for(let c=0;c<NS;c++)if(chordName(c)===n){const s=shapeFor(c);return {f:s.f.join(','),fi:s.fi.join(''),cost:s.cost}}return null}};// test hooks: try other settings (benchmark); a chord's diagram
+window.__an={tune:o=>Object.assign(TUNE,o||{}),shape:n=>{for(let c=0;c<NS;c++)if(chordName(c)===n){const s=shapeFor(c);return {f:s.f.join(','),fi:s.fi.join(''),cost:s.cost}}return null},seg:(n,tun='std',capo=0)=>{const g=segFromName(n,tun,capo),s=g&&shapeForSeg(g,tun,capo);return s&&{f:s.f.join(','),name:s.name,ok:segShapeOk(s,n,tun),note:s.note||''}}};// test hooks: try other settings (benchmark); a chord's diagram
 function beatFit(segs,chroma,rms,thr,beats){const nF=chroma.length,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP)));
  const mean=(t0,t1)=>{const v=new Float64Array(12);let k=0;for(let f=f0(t0);f<f0(t1);f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;for(let i=0;i<12;i++)v[i]+=c[i]/m;k++}return k>=2?v:null};
  const sc=(s2,v)=>{const T=TPL[s2],n=Math.hypot(...v)||1;let d=0;for(let i=0;i<12;i++)d+=T[i]*v[i];return d/n+TYPES[s2%NT].prior};
@@ -421,7 +433,7 @@ function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
 const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
 const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
-function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;if(/^mix_/.test(fileKey))try{lsSoon()}catch(e){}try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
 function loadSong(k){try{const v=JSON.parse(localStorage.getItem(KP+'song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
@@ -634,10 +646,10 @@ $('timeline').addEventListener('click',e=>{const b=e.target.closest('.blk');if(!
  const sc=shapeIdx(A.segs[i].c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc';
  $('edNote').value=A.segs[i].note||'';$('editLabel').textContent=`Edit the chord at ${mmss(A.segs[i].t0)}`;$('edMerge').disabled=i===0;$('editBox').hidden=false;
  [...$('timeline').children].forEach((x,k)=>x.classList.toggle('sel',k===i));syncSong(true)});
-$('edApply').onclick=()=>{if(selIdx<0)return;const g=A.segs[selIdx],typed=$('edName').value.trim();
+$('edApply').onclick=()=>{if(selIdx<0)return;const g=A.segs[selIdx],typed=$('edName').value.trim();const was=g.c<NS?nameOf(g,'std',0):'N.C.';
  if(typed){const p=parseChord(typed);if(!p){$('edName').style.borderColor='var(--sharp)';$('editLabel').textContent='Couldn’t read that chord. Try a name like G/B or Cadd9.';return}const d=tshift(A.play.tun,A.play.capo),ti=TYPES.findIndex(t=>t.id===QTYPE[p.q]);g.c=((p.root+d)%12)*NT+(ti<0?0:ti);g.q=p.q;if(p.bass!=null)g.b=(p.bass+d)%12;else delete g.b;$('edName').value=''}
  else{const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);g.c=tv==='nc'?NS:soundIdx(shape);delete g.q;delete g.b}
- g.pin=true;const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;afterEdit('Saved.')};
+ g.pin=true;const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;learnEdit(fileKey,g,was);afterEdit('Saved.')};
 $('edSplit').onclick=()=>{const t=vid.currentTime||0,i=segAt(t),g=A.segs[i];if(!g||t-g.t0<.3||g.t1-t<.3){$('editLabel').textContent='Move the video to the spot where the new chord starts, then tap Split.';return}A.segs.splice(i+1,0,{t0:t,t1:g.t1,c:g.c,q:g.q,b:g.b,pin:true});g.pin=true;g.t1=t;selIdx=i+1;$('edNote').value='';afterEdit('Split. Now pick the chord for the new part.')};
 $('edClose').onclick=()=>{selIdx=-1;$('editBox').hidden=true;renderTimeline();curIdx=-1;syncSong(true)};
 $('edMerge').onclick=()=>{if(selIdx<1)return;const g=A.segs[selIdx],p=A.segs[selIdx-1];p.t1=g.t1;if(g.note)p.note=p.note?p.note+' / '+g.note:g.note;A.segs.splice(selIdx,1);selIdx--;$('edNote').value=A.segs[selIdx].note||'';afterEdit('Merged.')};
