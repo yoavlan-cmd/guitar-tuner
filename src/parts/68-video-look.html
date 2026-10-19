@@ -46,9 +46,9 @@ const VL_T={n:4,cols:2,W:720,H:405};
 // so the Full guide comes out the same each time (Oct 2026). Bump VL_VER when the reading itself changes (its questions, the stills);
 // the next rebuild then reads the video again.
 const VL_VER=2;// 2: large close-ups of the end of the neck for the capo
-const vlRaw=r=>r?{capo:r.capo,capo_conf:r.capo_conf,frames:r.frames,looked:r.looked,clear:r.clear,who:r.who,others:r.others,nohand:r.nohand,neck:r.neck}:null;
+const vlRaw=r=>r?{capo:r.capo,capo_conf:r.capo_conf,frames:r.frames,looked:r.looked,clear:r.clear,who:r.who,others:r.others,nohand:r.nohand,neck:r.neck,scan:r.scan,capoScan:r.capoScan}:null;
 // a reading kept from before a video with no clear hand was still asked about the capo (Oct 2026) is read again
-function vlKept(it,vkey){if(window.__vlFresh)return null;try{const v=(loadSong('mix_'+it.id)||{}).video;return v&&v.raw&&v.vkey===vkey&&v.ver===VL_VER&&!(v.raw.nohand&&!v.raw.neck)?v.raw:null}catch(e){return null}}
+function vlKept(it,vkey){if(window.__vlFresh)return null;try{const v=(loadSong('mix_'+it.id)||{}).video;return v&&v.raw&&v.vkey===vkey&&v.ver===VL_VER&&!(v.raw.nohand&&!v.raw.neck)&&(v.raw.scan||(Number.isInteger(v.raw.capo)&&['high','medium'].includes(v.raw.capo_conf)))?v.raw:null}catch(e){return null}}
 const vlKeep=(a,res,vkey,reused)=>{if(a.video&&!a.video.skip)Object.assign(a.video,{raw:vlRaw(res),vkey,ver:VL_VER,...(reused?{reused:true}:{})})};
 async function vlContact(frames){const out=[],{n:N,cols:C,W,H}=VL_T;for(let i=0;i<frames.length;i+=N){const part=frames.slice(i,i+N),cv=document.createElement('canvas');cv.width=W*C;cv.height=H*Math.ceil(N/C);const g=cv.getContext('2d');
   g.fillStyle='#000';g.fillRect(0,0,cv.width,cv.height);const tiles=[];
@@ -65,15 +65,65 @@ Reply with only compact JSON on one line, boxes with 2 decimals: {"tiles": [{"sh
  // room for a long answer: with the 720 px tiles many hands are seen (an answer cut short can't be read)
  return await sampleFn.json(prompt,{images:sheets.map(x=>x.blob),maxTokens:8000})}
 // (2) read: the hand and the neck cut from the full still (with room around it), up to 768 wide
-async function vlCrop(f,box,maxW=768){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
+async function vlCrop(f,box,maxW=768,bright=false){const im=await vlImg(f.blob);let [x0,y0,x1,y1]=box.map(Number);const mx=(x1-x0)*.3,my=(y1-y0)*.3;
  x0=Math.max(0,x0-mx);y0=Math.max(0,y0-my);x1=Math.min(1,x1+mx);y1=Math.min(1,y1+my);const sw=(x1-x0)*im.width,sh=(y1-y0)*im.height;if(sw<8||sh<8)return f.blob;
- const sc=Math.min(maxW/sw,3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
- g.drawImage(im,x0*im.width,y0*im.height,sw,sh,0,0,cv.width,cv.height);return await vlJpg(cv,.85)}
+ const sc=Math.min(maxW/sw,bright?4:3),cv=document.createElement('canvas');cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);const g=cv.getContext('2d');g.imageSmoothingQuality='high';
+ g.drawImage(im,x0*im.width,y0*im.height,sw,sh,0,0,cv.width,cv.height);if(bright)vlBright(g,cv.width,cv.height);return await vlJpg(cv,.85)}
+// a dark stage (Oct 2026, "עכשיו": a concert lit red, the neck nearly black): the picture is lifted gently, its middle grey towards a
+// third and its contrast stretched (the darkest 0.5 % and lightest 0.3 % to black and white), never more than gamma 0.55 (stronger
+// turns a compressed video's dark noise into blocks)
+function vlBright(g,w,h){try{const d=g.getImageData(0,0,w,h),p=d.data,hist=new Uint32Array(256);for(let i=0;i<p.length;i+=4)hist[(p[i]*.3+p[i+1]*.59+p[i+2]*.11)|0]++;
+ const n=p.length/4,at=q=>{let c=0;for(let v=0;v<256;v++){c+=hist[v];if(c>=n*q)return v}return 255},lo=at(.005),hi=Math.max(lo+24,at(.997)),mid=at(.5);
+ const m=Math.min(.9,Math.max(.05,(mid-lo)/(hi-lo))),gam=Math.min(1,Math.max(.55,Math.log(.33)/Math.log(m))),lut=new Uint8ClampedArray(256);
+ for(let v=0;v<256;v++){const x=Math.min(1,Math.max(0,(v-lo)/(hi-lo)));lut[v]=255*Math.pow(x,gam)}
+ for(let i=0;i<p.length;i+=4){p[i]=lut[p[i]];p[i+1]=lut[p[i+1]];p[i+2]=lut[p[i+2]]}g.putImageData(d,0,0)}catch(e){}}
+// ---- the capo scan (Oct 2026, the user: "If I am able to spot a capo with my eyes - I am expecting the app to be able to do the
+// same. Why not scanning the entire video in high level, see for indications for a capo and if there such, start taking specific
+// checks"). Used when the look above gives no clear capo. (1) Scan: every still of the whole video, brightened, in grids of 9; Claude
+// marks each still where the neck between the headstock and the hand shows, even small or dark, and whether a capo seems to be on it.
+// (2) Check: the best of those moments (a capo seen first, then the biggest neck), cut from the full still, brightened and enlarged,
+// up to 4; Claude counts the frets from the nut to the capo in each. Two calls; the capo is the one most close-ups agree on.
+const VL_CS={n:9,cols:3,W:480,H:270,max:90};
+async function vlCapoSheets(frames){const out=[],{n:N,cols:C,W,H}=VL_CS;for(let i=0;i<frames.length;i+=N){const part=frames.slice(i,i+N),cv=document.createElement('canvas');cv.width=W*C;cv.height=H*Math.ceil(N/C);const g=cv.getContext('2d');
+  g.fillStyle='#000';g.fillRect(0,0,cv.width,cv.height);const tiles=[];
+  for(let k=0;k<part.length;k++){const im=await vlImg(part[k].blob),sc=Math.min(W/im.width,H/im.height),w=Math.round(im.width*sc),h=Math.round(im.height*sc),x=(k%C)*W+(W-w)/2,y=Math.floor(k/C)*H+(H-h)/2;
+   const tc=document.createElement('canvas');tc.width=w;tc.height=h;const tg=tc.getContext('2d');tg.drawImage(im,0,0,w,h);vlBright(tg,w,h);g.drawImage(tc,x,y);
+   g.fillStyle='rgba(0,0,0,.7)';g.fillRect((k%C)*W,Math.floor(k/C)*H,30,24);g.fillStyle='#ff0';g.font='bold 18px sans-serif';g.fillText(String(k+1),(k%C)*W+8,Math.floor(k/C)*H+18);
+   tiles.push({n:k+1,f:part[k],fx:(x-(k%C)*W)/W,fy:(y-Math.floor(k/C)*H)/H,fw:w/W,fh:h/H})}
+  out.push({blob:await vlJpg(cv,.8),tiles})}return out}
+async function vlCapoScan(title,frames){if(!frames||!frames.length)return null;const {max}=VL_CS;
+ const all=frames.length>max?[...Array(max)].map((_,i)=>frames[Math.round(i*(frames.length-1)/(max-1))]):frames;
+ const sheets=(await vlCapoSheets(all)).slice(0,Math.max(1,imgLimit||10));
+ const r1=await sampleFn.json(`These ${sheets.length} images are grids of stills (brightened) covering a whole video of a guitarist playing the song "${title}". Each grid has up to ${VL_CS.n} stills numbered 1–${VL_CS.n} (left to right, top to bottom).
+We need to know if the guitarist uses a capo: a clamp or bar fixed across all the strings on the neck, a few frets from the headstock. Look at every still. List each still where the part of a guitar's neck between the headstock and the fretting hand is visible, even if it is small, dark or a little blurry. For each, give a box around that part of the neck (from the headstock to the hand) as fractions of the still's tile [x0, y0, x1, y1] (0,0 is the tile's top left), and say whether a capo seems to be on it: "yes", "maybe" or "no".
+Don't read lyrics or any other text on screen.
+Reply with only compact JSON on one line, boxes with 2 decimals: {"stills": [{"grid": 1, "still": 1, "box": [x0, y0, x1, y1], "capo": "yes"|"maybe"|"no"}]}`,{images:sheets.map(x=>x.blob),maxTokens:6000});
+ const frac=(b,tl)=>[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v))),seen=[];
+ (Array.isArray(r1&&r1.stills)?r1.stills:[]).forEach(x=>{const sh=sheets[(+x.grid||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.still);if(!tl||!Array.isArray(x.box)||x.box.length!==4)return;
+  const bx=frac(x.box.map(Number),tl);if(bx[2]>bx[0]&&bx[3]>bx[1])seen.push({f:tl.f,box:bx,c:x.capo==='yes'?2:x.capo==='maybe'?1:0,area:(bx[2]-bx[0])*(bx[3]-bx[1])})});
+ const hint={yes:seen.filter(x=>x.c===2).length,maybe:seen.filter(x=>x.c===1).length,necks:seen.length,looked:all.length};
+ if(!seen.length)return {capo:null,capo_conf:null,hint};
+ // the check: up to 4 moments, a capo seen first, then the biggest neck, each at least 6 s from the others
+ seen.sort((a,b)=>b.c-a.c||b.area-a.area);const pick=[];for(const x of seen)if(pick.length<4&&pick.every(y=>Math.abs(y.f.t-x.f.t)>=6))pick.push(x);
+ const shots=[];for(const x of pick)shots.push({t:x.f.t,blob:await vlCrop(x.f,x.box,1024,true)});
+ const r2=await sampleFn.json(`These ${shots.length} images are close-ups (brightened and enlarged) of the same guitar's neck, from the headstock end towards the fretting hand, at ${shots.map(x=>x.t.toFixed(0)+'s').join(', ')} in a video of the song "${title}".
+A capo is a clamp or bar fixed across all the strings. In each close-up, find the nut (where the headstock meets the fretboard) and count the frets from it: the first fret is the space right after the nut. If there is a capo, give the fret it sits in; if you can clearly see the frets near the nut with nothing across them, give 0; if you can't tell, give null.
+Then give your overall answer for the video.
+Reply with only JSON: {"each": [{"t": seconds, "capo": number or null}], "capo": number or null, "capo_conf": "high"|"medium"|"low"|null}`,{images:shots.map(x=>x.blob),maxTokens:2000});
+ // the capo most close-ups agree on (their own counts), and the overall answer when they don't say
+ const each=(Array.isArray(r2&&r2.each)?r2.each:[]).map(x=>x&&Number.isInteger(x.capo)&&x.capo>=0&&x.capo<=9?x.capo:null).filter(x=>x!=null),cnt={};each.forEach(c=>cnt[c]=(cnt[c]||0)+1);
+ const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];let capo=Number.isInteger(r2&&r2.capo)?r2.capo:null,conf=r2&&r2.capo_conf||null;
+ if(top&&+top[1]>=2&&+top[1]>=each.length/2){capo=+top[0];if(conf!=='high')conf=+top[1]>=3||hint.yes>=2?'high':'medium'}
+ else if(each.length&&capo!=null&&!each.includes(capo))conf='low';
+ return {capo,capo_conf:conf,each,hint,at:pick.map(x=>x.f.t)}}
 // both steps; frames: [{t, blob}] at the candidate moments. Returns Claude's reading of the close-ups, or {nohand} when no hand was
 // clear (with the capo read from the neck close-ups when the end of the neck was clear: a capo is plain to see even when the hand isn't).
 // With more than one guitarist, the one whose hand is clear most often (usually the one strumming the chords) is read; the others
 // are named (a lead line or a different voicing on another guitar shouldn't decide the chords).
-async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r1=await vlFind1(title,sheets),ok=x=>x==='high'||x==='medium';
+async function vlLookFrames(title,frames,scanFrames){const sheets=await vlContact(frames),r1=await vlFind1(title,sheets),ok=x=>x==='high'||x==='medium';
+ // no clear capo from the look: the capo scan over the whole video decides it (its finding is kept with the reading)
+ const scan=async res=>{if(Number.isInteger(res.capo)&&ok(res.capo_conf))return res;let sc=null;try{sc=await vlCapoScan(title,scanFrames||frames)}catch(e){}
+  if(!sc)return res;res.capoScan={capo:sc.capo,conf:sc.capo_conf,each:sc.each,hint:sc.hint};if(Number.isInteger(sc.capo)&&ok(sc.capo_conf)){res.capo=sc.capo;res.capo_conf=sc.capo_conf}return res};
  const all=[],necks=[],frac=(b,tl)=>[(b[0]-tl.fx)/tl.fw,(b[1]-tl.fy)/tl.fh,(b[2]-tl.fx)/tl.fw,(b[3]-tl.fy)/tl.fh].map(v=>Math.max(0,Math.min(1,v)));
  (Array.isArray(r1&&r1.tiles)?r1.tiles:[]).forEach(x=>{const sh=sheets[(+x.sheet||1)-1],tl=sh&&sh.tiles.find(y=>y.n===+x.tile);if(!tl)return;
   // the end of the neck (nut and first frets), for the capo
@@ -86,8 +136,8 @@ async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r
    if(bx[2]>bx[0]&&bx[3]>bx[1])all.push({f:tl.f,box:bx,q:h.quality,who})})});
  const capoOnly=async()=>{necks.sort((a,b)=>(b.q==='high')-(a.q==='high')||b.area-a.area);const nk=[];for(const n of necks)if(nk.length<2&&!nk.some(x=>x.f.t===n.f.t))nk.push(n);
   const shots=[];for(const n of nk)shots.push({t:n.f.t,blob:await vlCrop(n.f,n.box,1024)});return shots};
- if(!all.length){if(!necks.length)return {nohand:true,looked:frames.length};
-  const res=await vlAsk(title,[],null,'guitar',await capoOnly());return {...res,frames:[],nohand:true,neck:true,looked:frames.length}}
+ if(!all.length){if(!necks.length){const r=await scan({capo:null,capo_conf:null,frames:[]});return {...r,nohand:true,neck:Number.isInteger(r.capo),scan:true,looked:frames.length}}
+  const res=await scan(await vlAsk(title,[],null,'guitar',await capoOnly()));return {...res,frames:[],nohand:true,neck:true,scan:true,looked:frames.length}}
  const score={};all.forEach(p=>score[p.who]=(score[p.who]||0)+(p.q==='high'?2:1));
  const who=Object.keys(score).sort((a,b)=>score[b]-score[a]||(b==='acoustic')-(a==='acoustic'))[0],picks=all.filter(p=>p.who===who),others=Object.keys(score).filter(k=>k!==who);
  // up to 8, spread over the song (the clearest first when there are more than enough)
@@ -97,7 +147,7 @@ async function vlLookFrames(title,frames){const sheets=await vlContact(frames),r
  // the capo: up to 2 large close-ups of the end of the neck (the biggest in the frame, at two different moments), cut from the full
  // still; without them, a whole still as before
  const capoShots=await capoOnly();
- const res=await vlAsk(title,crops,capoShots.length?null:use[0].f,who,capoShots);res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
+ const res=await scan(await vlAsk(title,crops,capoShots.length?null:use[0].f,who,capoShots));res.scan=true;res.looked=frames.length;res.clear=picks.length;res.who=who;res.others=others;return res}
 // ask Claude what it sees (it isn't told what the sound heard, so it can't just agree)
 async function vlAsk(title,frames,whole,who,capoShots=[]){const gw=who&&who!=='guitar'?`the ${who} guitarist’s`:'the guitarist’s',nc=capoShots.length;
  const prompt=!frames.length?`${nc===1?'This image is a close-up':'These '+nc+' images are close-ups'} of the end of the guitar's neck by the headstock (the nut and the first frets), from a video of a guitarist playing the song "${title}".
@@ -152,7 +202,7 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  // Easy has it in standard tuning (Oct 2026, the user). A guitar tuned up keeps the standard-tuning capo.
  if(shift&&shift.seenCapo!=null&&tshift(shift.tun0,0)===0){const n=shift.seenCapo-shift.capo,t=n===1?'half':n===2?'whole':'';if(t){a.play.tun=t;shift.tun=t}}
  const vcap=shift?(shift.tun?shift.seenCapo:shift.capo):vc;if(vcap!=null){a.play.capo=vcap;a.play.capoBy='video'}
- a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed],...(res&&res.nohand?{nohand:true}:{})};return a}
+ a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed],...(res&&res.capoScan?{capoScan:res.capoScan}:{}),...(res&&res.nohand?{nohand:true}:{})};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
@@ -165,7 +215,7 @@ async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}c
   if(kept){const S=vk.startsWith('stills');vlApply(a,kept,S?{name:vname||'the song’s video',url:vurl}:it.drive.video,pts,0);if(S)a.video.from='stills';vlKeep(a,kept,vk,true);return}}catch(e){}
  if(!claudeReads()){if(st||(it.drive&&it.drive.video))a.video={skip:'claude',name:vname};return}
  try{const pts=vlTimes(a.segs,VL_CAND);if(pts.length<2){a.video={skip:'few'};return}
-  if(st&&st.idx&&st.idx.length){const vkey='stills:'+st.idx.length,kept=vlKept(it,vkey),res=kept||await vlLookFrames(a.title,vlStills(st,pts.map(p=>p.t)));vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';vlKeep(a,res,vkey,!!kept);return}
+  if(st&&st.idx&&st.idx.length){const vkey='stills:'+st.idx.length,kept=vlKept(it,vkey),res=kept||await vlLookFrames(a.title,vlStills(st,pts.map(p=>p.t)),st.idx.map(x=>({t:x[0],blob:st.bin.slice(x[1],x[1]+x[2],'image/jpeg')})));vlApply(a,res,{name:vname||'the song’s video',url:vurl},pts,0);a.video.from='stills';vlKeep(a,res,vkey,!!kept);return}
   const tok=vlTok();if(!tok){a.video={skip:'drive'};return}
   const v=await vlFind(it,tok);if(!v){a.video={skip:'none'};return}
   const vkey='drive:'+v.id,kept=vlKept(it,vkey);if(kept){vlApply(a,kept,v,pts,0);vlKeep(a,kept,vkey,true);return}
@@ -181,4 +231,4 @@ function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${vlErrWhy(v.code)}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
  if(v.skip)return '';
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
-window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks
+window.__vl={capoImages:async(frames,box)=>{const toUrl=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});const sh=await vlCapoSheets(frames);const out={grids:[],crops:[]};for(const x of sh)out.grids.push(await toUrl(x.blob));if(box)for(const f of frames.filter((_,i)=>i%15===7))out.crops.push(await toUrl(await vlCrop(f,box,1024,true)));return out},setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks
