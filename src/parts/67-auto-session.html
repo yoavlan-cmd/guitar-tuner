@@ -39,10 +39,10 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   // 3. the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
   it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
   // what this build wasn't sure of goes into the learning log (69-learn-log); the session says which engine made it
-  a.eng=ENGINE_V;try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
+  a.eng=engineId();try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
-  it.sess='done';it.anaKey=key;
+  it.sess='done';it.anaKey=key;try{lsSoon()}catch(e){}
   if(document.hidden)asReady={id,at:Date.now()};
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
   toast(`“${esc(it.name)}”: the session is ready. <button type="button" class="tlink" id="asOpen">Open the song</button>`,'ok');

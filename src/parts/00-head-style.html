@@ -1235,6 +1235,12 @@ body.kopen #bnav,body.kopen #mxBar{visibility:hidden}
 /* ===== add a song from Google Drive ===== */
 .dsdlg{position:fixed;inset:0;z-index:66;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
 .dsdlg[hidden]{display:none}
+/* What's new in your sessions (93-session-news) */
+.lndlg{position:fixed;inset:0;z-index:66;background:var(--bg,#111);overflow-y:auto}.lndlg[hidden]{display:none}
+.lnbox{max-width:640px;margin:0 auto;padding:14px 16px 40px}.lntop{display:flex;align-items:center;justify-content:space-between;gap:10px}.lntop h2{margin:0;font-size:20px}.lnx{background:none;border:0;color:inherit;font-size:20px;padding:8px;min-width:44px;min-height:44px}
+.lnsub{opacity:.7;margin:2px 0 10px}.lnbox h3{margin:18px 0 6px;font-size:16px}.lnsong{border:1px solid rgba(128,128,128,.3);border-radius:12px;padding:10px 12px;margin:8px 0}.lnsong>small{display:block;opacity:.8;margin-top:4px}
+.lnhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.lnhead b{margin-right:auto}.lnlv,.lnvd{font-size:12px;border-radius:99px;padding:2px 8px;background:rgba(128,128,128,.2)}.lnlv.major{background:rgba(255,183,77,.3)}.lnvd.better{background:rgba(102,187,106,.3)}.lnvd.worse{background:rgba(239,83,80,.3)}
+.lnspans{margin:8px 0 0;padding-left:18px}.lnspans li{margin:4px 0}.lnspans small{display:block;opacity:.75}.lnt{font-variant-numeric:tabular-nums;opacity:.8}.lnch{direction:ltr;unicode-bidi:isolate}.lncommits{font-size:13px;opacity:.85}
 .dsbox{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .dshead{display:flex;align-items:center;justify-content:space-between}.dshead h3{margin:0;font:800 24px var(--display);letter-spacing:.04em;text-transform:uppercase}
 .dslab{display:flex;flex-direction:column;gap:6px;font:600 13px var(--body);color:var(--muted)}.dslab .textin{font:400 14px var(--body)}

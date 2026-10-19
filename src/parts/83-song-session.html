@@ -64,9 +64,10 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   // a song split from Drive before the beat and chord models (splitter v9): split once more from the same Drive files, so the guide
   // gets the beat grid and BTC's chords (about 15 minutes, once); after that, Rebuild is quick again
   if(it.drive&&it.drive.file&&mxGh()&&gdOn()){let d=null;try{d=await mxGet('mixdata:'+id)}catch(e){}
-   if(d&&d.stems&&!d.models){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   // …and a song whose parts aren't kept on GitHub yet (before Oct 2026), so the daily check can build it again
+   if(d&&d.stems&&(!d.models||!it.keep)){const why=!d.models?'with the new beat and chord models':'so its parts stay in your GitHub for the daily check';let ok=false;try{await gdTokenFull();ok=true}catch(e){}
     if(ok){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:{id:it.drive.file,name:it.drive.name||it.name},vid:it.drive.video,folder:it.drive.folder,base:it.name,song});
-     if(n.state!=='failed'){toast('Your GitHub splits this song once more with the new beat and chord models (about 15 minutes). The guide rebuilds itself when it’s back.','ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
+     if(n.state!=='failed'){toast(`Your GitHub splits this song once more ${why} (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
   // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
   // needs this)
   if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}

@@ -1,0 +1,35 @@
+/* ===== What's new in your sessions (Oct 2026) ===== */
+// The daily check (guitaring-split, 5:00 Israel time) builds the sessions again with what Guitaring has learned and writes a list:
+// daily/latest.json on the branch "learn". This page shows it: what Guitaring learned (each step with its reason and its scores),
+// and per song what would change (where, from which chord to which, how much of the song) and whether it agrees better with the
+// evidence (your edits, the hand in the video, the BTC chord model). Nothing on the phone changes: the new versions are kept in the
+// repository to compare. A notification when a new list has changes, once per list.
+let LN=null;
+async function lnFetch(){const cfg=mxGh();if(!cfg)return null;try{const b=await gh('/contents/daily/latest.json?ref=learn',{raw:true,ok404:true},cfg);if(!b)return null;
+ const j=JSON.parse(await b.text());if(!j||!j.date)return null;LN=j;store.set('lnLast',j);
+ if(j.summary&&j.summary.changed&&store.get('lnNote','')!==j.date){store.set('lnNote',j.date);try{bkNotify('New versions of your sessions',`${j.summary.changed} song${j.summary.changed>1?'s':''} would change with what Guitaring learned. Tap to see what and why.`)}catch(e){}}
+ try{if(curSec==='home')renderHomeCont()}catch(e){}return j}catch(e){return null}}
+function lnStart(){LN=store.get('lnLast',null);setTimeout(()=>lnFetch(),window.__lsMs!=null?window.__lsMs:8000)}
+const lnT=s=>{s=Math.max(0,Math.floor(+s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const LN_LV={minor:'Small change',moderate:'Medium change',major:'Big change',none:'No change'},LN_V={better:'Better',worse:'Worse',unclear:'Not sure yet',check:'Check it',same:'Same'};
+function lnEv(e){const p=[];if(e.n.edit)p.push(`your edits ${e.edit}/${e.n.edit}`);if(e.n.video)p.push(`the video ${e.video}/${e.n.video}`);if(e.n.btc)p.push(`the chord model ${e.btc}/${e.n.btc}`);return p.join(' · ')}
+function lnSongHTML(r){if(r.status==='current')return '';
+ if(r.status!=='changed')return `<div class="lnsong"><b dir="auto">${esc(r.title)}</b><small>${r.status==='same'?'Built again with the new engine: no chord changes.':r.status==='no-parts'?esc(r.note||''):'Couldn’t be built again today.'}</small></div>`;
+ const sp=(r.spans||[]).slice(0,12).map(s=>{const o=lnEv(s.ev.old),n=lnEv(s.ev.new);return `<li><span class="lnt">${lnT(s.t0)}–${lnT(s.t1)}</span> <b class="lnch">${esc(s.from)} → ${esc(s.to)}</b>${o||n?`<small>Agrees with ${n||'nothing'}${o?` (was ${o})`:''}</small>`:'<small>No edit, video or model check here</small>'}</li>`}).join('');
+ return `<div class="lnsong"><div class="lnhead"><b dir="auto">${esc(r.title)}</b><span class="lnlv ${r.level}">${LN_LV[r.level]||r.level}</span><span class="lnvd ${r.verdict}">${LN_V[r.verdict]||r.verdict}</span></div>
+  <small>${r.share}% of the song’s chords would change${(r.other||[]).length?' · '+r.other.map(esc).join(' · '):''}${r.ed&&r.ed.old.n?` · your edits it gets right: ${r.ed.old.ok} → ${r.ed.new.ok} of ${r.ed.old.n}`:''}</small>
+  ${sp?`<ul class="lnspans">${sp}</ul>`:''}${(r.spans||[]).length>12?`<small>…and ${r.spans.length-12} more places</small>`:''}
+  ${(r.cause||[]).length?`<details><summary>Why it changes</summary><ul>${r.cause.map(c=>`<li>${esc(c.id)}: ${esc(c.plain)}${(c.commits||[]).length?'<br><small>'+c.commits.slice(0,6).map(x=>esc(x.replace(/^\w+ /,''))).join('<br>')+'</small>':''}</li>`).join('')}</ul></details>`:''}</div>`}
+function lnHTML(j){if(!j)return '<p class="tip">No daily check yet. It runs every day at 5:00 once your sessions are copied to your GitHub.</p>';
+ const L=j.learned,tr=(j.engine&&j.engine.tried)||[],code=((j.engine&&j.engine.changes)||[]).filter(x=>x.kind==='code');
+ const songs=(j.songs||[]).map(lnSongHTML).join('')||'<p class="tip">No sessions needed building again: all of them are made with today’s engine.</p>';
+ return `<p class="lnsub">${esc(new Date(j.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))} · engine ${esc(j.engine&&j.engine.now||'')}</p>
+  <h3>What Guitaring learned</h3>${L?`<p>${esc(L.plain)}</p>`:`<p>Nothing new today. ${tr.length?`${tr.length} small changes were tried on the test songs${j.engine.base&&j.engine.base.edits&&j.engine.base.edits.n?' and your edits':''}; none made things better without making a song worse, so the engine stays as it is.`:''}</p>`}
+  ${code.map(c=>`<p>${esc(c.plain)}</p>${(c.commits||[]).length?`<ul class="lncommits">${c.commits.slice(0,10).map(x=>`<li>${esc(x.replace(/^\w+ /,''))}</li>`).join('')}</ul>`:''}`).join('')}
+  ${tr.length?`<details><summary>What was tried</summary><ul>${tr.map(t=>`<li>${esc(t.what||t.k)}: ${t.from} → ${t.to} · ${t.taken?'<b>taken</b>':t.ok?'no worse, but not better enough':'made something worse'}</li>`).join('')}</ul></details>`:''}
+  <h3>Your sessions</h3>${songs}
+  <p class="tip">Nothing on your phone changes. The new versions are kept in your GitHub so you can compare them first.</p>`}
+function openNews(){let d=$('lnDlg');if(!d){d=document.createElement('div');d.id='lnDlg';d.className='lndlg';document.body.appendChild(d)}
+ const draw=j=>{d.innerHTML=`<div class="lnbox" role="dialog" aria-label="What’s new in your sessions"><div class="lntop"><h2>What’s new in your sessions</h2><button type="button" class="lnx" aria-label="Close">✕</button></div>${lnHTML(j)}</div>`;d.querySelector('.lnx').onclick=()=>{d.hidden=true;document.body.classList.remove('wopen')}};
+ d.hidden=false;document.body.classList.add('wopen');if(LN)store.set('lnSeen',LN.date);draw(LN);lnFetch().then(j=>{if(j&&!d.hidden){store.set('lnSeen',j.date);draw(j)}})}
+window.__ln={open:()=>openNews(),fetch:()=>lnFetch(),html:j=>lnHTML(j)};// test hooks

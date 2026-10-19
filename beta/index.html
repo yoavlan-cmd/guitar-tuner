@@ -1250,6 +1250,12 @@ body.kopen #bnav,body.kopen #mxBar{visibility:hidden}
 /* ===== add a song from Google Drive ===== */
 .dsdlg{position:fixed;inset:0;z-index:66;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
 .dsdlg[hidden]{display:none}
+/* What's new in your sessions (93-session-news) */
+.lndlg{position:fixed;inset:0;z-index:66;background:var(--bg,#111);overflow-y:auto}.lndlg[hidden]{display:none}
+.lnbox{max-width:640px;margin:0 auto;padding:14px 16px 40px}.lntop{display:flex;align-items:center;justify-content:space-between;gap:10px}.lntop h2{margin:0;font-size:20px}.lnx{background:none;border:0;color:inherit;font-size:20px;padding:8px;min-width:44px;min-height:44px}
+.lnsub{opacity:.7;margin:2px 0 10px}.lnbox h3{margin:18px 0 6px;font-size:16px}.lnsong{border:1px solid rgba(128,128,128,.3);border-radius:12px;padding:10px 12px;margin:8px 0}.lnsong>small{display:block;opacity:.8;margin-top:4px}
+.lnhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.lnhead b{margin-right:auto}.lnlv,.lnvd{font-size:12px;border-radius:99px;padding:2px 8px;background:rgba(128,128,128,.2)}.lnlv.major{background:rgba(255,183,77,.3)}.lnvd.better{background:rgba(102,187,106,.3)}.lnvd.worse{background:rgba(239,83,80,.3)}
+.lnspans{margin:8px 0 0;padding-left:18px}.lnspans li{margin:4px 0}.lnspans small{display:block;opacity:.75}.lnt{font-variant-numeric:tabular-nums;opacity:.8}.lnch{direction:ltr;unicode-bidi:isolate}.lncommits{font-size:13px;opacity:.85}
 .dsbox{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .dshead{display:flex;align-items:center;justify-content:space-between}.dshead h3{margin:0;font:800 24px var(--display);letter-spacing:.04em;text-transform:uppercase}
 .dslab{display:flex;flex-direction:column;gap:6px;font:600 13px var(--body);color:var(--muted)}.dslab .textin{font:400 14px var(--body)}
@@ -2649,6 +2655,9 @@ function diagram(sh,label){
 
 /* ---- audio analysis ---- */
 const SR=11025,FN=8192,FNC=4096,HOP=1024;
+// the detection engine's version: every change to how chords are found gets a new number (and a note in docs/PRD; the daily job
+// in guitaring-split lists which sessions it changes). Sessions and learning notes carry the version they were made with.
+const ENGINE_V=1;
 const TUNE={keyFix:.6,P1:1.1,P2:1.3,PB:1.6,vocabCum:.95,vocabMin:.02,slashRatio:1.25,slashMin:.35,bassW:.2,inv:.85,h3:.7,h5:.4,PU1:.55,PU2:.7,tonalT:.8,tonalW:.15,ncBase:.25,ncGain:0,beatSync:0,halfBeats:1,steadyT:.5,steadyW:.2,steadyGain:1.2,sev:.6,beatGap:.06,add9P:.17,btcW:.3,confM:.08};
 function makeFFT(n){const cs=new Float64Array(n/2),sn=new Float64Array(n/2),rv=new Uint32Array(n),bits=Math.log2(n);
  for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}for(let i=0;i<n;i++){let r=0,x=i;for(let b=0;b<bits;b++){r=(r<<1)|(x&1);x>>=1}rv[i]=r}
@@ -2963,7 +2972,7 @@ function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
 const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
 const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
-function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;if(/^mix_/.test(fileKey))try{lsSoon()}catch(e){}try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
 function loadSong(k){try{const v=JSON.parse(localStorage.getItem(KP+'song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
@@ -3176,10 +3185,10 @@ $('timeline').addEventListener('click',e=>{const b=e.target.closest('.blk');if(!
  const sc=shapeIdx(A.segs[i].c);if(sc<NS){$('edRoot').value=Math.floor(sc/NT);$('edType').value=sc%NT}else $('edType').value='nc';
  $('edNote').value=A.segs[i].note||'';$('editLabel').textContent=`Edit the chord at ${mmss(A.segs[i].t0)}`;$('edMerge').disabled=i===0;$('editBox').hidden=false;
  [...$('timeline').children].forEach((x,k)=>x.classList.toggle('sel',k===i));syncSong(true)});
-$('edApply').onclick=()=>{if(selIdx<0)return;const g=A.segs[selIdx],typed=$('edName').value.trim();
+$('edApply').onclick=()=>{if(selIdx<0)return;const g=A.segs[selIdx],typed=$('edName').value.trim();const was=g.c<NS?nameOf(g,'std',0):'N.C.';
  if(typed){const p=parseChord(typed);if(!p){$('edName').style.borderColor='var(--sharp)';$('editLabel').textContent='Couldn’t read that chord. Try a name like G/B or Cadd9.';return}const d=tshift(A.play.tun,A.play.capo),ti=TYPES.findIndex(t=>t.id===QTYPE[p.q]);g.c=((p.root+d)%12)*NT+(ti<0?0:ti);g.q=p.q;if(p.bass!=null)g.b=(p.bass+d)%12;else delete g.b;$('edName').value=''}
  else{const tv=$('edType').value;const shape=tv==='nc'?NS:(+$('edRoot').value)*NT+(+tv);g.c=tv==='nc'?NS:soundIdx(shape);delete g.q;delete g.b}
- g.pin=true;const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;afterEdit('Saved.')};
+ g.pin=true;const n=$('edNote').value.trim();if(n)g.note=n;else delete g.note;learnEdit(fileKey,g,was);afterEdit('Saved.')};
 $('edSplit').onclick=()=>{const t=vid.currentTime||0,i=segAt(t),g=A.segs[i];if(!g||t-g.t0<.3||g.t1-t<.3){$('editLabel').textContent='Move the video to the spot where the new chord starts, then tap Split.';return}A.segs.splice(i+1,0,{t0:t,t1:g.t1,c:g.c,q:g.q,b:g.b,pin:true});g.pin=true;g.t1=t;selIdx=i+1;$('edNote').value='';afterEdit('Split. Now pick the chord for the new part.')};
 $('edClose').onclick=()=>{selIdx=-1;$('editBox').hidden=true;renderTimeline();curIdx=-1;syncSong(true)};
 $('edMerge').onclick=()=>{if(selIdx<1)return;const g=A.segs[selIdx],p=A.segs[selIdx-1];p.t1=g.t1;if(g.note)p.note=p.note?p.note+' / '+g.note:g.note;A.segs.splice(selIdx,1);selIdx--;$('edNote').value=A.segs[selIdx].note||'';afterEdit('Merged.')};
@@ -5292,7 +5301,7 @@ function mxSheetUI(){if(mxBusy)return;if(mxCreating&&mxSheetOpen())return mxCrea
 async function mxForget(id,quiet){const it=mxIdx.find(x=>x.id===id);mxIdx=mxIdx.filter(x=>x.id!==id);
  if(mxSong&&mxSong.id===id){mxStopAudio();mxSong=null;mxPos=0}
  try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}try{await mxDel('mixvideo:'+id)}catch(e){}await mxIdxSave();
- if(it&&it.src==='cloud'&&mxGh())for(const b of ['j-','r-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});
+ if(it&&it.src==='cloud'&&mxGh()){for(const b of ['j-','r-','keep-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});try{lsForget('mix_'+id)}catch(e){}}
  if(!quiet){mxSheetUI();mxBar();renderMixNew()}}
 const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannels>1?au.getChannelData(1):a,o=new Int16Array(n*2);for(let i=0;i<n;i++){let x=a[i],y=b[i];o[2*i]=(x>1?1:x<-1?-1:x)*32767;o[2*i+1]=(y>1?1:y<-1?-1:y)*32767}return o};
 async function mxOpen(id){
@@ -5463,7 +5472,11 @@ async function mxCollect(it){mxBarOff=false;
    try{bkNotify(`“${it.name}” is split`,(it.drive?(it.drive.ok?'The full and guitars-only MP3s are in your Drive folder. ':'Open Guitaring to save the MP3s to your Drive. '):'')+'Now building its session: the chords and the guide (about a minute).')}catch(e){}
    try{asBuild(it.id)}catch(e){}
    toast(`${SK('MIX')} “${esc(it.name)}” is split and ready. <button type="button" class="tlink" id="mxToastOpen">Open the mixer</button>`,'ok');
-   const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}}
+   const b=$('mxToastOpen');if(b)b.onclick=()=>{const t=$('toast');if(t)t.hidden=true;mxView(true);mxOpen(it.id)}
+   // the parts stay in your private repository as the branch keep-<id> (the same commit, nothing uploaded again), so the daily
+   // check (guitaring-split, 5:00) can build the session again with what Guitaring has learned (Oct 2026)
+   try{const ref=await gh('/git/refs/heads/r-'+it.id);try{await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/keep-'+it.id,sha:ref.object.sha})})}
+    catch(e){if(e.status!==422)throw e;await gh('/git/refs/heads/keep-'+it.id,{method:'PATCH',body:JSON.stringify({sha:ref.object.sha,force:true})})}it.keep=true}catch(e){}}
   gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
  }catch(e){try{console.error('mixer collect',e&&e.message||e)}catch(_){}it.state='wait'}// try again on the next check
 }
@@ -5741,9 +5754,11 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   try{const w=await asWhole(d);if(w)asFuse(a,w);else a.whole={skip:'parts'}}catch(e){a.whole={skip:'err'};try{console.error('whole song',e)}catch(_){}}
   // 3. the song's video, when there is one (the capo and the chord shapes in the guitarist's hand)
   it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
+  // what this build wasn't sure of goes into the learning log (69-learn-log); the session says which engine made it
+  a.eng=engineId();try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
-  it.sess='done';it.anaKey=key;
+  it.sess='done';it.anaKey=key;try{lsSoon()}catch(e){}
   if(document.hidden)asReady={id,at:Date.now()};
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
   toast(`“${esc(it.name)}”: the session is ready. <button type="button" class="tlink" id="asOpen">Open the song</button>`,'ok');
@@ -5995,6 +6010,75 @@ function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip)return '';
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
 window.__vl={setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks
+/* ===== Learning log (Oct 2026) ===== */
+// What Guitaring got wrong or wasn't sure of, kept so it can learn from it (the daily job in guitaring-split, 5:00, reads it with the
+// session copies): your chord edits (the strongest note: the right chord at that moment), where the hand in the video disagrees with
+// the sound, the least sure chords, and chords BTC hears that Guitaring can't name yet (6, dim, aug, m6, mMaj7, dim7, m7b5). Kept
+// under KP+'learn' (backed up and restored with the rest). Each build of a session replaces that session's own automatic notes; your
+// edits are kept. Chords are written as they sound (no capo, standard tuning), times in seconds.
+const LEARN_MAX=800,LEARN_AUTO=['unsure','video','unknown'];
+const learnGet=()=>{const L=store.get('learn',[]);return Array.isArray(L)?L:[]};
+function learnPut(items,replace){let L=learnGet();if(replace)L=L.filter(x=>!(x.song===replace&&LEARN_AUTO.includes(x.kind)));
+ L=L.concat(items.map(x=>({...x,at:x.at||Date.now(),eng:engineId()})));
+ // over the limit: the oldest automatic notes go first, then the oldest edits
+ while(L.length>LEARN_MAX){const i=L.findIndex(x=>x.kind!=='edit');L.splice(i<0?0:i,1)}
+ store.set('learn',L);return L.length}
+// BTC's 14 qualities per root; the ones Guitaring can't name yet (its 8: '' m 7 m7 maj7 sus2 sus4 add9)
+const BTC_Q=['m','','dim','aug','m6','6','m7','mMaj7','maj7','7','dim7','m7b5','sus2','sus4'],BTC_NEW=new Set(['dim','aug','m6','6','mMaj7','dim7','m7b5']);
+function learnFromBuild(key,a,btc){const out=[],segs=(a.segs||[]),r1=x=>+(+x).toFixed(1),title=a.title||'';
+ const nm=g=>nameOf(g,'std',0);
+ // the least sure chords (a second or longer)
+ (a.conf||[]).forEach((c,i)=>{const g=segs[i];if(!g||g.c>=NS||g.t1-g.t0<1||!(c<GD_UNSURE))return;out.push({kind:'unsure',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),conf:c})});
+ // where the hand in the video plays another chord than the one heard
+ ((a.video&&a.video.differ)||[]).forEach(d=>out.push({kind:'video',song:key,title,t:r1(d.t),heard:d.heard,seen:d.seen}));
+ // chords BTC hears that Guitaring can't name yet: over a chord of a second or longer, BTC's mean probability of one such chord
+ // (btc.fps is the time per frame, in seconds, as the splitter writes it)
+ if(btc&&btc.fps&&Array.isArray(btc.frames))segs.forEach(g=>{if(g.c>=NS||g.t1-g.t0<1)return;const j0=Math.max(0,Math.round(g.t0/btc.fps)),j1=Math.min(btc.frames.length,Math.round(g.t1/btc.fps));if(j1-j0<2)return;
+  const sum={};for(let j=j0;j<j1;j++)(btc.frames[j]||[]).forEach(([i,p])=>{if(i>=168)return;const q=BTC_Q[i%14];if(BTC_NEW.has(q)){const n=CH[Math.floor(i/14)]+q;sum[n]=(sum[n]||0)+p}});
+  const top=Object.entries(sum).sort((x,y)=>y[1]-x[1])[0];if(top&&top[1]/(j1-j0)>=.45)out.push({kind:'unknown',song:key,title,t:r1(g.t0),dur:r1(g.t1-g.t0),heard:nm(g),btc:top[0],p:+(top[1]/(j1-j0)).toFixed(2)})});
+ return learnPut(out,key)}
+// a chord you changed by hand: what Guitaring heard, and what it is
+function learnEdit(key,g,before){try{if(!key||!g)return;const after=g.c<NS?nameOf(g,'std',0):'N.C.';if(after===before)return;
+ learnPut([{kind:'edit',song:key,title:(A&&A.title)||'',t:+g.t0.toFixed(1),dur:+(g.t1-g.t0).toFixed(1),heard:before,fix:after}])}catch(e){}}
+// ---- the session copies (Oct 2026): every session built from a split, and the learning log, go to your private repository (the
+// GitHub connection's repo, guitaring-split) on its branch "learn": sessions/<key>.json and learn.json. The daily check reads them at
+// 5:00, builds each session again from its kept parts (keep-<id>) with what Guitaring has learned, and lists what would change.
+// Sent a little after a build or an edit, and once a day when Guitaring opens; only what changed makes a commit.
+const LS_BR='learn';let lsT=0,lsBusy=null;
+function lsSessions(){const out={};(typeof mxIdx!=='undefined'?mxIdx:[]).forEach(it=>{if(!it||it.state!=='ready'||!it.anaKey)return;const raw=localStorage.getItem(KP+'song.'+it.anaKey);if(!raw)return;
+  let a;try{a=JSON.parse(raw)}catch(e){return}
+  out['sessions/'+it.anaKey+'.json']=JSON.stringify({v:1,key:it.anaKey,id:it.id,name:it.name,song:it.song||null,keep:!!it.keep,drive:it.drive?{file:it.drive.file||'',video:it.drive.video||'',folder:it.drive.folder||''}:null,eng:a.eng||0,built:a.at||0,session:a})});return out}
+async function lsBranch(cfg){try{return await gh('/git/refs/heads/'+LS_BR,{},cfg)}catch(e){if(e.status!==404)throw e}
+ const repo=await gh('',{},cfg),head=await gh('/git/refs/heads/'+(repo.default_branch||'main'),{},cfg);
+ return await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/'+LS_BR,sha:head.object.sha})},cfg)}
+// one commit with the files given (path → text; null deletes it); nothing when nothing changed
+async function lsPush(files,msg){const cfg=mxGh();if(!cfg)return false;const ref=await lsBranch(cfg),base=await gh('/git/commits/'+ref.object.sha,{},cfg);
+ const tree=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base.tree.sha,tree:Object.entries(files).map(([path,content])=>content==null?{path,mode:'100644',type:'blob',sha:null}:{path,mode:'100644',type:'blob',content})})},cfg);
+ if(tree.sha===base.tree.sha)return true;
+ const com=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:msg,tree:tree.sha,parents:[ref.object.sha]})},cfg);
+ await gh('/git/refs/heads/'+LS_BR,{method:'PATCH',body:JSON.stringify({sha:com.sha})},cfg);return true}
+async function lsSync(){if(!mxGh())return false;if(lsBusy)return lsBusy;
+ lsBusy=(async()=>{try{const files=lsSessions();files['learn.json']=JSON.stringify({v:1,at:Date.now(),eng:engineId(),notes:learnGet()});
+   const gone=store.get('lsGone',[]);gone.forEach(k=>{files['sessions/'+k+'.json']=null});
+   await lsPush(files,'Guitaring: session copies and learning notes');store.set('lsAt',Date.now());if(gone.length)store.set('lsGone',[]);return true}
+  catch(e){try{console.error('session copies',e&&e.message||e)}catch(_){}return false}finally{lsBusy=null}})();return lsBusy}
+// soon after a build or an edit (a burst of edits makes one commit)
+function lsSoon(ms=20000){clearTimeout(lsT);lsT=setTimeout(()=>{lsSync()},window.__lsMs!=null?window.__lsMs:ms)}
+// a removed song: its copy goes on the next sync
+function lsForget(key){const g=store.get('lsGone',[]);if(!g.includes(key)){g.push(key);store.set('lsGone',g)}lsSoon()}
+// once a day when Guitaring opens
+function lsDaily(){const at=store.get('lsAt',0);if(Date.now()-at>20*3600e3)setTimeout(()=>lsSync(),window.__lsMs!=null?window.__lsMs:30000)}
+// ---- the learned engine (Oct 2026): the daily check keeps engine/engine.json on the branch "learn": the detection settings it has
+// learned for this code (ENGINE_V), with a numbered version and a note per change. Guitaring uses them for every new build, and
+// each session says which engine made it ("1.3": code 1, learned step 3). Settings learned for another code version aren't used.
+let ENG={code:ENGINE_V,v:0,tune:{}};const TUNE0={...TUNE};
+const engineId=()=>ENG.code+'.'+(ENG.v||0);
+function engApply(e){if(!e||+e.code!==ENGINE_V||!e.tune||typeof e.tune!=='object')return false;Object.assign(TUNE,TUNE0);
+ for(const [k,v] of Object.entries(e.tune))if(k in TUNE0&&Number.isFinite(+v))TUNE[k]=+v;ENG={code:ENGINE_V,v:+e.v||0,tune:{...e.tune}};return true}
+async function engFetch(){const cfg=mxGh();if(!cfg)return;try{const b=await gh('/contents/engine/engine.json?ref='+LS_BR,{raw:true,ok404:true},cfg);if(!b)return;
+ const j=JSON.parse(await b.text()),e=j&&j.cur;if(e&&engApply(e))store.set('engine',ENG)}catch(e){}}
+function engStart(){if(window.__engine){engApply(window.__engine);return}engApply(store.get('engine',null));setTimeout(()=>engFetch(),window.__lsMs!=null?window.__lsMs:5000)}
+window.__learn={shown:(segs,tun,capo)=>(segs||[]).map(x=>{const g=Array.isArray(x)?{t0:x[0],t1:x[1],c:x[2]}:x;return [g.t0,g.t1,g.c>=NS?'N.C.':nameOf({c:g.c},tun,capo)]}),engine:()=>({...ENG,id:engineId()}),get:learnGet,sync:()=>lsSync(),files:()=>lsSessions(),fromBuild:(k,a,b)=>learnFromBuild(k,a,b),edit:(k,g,b)=>learnEdit(k,g,b)};// test hooks
 /* ================= Welcome screen ================= */
 const JOKES=[
  "Lenny Kravitz called. He says you suck on the guitar and shouldn't bother practising. Prove him wrong, {n}.",
@@ -7421,9 +7505,10 @@ function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g
   // a song split from Drive before the beat and chord models (splitter v9): split once more from the same Drive files, so the guide
   // gets the beat grid and BTC's chords (about 15 minutes, once); after that, Rebuild is quick again
   if(it.drive&&it.drive.file&&mxGh()&&gdOn()){let d=null;try{d=await mxGet('mixdata:'+id)}catch(e){}
-   if(d&&d.stems&&!d.models){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
+   // …and a song whose parts aren't kept on GitHub yet (before Oct 2026), so the daily check can build it again
+   if(d&&d.stems&&(!d.models||!it.keep)){const why=!d.models?'with the new beat and chord models':'so its parts stay in your GitHub for the daily check';let ok=false;try{await gdTokenFull();ok=true}catch(e){}
     if(ok){const song=it.song&&it.song.t?it.song:{t:g.title,a:g.artist||''},n=await dsSubmit({src:{id:it.drive.file,name:it.drive.name||it.name},vid:it.drive.video,folder:it.drive.folder,base:it.name,song});
-     if(n.state!=='failed'){toast('Your GitHub splits this song once more with the new beat and chord models (about 15 minutes). The guide rebuilds itself when it’s back.','ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
+     if(n.state!=='failed'){toast(`Your GitHub splits this song once more ${why} (about 15 minutes). The guide rebuilds itself when it’s back.`,'ok');renderSession();try{dsShowProgress(n.id)}catch(e){}return}}}}
   // (a song made from Drive already has its folder's video read during the rebuild, 68-video-look: only a song split from the phone
   // needs this)
   if(!it.drive&&gdOn()){let ok=false;try{await gdTokenFull();ok=true}catch(e){}
@@ -7776,6 +7861,8 @@ async function bkRestore(b,mode,onp){const {z,man,txt}=b,rep={local:0,idb:0,kept
   if(k===KP+'profile'&&c&&a&&!(c.onboarding&&c.onboarding.done)&&((a.onboarding&&a.onboarding.done)||bkAnswers(a)>bkAnswers(c))){localStorage.setItem(k,local[k0]);rep.local++;continue}
   // song records: matched by song (a phone that just started has fresh records with other ids); the backup's record wins (status, notes)
   if(k===KP+'songs2'&&Array.isArray(c)&&Array.isArray(a)){const m=a.concat(c.filter(x=>!a.some(y=>sameSong(y,x)||sameSong(x,y))));localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
+  // the learning log: both sides' notes, each once
+  if(k===KP+'learn'&&Array.isArray(c)&&Array.isArray(a)){const id=x=>[x.kind,x.song,x.t,x.at].join('|'),m=c.concat(a.filter(x=>!c.some(y=>id(y)===id(x)))).sort((x,y)=>(x.at||0)-(y.at||0));localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   if(k===KP+'v2mig'&&c&&a){const m={...c,...a,done:[...new Set([...(a.done||[]),...(c.done||[])])]};localStorage.setItem(k,JSON.stringify(m));rep.local++;continue}
   const m=bkMerge(c,a);if(JSON.stringify(m)!==cur){localStorage.setItem(k,JSON.stringify(m));rep.local++}else rep.kept++}
  if(mode==='replace')await idbClear(k=>/^backup:pre-/.test(k)||(!man.opt.parts&&bkIsPart(k)));
@@ -8120,6 +8207,8 @@ function renderHomeCont(){
  c.sort((a,b)=>b.at-a.at);const items=c.slice(0,2);
  // a song being made comes first: where it stands, tap for the progress
  try{mkList().filter(x=>x.src==='cloud').slice(0,1).forEach(it=>{const k=dsCalc(it);items.unshift({ic:'MIX',k:'make',t:`Making “${it.name}”`,s:k.warn?'Slower than usual · tap to see why':`${k.label} · ${k.pct}% · ${k.k>=5?'almost done':'about '+Math.round(k.left)+' min left'}`,go:()=>dsShowProgress(it.id)})})}catch(e){}
+ // a new daily list with changes you haven't opened (93-session-news)
+ try{const j=typeof LN!=='undefined'&&LN;if(j&&j.summary&&j.summary.changed&&store.get('lnSeen','')!==j.date)items.unshift({ic:'LEARN',t:'New versions of your sessions',s:`${j.summary.changed} song${j.summary.changed>1?'s':''} would change with what Guitaring learned · see what and why`,go:()=>openNews()})}catch(e){}
  if(!p.onboarding.done)items.unshift({ic:'PROFILE',t:'Finish setting up Guitaring',s:'About 2 minutes. Skip anything you like.',go:()=>openOnb()});
  const box=$('homeCont');box.innerHTML=items.map((x,i)=>`<button type="button" class="hcont${x.k?' hc-'+x.k:''}" data-hc="${i}">${SK(x.ic)}<span><b>${esc(x.t)}</b><small dir="auto">${esc(x.s)}</small></span><i>›</i></button>`).join('');
  box.querySelectorAll('[data-hc]').forEach(b=>b.onclick=()=>items[+b.dataset.hc].go())}
@@ -8363,6 +8452,41 @@ function remUI(){const box=$('remSet');if(!box)return;
  box.innerHTML=`<label class="prfrow"><input type="checkbox" id="remOn"${remOn()?' checked':''}> <span><b>Song reminders in the comments</b><small>Now and then, a comment on Home asks about a song that’s been in Learning for 3 weeks or more, with a Practise button.</small></span></label>`;
  $('remOn').onchange=e=>{const p=profGet();p.remind=e.target.checked;profSet(p)}}
 window.__rem={songs:remSongs,line:homeLine,go:remGo,key:(t,a)=>remKey({title:t,artist:a}),reset:()=>{remLast=false}};// test hooks
+/* ===== What's new in your sessions (Oct 2026) ===== */
+// The daily check (guitaring-split, 5:00 Israel time) builds the sessions again with what Guitaring has learned and writes a list:
+// daily/latest.json on the branch "learn". This page shows it: what Guitaring learned (each step with its reason and its scores),
+// and per song what would change (where, from which chord to which, how much of the song) and whether it agrees better with the
+// evidence (your edits, the hand in the video, the BTC chord model). Nothing on the phone changes: the new versions are kept in the
+// repository to compare. A notification when a new list has changes, once per list.
+let LN=null;
+async function lnFetch(){const cfg=mxGh();if(!cfg)return null;try{const b=await gh('/contents/daily/latest.json?ref=learn',{raw:true,ok404:true},cfg);if(!b)return null;
+ const j=JSON.parse(await b.text());if(!j||!j.date)return null;LN=j;store.set('lnLast',j);
+ if(j.summary&&j.summary.changed&&store.get('lnNote','')!==j.date){store.set('lnNote',j.date);try{bkNotify('New versions of your sessions',`${j.summary.changed} song${j.summary.changed>1?'s':''} would change with what Guitaring learned. Tap to see what and why.`)}catch(e){}}
+ try{if(curSec==='home')renderHomeCont()}catch(e){}return j}catch(e){return null}}
+function lnStart(){LN=store.get('lnLast',null);setTimeout(()=>lnFetch(),window.__lsMs!=null?window.__lsMs:8000)}
+const lnT=s=>{s=Math.max(0,Math.floor(+s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const LN_LV={minor:'Small change',moderate:'Medium change',major:'Big change',none:'No change'},LN_V={better:'Better',worse:'Worse',unclear:'Not sure yet',check:'Check it',same:'Same'};
+function lnEv(e){const p=[];if(e.n.edit)p.push(`your edits ${e.edit}/${e.n.edit}`);if(e.n.video)p.push(`the video ${e.video}/${e.n.video}`);if(e.n.btc)p.push(`the chord model ${e.btc}/${e.n.btc}`);return p.join(' · ')}
+function lnSongHTML(r){if(r.status==='current')return '';
+ if(r.status!=='changed')return `<div class="lnsong"><b dir="auto">${esc(r.title)}</b><small>${r.status==='same'?'Built again with the new engine: no chord changes.':r.status==='no-parts'?esc(r.note||''):'Couldn’t be built again today.'}</small></div>`;
+ const sp=(r.spans||[]).slice(0,12).map(s=>{const o=lnEv(s.ev.old),n=lnEv(s.ev.new);return `<li><span class="lnt">${lnT(s.t0)}–${lnT(s.t1)}</span> <b class="lnch">${esc(s.from)} → ${esc(s.to)}</b>${o||n?`<small>Agrees with ${n||'nothing'}${o?` (was ${o})`:''}</small>`:'<small>No edit, video or model check here</small>'}</li>`}).join('');
+ return `<div class="lnsong"><div class="lnhead"><b dir="auto">${esc(r.title)}</b><span class="lnlv ${r.level}">${LN_LV[r.level]||r.level}</span><span class="lnvd ${r.verdict}">${LN_V[r.verdict]||r.verdict}</span></div>
+  <small>${r.share}% of the song’s chords would change${(r.other||[]).length?' · '+r.other.map(esc).join(' · '):''}${r.ed&&r.ed.old.n?` · your edits it gets right: ${r.ed.old.ok} → ${r.ed.new.ok} of ${r.ed.old.n}`:''}</small>
+  ${sp?`<ul class="lnspans">${sp}</ul>`:''}${(r.spans||[]).length>12?`<small>…and ${r.spans.length-12} more places</small>`:''}
+  ${(r.cause||[]).length?`<details><summary>Why it changes</summary><ul>${r.cause.map(c=>`<li>${esc(c.id)}: ${esc(c.plain)}${(c.commits||[]).length?'<br><small>'+c.commits.slice(0,6).map(x=>esc(x.replace(/^\w+ /,''))).join('<br>')+'</small>':''}</li>`).join('')}</ul></details>`:''}</div>`}
+function lnHTML(j){if(!j)return '<p class="tip">No daily check yet. It runs every day at 5:00 once your sessions are copied to your GitHub.</p>';
+ const L=j.learned,tr=(j.engine&&j.engine.tried)||[],code=((j.engine&&j.engine.changes)||[]).filter(x=>x.kind==='code');
+ const songs=(j.songs||[]).map(lnSongHTML).join('')||'<p class="tip">No sessions needed building again: all of them are made with today’s engine.</p>';
+ return `<p class="lnsub">${esc(new Date(j.date+'T12:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))} · engine ${esc(j.engine&&j.engine.now||'')}</p>
+  <h3>What Guitaring learned</h3>${L?`<p>${esc(L.plain)}</p>`:`<p>Nothing new today. ${tr.length?`${tr.length} small changes were tried on the test songs${j.engine.base&&j.engine.base.edits&&j.engine.base.edits.n?' and your edits':''}; none made things better without making a song worse, so the engine stays as it is.`:''}</p>`}
+  ${code.map(c=>`<p>${esc(c.plain)}</p>${(c.commits||[]).length?`<ul class="lncommits">${c.commits.slice(0,10).map(x=>`<li>${esc(x.replace(/^\w+ /,''))}</li>`).join('')}</ul>`:''}`).join('')}
+  ${tr.length?`<details><summary>What was tried</summary><ul>${tr.map(t=>`<li>${esc(t.what||t.k)}: ${t.from} → ${t.to} · ${t.taken?'<b>taken</b>':t.ok?'no worse, but not better enough':'made something worse'}</li>`).join('')}</ul></details>`:''}
+  <h3>Your sessions</h3>${songs}
+  <p class="tip">Nothing on your phone changes. The new versions are kept in your GitHub so you can compare them first.</p>`}
+function openNews(){let d=$('lnDlg');if(!d){d=document.createElement('div');d.id='lnDlg';d.className='lndlg';document.body.appendChild(d)}
+ const draw=j=>{d.innerHTML=`<div class="lnbox" role="dialog" aria-label="What’s new in your sessions"><div class="lntop"><h2>What’s new in your sessions</h2><button type="button" class="lnx" aria-label="Close">✕</button></div>${lnHTML(j)}</div>`;d.querySelector('.lnx').onclick=()=>{d.hidden=true;document.body.classList.remove('wopen')}};
+ d.hidden=false;document.body.classList.add('wopen');if(LN)store.set('lnSeen',LN.date);draw(LN);lnFetch().then(j=>{if(j&&!d.hidden){store.set('lnSeen',j.date);draw(j)}})}
+window.__ln={open:()=>openNews(),fetch:()=>lnFetch(),html:j=>lnHTML(j)};// test hooks
 // ---- start the app ----
 renderGear();
 
@@ -8373,6 +8497,8 @@ setBookTun(bookTun);
 v2Start();
 // the songs' album covers, ready before they're needed (in the background, after the app is up)
 setTimeout(()=>{try{covWarm()}catch(e){}},window.__covStartMs??2500);
+// the session copies and learning notes for the daily check, once a day (69-learn-log)
+try{engStart()}catch(e){}try{lsDaily()}catch(e){}try{lnStart()}catch(e){}
 
 $('calOut').textContent='A4 '+a4;renderTunings();renderStrings();showTarget();drawNeedle();
 })();

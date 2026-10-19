@@ -20,7 +20,7 @@ const beats=[...Array(51)].map((_,i)=>+(i*.75).toFixed(3)),MODELS={v:1,beats:{be
  const H={'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'GET,POST,PUT,PATCH,DELETE','access-control-expose-headers':'*'};
  await ctx.route('https://accounts.google.com/gsi/client',r=>r.fulfill({contentType:'text/javascript',headers:H,body:`window.google={accounts:{oauth2:{initTokenClient:c=>({requestAccessToken(){setTimeout(()=>c.callback({access_token:'drivetok',expires_in:3600}),10)}})}}};`}));
  await ctx.route(/^https:\/\/www\.googleapis\.com\//,r=>r.request().method()==='OPTIONS'?r.fulfill({status:204,headers:H}):r.fulfill({status:200,headers:{...H,'content-type':'application/json'},body:JSON.stringify({files:[]})}));
- const jobs={},blobs={};let dispatches=0;const J=(r,st,o)=>r.fulfill({status:st,contentType:'application/json',headers:H,body:JSON.stringify(o||{})});
+ const jobs={},blobs={},gitL={n:0,trees:[],ref:null,keep:null};let dispatches=0;const J=(r,st,o)=>r.fulfill({status:st,contentType:'application/json',headers:H,body:JSON.stringify(o||{})});
  const gtr=fs.readFileSync(GTR),sil=fs.readFileSync(SIL);
  await ctx.route('https://api.github.com/**',async r=>{const q=r.request(),u=q.url().replace('https://api.github.com/repos/me/split',''),m=q.method();
   if(m==='OPTIONS')return r.fulfill({status:204,headers:H});
@@ -30,6 +30,15 @@ const beats=[...Array(51)].map((_,i)=>+(i*.75).toFixed(3)),MODELS={v:1,beats:{be
   if(u.startsWith('/contents/models.json?ref=r-m9'))return raw(JSON.stringify(MODELS),'application/json');
   const st=u.match(/^\/contents\/(\w+)\.flac\?ref=r-m9/);if(st)return raw(st[1]==='guitar'?gtr:sil);
   if(u.startsWith('/contents/.github/workflows/split.yml'))return m==='GET'?J(r,404,{message:'Not Found'}):J(r,201,{});
+  // the parts kept as keep-<id>, and the session copies on the branch "learn" (69-learn-log)
+  if(m==='GET'&&u==='/git/refs/heads/r-m9')return J(r,200,{object:{sha:'rsha'}});
+  if(m==='GET'&&u==='/git/refs/heads/learn')return gitL.ref?J(r,200,{object:{sha:gitL.ref}}):J(r,404,{message:'Not Found'});
+  if(m==='GET'&&u==='/git/refs/heads/main')return J(r,200,{object:{sha:'m0'}});
+  if(m==='GET'&&u.startsWith('/git/commits/'))return J(r,200,{tree:{sha:'T'+gitL.n}});
+  if(m==='POST'&&u==='/git/trees'&&JSON.parse(q.postData()).base_tree){const d=JSON.parse(q.postData());gitL.trees.push(d.tree);return J(r,201,{sha:'T'+(++gitL.n)})}
+  if(m==='POST'&&u==='/git/commits'&&(JSON.parse(q.postData()).parents||[]).length)return J(r,201,{sha:'L'+gitL.n});
+  if(m==='PATCH'&&u==='/git/refs/heads/learn'){gitL.ref=JSON.parse(q.postData()).sha;return J(r,200,{})}
+  if(m==='POST'&&u==='/git/refs'&&/keep-|learn/.test(JSON.parse(q.postData()).ref)){const d=JSON.parse(q.postData());if(/learn/.test(d.ref))gitL.ref=d.sha;else gitL.keep=d;return J(r,201,{})}
   if(u==='/git/blobs'){const c=JSON.parse(q.postData()).content,sha='b'+Object.keys(blobs).length;blobs[sha]=Buffer.from(c,'base64').toString();return J(r,201,{sha})}
   if(u==='/git/trees'){const t=JSON.parse(q.postData()).tree[0];return J(r,201,{sha:'t:'+t.path+':'+t.sha})}
   if(u==='/git/commits')return J(r,201,{sha:'c:'+JSON.parse(q.postData()).tree});
@@ -40,7 +49,7 @@ const beats=[...Array(51)].map((_,i)=>+(i*.75).toFixed(3)),MODELS={v:1,beats:{be
   return J(r,404,{message:'Not Found'})});
  await ctx.route(/^https:\/\/(?!www\.googleapis\.com|accounts\.google\.com|api\.github\.com)/,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.addInitScript(()=>{window.__GD_CLIENT='test.apps.googleusercontent.com';window.__mxWaitScale=0.001;window.__mxPollMs=1e9;window.__dsTickMs=1e9;
+ await p.addInitScript(()=>{window.__GD_CLIENT='test.apps.googleusercontent.com';window.__mxWaitScale=0.001;window.__lsMs=0;window.__mxPollMs=1e9;window.__dsTickMs=1e9;
   if(sessionStorage.x)return;sessionStorage.x=1;localStorage.setItem('tuner.profile',JSON.stringify({name:'Yoav',level:'intermediate',onboarding:{done:true}}));localStorage.setItem('tuner.learnLang','"en"');
   localStorage.setItem('guitaring.gh',JSON.stringify({repo:'me/split',token:'t',branch:'main'}))});
  await p.goto(APP);await p.waitForTimeout(500);
@@ -51,7 +60,11 @@ const beats=[...Array(51)].map((_,i)=>+(i*.75).toFixed(3)),MODELS={v:1,beats:{be
  ok(md&&md.beats===51&&md.btc,'the split’s models.json is kept with the parts (beats and chords)');
  const a=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.song.mix_m9')||'null'));console.log('  analysis:',a&&JSON.stringify({bpm:a.bpm,beatFrom:a.beatFrom,beats:a.beats&&a.beats.length,down:a.downbeats&&a.downbeats.length}));
  ok(a&&a.beatFrom==='model'&&a.bpm===80&&a.beats.length===51&&a.downbeats&&a.downbeats.length===13,'the session’s beat and tempo are Beat This!’s (80 BPM, its bars), not the phone’s own guess (100)');
- {const L=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.learn')||'null'));ok(a&&a.eng===1&&Array.isArray(L),'the session says which engine made it (1), and its build wrote the learning log ('+(L&&L.length)+' notes)')}
+ {const L=await p.evaluate(()=>JSON.parse(localStorage.getItem('tuner.learn')||'null'));ok(a&&a.eng==='1.0'&&Array.isArray(L),'the session says which engine made it (1.0), and its build wrote the learning log ('+(L&&L.length)+' notes)')}
+ await p.waitForTimeout(1500);
+ ok(gitL.keep&&gitL.keep.ref==='refs/heads/keep-m9'&&gitL.keep.sha==='rsha','the split\u2019s parts stay in the repository as keep-m9 (the same commit, nothing sent again)');
+ {const t=gitL.trees[gitL.trees.length-1]||[],ses=t.find(x=>x.path==='sessions/mix_m9.json'),ln=t.find(x=>x.path==='learn.json'),sj=ses&&JSON.parse(ses.content);
+  ok(sj&&sj.key==='mix_m9'&&sj.keep===true&&sj.eng==='1.0'&&sj.session&&sj.session.segs.length&&ln&&JSON.parse(ln.content).notes,'the session copy (with its engine and parts kept) and the learning notes go to the branch \u201clearn\u201d');}
  const why=await p.evaluate(()=>{const G=window.__gd.build('mix_m9');return (G.sure.find(s=>s.k==='Tempo')||{}).why||''});console.log('  tempo:',why);
  ok(/Measured by Beat This!/.test(why),'How sure says where the tempo comes from');
  // 2. a song split from Drive before v9 (no models): Rebuild splits it once more from the same Drive files

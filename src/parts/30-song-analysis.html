@@ -433,7 +433,7 @@ function prog(p,t){$('prog').hidden=false;$('progBar').style.width=Math.round(p*
 const titleFrom=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();
 const compact=a=>({...a,segs:a.segs.map(g=>g.note?[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c,g.note]:[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c])});
 const expand=d=>{const v=JSON.parse(JSON.stringify(d));v.segs=v.segs.map(([t0,t1,c,note])=>note?{t0,t1,c,note}:{t0,t1,c});return v};
-function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
+function saveSong(){libSync();try{rememberChords(A)}catch(e){}if(!fileKey)return;if(/^mix_/.test(fileKey))try{lsSoon()}catch(e){}try{const k=KP+'song.'+fileKey;localStorage.setItem(k,JSON.stringify(compact(A)));const idx=store.get('songs',[]).filter(x=>x!==fileKey);idx.unshift(fileKey);idx.slice(8).forEach(x=>{try{localStorage.removeItem(KP+'song.'+x)}catch(e){}});store.set('songs',idx.slice(0,8))}catch(e){}}
 function loadSong(k){try{const v=JSON.parse(localStorage.getItem(KP+'song.'+k));if(v&&v.segs)return expand(v)}catch(e){}return null}
 
 $('vidIn').addEventListener('change',async e=>{
