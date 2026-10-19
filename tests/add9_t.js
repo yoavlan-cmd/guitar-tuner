@@ -13,6 +13,6 @@ srv.listen(0,async()=>{const APP=process.env.APP||`http://localhost:${srv.addres
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(APP);await p.waitForTimeout(400);
  for(const r of ['C','D','E','F','G','A','B','Bb','F#']){const R=(PC[r[0]]+(r[1]==='#'?1:r[1]==='b'?-1:0)+12)%12;
   const [pl,a9]=await p.evaluate(n=>[window.__an.shape(n),window.__an.shape(n+'add9')],r);
-  const want=pcs(R,[0,2,4,7]),got=notes(a9.f);
-  ok(a9.f!==pl.f&&JSON.stringify(got)===JSON.stringify(want)&&a9.cost<=.3&&Math.max(...a9.f.split(',').map(Number))<=7,`${r}add9 draws ${a9.f} (the notes of ${r}add9, not plain ${r} ${pl.f}; ease ${a9.cost}, low on the neck)`)}
+  const want=pcs(R,[0,2,4,7]),got=notes(a9.f),lowest=Math.min(...a9.f.split(',').map((x,i)=>+x<0?99:STR[i]+ +x))%12;
+  ok(a9.f!==pl.f&&JSON.stringify(got)===JSON.stringify(want)&&lowest===R&&a9.cost<=.3&&Math.max(...a9.f.split(',').map(Number))<=7,`${r}add9 draws ${a9.f} (the notes of ${r}add9, not plain ${r} ${pl.f}; root lowest, ease ${a9.cost}, low on the neck)`)}
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await b.close();srv.close();console.log(fail?fail+' FAILED':'all passed');process.exit(fail?1:0)});
