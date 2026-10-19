@@ -29,6 +29,11 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
   if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){calls.list++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
   if(/googleapis\.com\/drive\/v3\/files\/vid1\?alt=media/.test(u)){calls.media++;return r.fulfill({contentType:'video/webm',headers:H,body:vbytes})}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
+   // the capo scan: (1) grids of every still, (2) brightened close-ups of the neck (calls.scanCapo: the capo the video shows)
+   if(/grids of stills/.test(txt)){calls.scan1=(calls.scan1||0)+1;calls.scanGrids=c.filter(x=>x.type==='image').length;const st=calls.scanCapo?[...Array(calls.scanGrids)].flatMap((_,g)=>[1,5].map(k=>({grid:g+1,still:k,box:[.55,.4,.95,.6],capo:k===1?'yes':'maybe'}))):[];
+    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({stills:st})}]})})}
+   if(/close-ups \(brightened and enlarged\)/.test(txt)){calls.scan2=(calls.scan2||0)+1;calls.scanShots=c.filter(x=>x.type==='image').length;const ts=((txt.match(/at ([\d s,]+) in a video/)||[])[1]||'').split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+    return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({each:ts.map((t,i)=>({t,capo:i===ts.length-1?null:calls.scanCapo})),capo:calls.scanCapo,capo_conf:'medium'})}]})})}
    if(/contact sheets/.test(txt)){const n=c.filter(x=>x.type==='image').length;calls.find++;calls.sheets=n;calls.sheetSize=jpgSize(c.find(x=>x.type==='image').source.data);calls.tilesSaid=(txt.match(/up to (\d+) tiles/)||[])[1];calls.findMax=body.max_tokens;calls.findOnly=/Leave out tiles with no clear fretting hand/.test(txt);calls.findNeck=/the nut and the first 5 frets, where a capo would sit/.test(txt);if(calls.cut)return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:'{"tiles": [{"sheet": 1, "tile": 1, "hands": [{"guitar": "acou'}]})});return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({content:[{type:'text',text:JSON.stringify({tiles:[...Array(n)].flatMap((_,si)=>[...Array(9)].map((_,k)=>({sheet:si+1,tile:k+1,clear:!calls.nohand,box:calls.nohand?null:[.2,.2,.8,.8],quality:calls.nohand?null:'high',...(k<2&&(!calls.nohand||calls.neckOnly)?{neck:{box:[.05,.3,.3+k*.05,.55],quality:'high'}}:{})})))})}]})})}
    calls.prompt=txt;calls.readImgs=c.filter(x=>x.type==='image').length;calls.capoShots=+((txt.match(/The first (\d+) images are close-ups of the end of the guitar's neck/)||[0,/The first image is a close-up of the end of the guitar's neck/.test(txt)?1:0])[1]);calls.countNut=/Count the frets from the nut/.test(txt);
    const ts=((txt.match(/taken at ([^\n]+?)\.\n/)||[])[1]||'').split(',').map(x=>parseFloat(x));let lastE=-1;ts.forEach((t,i)=>{if(seq[Math.floor(t/4.6)]==='E')lastE=i});
@@ -89,7 +94,7 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  // ---- 3. a video where the guitarist's hand is never shown clearly: one Claude call only (no close-ups), and the guide says so ----
  calls.nohand=true;const before3=calls.claude;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
  const a3=await ana();console.log('  no hand:',JSON.stringify(a3.video&&{nohand:a3.video.nohand,asked:a3.video.asked,frames:a3.video.frames.length}));
- ok(calls.claude-before3===1&&a3.video.nohand&&a3.play.capoBy!=='video','a video that never shows the hand clearly: one Claude call only, nothing taken from it');
+ ok(calls.claude-before3===2&&calls.scan1===1&&!calls.scan2&&a3.video.nohand&&a3.play.capoBy!=='video','a video that never shows the hand clearly: the look, then the capo scan of every still (it sees no neck: no close-ups), nothing taken from it');
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
  const src3=await p.$$eval('.gdsrc li',l=>l.map(x=>[x.className,x.textContent]));const v3=src3.find(x=>/The video/.test(x[1]))||[];console.log('  video line:',JSON.stringify(v3));
  ok(v3[0]==='n'&&/fretting hand isn’t shown clearly/.test(v3[1]),'Built from lists the video as not helping, and why');
@@ -99,6 +104,13 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
   const vl=(await p.$$eval('.gdsrc li',l=>l.map(x=>x.textContent))).find(x=>/The video/.test(x))||'',head=await p.$eval('#gdBody',e=>e.textContent).catch(()=>'');console.log('  neck only:',JSON.stringify({calls:calls.claude-before3b,capo:a.play.capo,by:a.play.capoBy,nohand:a.video.nohand}),vl);
   ok(calls.claude-before3b===2&&a.video.nohand&&a.play.capo===4&&a.play.capoBy==='video'&&/capo on fret 4/.test(vl),'no clear hand but a clear neck: the capo seen is used (capo 4), and Built from says so');}
  calls.neckOnly=false;
+ // a dark video (Oct 2026, "עכשיו"): no clear hand, no clear neck in the look, but the capo scan of every still finds the neck and a
+ // capo, and the brightened close-ups count fret 5: Full has capo 5, and Built from says the scan found it
+ calls.scanCapo=5;const b3c=calls.claude,s1=calls.scan1;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
+ {const a=await ana();if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
+  const vl=(await p.$$eval('.gdsrc li',l=>l.map(x=>x.textContent))).find(x=>/The video/.test(x))||'';console.log('  capo scan:',JSON.stringify({calls:calls.claude-b3c,grids:calls.scanGrids,shots:calls.scanShots,capo:a.play.capo,by:a.play.capoBy}),vl);
+  ok(calls.claude-b3c===3&&calls.scan1===s1+1&&calls.scan2===1&&calls.scanShots>=2&&calls.scanShots<=4&&a.play.capo===5&&a.play.capoBy==='video'&&/found by the capo scan of the whole video/.test(vl),'a dark video: the capo scan of every still finds the capo, brightened close-ups count fret 5, Full has capo 5 and Built from says how');}
+ calls.scanCapo=0;
  // an answer cut short: Built from names it (and offers nothing from the video)
  calls.nohand=false;calls.cut=true;await p.evaluate(()=>window.__vl.setTok('tok'));await p.tap('#sesRebuild');await done();await p.waitForTimeout(400);
  if(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))!=='true'){await p.tap('[data-gd=full]');await p.waitForTimeout(150)}
