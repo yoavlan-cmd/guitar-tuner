@@ -2557,23 +2557,25 @@ const LIB={C:['x32010','-32-1-'],Cadd9:['x32033','-21-34'],Cmaj7:['x32000','-32-
  F:['133211','134211',1],Fm:['133111','134111',1],Fmaj7:['xx3210','--321-'],
  G:['320003','21---3'],G7:['320001','32---1'],Gmaj7:['320002','32---1'],
  A:['x02220','--123-'],Am:['x02210','--231-'],A7:['x02020','--2-3-'],Am7:['x02010','--2-1-'],Amaj7:['x02120','--213-'],Asus2:['x02200','--12--'],Asus4:['x02230','--123-'],
- B7:['x21202','-213-4'],Bm:['x24432','-13421',2]};
-const ESH={'':[[0,2,2,1,0,0],[1,3,4,2,1,1]],m:[[0,2,2,0,0,0],[1,3,4,1,1,1]],'7':[[0,2,0,1,0,0],[1,3,1,2,1,1]],m7:[[0,2,0,0,0,0],[1,3,1,1,1,1]],sus4:[[0,2,2,2,0,0],[1,2,3,4,1,1]]};
-const ASH={'':[[-1,0,2,2,2,0],[0,1,3,3,3,1]],m:[[-1,0,2,2,1,0],[0,1,3,4,2,1]],'7':[[-1,0,2,0,2,0],[0,1,3,1,4,1]],m7:[[-1,0,2,0,1,0],[0,1,3,1,2,1]],maj7:[[-1,0,2,1,2,0],[0,1,3,2,4,1]],sus2:[[-1,0,2,2,0,0],[0,1,3,4,1,1]],sus4:[[-1,0,2,2,3,0],[0,1,2,3,4,1]]};
+ B7:['x21202','-213-4'],Bm:['x24432','-13421',2],
+ // add9: the chord with the 9th (the 2nd) added, so it doesn't draw as the plain chord (Oct 2026: D and Dadd9 looked the same)
+ Dadd9:['xx4230','--312-'],Gadd9:['320203','21-3-4'],Aadd9:['x02420','--142-'],Eadd9:['024100','-241--'],Fadd9:['xx3213','--3214']};
+const ESH={'':[[0,2,2,1,0,0],[1,3,4,2,1,1]],m:[[0,2,2,0,0,0],[1,3,4,1,1,1]],'7':[[0,2,0,1,0,0],[1,3,1,2,1,1]],m7:[[0,2,0,0,0,0],[1,3,1,1,1,1]],sus4:[[0,2,2,2,0,0],[1,2,3,4,1,1]],add9:[[0,-1,2,1,0,2],[1,0,3,2,1,4]]};
+const ASH={'':[[-1,0,2,2,2,0],[0,1,3,3,3,1]],m:[[-1,0,2,2,1,0],[0,1,3,4,2,1]],'7':[[-1,0,2,0,2,0],[0,1,3,1,4,1]],m7:[[-1,0,2,0,1,0],[0,1,3,1,2,1]],maj7:[[-1,0,2,1,2,0],[0,1,3,2,4,1]],sus2:[[-1,0,2,2,0,0],[0,1,3,4,1,1]],sus4:[[-1,0,2,2,3,0],[0,1,2,3,4,1]],add9:[[-1,0,2,4,2,0],[0,1,2,4,3,1]]};
 function parseLib([fr,fi,b]){const f=[...fr].map(ch=>ch==='x'?-1:+ch),fg=[...fi].map(ch=>ch==='-'?0:+ch);return {f,fi:fg,barre:b||0,bFrom:b?f.findIndex(x=>x===b):0,cost:b?2:0}}
 const shapeCache=new Map();
 function shapeFor(c){
  if(c>=NS)return null;if(shapeCache.has(c))return shapeCache.get(c);
  const name=chordName(c);let out;
- if(LIB[name])out={...parseLib(LIB[name]),name};
+ // an add9 keeps the ease it had when it was drawn as the plain chord (the capo and tuning guesses weigh shapes by it; Cadd9 had its own)
+ const t9=TYPES[c%NT].id==='add9'&&name!=='Cadd9';
+ if(LIB[name])out={...parseLib(LIB[name]),name,...(t9?{cost:.3}:{})};
  else{
-  const r=Math.floor(c/NT);let t=TYPES[c%NT].id,note='';
-  if(t==='add9'){t='';note='Simplified: play '+CH[r]+' (add9 adds the 2nd/9th)'}
-  if(note&&LIB[CH[r]])out={...parseLib(LIB[CH[r]]),name,note,cost:.3};
-  else{
+  const r=Math.floor(c/NT),t=TYPES[c%NT].id,note='';
+  {
    const opts=[];if(ESH[t]){let b=(r-4+12)%12||12;opts.push(['E',b])}if(ASH[t]){let b=(r-9+12)%12||12;opts.push(['A',b])}
    opts.sort((a,b)=>a[1]-b[1]);const [k,b]=opts[0],[off,fi]=(k==='E'?ESH:ASH)[t];
-   out={f:off.map(o=>o<0?-1:o+b),fi,barre:b,bFrom:k==='E'?0:1,cost:3,name,note};
+   out={f:off.map(o=>o<0?-1:o+b),fi,barre:b,bFrom:k==='E'?0:1,cost:t9?.3:3,name,note};
   }
  }
  shapeCache.set(c,out);return out;
@@ -2835,7 +2837,7 @@ function segConf(segs,EM,nF,rms,thr){const S=NS+1,f0=t=>Math.max(0,Math.min(nF,M
   for(let f=f0(g.t0);f<f0(g.t1);f++){if(rms[f]<thr)continue;const o=f*S,v=EM[o+g.c];let b=-1e9;for(let s2=0;s2<NS;s2++){if(Math.floor(s2/NT)===r&&th(s2%NT)===t3)continue;if(EM[o+s2]>b)b=EM[o+s2]}m+=v-b;k++}
   // the chord itself (root and 3rd) only: its extras (7, 9, sus) are settled after this by the notes' own rules (sevFit, add9P…)
   return k?+Math.max(0,Math.min(1,m/k/TUNE.confM)).toFixed(2):0})}
-window.__an={tune:o=>Object.assign(TUNE,o||{})};// test hook: try other settings (benchmark)
+window.__an={tune:o=>Object.assign(TUNE,o||{}),shape:n=>{for(let c=0;c<NS;c++)if(chordName(c)===n){const s=shapeFor(c);return {f:s.f.join(','),fi:s.fi.join(''),cost:s.cost}}return null}};// test hooks: try other settings (benchmark); a chord's diagram
 function beatFit(segs,chroma,rms,thr,beats){const nF=chroma.length,f0=t=>Math.max(0,Math.min(nF,Math.round((t*SR-(FN-HOP)/2)/HOP)));
  const mean=(t0,t1)=>{const v=new Float64Array(12);let k=0;for(let f=f0(t0);f<f0(t1);f++){if(rms[f]<thr)continue;const c=chroma[f],m=Math.max(...c)||1;for(let i=0;i<12;i++)v[i]+=c[i]/m;k++}return k>=2?v:null};
  const sc=(s2,v)=>{const T=TPL[s2],n=Math.hypot(...v)||1;let d=0;for(let i=0;i<12;i++)d+=T[i]*v[i];return d/n+TYPES[s2%NT].prior};
