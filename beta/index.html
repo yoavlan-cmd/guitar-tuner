@@ -7619,9 +7619,19 @@ function gdThirds(d){const F=d.feat;if(!F||!F.c)return null;let c;try{c=b64u8(F.
  return g=>{const r=Math.floor(g.c/NT);let M=0,m=0;const f0=Math.max(0,Math.floor((g.t0*SR-off)/hop)),f1=Math.min(n,Math.ceil((g.t1*SR-off)/hop));
   for(let f=f0;f<f1;f++){M+=c[f*12+(r+4)%12];m+=c[f*12+(r+3)%12]}return {M,m}}}
 const gd3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':''};
+// the capo the sound points to (deterministic): near a capo the hand plays open shapes (C D E G A, Am Dm Em…), so the capo is where
+// the chords heard become clearly open shapes: 80 % of the song or more, and 25 points more than with no capo (Oct 2026, "עכשיו":
+// capo 5 plain in the video but too small to read; the chords F Am7 G are C Em7 D with capo 5, 92 % open against 53 % with none)
+function gdSoundCapo(segs){const o0=vlOpen(segs,0);let best=null;for(let k=1;k<=7;k++){const o=vlOpen(segs,k);if(!best||o>best.o+1e-9)best={k,o}}
+ return best&&best.o>=.8&&best.o-o0>=.25?{capo:best.k,open:+best.o.toFixed(2),open0:+o0.toFixed(2)}:null}
 function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Number.isInteger(v.video.capo)?v.video.capo:null;
- // the capo: the one seen in the video, else none (the chords as they sound); nothing you set changes it, and a sheet's capo is only shown
- const by=vc!=null?'video':'none',capo=by==='video'?vc:0;
+ // the capo: the one seen in the video; when the video doesn't show it clearly (or there's no video), the one the sound points to
+ // clearly (gdSoundCapo); else none (the chords as they sound). Nothing you set changes it, and a sheet's capo is only shown. A capo
+ // read from the video with only medium confidence (and no clear hand shapes agreeing with it) that the sound clearly contradicts (its shapes far from open, another capo's
+ // nearly all open) is taken as misread: the sound's capo, and How sure says so.
+ const snd=gdSoundCapo(v.segs),vconf=v.video&&v.video.raw&&v.video.raw.capo_conf,vOpen=vc!=null?vlOpen(v.segs,vc):null;
+ const misread=vc!=null&&!(v.video&&v.video.shift)&&!((v.video&&v.video.agree)>=2)&&vconf!=='high'&&snd&&snd.capo!==vc&&snd.open>=.85&&vOpen<=.6;
+ const by=vc!=null&&!misread?'video':snd?'sound':'none',capo=by==='video'?vc:by==='sound'?snd.capo:0;
  let fit=null;
  if(ref&&ref.chords&&ref.chords.length){const d0=tshift(ref.tun||v.play.tun,ref.capo||0),S=[];
   ref.chords.forEach(n=>{const p=parseChord(n);if(!p)return;let t=TYPES.findIndex(x=>x.id===(QTYPE[p.q]??p.q));if(t<0)t=p.iv.includes(3)?1:0;
@@ -7643,10 +7653,13 @@ function gdFit(d,ref,key){const v=JSON.parse(JSON.stringify(d)),vc=v.video&&Numb
   fit={by:'sheet',chords:ref.chords.slice(0,8),capo:ref.capo,match:tot?inSheet/tot:0,unsure:[...unsure].map(([h,s])=>({heard:h,sheet:s})),clash:[...clash].map(([h,s])=>({heard:h,sheet:s})),extra:heard,missing}}
  // a guide matched to the sheet by the earlier version (its chords were replaced): say so until it's rebuilt
  if(d.fit&&(d.fit.share!=null||d.fit.legacy))(fit=fit||{by:'sheet',chords:d.fit.chords||[],capo:null,match:0,unsure:[],clash:[],extra:[],missing:[]}).legacy=true;
- v.play={...v.play,capo,capoBy:by};v.fit=fit;
+ v.play={...v.play,capo,capoBy:by};if(by==='sound')v.play.capoSnd={...snd,...(misread?{seen:vc,seenOpen:+vOpen.toFixed(2)}:{})};else delete v.play.capoSnd;v.fit=fit;
  // keep it (the capo and its source), so the play-along shows the same
  if(key&&(v.play.capo!==d.play.capo||d.play.capoBy!==by))try{localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(v)))}catch(e){}
  return v}
+// why the capo comes from the sound
+function gdSoundWhy(x,V){const pc=n=>Math.round(n*100)+'%';
+ return `${x.seen!=null?`The video seemed to show ${x.seen?'capo '+x.seen:'no capo'}, but the sound says otherwise: with ${x.seen?'capo '+x.seen:'no capo'} only ${pc(x.seenOpen)} of the song is open shapes.`:V&&!V.skip?'The capo isn’t clear in the video’s stills.':'There’s no video to see the capo.'} With capo ${x.capo} the chords heard are the open shapes a hand plays near a capo (${pc(x.open)} of the song, against ${pc(x.open0)} with no capo), so it’s capo ${x.capo}. Check it against the video.`}
 // the capo set from the shapes the hand plays in the video, or (when the shapes can't be read) from the open shapes the sound
 // becomes near the capo seen (68-video-look vlApply)
 function gdShiftWhy(x){const c=x.capo,sc=x.seenCapo,n=sc!=null?sc-c:0,hs=k=>Math.abs(k)===1?'a half step':Math.abs(k)+' half steps';
@@ -7681,12 +7694,12 @@ function gdBuild(d){const keep=A;A=d;try{
  const rep=[...dur].filter(([n])=>d.segs.filter(g=>g.c<NS&&nameOf(g)===n).length>=3).reduce((a,[,v])=>a+v,0)/tot,parts=new Set(secs.map(s=>s.name)).size<secs.length;
  const U=gdUnsure(d),V=d.video&&!d.video.skip?d.video:null,vSeen=V?V.frames.length:0,vDiff=V?V.differ:[];
  const byYou=d.fb&&(d.fb.chords||d.fb.sections),chordsLv=V&&vDiff.length>1?'likely':byYou||(V&&vSeen>=2&&!vDiff.length)||(d.fit&&d.fit.match>=.9&&!(d.fit.clash||[]).length&&rep>=.6)?'solid':rep>=.85&&parts?'solid':rep>=.6?'likely':'guess';
- const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':sc===capo?'likely':'guess';
+ const cb=d.play.capoBy,sc=d.fit&&d.fit.capo!=null?+d.fit.capo:null,capoLv=cb==='you'||cb==='video'?'solid':cb==='sound'?'likely':sc===capo?'likely':'guess';
  const share=PA.share,strumLv=!d.ons||!PA.n?'guess':share>=.85?'solid':share>=.72?'likely':'guess';
  const tempoLv=d.beats&&d.beats.length>8?'solid':'likely',ext=fullMain.some(n=>gdEasyName(n)!==n);
  const vWhy=V&&vSeen?(vDiff.length?` The video shows something else at ${vDiff.slice(0,2).map(x=>`${mmss(x.t)} (heard ${x.heard}, the hand plays ${x.seen})`).join(' and ')}: check it there.`:` The guitarist’s hand in the video matches at ${vSeen} moment${vSeen>1?'s':''}${V.fixed.length?` (it showed ${V.fixed.map(x=>x.split(' → ')[1]).join(', ')}, which the sound heard differently)`:''}.`):'';
  const sure=[{k:'Chords and order',lv:chordsLv,why:(byYou?'You checked them in the analysis.':chordsLv==='solid'?'The same chords come back in every repeat of the song’s parts.':chordsLv==='likely'?'Most of the song repeats the same chords; a few short changes may be off.':'The chords change a lot and don’t repeat much, so check them by ear.')+vWhy+gdSheetWhy(d.fit)+(U.length?` Least sure: ${U.map(x=>`${x.n} at ${x.ts.slice(0,2).map(mmss).join(', ')}`).join('; ')}. Check ${U.length>1?'these':'it'} by ear${d.video&&!d.video.skip?' or in the video':''} (dashed in the play-along).`:'')},
-  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
+  {k:'Capo and shapes',lv:capoLv,why:(cb==='you'?'You set the capo from the video.':cb==='sound'&&d.play.capoSnd?gdSoundWhy(d.play.capoSnd,d.video):cb==='video'?(d.video&&d.video.shift?gdShiftWhy(d.video.shift):`Seen in the song’s video: ${capo?'capo on fret '+capo:'no capo on the neck'}.`):sc===capo&&sc!=null?'A capo can’t be heard; these are the chords as they sound, with no capo, and your chord sheet has no capo either.':'A capo can’t be heard (an open C#m sounds like an Am shape with capo 4), so these are the chords as they sound, with no capo. It’s taken from the song’s video when there is one.')+(sc!=null&&sc!==capo&&cb!=='you'?` Your chord sheet says ${sc?'capo '+sc:'no capo'} (it may be another version).`:'')},
   ...(ext?[{k:'Exact voicings',lv:'likely',why:'The extra notes ('+fullMain.filter(n=>gdEasyName(n)!==n).slice(0,3).join(', ')+') are in the sound; the finger placement is the usual way to get them.'}]:[]),
   {k:'Strumming',lv:strumLv,why:!d.ons?'There’s no beat detail for this song yet, so it shows a simple pattern.':`The bars follow this pattern ${Math.round(share*100)}% of the time${strumLv==='guess'?' (the strums vary a lot: use it as a starting point)':''}.`+(d.beatFrom==='drums'?' The beat is taken from the drums.':d.beatFrom==='model'?' The beat is from Beat This!, a beat-tracking model your GitHub runs during the split.':'')},
   {k:'Tempo',lv:tempoLv,why:tempoLv==='solid'?(d.beatFrom==='drums'?'Measured from the drums of the recording.':d.beatFrom==='model'?'Measured by Beat This!, a beat-tracking model, during the split.':'Measured from the beat of the recording.'):'Estimated; the beat wasn’t measured in detail.'}];
