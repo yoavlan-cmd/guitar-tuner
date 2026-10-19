@@ -1,9 +1,10 @@
 {
  "v": 1,
- "at": "2026-10-18T02:55:07Z",
- "date": "2026-10-18",
+ "at": "2026-10-19T02:55:48Z",
+ "date": "2026-10-19",
  "index": {
   "artists": [
+   "Hatikva 6",
    "Jimbo J",
    "Eviatar Banai",
    "Green Day",
@@ -285,110 +286,193 @@
     "a": "Foo",
     "t": "My Hero - acoustic",
     "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה",
+    "ch": []
    }
   ]
  },
- "level": "Intermediate: comfortable with full barre chords in flat keys, maj7 and slash chords, capo and Drop D.",
+ "level": "Comfortable intermediate: plenty of barre chords in flat keys, capo and Drop D already in the folder.",
  "suggestions": [
   {
-   "title": "ממעמקים",
-   "artist": "הפרויקט של עידן רייכל",
-   "style": "Israeli pop",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A second song by an artist already in the folder; a slow, flowing ballad to work on smooth chord changes."
-  },
-  {
-   "title": "לבכות לך",
-   "artist": "אביב גפן",
-   "style": "Israeli rock ballad",
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
    "difficulty": 2,
-   "chords": [],
+   "chords": [
+    "Bb",
+    "C",
+    "Dm",
+    "F",
+    "Gm"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A classic sing-along ballad; a relaxed song to polish arpeggio picking."
+   "why": "A sing-along by the band you just added; five chords with the Gm and Bb barres you already know."
   },
   {
-   "title": "שפל רוח",
-   "artist": "ברי סחרוף",
+   "title": "הכל עוד לפני",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "D",
+    "G",
+    "C",
+    "Bm",
+    "D/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier one from the same band: open chords plus the D/F# bass walk."
+  },
+  {
+   "title": "מכה אפורה",
+   "artist": "מוניקה סקס",
    "style": "Israeli rock",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "D",
+    "Bm",
+    "A",
+    "G",
+    "A/F#",
+    "Em",
+    "D4",
+    "F#m",
+    "D/A"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Berry Sakharof after Hot on the Moon; a moodier rock groove to tighten strumming."
+   "why": "Classic Israeli rock close to Rockfour; practise slash chords and the D4 riff."
   },
   {
-   "title": "לרגע קטן",
+   "title": "הכוכבים דולקים על אש קטנה",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "G",
+    "Bm",
+    "C",
+    "F",
+    "Am",
+    "Em",
+    "Gm",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A Mashina ballad that mixes open chords with F and Gm barres for smooth changes."
+  },
+  {
+   "title": "בגלגול הזה",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "E",
+    "E/C#",
+    "E/D",
+    "E/Eb",
+    "A",
+    "G",
+    "B"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "New technique: a descending bass line under one E chord shape."
+  },
+  {
+   "title": "ניסים",
    "artist": "עברי לידר",
    "style": "Israeli pop",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Ivri Lider song in the same melodic style; good practice for dynamics between verse and chorus."
-  },
-  {
-   "title": "על הרכבת",
-   "artist": "טונה",
-   "style": "Israeli hip hop",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Tuna again, in a groove-based song; keeps the rhythm hand busy under fast lyrics."
-  },
-  {
-   "title": "מבול",
-   "artist": "אביתר בנאי",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A deeper cut from an artist he plays a lot; a good next step after the other Banai songs."
-  },
-  {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A gentler Oasis song after Wonderwall; practise a steady picked-strum pattern."
-  },
-  {
-   "title": "Soul to Squeeze",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
    "difficulty": 4,
-   "chords": [],
+   "chords": [
+    "Bb9",
+    "Fm",
+    "C7",
+    "Ddim",
+    "C#",
+    "Bbm",
+    "Gm",
+    "B",
+    "Bb",
+    "C"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A small step up from My Friends: funkier rhythm and smoother chord transitions."
+   "why": "A step up from an artist in your folder: 9th, sus and dim chords in a flat key."
   },
   {
-   "title": "Big Me",
+   "title": "Best of You",
    "artist": "Foo Fighters",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [],
+   "style": "Rock",
+   "difficulty": 3,
+   "chords": [
+    "C#m",
+    "A",
+    "B",
+    "F#"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A short, easy Foo Fighters song to sit next to My Hero; quick to learn and fun to sing."
+   "why": "Four chords, big dynamics: build strumming power from quiet to loud."
   },
   {
-   "title": "Just Breathe",
-   "artist": "Pearl Jam",
-   "style": "Acoustic rock",
+   "title": "Heart-Shaped Box",
+   "artist": "Nirvana",
+   "style": "Grunge",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "A5",
+    "F5",
+    "D5"
+   ],
+   "capo": 0,
+   "tuning": "Drop Db",
+   "why": "A start for your empty Nirvana folder; power chords in a new drop tuning."
+  },
+  {
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "Am7",
+    "G",
+    "G7",
+    "F",
+    "F7",
+    "C",
+    "C7",
+    "E",
+    "E7"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A new artist close to his grunge taste; a fingerpicked acoustic piece for clean picking."
+   "why": "An easy groove: add 7ths to chords you know and work on palm-muted strumming."
+  },
+  {
+   "title": "Black",
+   "artist": "Pearl Jam",
+   "style": "Grunge ballad",
+   "difficulty": 3,
+   "chords": [
+    "E",
+    "Asus2",
+    "A",
+    "C",
+    "Em",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A slow 90s ballad for expressive picking with sus2 colours."
   }
  ],
  "history": [
@@ -841,6 +925,56 @@
    "title": "Just Breathe",
    "artist": "Pearl Jam",
    "date": "2026-10-18"
+  },
+  {
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "הכל עוד לפני",
+   "artist": "התקווה 6",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "מכה אפורה",
+   "artist": "מוניקה סקס",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "הכוכבים דולקים על אש קטנה",
+   "artist": "משינה",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "בגלגול הזה",
+   "artist": "שלום חנוך",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "ניסים",
+   "artist": "עברי לידר",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "Heart-Shaped Box",
+   "artist": "Nirvana",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "date": "2026-10-19"
+  },
+  {
+   "title": "Black",
+   "artist": "Pearl Jam",
+   "date": "2026-10-19"
   }
  ],
  "sheets": [
@@ -856,8 +990,9 @@
     "Cadd9"
    ],
    "level": 1,
-   "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
-   "at": "2026-10-10T23:07:35.424Z"
+   "viewUrl": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
+   "createdTime": "2026-10-10T23:07:35.424Z",
+   "folder": "Eviatar Banai"
   },
   {
    "title": "יא",
@@ -869,8 +1004,9 @@
     "C#"
    ],
    "level": 2,
-   "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
-   "at": "2026-10-12T05:44:13.178Z"
+   "viewUrl": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
+   "createdTime": "2026-10-12T05:44:13.178Z",
+   "folder": "Tuna"
   },
   {
    "title": "במקום-טסט שיר",
@@ -883,8 +1019,9 @@
     "C#m"
    ],
    "level": 2,
-   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z"
+   "viewUrl": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "createdTime": "2026-10-16T22:12:44.867Z",
+   "folder": "Jimbo J"
   },
   {
    "title": "במקום בו אני גר",
@@ -897,8 +1034,9 @@
     "C#m"
    ],
    "level": 2,
-   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
+   "viewUrl": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "createdTime": "2026-10-11T20:50:16.168Z",
+   "folder": "Jimbo J"
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -911,8 +1049,9 @@
     "Em"
    ],
    "level": 1,
-   "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
-   "at": "2026-10-12T05:50:07.510Z"
+   "viewUrl": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
+   "createdTime": "2026-10-12T05:50:07.510Z",
+   "folder": "Green Day"
   },
   {
    "title": "שאריות של החיים",
@@ -930,8 +1069,9 @@
     "Ab"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
-   "at": "2026-10-12T04:23:56.176Z"
+   "viewUrl": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
+   "createdTime": "2026-10-12T04:23:56.176Z",
+   "folder": "Amir dadon"
   },
   {
    "title": "חלל",
@@ -944,8 +1084,9 @@
     "Abm"
    ],
    "level": 2,
-   "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
-   "at": "2026-10-12T04:21:21.095Z"
+   "viewUrl": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
+   "createdTime": "2026-10-12T04:21:21.095Z",
+   "folder": "Amir dadon"
   },
   {
    "title": "אור גדול",
@@ -961,8 +1102,9 @@
     "Fm7"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
-   "at": "2026-10-12T04:13:33.006Z"
+   "viewUrl": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
+   "createdTime": "2026-10-12T04:13:33.006Z",
+   "folder": "Amir dadon"
   },
   {
    "title": "Bascet Case",
@@ -978,8 +1120,9 @@
     "Dbm"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
-   "at": "2026-10-11T20:57:06.788Z"
+   "viewUrl": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
+   "createdTime": "2026-10-11T20:57:06.788Z",
+   "folder": "Green Day"
   },
   {
    "title": "סהרה",
@@ -993,8 +1136,9 @@
     "B"
    ],
    "level": 4,
-   "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
-   "at": "2026-10-11T19:20:34.742Z"
+   "viewUrl": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
+   "createdTime": "2026-10-11T19:20:34.742Z",
+   "folder": "Tuna"
   },
   {
    "title": "קשה בכדור הארץ",
@@ -1010,8 +1154,9 @@
     "G"
    ],
    "level": 3,
-   "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
-   "at": "2026-10-11T19:18:19.408Z"
+   "viewUrl": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
+   "createdTime": "2026-10-11T19:18:19.408Z",
+   "folder": "Tuna"
   },
   {
    "title": "ביום שמש יפה",
@@ -1029,8 +1174,9 @@
     "Ddim"
    ],
    "level": 4,
-   "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
-   "at": "2026-10-10T17:10:42.560Z"
+   "viewUrl": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
+   "createdTime": "2026-10-10T17:10:42.560Z",
+   "folder": "Ivri lider"
   },
   {
    "title": "בין קודש לחול",
@@ -1047,8 +1193,9 @@
     "Bb"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
-   "at": "2026-10-11T11:24:33.896Z"
+   "viewUrl": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
+   "createdTime": "2026-10-11T11:24:33.896Z",
+   "folder": "Amir dadon"
   },
   {
    "title": "חם על הירח",
@@ -1069,8 +1216,9 @@
     "B7"
    ],
    "level": 4,
-   "url": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
-   "at": "2026-10-11T08:59:26.641Z"
+   "viewUrl": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
+   "createdTime": "2026-10-11T08:59:26.641Z",
+   "folder": "Beri Saharof"
   },
   {
    "title": "עד מתי",
@@ -1086,8 +1234,9 @@
     "C"
    ],
    "level": 3,
-   "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
-   "at": "2026-10-11T04:39:56.376Z"
+   "viewUrl": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
+   "createdTime": "2026-10-11T04:39:56.376Z",
+   "folder": "Eviatar Banai"
   },
   {
    "title": "Wanderwall",
@@ -1100,8 +1249,9 @@
     "E"
    ],
    "level": 1,
-   "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
-   "at": "2026-10-11T04:04:56.240Z"
+   "viewUrl": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
+   "createdTime": "2026-10-11T04:04:56.240Z",
+   "folder": "Oasis"
   },
   {
    "title": "תחרות כלבים",
@@ -1119,8 +1269,9 @@
     "F#m6"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
-   "at": "2026-10-11T03:48:41.071Z"
+   "viewUrl": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
+   "createdTime": "2026-10-11T03:48:41.071Z",
+   "folder": "Eviatar Banai"
   },
   {
    "title": "צבעים",
@@ -1135,8 +1286,9 @@
     "Dm"
    ],
    "level": 2,
-   "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
-   "at": "2026-10-10T22:31:59.230Z"
+   "viewUrl": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
+   "createdTime": "2026-10-10T22:31:59.230Z",
+   "folder": "Amir dadon"
   },
   {
    "title": "הכעס",
@@ -1151,8 +1303,9 @@
     "F#m"
    ],
    "level": 3,
-   "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
-   "at": "2026-10-10T19:13:35.115Z"
+   "viewUrl": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
+   "createdTime": "2026-10-10T19:13:35.115Z",
+   "folder": "Rockfour"
   },
   {
    "title": "Better Together",
@@ -1168,8 +1321,9 @@
     "Gm"
    ],
    "level": 4,
-   "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
-   "at": "2026-10-11T04:46:28.822Z"
+   "viewUrl": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
+   "createdTime": "2026-10-11T04:46:28.822Z",
+   "folder": "Jack Johnson"
   },
   {
    "title": "My friends",
@@ -1193,8 +1347,9 @@
     "C"
    ],
    "level": 5,
-   "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
-   "at": "2026-10-07T10:16:18.945Z"
+   "viewUrl": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
+   "createdTime": "2026-10-07T10:16:18.945Z",
+   "folder": "RHCP"
   }
  ],
  "jokes": [
