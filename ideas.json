@@ -1,15 +1,16 @@
 {
  "v": 1,
- "at": "2026-10-19T02:55:48Z",
- "date": "2026-10-19",
+ "at": "2026-10-20T02:55:36Z",
+ "date": "2026-10-20",
  "index": {
   "artists": [
+   "Jonnie Shualy",
    "Hatikva 6",
    "Jimbo J",
-   "Eviatar Banai",
-   "Green Day",
-   "Tuna",
    "Amir dadon",
+   "Eviatar Banai",
+   "Tuna",
+   "Green Day",
    "Nirvana",
    "Jack Johnson",
    "Beri Saharof",
@@ -21,6 +22,16 @@
   ],
   "songs": [
    {
+    "a": "Jonnie Shualy",
+    "t": "עכשיו",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה",
+    "ch": []
+   },
+   {
     "a": "Jimbo J",
     "t": "במקום בו אני גר",
     "ch": [
@@ -28,99 +39,6 @@
      "E",
      "C#m",
      "A"
-    ]
-   },
-   {
-    "a": "Eviatar Banai",
-    "t": "מאיר בנאי אצלך בעולם",
-    "ch": [
-     "Am",
-     "Em",
-     "Em7",
-     "Cadd9",
-     "C",
-     "D"
-    ]
-   },
-   {
-    "a": "Eviatar Banai",
-    "t": "עד מתי",
-    "ch": [
-     "Dm",
-     "F",
-     "Gm",
-     "Bb",
-     "Am",
-     "C"
-    ]
-   },
-   {
-    "a": "Eviatar Banai",
-    "t": "תחרות כלבים",
-    "ch": [
-     "F#m",
-     "C#m",
-     "G#m",
-     "A",
-     "E",
-     "Bm",
-     "F#m7",
-     "F#m6",
-     "D"
-    ]
-   },
-   {
-    "a": "Green Day",
-    "t": "Good Riddance (Time Of Your Life)",
-    "ch": [
-     "G",
-     "Cadd9",
-     "C",
-     "D",
-     "Em"
-    ]
-   },
-   {
-    "a": "Green Day",
-    "t": "Bascet Case",
-    "ch": [
-     "Eb",
-     "Bb",
-     "Cm",
-     "Gm",
-     "Ab",
-     "Dbm"
-    ]
-   },
-   {
-    "a": "Tuna",
-    "t": "יא",
-    "ch": [
-     "Cm",
-     "C#"
-    ]
-   },
-   {
-    "a": "Tuna",
-    "t": "סהרה",
-    "ch": [
-     "Bbm",
-     "Ebm",
-     "Abm",
-     "B"
-    ]
-   },
-   {
-    "a": "Tuna",
-    "t": "קשה בכדור הארץ",
-    "ch": [
-     "Bm",
-     "A",
-     "F#m",
-     "Em",
-     "F#",
-     "G",
-     "D"
     ]
    },
    {
@@ -157,8 +75,8 @@
      "Ab",
      "Cm",
      "Gm",
-     "Bb4",
-     "Fm7"
+     "Fm7",
+     "Bb4"
     ]
    },
    {
@@ -180,28 +98,117 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "Bm",
+     "C",
      "D",
+     "Bm",
+     "Dm"
+    ]
+   },
+   {
+    "a": "Eviatar Banai",
+    "t": "מאיר בנאי אצלך בעולם",
+    "ch": [
+     "Am",
+     "Em",
+     "Em7",
+     "Cadd9",
+     "C",
+     "D"
+    ]
+   },
+   {
+    "a": "Eviatar Banai",
+    "t": "עד מתי",
+    "ch": [
      "Dm",
+     "F",
+     "Gm",
+     "Bb",
+     "Am",
      "C"
     ]
    },
    {
-    "a": "Ivri lider",
-    "t": "ביום שמש יפה",
+    "a": "Eviatar Banai",
+    "t": "תחרות כלבים",
     "ch": [
-     "G/B",
-     "Am",
-     "Dm7",
-     "Dm",
+     "F#m",
+     "C#m",
+     "G#m",
+     "A",
+     "E",
+     "D",
+     "Bm",
+     "F#m7",
+     "F#m6"
+    ]
+   },
+   {
+    "a": "Tuna",
+    "t": "יא",
+    "ch": [
+     "Cm",
+     "C#"
+    ]
+   },
+   {
+    "a": "Tuna",
+    "t": "סהרה",
+    "ch": [
+     "Bbm",
+     "Ebm",
+     "B",
+     "Abm"
+    ]
+   },
+   {
+    "a": "Tuna",
+    "t": "קשה בכדור הארץ",
+    "ch": [
+     "Bm",
+     "A",
+     "G",
+     "D",
+     "F#m",
+     "Em",
+     "F#"
+    ]
+   },
+   {
+    "a": "Green Day",
+    "t": "Good Riddance (Time Of Your Life)",
+    "ch": [
+     "G",
+     "Cadd9",
+     "D",
+     "C",
+     "Em"
+    ]
+   },
+   {
+    "a": "Green Day",
+    "t": "Bascet Case",
+    "ch": [
      "Eb",
      "Bb",
      "Cm",
-     "Ddim",
+     "Gm",
+     "Ab",
+     "Dbm"
+    ]
+   },
+   {
+    "a": "Jack Johnson",
+    "t": "Better Together",
+    "ch": [
      "F",
-     "C"
-    ],
-    "capo": 1
+     "F/E",
+     "Dm",
+     "C",
+     "Bb",
+     "Bb/A",
+     "Gm"
+    ]
    },
    {
     "a": "Beri Saharof",
@@ -212,10 +219,10 @@
      "F#",
      "Cmaj7",
      "Am7",
-     "C",
      "E",
-     "Dm",
+     "C",
      "Am",
+     "Dm",
      "Ebdim",
      "B7"
     ]
@@ -224,9 +231,9 @@
     "a": "Oasis",
     "t": "Wanderwall",
     "ch": [
-     "Cadd9",
      "Em7",
      "G",
+     "Cadd9",
      "D4",
      "G/F#",
      "E"
@@ -241,24 +248,11 @@
      "Bb",
      "Am",
      "Eb",
-     "F#m",
-     "A",
      "G",
      "C",
-     "D"
-    ]
-   },
-   {
-    "a": "Jack Johnson",
-    "t": "Better Together",
-    "ch": [
-     "F",
-     "F/E",
-     "Dm",
-     "Bb",
-     "Bb/A",
-     "Gm",
-     "C"
+     "F#m",
+     "D",
+     "A"
     ]
    },
    {
@@ -270,209 +264,227 @@
      "Dm7/F",
      "G/B",
      "G",
+     "C",
+     "D",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
-     "D",
-     "C",
      "Asus2/B",
      "A/B",
-     "D/F#"
+     "D/F#",
+     "F"
     ],
     "tuning": "Drop D"
+   },
+   {
+    "a": "Ivri lider",
+    "t": "ביום שמש יפה",
+    "ch": [
+     "G/B",
+     "Am",
+     "F",
+     "C",
+     "Dm7",
+     "Dm",
+     "Eb",
+     "Bb",
+     "Cm",
+     "Ddim"
+    ],
+    "capo": 1
    },
    {
     "a": "Foo",
     "t": "My Hero - acoustic",
     "ch": []
-   },
-   {
-    "a": "Hatikva 6",
-    "t": "לחזור הביתה",
-    "ch": []
    }
   ]
  },
- "level": "Comfortable intermediate: plenty of barre chords in flat keys, capo and Drop D already in the folder.",
+ "level": "Confident intermediate: you already handle full barre chords in flat keys, maj7 and slash chords, capo and Drop D.",
  "suggestions": [
   {
-   "title": "כל יום מחדש",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
+   "title": "תתארו לכם",
+   "artist": "שלמה ארצי",
+   "style": "Israeli classic rock",
+   "difficulty": 3,
    "chords": [
-    "Bb",
-    "C",
+    "Gm",
     "Dm",
+    "Eb",
+    "F4",
     "F",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along by the band you just added; five chords with the Gm and Bb barres you already know."
-  },
-  {
-   "title": "הכל עוד לפני",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "D",
-    "G",
-    "C",
-    "Bm",
-    "D/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier one from the same band: open chords plus the D/F# bass walk."
-  },
-  {
-   "title": "מכה אפורה",
-   "artist": "מוניקה סקס",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "D",
-    "Bm",
-    "A",
-    "G",
-    "A/F#",
-    "Em",
-    "D4",
-    "F#m",
-    "D/A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Classic Israeli rock close to Rockfour; practise slash chords and the D4 riff."
-  },
-  {
-   "title": "הכוכבים דולקים על אש קטנה",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "G",
-    "Bm",
-    "C",
-    "F",
-    "Am",
-    "Em",
-    "Gm",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Mashina ballad that mixes open chords with F and Gm barres for smooth changes."
-  },
-  {
-   "title": "בגלגול הזה",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "E/C#",
-    "E/D",
-    "E/Eb",
-    "A",
-    "G",
-    "B"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "New technique: a descending bass line under one E chord shape."
-  },
-  {
-   "title": "ניסים",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
-   "difficulty": 4,
-   "chords": [
-    "Bb9",
-    "Fm",
-    "C7",
-    "Ddim",
-    "C#",
-    "Bbm",
-    "Gm",
-    "B",
     "Bb",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up from an artist in your folder: 9th, sus and dim chords in a flat key."
-  },
-  {
-   "title": "Best of You",
-   "artist": "Foo Fighters",
-   "style": "Rock",
-   "difficulty": 3,
-   "chords": [
-    "C#m",
-    "A",
-    "B",
-    "F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Four chords, big dynamics: build strumming power from quiet to loud."
-  },
-  {
-   "title": "Heart-Shaped Box",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 3,
-   "chords": [
-    "A5",
-    "F5",
-    "D5"
-   ],
-   "capo": 0,
-   "tuning": "Drop Db",
-   "why": "A start for your empty Nirvana folder; power chords in a new drop tuning."
-  },
-  {
-   "title": "Sitting, Waiting, Wishing",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "Am7",
-    "G",
-    "G7",
-    "F",
-    "F7",
-    "C",
-    "C7",
-    "E",
-    "E7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy groove: add 7ths to chords you know and work on palm-muted strumming."
-  },
-  {
-   "title": "Black",
-   "artist": "Pearl Jam",
-   "style": "Grunge ballad",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "Asus2",
-    "A",
-    "C",
-    "Em",
+    "Bb4",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A slow 90s ballad for expressive picking with sus2 colours."
+   "why": "Uses the flat-key barre chords you already play, with sus4 touches to colour the changes."
+  },
+  {
+   "title": "בעולם שלה",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "Gm",
+    "Bb",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Same band as the song you're working on, built on four chords you know well; focus on a tight strum."
+  },
+  {
+   "title": "מה שיהיה יהיה",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "F",
+    "C",
+    "Dm",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy, upbeat one to play and sing straight through, good for clean F and Bb barres."
+  },
+  {
+   "title": "בשבילך",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 4,
+   "chords": [
+    "Bm",
+    "Em",
+    "F#",
+    "C#m7b5",
+    "Bm/F#",
+    "Bm/G",
+    "Bm/G#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: a descending bass line under Bm and your first m7b5 chord."
+  },
+  {
+   "title": "אוח",
+   "artist": "טונה",
+   "style": "Israeli hip-hop / groove",
+   "difficulty": 4,
+   "chords": [
+    "B7",
+    "C",
+    "Cmaj7",
+    "F#7",
+    "Bm7",
+    "F#m7",
+    "E",
+    "C7",
+    "F#",
+    "Bm",
+    "B",
+    "C5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Tuna with a jazzier palette: dominant 7 and m7 shapes, plus a groovy right hand."
+  },
+  {
+   "title": "תרקוד",
+   "artist": "שלמה ארצי",
+   "style": "Israeli classic rock",
+   "difficulty": 3,
+   "chords": [
+    "Em",
+    "B",
+    "B7",
+    "Am",
+    "G",
+    "D",
+    "C",
+    "G7",
+    "G/E",
+    "G/F",
+    "D/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A classic at your level that adds B7 and walking slash-chord bass notes."
+  },
+  {
+   "title": "מכונת הזמן",
+   "artist": "רוקפור",
+   "style": "Israeli alt-rock",
+   "difficulty": 4,
+   "chords": [
+    "C",
+    "Em",
+    "Am",
+    "F",
+    "Fm",
+    "Cm",
+    "Dm",
+    "C#",
+    "F#dim7",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More from a band in your folder; the F to Fm move and a dim7 passing chord are the new bits."
+  },
+  {
+   "title": "Whatever",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "Dsus4/F#",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier Oasis strummer to enjoy; practise keeping the ringing top strings steady while the bass moves."
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "style": "Acoustic",
+   "difficulty": 2,
+   "chords": [
+    "A",
+    "G",
+    "D",
+    "Em",
+    "F#m"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Laid-back Jack Johnson with simple open chords; work on his muted, percussive strum."
+  },
+  {
+   "title": "Dumb",
+   "artist": "Nirvana",
+   "style": "Grunge / acoustic",
+   "difficulty": 3,
+   "chords": [
+    "Esus4",
+    "A",
+    "Gsus4",
+    "C",
+    "E",
+    "Em",
+    "G",
+    "B",
+    "E5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A first song for your empty Nirvana folder; sus4 colours and quick changes between open shapes."
   }
  ],
  "history": [
@@ -975,84 +987,59 @@
    "title": "Black",
    "artist": "Pearl Jam",
    "date": "2026-10-19"
+  },
+  {
+   "title": "תתארו לכם",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "בעולם שלה",
+   "artist": "התקווה 6",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "מה שיהיה יהיה",
+   "artist": "התקווה 6",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "בשבילך",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "אוח",
+   "artist": "טונה",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "תרקוד",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "מכונת הזמן",
+   "artist": "רוקפור",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "Whatever",
+   "artist": "Oasis",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "date": "2026-10-20"
+  },
+  {
+   "title": "Dumb",
+   "artist": "Nirvana",
+   "date": "2026-10-20"
   }
  ],
  "sheets": [
-  {
-   "title": "מאיר בנאי אצלך בעולם",
-   "artist": "Eviatar Banai",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "Am",
-    "Em",
-    "Em7",
-    "Cadd9"
-   ],
-   "level": 1,
-   "viewUrl": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
-   "createdTime": "2026-10-10T23:07:35.424Z",
-   "folder": "Eviatar Banai"
-  },
-  {
-   "title": "יא",
-   "artist": "Tuna",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "Cm",
-    "C#"
-   ],
-   "level": 2,
-   "viewUrl": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
-   "createdTime": "2026-10-12T05:44:13.178Z",
-   "folder": "Tuna"
-  },
-  {
-   "title": "במקום-טסט שיר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m"
-   ],
-   "level": 2,
-   "viewUrl": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "createdTime": "2026-10-16T22:12:44.867Z",
-   "folder": "Jimbo J"
-  },
-  {
-   "title": "במקום בו אני גר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m"
-   ],
-   "level": 2,
-   "viewUrl": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "createdTime": "2026-10-11T20:50:16.168Z",
-   "folder": "Jimbo J"
-  },
-  {
-   "title": "Good Riddance (Time Of Your Life)",
-   "artist": "Green Day",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "C",
-    "D",
-    "Em"
-   ],
-   "level": 1,
-   "viewUrl": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
-   "createdTime": "2026-10-12T05:50:07.510Z",
-   "folder": "Green Day"
-  },
   {
    "title": "שאריות של החיים",
    "artist": "Amir dadon",
@@ -1066,12 +1053,93 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab"
+    "Ab",
+    "Bbm/Ab",
+    "Eb/G",
+    "Ab/Gb",
+    "Db/F",
+    "Eb"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
-   "createdTime": "2026-10-12T04:23:56.176Z",
-   "folder": "Amir dadon"
+   "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
+   "at": "2026-10-12T04:23:56.176Z"
+  },
+  {
+   "title": "מאיר בנאי אצלך בעולם",
+   "artist": "Eviatar Banai",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "Am",
+    "Em",
+    "Em7",
+    "Cadd9",
+    "C",
+    "D"
+   ],
+   "level": 1,
+   "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
+   "at": "2026-10-10T23:07:35.424Z"
+  },
+  {
+   "title": "במקום-טסט שיר",
+   "artist": "Jimbo J",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m",
+    "A"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "at": "2026-10-16T22:12:44.867Z"
+  },
+  {
+   "title": "במקום בו אני גר",
+   "artist": "Jimbo J",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m",
+    "A"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "at": "2026-10-11T20:50:16.168Z"
+  },
+  {
+   "title": "יא",
+   "artist": "Tuna",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "Cm",
+    "C",
+    "C#"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
+   "at": "2026-10-12T05:44:13.178Z"
+  },
+  {
+   "title": "Good Riddance (Time Of Your Life)",
+   "artist": "Green Day",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "C",
+    "D",
+    "Em",
+    "G",
+    "Cadd9"
+   ],
+   "level": 1,
+   "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
+   "at": "2026-10-12T05:50:07.510Z"
   },
   {
    "title": "חלל",
@@ -1081,12 +1149,14 @@
    "chords": [
     "Bmaj7",
     "E",
-    "Abm"
+    "Abm",
+    "Emaj7",
+    "F#",
+    "Ebm"
    ],
-   "level": 2,
-   "viewUrl": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
-   "createdTime": "2026-10-12T04:21:21.095Z",
-   "folder": "Amir dadon"
+   "level": 4,
+   "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
+   "at": "2026-10-12T04:21:21.095Z"
   },
   {
    "title": "אור גדול",
@@ -1102,9 +1172,8 @@
     "Fm7"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
-   "createdTime": "2026-10-12T04:13:33.006Z",
-   "folder": "Amir dadon"
+   "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
+   "at": "2026-10-12T04:13:33.006Z"
   },
   {
    "title": "Bascet Case",
@@ -1120,9 +1189,8 @@
     "Dbm"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
-   "createdTime": "2026-10-11T20:57:06.788Z",
-   "folder": "Green Day"
+   "url": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
+   "at": "2026-10-11T20:57:06.788Z"
   },
   {
    "title": "סהרה",
@@ -1136,9 +1204,8 @@
     "B"
    ],
    "level": 4,
-   "viewUrl": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
-   "createdTime": "2026-10-11T19:20:34.742Z",
-   "folder": "Tuna"
+   "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
+   "at": "2026-10-11T19:20:34.742Z"
   },
   {
    "title": "קשה בכדור הארץ",
@@ -1154,9 +1221,8 @@
     "G"
    ],
    "level": 3,
-   "viewUrl": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
-   "createdTime": "2026-10-11T19:18:19.408Z",
-   "folder": "Tuna"
+   "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
+   "at": "2026-10-11T19:18:19.408Z"
   },
   {
    "title": "ביום שמש יפה",
@@ -1174,9 +1240,8 @@
     "Ddim"
    ],
    "level": 4,
-   "viewUrl": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
-   "createdTime": "2026-10-10T17:10:42.560Z",
-   "folder": "Ivri lider"
+   "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
+   "at": "2026-10-10T17:10:42.560Z"
   },
   {
    "title": "בין קודש לחול",
@@ -1193,9 +1258,8 @@
     "Bb"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
-   "createdTime": "2026-10-11T11:24:33.896Z",
-   "folder": "Amir dadon"
+   "url": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
+   "at": "2026-10-11T11:24:33.896Z"
   },
   {
    "title": "חם על הירח",
@@ -1216,9 +1280,8 @@
     "B7"
    ],
    "level": 4,
-   "viewUrl": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
-   "createdTime": "2026-10-11T08:59:26.641Z",
-   "folder": "Beri Saharof"
+   "url": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
+   "at": "2026-10-11T08:59:26.641Z"
   },
   {
    "title": "עד מתי",
@@ -1234,9 +1297,8 @@
     "C"
    ],
    "level": 3,
-   "viewUrl": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
-   "createdTime": "2026-10-11T04:39:56.376Z",
-   "folder": "Eviatar Banai"
+   "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
+   "at": "2026-10-11T04:39:56.376Z"
   },
   {
    "title": "Wanderwall",
@@ -1249,9 +1311,8 @@
     "E"
    ],
    "level": 1,
-   "viewUrl": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
-   "createdTime": "2026-10-11T04:04:56.240Z",
-   "folder": "Oasis"
+   "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
+   "at": "2026-10-11T04:04:56.240Z"
   },
   {
    "title": "תחרות כלבים",
@@ -1269,9 +1330,8 @@
     "F#m6"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
-   "createdTime": "2026-10-11T03:48:41.071Z",
-   "folder": "Eviatar Banai"
+   "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
+   "at": "2026-10-11T03:48:41.071Z"
   },
   {
    "title": "צבעים",
@@ -1286,9 +1346,8 @@
     "Dm"
    ],
    "level": 2,
-   "viewUrl": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
-   "createdTime": "2026-10-10T22:31:59.230Z",
-   "folder": "Amir dadon"
+   "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
+   "at": "2026-10-10T22:31:59.230Z"
   },
   {
    "title": "הכעס",
@@ -1303,9 +1362,8 @@
     "F#m"
    ],
    "level": 3,
-   "viewUrl": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
-   "createdTime": "2026-10-10T19:13:35.115Z",
-   "folder": "Rockfour"
+   "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
+   "at": "2026-10-10T19:13:35.115Z"
   },
   {
    "title": "Better Together",
@@ -1321,9 +1379,8 @@
     "Gm"
    ],
    "level": 4,
-   "viewUrl": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
-   "createdTime": "2026-10-11T04:46:28.822Z",
-   "folder": "Jack Johnson"
+   "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
+   "at": "2026-10-11T04:46:28.822Z"
   },
   {
    "title": "My friends",
@@ -1347,9 +1404,8 @@
     "C"
    ],
    "level": 5,
-   "viewUrl": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
-   "createdTime": "2026-10-07T10:16:18.945Z",
-   "folder": "RHCP"
+   "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
+   "at": "2026-10-07T10:16:18.945Z"
   }
  ],
  "jokes": [
@@ -1416,7 +1472,23 @@
   {
    "text": "Rockfour toured the world on hard work and loud amps. You only need the hard work part tonight, {n}.",
    "date": "2026-10-18"
+  },
+  {
+   "text": "Your pick has been on the coffee table so long it applied for residency, {n}. Put it back to work.",
+   "date": "2026-10-20"
+  },
+  {
+   "text": "Tom Morello makes his guitar sound like a DJ. You can start by making yours sound like a guitar, {n}.",
+   "date": "2026-10-20"
+  },
+  {
+   "text": "The F chord is not a wall, {n}. It's a door that buzzes. Push a little harder.",
+   "date": "2026-10-20"
+  },
+  {
+   "text": "Your string winder is bored, {n}. Change one string today and give it something to talk about.",
+   "date": "2026-10-20"
   }
  ],
- "jokesDate": "2026-10-18"
+ "jokesDate": "2026-10-20"
 }
