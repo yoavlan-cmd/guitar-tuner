@@ -26,6 +26,16 @@ srv.listen(0,async()=>{const APP=process.env.APP||`http://localhost:${srv.addres
  ok(r.capo===0&&r.by==='video','a clear reading of the video wins (no capo, high)');
  r=await G('mix_s5',song(CAPO5,vid(5,'medium')));
  ok(r.capo===5&&r.by==='video','the video and the sound agree: capo 5 from the video');
+ // the video and the sound agree: solid (Oct 2026, "עכשיו": the scan saw the capo, one close-up counted 5, the sound says 5)
+ const scanned=(each,yes)=>({at:1,name:'v.mp4',url:'',capo:null,frames:[],asked:26,clear:0,agree:0,differ:[],fixed:[],nohand:true,capoScan:{capo:null,conf:'low',each,hint:{yes,maybe:2,necks:12,looked:67}}});
+ r=await G('mix_s7',song(CAPO5,scanned([5,null,3],3)));console.log('  both:',r.lv,'|',r.why);
+ ok(r.capo===5&&r.by==='both'&&r.lv==='solid'&&/The video shows a capo \(the capo scan saw it in 3 stills\), 1 of 2 close-ups counted fret 5, and the sound agrees/.test(r.why),'the scan saw the capo and a close-up counted fret 5, the sound says 5: capo 5, solid, and it says both');
+ r=await G('mix_s8',song(CAPO5,scanned([],3)));
+ ok(r.capo===5&&r.by==='both'&&r.lv==='solid','the scan saw a capo in 3 stills but couldn\u2019t count its fret; the sound is clear on 5: solid');
+ r=await G('mix_s9',song(CAPO5,scanned([],0)));
+ ok(r.capo===5&&r.by==='sound'&&r.lv==='likely','no capo seen by the scan: still the sound\u2019s capo 5, only likely');
+ {const h=await p.evaluate(()=>{const d=document.createElement('div');d.innerHTML=window.__gd.html('mix_s9');return [...d.querySelectorAll('.gdsrc li')].map(x=>x.textContent).find(x=>/The video/.test(x))||''});console.log('  built from:',h);
+  ok(/the capo scan of the whole video saw the neck in 12 stills, but couldn\u2019t count the capo\u2019s fret/.test(h),'Built from says what the capo scan saw')}
  r=await G('mix_s6',song(OPEN,null));
  ok(r.capo===0&&r.by==='none','open shapes with no capo: no capo');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await b.close();srv.close();console.log(fail?fail+' FAILED':'all passed');process.exit(fail?1:0)});
