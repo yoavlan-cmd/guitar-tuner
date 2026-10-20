@@ -83,7 +83,7 @@ const SHEET={title:'במקום בו אני גר',artist:HEB,capo:0,tuning:'Stand
  // ---- 2. a sheet with capo 2 (perhaps another version): offered, not applied ----
  ({p,ctx,errs}=await run(mk(),{...SHEET,capo:2,chords:['Em','D','Bm','G']}));L=await look(p);console.log('  sheet capo 2:',L.capo,'|',L.lv['Capo and shapes'][1]);
  ok(L.capo==='No capo'&&/Your chord sheet says capo 2 \(it may be another version\)/.test(L.lv['Capo and shapes'][1]),'a sheet’s capo 2 isn’t applied; How sure mentions it');
- ok(!await p.$('#gdBody [data-gdcapo]')&&/Your chord sheet says capo 2\. It may be another version: the Full guide follows this recording/.test(await p.$eval('#gdBody',e=>e.textContent)),'the sheet’s capo is mentioned, with no button to apply it');
+ ok(!await p.$('#gdBody [data-gdcapo]')&&/Your chord sheet says capo 2\. It may be another version: “As played” follows this recording/.test(await p.$eval('#gdBody',e=>e.textContent)),'the sheet’s capo is mentioned, with no button to apply it');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  // ---- 3. the video saw the hand on the F#: the video wins, the sheet doesn't settle it ----
  {const a=mk();a.video={at:Date.now(),name:'v.mp4',capo:null,frames:[{t:30,shape:'F#',conf:'high',heard:'F#',seen:'F#'}],asked:8,agree:1,differ:[],fixed:[]};

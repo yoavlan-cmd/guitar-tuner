@@ -38,7 +38,7 @@ const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:
  let {p,ctx,errs}=await run('intermediate');
  await p.tap('#learnList .lrow:has-text("שאריות")');await p.waitForTimeout(400);
  ok(!!await p.$('#sesGuide'),'a song with a chord analysis has a song guide');
- ok(/Practise with the song guide/.test(await p.$eval('#sesGo',e=>e.textContent))&&/Full version first/.test(await p.$eval('#sesGo',e=>e.textContent)),'Practise opens the guide (Full first for an intermediate player)');
+ ok(/Practise with the song guide/.test(await p.$eval('#sesGo',e=>e.textContent))&&/“As played” first/.test(await p.$eval('#sesGo',e=>e.textContent)),'Practise opens the guide (Full first for an intermediate player)');
  ok(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))==='true','Full is the open tab');
  const full=await p.$eval('#gdBody',e=>e.innerText.replace(/\s+/g,' '));console.log('  FULL: '+full.slice(0,700));
  ok(/Capo 2/.test(full)&&/108/.test(full)&&/walking pace/.test(full),'Before you play: capo 2, 108 BPM, a walking pace (as the reference)');
@@ -69,11 +69,11 @@ const MESSY=(()=>{const s=song({title:'Messy song',bpm:90,capo:0,conf:'low',pat:
  const vl=await p.$$eval('.gdsure li',l=>Object.fromEntries(l.map(x=>[x.querySelector('span').textContent,[x.querySelector('.gdlv').className.split(' ')[1],x.querySelector('small').textContent]])));console.log('  varied:',vp,JSON.stringify(vl['Strumming']));
  ok(vp==='D·DU·UDU'&&vl['Strumming'][0]!=='guess'&&/follow this pattern (8\d|9\d)%/.test(vl['Strumming'][1]),'a player who varies a strum in every bar: the pattern is still D · D U · U D U, and the bars fit it about 88% of the time');
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
- // ---- a beginner: Easy first; a messy analysis says so ----
+ // ---- a beginner: Full first too (Oct 2026: always the real version first); a messy analysis says so ----
  ({p,ctx,errs}=await run('beginner'));
  await p.tap('[data-lang=en]').catch(()=>{});await p.waitForTimeout(150);
  await p.tap('#learnList .lrow:has-text("Messy song")');await p.waitForTimeout(400);
- ok(await p.$eval('[data-gd=easy]',e=>e.getAttribute('aria-pressed'))==='true','a beginner gets Easy first');
+ ok(await p.$eval('[data-gd=full]',e=>e.getAttribute('aria-pressed'))==='true'&&await p.$eval('.gdtabs',e=>e.firstElementChild.dataset.gd)==='full','a beginner gets Full first too (the real version first), and the Full tab comes first');
  const lv2=await p.$$eval('.gdsure li',l=>Object.fromEntries(l.map(x=>[x.querySelector('span').textContent,x.querySelector('.gdlv').className.split(' ')[1]])));console.log('  messy sure:',JSON.stringify(lv2));
  ok(lv2['Chords and order']==='guess'&&lv2['Capo and shapes']==='guess'&&lv2['Strumming']==='guess','a messy analysis is marked "a guess" (chords, capo, strumming)');
  await p.tap('[data-gd=full]');await p.waitForTimeout(150);ok(/No clear pattern|one strum per beat/.test(await p.$eval('#gdBody',e=>e.textContent)),'no beat detail: Full falls back to one strum per beat and says why');
