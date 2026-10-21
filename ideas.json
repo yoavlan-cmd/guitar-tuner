@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-20T02:55:36Z",
- "date": "2026-10-20",
+ "at": "2026-10-21T03:05:19Z",
+ "date": "2026-10-21",
  "index": {
   "artists": [
    "Jonnie Shualy",
@@ -176,7 +176,7 @@
    },
    {
     "a": "Green Day",
-    "t": "Good Riddance (Time Of Your Life)",
+    "t": "Good Riddance",
     "ch": [
      "G",
      "Cadd9",
@@ -244,11 +244,11 @@
     "a": "Rockfour",
     "t": "הכעס",
     "ch": [
-     "Dm",
-     "Bb",
-     "Am",
-     "Eb",
      "G",
+     "Am",
+     "Bb",
+     "Dm",
+     "Eb",
      "C",
      "F#m",
      "D",
@@ -262,10 +262,10 @@
      "Dsus2",
      "Dm7",
      "Dm7/F",
-     "G/B",
-     "G",
-     "C",
      "D",
+     "G/B",
+     "C",
+     "G",
      "G/F",
      "Asus2",
      "F#add9",
@@ -301,190 +301,148 @@
    }
   ]
  },
- "level": "Confident intermediate: you already handle full barre chords in flat keys, maj7 and slash chords, capo and Drop D.",
+ "level": "Comfortable intermediate: open and barre chords in many keys, capo use and Drop D are all in your folder.",
  "suggestions": [
   {
-   "title": "תתארו לכם",
-   "artist": "שלמה ארצי",
-   "style": "Israeli classic rock",
-   "difficulty": 3,
-   "chords": [
-    "Gm",
-    "Dm",
-    "Eb",
-    "F4",
-    "F",
-    "Bb",
-    "Bb4",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Uses the flat-key barre chords you already play, with sus4 touches to colour the changes."
-  },
-  {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
+   "title": "Better Man",
+   "artist": "Pearl Jam",
+   "style": "Alternative rock",
    "difficulty": 2,
    "chords": [
-    "C",
-    "Gm",
-    "Bb",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Same band as the song you're working on, built on four chords you know well; focus on a tight strum."
-  },
-  {
-   "title": "מה שיהיה יהיה",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
-   "chords": [
-    "F",
-    "C",
-    "Dm",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy, upbeat one to play and sing straight through, good for clean F and Bb barres."
-  },
-  {
-   "title": "בשבילך",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 4,
-   "chords": [
-    "Bm",
-    "Em",
-    "F#",
-    "C#m7b5",
-    "Bm/F#",
-    "Bm/G",
-    "Bm/G#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: a descending bass line under Bm and your first m7b5 chord."
-  },
-  {
-   "title": "אוח",
-   "artist": "טונה",
-   "style": "Israeli hip-hop / groove",
-   "difficulty": 4,
-   "chords": [
-    "B7",
-    "C",
-    "Cmaj7",
-    "F#7",
-    "Bm7",
-    "F#m7",
-    "E",
-    "C7",
-    "F#",
-    "Bm",
-    "B",
-    "C5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Tuna with a jazzier palette: dominant 7 and m7 shapes, plus a groovy right hand."
-  },
-  {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "style": "Israeli classic rock",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "B",
-    "B7",
-    "Am",
-    "G",
     "D",
-    "C",
-    "G7",
-    "G/E",
-    "G/F",
-    "D/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic at your level that adds B7 and walking slash-chord bass notes."
-  },
-  {
-   "title": "מכונת הזמן",
-   "artist": "רוקפור",
-   "style": "Israeli alt-rock",
-   "difficulty": 4,
-   "chords": [
-    "C",
-    "Em",
-    "Am",
-    "F",
-    "Fm",
-    "Cm",
-    "Dm",
-    "C#",
-    "F#dim7",
+    "A",
     "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More from a band in your folder; the F to Fm move and a dim7 passing chord are the new bits."
+   "why": "Grunge-era classic close to Nirvana and Foo; three open chords let you focus on dynamics, quiet verse to loud chorus."
   },
   {
-   "title": "Whatever",
+   "title": "Talk Tonight",
    "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "Dsus4/F#",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier Oasis strummer to enjoy; practise keeping the ringing top strings steady while the bass moves."
-  },
-  {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "style": "Acoustic",
-   "difficulty": 2,
-   "chords": [
-    "A",
-    "G",
-    "D",
-    "Em",
-    "F#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Laid-back Jack Johnson with simple open chords; work on his muted, percussive strum."
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "style": "Grunge / acoustic",
+   "style": "Britpop acoustic",
    "difficulty": 3,
    "chords": [
-    "Esus4",
-    "A",
-    "Gsus4",
-    "C",
-    "E",
-    "Em",
+    "Em7",
+    "A7sus4",
+    "Cadd9",
+    "C9",
     "G",
-    "B",
-    "E5"
+    "G/B"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A first song for your empty Nirvana folder; sus4 colours and quick changes between open shapes."
+   "why": "Another Oasis acoustic after Wonderwall, with ringing sus and add9 shapes and a faster strum."
+  },
+  {
+   "title": "These Days",
+   "artist": "Foo Fighters",
+   "style": "Rock",
+   "difficulty": 2,
+   "chords": [
+    "A",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A Foo Fighters song beyond My Hero; easy shapes, the challenge is building from clean picking to a full-band strum."
+  },
+  {
+   "title": "Something in the Way",
+   "artist": "Nirvana",
+   "style": "Grunge acoustic",
+   "difficulty": 1,
+   "chords": [
+    "Em",
+    "C",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy, moody start for your empty Nirvana folder: slow strumming and a quiet, steady feel."
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Acoustic rock",
+   "difficulty": 4,
+   "chords": [
+    "Em",
+    "C",
+    "Cm",
+    "B",
+    "Am",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from My Friends: fingerpicked arpeggios and moving chord shapes, still in the RHCP sound you like."
+  },
+  {
+   "title": "שמע קולי",
+   "artist": "מאיר בנאי",
+   "style": "Israeli rock / piyut",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits right next to the Banai songs in your folder; a slow, emotional build that's great for steady strumming."
+  },
+  {
+   "title": "סאלאם",
+   "artist": "מוש בן ארי",
+   "style": "Israeli folk / world",
+   "difficulty": 1,
+   "chords": [
+    "G",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy sing-along with two chords, ideal for working on a groovy, rhythmic strum."
+  },
+  {
+   "title": "בוא",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [
+    "F/A",
+    "C/G",
+    "Bb",
+    "Dm",
+    "F",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Ivri Lider; slash chords with a walking bass line are a nice new technique on top of your F and Bb."
+  },
+  {
+   "title": "יש לנו את כל הזמן",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [
+    "Fm",
+    "G#",
+    "Cm",
+    "Bb",
+    "Gm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Eviatar Banai song in flat keys, like your Amir Dadon sheets; good barre-chord workout."
+  },
+  {
+   "title": "מונסון",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A second Berry Sakharof song after Ham Al HaYareach, with a hypnotic, rock-guitar feel."
   }
  ],
  "history": [
@@ -1037,12 +995,62 @@
    "title": "Dumb",
    "artist": "Nirvana",
    "date": "2026-10-20"
+  },
+  {
+   "title": "Better Man",
+   "artist": "Pearl Jam",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "Talk Tonight",
+   "artist": "Oasis",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "These Days",
+   "artist": "Foo Fighters",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "Something in the Way",
+   "artist": "Nirvana",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "שמע קולי",
+   "artist": "מאיר בנאי",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "סאלאם",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "בוא",
+   "artist": "עברי לידר",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "יש לנו את כל הזמן",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-21"
+  },
+  {
+   "title": "מונסון",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-21"
   }
  ],
  "sheets": [
   {
    "title": "שאריות של החיים",
-   "artist": "Amir dadon",
+   "artist": "הפרוייקט של עידן רייכל",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
@@ -1053,12 +1061,7 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab",
-    "Bbm/Ab",
-    "Eb/G",
-    "Ab/Gb",
-    "Db/F",
-    "Eb"
+    "Ab"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
@@ -1073,9 +1076,7 @@
     "Am",
     "Em",
     "Em7",
-    "Cadd9",
-    "C",
-    "D"
+    "Cadd9"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
@@ -1083,33 +1084,17 @@
   },
   {
    "title": "במקום-טסט שיר",
-   "artist": "Jimbo J",
+   "artist": "אורית טשומה ואברהם לגסה",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
     "F#m",
     "E",
-    "C#m",
-    "A"
+    "C#m"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
    "at": "2026-10-16T22:12:44.867Z"
-  },
-  {
-   "title": "במקום בו אני גר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m",
-    "A"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "יא",
@@ -1118,12 +1103,25 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
-    "C",
-    "C#"
+    "C"
    ],
-   "level": 2,
+   "level": 1,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
    "at": "2026-10-12T05:44:13.178Z"
+  },
+  {
+   "title": "במקום בו אני גר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -1133,9 +1131,7 @@
    "chords": [
     "C",
     "D",
-    "Em",
-    "G",
-    "Cadd9"
+    "Em"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
@@ -1400,10 +1396,9 @@
     "Asus2/B",
     "A/B",
     "F#add9/B",
-    "G",
-    "C"
+    "G"
    ],
-   "level": 5,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
    "at": "2026-10-07T10:16:18.945Z"
   }
