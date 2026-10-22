@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-21T03:05:19Z",
- "date": "2026-10-21",
+ "at": "2026-10-22T02:55:58Z",
+ "date": "2026-10-22",
  "index": {
   "artists": [
    "Jonnie Shualy",
@@ -32,28 +32,24 @@
     "ch": []
    },
    {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (full)",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (guitars only)",
+    "ch": []
+   },
+   {
     "a": "Jimbo J",
     "t": "במקום בו אני גר",
-    "ch": [
-     "F#m",
-     "E",
-     "C#m",
-     "A"
-    ]
+    "ch": []
    },
    {
     "a": "Amir dadon",
     "t": "שאריות של החיים",
-    "ch": [
-     "Db",
-     "Bbm",
-     "Fm",
-     "Fm/Eb",
-     "Db/C",
-     "Gb",
-     "Ebm",
-     "Ab"
-    ]
+    "ch": []
    },
    {
     "a": "Amir dadon",
@@ -64,7 +60,8 @@
      "Abm",
      "Emaj7",
      "F#",
-     "Ebm"
+     "Ebm",
+     "F"
     ]
    },
    {
@@ -75,8 +72,8 @@
      "Ab",
      "Cm",
      "Gm",
-     "Fm7",
-     "Bb4"
+     "Bb4",
+     "Fm7"
     ]
    },
    {
@@ -157,8 +154,8 @@
     "ch": [
      "Bbm",
      "Ebm",
-     "B",
-     "Abm"
+     "Abm",
+     "B"
     ]
    },
    {
@@ -177,13 +174,7 @@
    {
     "a": "Green Day",
     "t": "Good Riddance",
-    "ch": [
-     "G",
-     "Cadd9",
-     "D",
-     "C",
-     "Em"
-    ]
+    "ch": []
    },
    {
     "a": "Green Day",
@@ -204,10 +195,10 @@
      "F",
      "F/E",
      "Dm",
-     "C",
      "Bb",
      "Bb/A",
-     "Gm"
+     "Gm",
+     "C"
     ]
    },
    {
@@ -219,10 +210,10 @@
      "F#",
      "Cmaj7",
      "Am7",
-     "E",
      "C",
-     "Am",
+     "E",
      "Dm",
+     "Am",
      "Ebdim",
      "B7"
     ]
@@ -231,9 +222,9 @@
     "a": "Oasis",
     "t": "Wanderwall",
     "ch": [
+     "Cadd9",
      "Em7",
      "G",
-     "Cadd9",
      "D4",
      "G/F#",
      "E"
@@ -244,15 +235,15 @@
     "a": "Rockfour",
     "t": "הכעס",
     "ch": [
-     "G",
-     "Am",
-     "Bb",
      "Dm",
+     "Bb",
+     "Am",
      "Eb",
-     "C",
      "F#m",
-     "D",
-     "A"
+     "A",
+     "G",
+     "C",
+     "D"
     ]
    },
    {
@@ -262,14 +253,14 @@
      "Dsus2",
      "Dm7",
      "Dm7/F",
-     "D",
      "G/B",
-     "C",
      "G",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
+     "D",
+     "C",
      "Asus2/B",
      "A/B",
      "D/F#",
@@ -301,148 +292,178 @@
    }
   ]
  },
- "level": "Comfortable intermediate: open and barre chords in many keys, capo use and Drop D are all in your folder.",
+ "level": "Comfortable with barre chords and flat keys (Eb, Ab, Bbm), so ready for richer voicings and faster changes.",
  "suggestions": [
   {
-   "title": "Better Man",
-   "artist": "Pearl Jam",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "D",
-    "A",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Grunge-era classic close to Nirvana and Foo; three open chords let you focus on dynamics, quiet verse to loud chorus."
-  },
-  {
-   "title": "Talk Tonight",
-   "artist": "Oasis",
-   "style": "Britpop acoustic",
-   "difficulty": 3,
-   "chords": [
-    "Em7",
-    "A7sus4",
-    "Cadd9",
-    "C9",
-    "G",
-    "G/B"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Oasis acoustic after Wonderwall, with ringing sus and add9 shapes and a faster strum."
-  },
-  {
-   "title": "These Days",
-   "artist": "Foo Fighters",
-   "style": "Rock",
-   "difficulty": 2,
-   "chords": [
-    "A",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Foo Fighters song beyond My Hero; easy shapes, the challenge is building from clean picking to a full-band strum."
-  },
-  {
-   "title": "Something in the Way",
-   "artist": "Nirvana",
-   "style": "Grunge acoustic",
-   "difficulty": 1,
-   "chords": [
-    "Em",
-    "C",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy, moody start for your empty Nirvana folder: slow strumming and a quiet, steady feel."
-  },
-  {
-   "title": "Road Trippin'",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Acoustic rock",
+   "title": "עד האהבה",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock ballad",
    "difficulty": 4,
    "chords": [
-    "Em",
-    "C",
-    "Cm",
-    "B",
+    "G6",
     "Am",
-    "A"
+    "F",
+    "Dm",
+    "Fm",
+    "Cm",
+    "Bb",
+    "Ab",
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from My Friends: fingerpicked arpeggios and moving chord shapes, still in the RHCP sound you like."
+   "why": "More Eviatar for your folder; the borrowed Fm, Cm and Ab chords add colour to a familiar C-major sound."
   },
   {
-   "title": "שמע קולי",
-   "artist": "מאיר בנאי",
-   "style": "Israeli rock / piyut",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits right next to the Banai songs in your folder; a slow, emotional build that's great for steady strumming."
-  },
-  {
-   "title": "סאלאם",
-   "artist": "מוש בן ארי",
-   "style": "Israeli folk / world",
-   "difficulty": 1,
+   "title": "אנה",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
    "chords": [
+    "Em",
+    "Am",
+    "D",
+    "C",
     "G",
-    "C"
+    "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy sing-along with two chords, ideal for working on a groovy, rhythmic strum."
+   "why": "An easier sing-along classic in open chords; a good warm-up between harder songs."
   },
   {
-   "title": "בוא",
+   "title": "עדיין ילד",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "G",
+    "Dm",
+    "F",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Amir Dadon in a friendly key, so you can focus on a smooth F change and steady strumming."
+  },
+  {
+   "title": "בנאדם",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
+   "difficulty": 4,
+   "chords": [
+    "F#",
+    "Ebm",
+    "Bbm",
+    "Ab",
+    "C#",
+    "Fm",
+    "F#maj7",
+    "Eb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Same sharp-key barre world as חלל, with a new F#maj7 voicing to learn."
+  },
+  {
+   "title": "מרפקים",
+   "artist": "טונה",
+   "style": "Israeli hip-hop",
+   "difficulty": 3,
+   "chords": [
+    "Ebm",
+    "F#",
+    "B",
+    "Abm7",
+    "Bbm7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Close to סהרה in key, adding minor-7 barre shapes and a tight hip-hop groove."
+  },
+  {
+   "title": "הכל בוער",
    "artist": "עברי לידר",
    "style": "Israeli pop",
    "difficulty": 3,
    "chords": [
-    "F/A",
-    "C/G",
-    "Bb",
-    "Dm",
-    "F",
-    "C"
+    "A",
+    "E",
+    "F#m",
+    "D",
+    "Bm",
+    "E/Ab",
+    "E4"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Ivri Lider; slash chords with a walking bass line are a nice new technique on top of your F and Bb."
+   "why": "More Ivri Lider; practises the Bm barre and a walking bass line with E/Ab."
   },
   {
-   "title": "יש לנו את כל הזמן",
-   "artist": "אביתר בנאי",
-   "style": "Israeli rock",
-   "difficulty": 4,
+   "title": "The Zephyr Song",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alternative rock",
+   "difficulty": 2,
    "chords": [
-    "Fm",
-    "G#",
-    "Cm",
-    "Bb",
-    "Gm"
+    "Am",
+    "G",
+    "Em",
+    "F",
+    "D",
+    "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Eviatar Banai song in flat keys, like your Amir Dadon sheets; good barre-chord workout."
+   "why": "A relaxed RHCP song after My Friends; great for clean, rhythmic strumming."
   },
   {
-   "title": "מונסון",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
+   "title": "Elderly Woman Behind the Counter in a Small Town",
+   "artist": "Pearl Jam",
+   "style": "Acoustic grunge",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "D",
+    "C9",
+    "G",
+    "A",
+    "Em"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A second Berry Sakharof song after Ham Al HaYareach, with a hypnotic, rock-guitar feel."
+   "why": "A step up in acoustic strumming with ringing C9 and open-string drones."
+  },
+  {
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "style": "Acoustic surf-pop",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "C/B",
+    "Am",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits your Jack Johnson taste; work on the muted, percussive strum."
+  },
+  {
+   "title": "Walk",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "E",
+    "Bm",
+    "Dm",
+    "F#m",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Foo Fighters; switching between Bm and Dm adds a fresh minor colour."
   }
  ],
  "history": [
@@ -1045,6 +1066,56 @@
    "title": "מונסון",
    "artist": "ברי סחרוף",
    "date": "2026-10-21"
+  },
+  {
+   "title": "עד האהבה",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "אנה",
+   "artist": "משינה",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "עדיין ילד",
+   "artist": "אמיר דדון",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "בנאדם",
+   "artist": "אמיר דדון",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "מרפקים",
+   "artist": "טונה",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "הכל בוער",
+   "artist": "עברי לידר",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "The Zephyr Song",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "Elderly Woman Behind the Counter in a Small Town",
+   "artist": "Pearl Jam",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "date": "2026-10-22"
+  },
+  {
+   "title": "Walk",
+   "artist": "Foo Fighters",
+   "date": "2026-10-22"
   }
  ],
  "sheets": [
@@ -1483,7 +1554,23 @@
   {
    "text": "Your string winder is bored, {n}. Change one string today and give it something to talk about.",
    "date": "2026-10-20"
+  },
+  {
+   "text": "Bon Jovi was livin' on a prayer. You're livin' on one chord change a minute, {n}. Let's double it.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "Dave Grohl went from the drum stool to the front of the stage. You only need to get from the couch to the guitar, {n}.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "The dust on your guitar is thick enough for a slide solo, {n}. Wipe it off with a song instead.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "Strumming tip of the day, {n}: down, down, up, up, down, up. Scrolling is not part of the pattern.",
+   "date": "2026-10-22"
   }
  ],
- "jokesDate": "2026-10-20"
+ "jokesDate": "2026-10-22"
 }
