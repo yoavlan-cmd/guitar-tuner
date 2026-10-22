@@ -42,6 +42,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   a.eng=engineId();try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
+  // another split of the song with no video of its own (a studio MP3) takes its capo from this one's video (68-video-look)
+  if(a.video&&a.video.raw&&a.video.from!=='other')try{await vlShare(it)}catch(e){}
   it.sess='done';it.anaKey=key;try{lsSoon()}catch(e){}
   if(document.hidden)asReady={id,at:Date.now()};
   try{bkNotify(`“${it.name}”: the session is ready`,'Its chords from the guitars, the Easy and Full guide and the jam track are on its page.')}catch(e){}
