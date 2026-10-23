@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-22T02:55:58Z",
- "date": "2026-10-22",
+ "at": "2026-10-23T02:59:10Z",
+ "date": "2026-10-23",
  "index": {
   "artists": [
    "Jonnie Shualy",
@@ -292,178 +292,169 @@
    }
   ]
  },
- "level": "Comfortable with barre chords and flat keys (Eb, Ab, Bbm), so ready for richer voicings and faster changes.",
+ "level": "Comfortable with barre chords and flat keys, ready for maj7 colours, faster changes and a few lead-guitar touches.",
  "suggestions": [
   {
-   "title": "עד האהבה",
+   "title": "מיתר",
    "artist": "אביתר בנאי",
    "style": "Israeli rock ballad",
    "difficulty": 4,
    "chords": [
-    "G6",
-    "Am",
-    "F",
-    "Dm",
-    "Fm",
-    "Cm",
-    "Bb",
-    "Ab",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar for your folder; the borrowed Fm, Cm and Ab chords add colour to a familiar C-major sound."
-  },
-  {
-   "title": "אנה",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "Am",
+    "E",
+    "Cmaj7",
+    "Amaj7",
     "D",
-    "C",
-    "G",
-    "F"
+    "F#m",
+    "A",
+    "C#m",
+    "Bm",
+    "B"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier sing-along classic in open chords; a good warm-up between harder songs."
+   "why": "More Eviatar for your folder; the maj7 chords and the move to Cmaj7 are a step up in colour."
   },
   {
-   "title": "עדיין ילד",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "G",
-    "Dm",
-    "F",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Amir Dadon in a friendly key, so you can focus on a smooth F change and steady strumming."
-  },
-  {
-   "title": "בנאדם",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
-   "difficulty": 4,
-   "chords": [
-    "F#",
-    "Ebm",
-    "Bbm",
-    "Ab",
-    "C#",
-    "Fm",
-    "F#maj7",
-    "Eb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Same sharp-key barre world as חלל, with a new F#maj7 voicing to learn."
-  },
-  {
-   "title": "מרפקים",
-   "artist": "טונה",
-   "style": "Israeli hip-hop",
+   "title": "רגעים",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "Ebm",
-    "F#",
-    "B",
-    "Abm7",
-    "Bbm7"
+    "Dm",
+    "G",
+    "A",
+    "Fm",
+    "Ab",
+    "Cm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Close to סהרה in key, adding minor-7 barre shapes and a tight hip-hop groove."
+   "why": "A Berry classic that mixes open chords with the Fm, Ab and Cm barres you already know."
   },
   {
-   "title": "הכל בוער",
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
+   "style": "Israeli pop rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "Em",
+    "D",
+    "G",
+    "Cmaj7",
+    "Bm"
+   ],
+   "capo": 2,
+   "tuning": "Standard",
+   "why": "Another Hatikva 6 song in easy open shapes with a capo; good for practising a steady strum."
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock ballad",
+   "difficulty": 4,
+   "chords": [
+    "F#m",
+    "C#m",
+    "A",
+    "B",
+    "E",
+    "G#m",
+    "Amaj7",
+    "D#m7b5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Amir Dadon in sharp keys; D#m7b5 is a new chord shape to learn."
+  },
+  {
+   "title": "גם זה יעבור",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
+   "difficulty": 1,
+   "chords": [
+    "Em",
+    "Am"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy Tuna groove on two chords, so you can focus on rhythm and singing the fast words."
+  },
+  {
+   "title": "על קו המים",
    "artist": "עברי לידר",
    "style": "Israeli pop",
    "difficulty": 3,
    "chords": [
-    "A",
-    "E",
-    "F#m",
-    "D",
-    "Bm",
-    "E/Ab",
-    "E4"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Ivri Lider; practises the Bm barre and a walking bass line with E/Ab."
-  },
-  {
-   "title": "The Zephyr Song",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "G",
-    "Em",
     "F",
-    "D",
-    "A"
+    "Bb",
+    "Dm",
+    "C",
+    "Gm",
+    "F/A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A relaxed RHCP song after My Friends; great for clean, rhythmic strumming."
+   "why": "An Ivri Lider song in F with barre chords and a smooth F/A bass walk."
   },
   {
-   "title": "Elderly Woman Behind the Counter in a Small Town",
-   "artist": "Pearl Jam",
-   "style": "Acoustic grunge",
-   "difficulty": 3,
-   "chords": [
-    "D",
-    "C9",
-    "G",
-    "A",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up in acoustic strumming with ringing C9 and open-string drones."
-  },
-  {
-   "title": "Taylor",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-pop",
+   "title": "Minority",
+   "artist": "Green Day",
+   "style": "Punk rock",
    "difficulty": 2,
    "chords": [
     "C",
-    "C/B",
-    "Am",
+    "G",
+    "Fmaj7",
     "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits your Jack Johnson taste; work on the muted, percussive strum."
+   "why": "Fast, fun strumming in open chords; a quick warm-up next to Basket Case."
   },
   {
-   "title": "Walk",
+   "title": "Long Road to Ruin",
    "artist": "Foo Fighters",
-   "style": "Alternative rock",
+   "style": "Rock",
    "difficulty": 3,
    "chords": [
-    "A",
-    "E",
-    "Bm",
-    "Dm",
-    "F#m",
-    "D"
+    "C",
+    "F",
+    "Am",
+    "Gsus4/B",
+    "D",
+    "Cadd9",
+    "Gsus4",
+    "Am7/G",
+    "Am7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Foo Fighters; switching between Bm and Dm adds a fresh minor colour."
+   "why": "Fits your Foo folder; sus4 and slash chords train clean, quick changes."
+  },
+  {
+   "title": "Yellow Ledbetter",
+   "artist": "Pearl Jam",
+   "style": "Alternative rock",
+   "difficulty": 4,
+   "chords": [
+    "E",
+    "B",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Simple chords but played with a Hendrix-style feel; a first step into lead-rhythm playing."
+  },
+  {
+   "title": "Morning Glory",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Oasis anthem after Wonderwall; open-string drones over moving chord shapes."
   }
  ],
  "history": [
@@ -1116,6 +1107,56 @@
    "title": "Walk",
    "artist": "Foo Fighters",
    "date": "2026-10-22"
+  },
+  {
+   "title": "מיתר",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "רגעים",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "גם זה יעבור",
+   "artist": "טונה",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "על קו המים",
+   "artist": "עברי לידר",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "Minority",
+   "artist": "Green Day",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "Long Road to Ruin",
+   "artist": "Foo Fighters",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "Yellow Ledbetter",
+   "artist": "Pearl Jam",
+   "date": "2026-10-23"
+  },
+  {
+   "title": "Morning Glory",
+   "artist": "Oasis",
+   "date": "2026-10-23"
   }
  ],
  "sheets": [
