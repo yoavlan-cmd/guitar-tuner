@@ -1,9 +1,10 @@
 {
  "v": 1,
- "at": "2026-10-23T02:59:10Z",
- "date": "2026-10-23",
+ "at": "2026-10-24T02:59:55Z",
+ "date": "2026-10-24",
  "index": {
   "artists": [
+   "Tracy Chapman",
    "Jonnie Shualy",
    "Hatikva 6",
    "Jimbo J",
@@ -21,6 +22,11 @@
    "Foo"
   ],
   "songs": [
+   {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You",
+    "ch": []
+   },
    {
     "a": "Jonnie Shualy",
     "t": "עכשיו",
@@ -292,169 +298,186 @@
    }
   ]
  },
- "level": "Comfortable with barre chords and flat keys, ready for maj7 colours, faster changes and a few lead-guitar touches.",
+ "level": "Comfortable with barre chords and flat keys, ready for maj7 colours, fingerpicked riffs and faster changes.",
  "suggestions": [
   {
-   "title": "מיתר",
-   "artist": "אביתר בנאי",
-   "style": "Israeli rock ballad",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "Cmaj7",
-    "Amaj7",
-    "D",
-    "F#m",
-    "A",
-    "C#m",
-    "Bm",
-    "B"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar for your folder; the maj7 chords and the move to Cmaj7 are a step up in colour."
-  },
-  {
-   "title": "רגעים",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
+   "title": "Fast Car",
+   "artist": "Tracy Chapman",
+   "style": "Folk pop",
    "difficulty": 3,
    "chords": [
-    "Dm",
-    "G",
-    "A",
-    "Fm",
-    "Ab",
-    "Cm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Berry classic that mixes open chords with the Fm, Ab and Cm barres you already know."
-  },
-  {
-   "title": "גיבורי על",
-   "artist": "התקווה 6",
-   "style": "Israeli pop rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
+    "C",
     "Em",
     "D",
     "G",
     "Cmaj7",
-    "Bm"
+    "Dsus4"
    ],
    "capo": 2,
    "tuning": "Standard",
-   "why": "Another Hatikva 6 song in easy open shapes with a capo; good for practising a steady strum."
+   "why": "Fits your new Tracy Chapman folder; the open chords are easy, the fingerpicked riff is the new skill."
   },
   {
-   "title": "לבחור נכון",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock ballad",
-   "difficulty": 4,
-   "chords": [
-    "F#m",
-    "C#m",
-    "A",
-    "B",
-    "E",
-    "G#m",
-    "Amaj7",
-    "D#m7b5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Amir Dadon in sharp keys; D#m7b5 is a new chord shape to learn."
-  },
-  {
-   "title": "גם זה יעבור",
-   "artist": "טונה",
-   "style": "Israeli hip hop",
-   "difficulty": 1,
-   "chords": [
-    "Em",
-    "Am"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Tuna groove on two chords, so you can focus on rhythm and singing the fast words."
-  },
-  {
-   "title": "על קו המים",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "style": "Blues",
    "difficulty": 3,
    "chords": [
-    "F",
-    "Bb",
-    "Dm",
-    "C",
-    "Gm",
-    "F/A"
+    "F#",
+    "B",
+    "C#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An Ivri Lider song in F with barre chords and a smooth F/A bass walk."
+   "why": "A three-chord blues built on major barre shapes, with a laid-back shuffle groove to learn."
   },
   {
-   "title": "Minority",
-   "artist": "Green Day",
-   "style": "Punk rock",
+   "title": "Talkin' Bout a Revolution",
+   "artist": "Tracy Chapman",
+   "style": "Folk",
    "difficulty": 2,
    "chords": [
-    "C",
     "G",
-    "Fmaj7",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fast, fun strumming in open chords; a quick warm-up next to Basket Case."
-  },
-  {
-   "title": "Long Road to Ruin",
-   "artist": "Foo Fighters",
-   "style": "Rock",
-   "difficulty": 3,
-   "chords": [
-    "C",
-    "F",
-    "Am",
-    "Gsus4/B",
-    "D",
     "Cadd9",
-    "Gsus4",
-    "Am7/G",
-    "Am7"
+    "Em",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits your Foo folder; sus4 and slash chords train clean, quick changes."
+   "why": "An easier one: four open chords you know, so all the focus goes to a steady, driving strum."
   },
   {
-   "title": "Yellow Ledbetter",
-   "artist": "Pearl Jam",
-   "style": "Alternative rock",
+   "title": "Cannonball",
+   "artist": "Damien Rice",
+   "style": "Acoustic singer-songwriter",
+   "difficulty": 2,
+   "chords": [
+    "Em7",
+    "Cadd9",
+    "G",
+    "G/F#",
+    "D",
+    "C",
+    "D11"
+   ],
+   "capo": 6,
+   "tuning": "Standard",
+   "why": "Close to Wonderwall's shapes in a quiet folk song; playing high up the neck with a capo is new."
+  },
+  {
+   "title": "לעיתים",
+   "artist": "ג'וני שועלי",
+   "style": "Israeli ballad",
    "difficulty": 4,
    "chords": [
-    "E",
+    "Cmaj7",
+    "C#m7b5",
+    "Bm",
+    "F#m7",
+    "Em",
     "B",
-    "A"
+    "G",
+    "D",
+    "D/C",
+    "C#dim"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Simple chords but played with a Hendrix-style feel; a first step into lead-rhythm playing."
+   "why": "More from an artist in your folder; m7b5 and dim chords are a step up in colour."
   },
   {
-   "title": "Morning Glory",
-   "artist": "Oasis",
-   "style": "Britpop",
+   "title": "שוב שגעון",
+   "artist": "ברי סחרוף וג'וני שועלי",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Oasis anthem after Wonderwall; open-string drones over moving chord shapes."
+   "why": "Brings together two artists you already have in one rock duet."
+  },
+  {
+   "title": "הכי ישראלי",
+   "artist": "התקווה 6",
+   "style": "Israeli pop rock",
+   "difficulty": 3,
+   "chords": [
+    "Fm",
+    "Bbm",
+    "C#",
+    "Eb",
+    "Cm",
+    "Gm",
+    "Ab"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Same flat-key barre chords as your Amir Dadon songs, with an upbeat strum."
+  },
+  {
+   "title": "אבא",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock ballad",
+   "difficulty": 5,
+   "chords": [
+    "Bm",
+    "A",
+    "D",
+    "F#m",
+    "G",
+    "E",
+    "Ebm",
+    "Db",
+    "F#",
+    "Bbm",
+    "Fm",
+    "Gm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: the song changes key several times, so it trains fast barre moves across the neck."
+  },
+  {
+   "title": "חור בלבנה",
+   "artist": "רוקפור",
+   "style": "Israeli alt rock",
+   "difficulty": 4,
+   "chords": [
+    "Bm",
+    "Gb",
+    "Dm",
+    "Am",
+    "E",
+    "Bb",
+    "F4",
+    "F",
+    "Ab",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Rockfour; unexpected chord jumps and a sus4 that give it that Britpop feel."
+  },
+  {
+   "title": "חיבורים",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 4,
+   "chords": [
+    "Em",
+    "Am",
+    "Am/F",
+    "Am/F#",
+    "Dm",
+    "G",
+    "Am7",
+    "Bm7b5",
+    "Fmaj7",
+    "C",
+    "G6"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Eviatar's moving bass line under Am is a new technique, with maj7 and m7b5 colours."
   }
  ],
  "history": [
@@ -1157,6 +1180,56 @@
    "title": "Morning Glory",
    "artist": "Oasis",
    "date": "2026-10-23"
+  },
+  {
+   "title": "Fast Car",
+   "artist": "Tracy Chapman",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "Talkin' Bout a Revolution",
+   "artist": "Tracy Chapman",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "Cannonball",
+   "artist": "Damien Rice",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "לעיתים",
+   "artist": "ג'וני שועלי",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "שוב שגעון",
+   "artist": "ברי סחרוף וג'וני שועלי",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "הכי ישראלי",
+   "artist": "התקווה 6",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "אבא",
+   "artist": "אמיר דדון",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "חור בלבנה",
+   "artist": "רוקפור",
+   "date": "2026-10-24"
+  },
+  {
+   "title": "חיבורים",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-24"
   }
  ],
  "sheets": [
@@ -1611,7 +1684,23 @@
   {
    "text": "Strumming tip of the day, {n}: down, down, up, up, down, up. Scrolling is not part of the pattern.",
    "date": "2026-10-22"
+  },
+  {
+   "text": "Tracy Chapman got a fast car. You got a whole new folder of her songs. Time to start the engine, {n}.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your capo has been clipped to the headstock so long it thinks it's a tuning peg, {n}. Give it a real job today.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your guitar stand is starting to look like a museum exhibit, {n}. Take the guitar off display and play it.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your strings said they're fine with being played every day, {n}. It's being ignored that makes them go flat.",
+   "date": "2026-10-24"
   }
  ],
- "jokesDate": "2026-10-22"
+ "jokesDate": "2026-10-24"
 }
