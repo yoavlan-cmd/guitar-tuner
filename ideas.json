@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-24T02:59:55Z",
- "date": "2026-10-24",
+ "at": "2026-10-25T03:54:57Z",
+ "date": "2026-10-25",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -298,186 +298,184 @@
    }
   ]
  },
- "level": "Comfortable with barre chords and flat keys, ready for maj7 colours, fingerpicked riffs and faster changes.",
+ "level": "Comfortable with barre chords and flat keys; ready for slash-chord bass lines, fingerpicking and longer chord journeys.",
  "suggestions": [
   {
-   "title": "Fast Car",
+   "title": "The Promise",
    "artist": "Tracy Chapman",
-   "style": "Folk pop",
-   "difficulty": 3,
+   "style": "Folk ballad",
+   "difficulty": 2,
    "chords": [
     "C",
-    "Em",
-    "D",
     "G",
-    "Cmaj7",
-    "Dsus4"
+    "F",
+    "Am"
    ],
-   "capo": 2,
+   "capo": 1,
    "tuning": "Standard",
-   "why": "Fits your new Tracy Chapman folder; the open chords are easy, the fingerpicked riff is the new skill."
+   "why": "Four friendly chords from an artist in your folder; the new skill is a gentle fingerpicked accompaniment."
   },
   {
-   "title": "Give Me One Reason",
-   "artist": "Tracy Chapman",
-   "style": "Blues",
-   "difficulty": 3,
+   "title": "The Blower's Daughter",
+   "artist": "Damien Rice",
+   "style": "Acoustic ballad",
+   "difficulty": 4,
    "chords": [
-    "F#",
+    "E",
+    "A",
     "B",
-    "C#"
+    "E7",
+    "Esus4",
+    "C#m",
+    "G#m",
+    "F#m",
+    "F#",
+    "C#",
+    "D#m",
+    "A#m"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A three-chord blues built on major barre shapes, with a laid-back shuffle groove to learn."
+   "why": "A step up: sharp-key barre chords and a quiet, dynamic picking style in the singer-songwriter vein you like."
   },
   {
-   "title": "Talkin' Bout a Revolution",
-   "artist": "Tracy Chapman",
-   "style": "Folk",
+   "title": "Good People",
+   "artist": "Jack Johnson",
+   "style": "Surf folk",
+   "difficulty": 3,
+   "chords": [
+    "B",
+    "E",
+    "C#m",
+    "F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Jack Johnson groove, this time with B and F# barre shapes and a muted, percussive strum."
+  },
+  {
+   "title": "Little by Little",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "D",
+    "C/B",
+    "D/F#",
+    "G",
+    "G/F#",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A big Oasis sing-along built on open chords, with walking bass notes (C/B, G/F#) to practise."
+  },
+  {
+   "title": "Next Year",
+   "artist": "Foo Fighters",
+   "style": "Alt rock",
    "difficulty": 2,
    "chords": [
     "G",
     "Cadd9",
-    "Em",
+    "D/F#",
+    "A7",
+    "C",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier one: four open chords you know, so all the focus goes to a steady, driving strum."
+   "why": "Easy open-chord Foo Fighters song for relaxed playing; A7 and D/F# add small new colours."
   },
   {
-   "title": "Cannonball",
-   "artist": "Damien Rice",
-   "style": "Acoustic singer-songwriter",
-   "difficulty": 2,
-   "chords": [
-    "Em7",
-    "Cadd9",
-    "G",
-    "G/F#",
-    "D",
-    "C",
-    "D11"
-   ],
-   "capo": 6,
-   "tuning": "Standard",
-   "why": "Close to Wonderwall's shapes in a quiet folk song; playing high up the neck with a capo is new."
-  },
-  {
-   "title": "לעיתים",
-   "artist": "ג'וני שועלי",
-   "style": "Israeli ballad",
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "style": "Israeli classic",
    "difficulty": 4,
    "chords": [
-    "Cmaj7",
-    "C#m7b5",
-    "Bm",
-    "F#m7",
-    "Em",
-    "B",
+    "Cadd9",
+    "Em7",
+    "D6",
     "G",
+    "D/F#",
+    "Bm",
+    "Am",
     "D",
-    "D/C",
-    "C#dim"
+    "Am7",
+    "B7",
+    "Am/F#",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More from an artist in your folder; m7b5 and dim chords are a step up in colour."
+   "why": "A step up: a classic with a key change and many colour chords, great for building a richer chord vocabulary."
   },
   {
-   "title": "שוב שגעון",
-   "artist": "ברי סחרוף וג'וני שועלי",
+   "title": "כמו בחיים",
+   "artist": "מוש בן ארי",
+   "style": "Israeli folk rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "A5",
+    "Aadd9",
+    "C",
+    "G",
+    "D",
+    "G/F#",
+    "Bm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Mostly open chords you know, with A5 and Aadd9 as fresh, open-ringing shapes."
+  },
+  {
+   "title": "ממריאים",
+   "artist": "מוש בן ארי",
+   "style": "Israeli pop rock",
+   "difficulty": 1,
+   "chords": [
+    "F",
+    "Am",
+    "G",
+    "Dm",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy, upbeat one for warming up and practising smooth changes around the F barre."
+  },
+  {
+   "title": "בדרך אל הים",
+   "artist": "משינה",
    "style": "Israeli rock",
    "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Brings together two artists you already have in one rock duet."
-  },
-  {
-   "title": "הכי ישראלי",
-   "artist": "התקווה 6",
-   "style": "Israeli pop rock",
-   "difficulty": 3,
    "chords": [
-    "Fm",
-    "Bbm",
-    "C#",
-    "Eb",
-    "Cm",
-    "Gm",
-    "Ab"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Same flat-key barre chords as your Amir Dadon songs, with an upbeat strum."
-  },
-  {
-   "title": "אבא",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock ballad",
-   "difficulty": 5,
-   "chords": [
-    "Bm",
+    "Dm",
+    "Bb",
     "A",
-    "D",
-    "F#m",
-    "G",
-    "E",
-    "Ebm",
-    "Db",
-    "F#",
-    "Bbm",
-    "Fm",
     "Gm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: the song changes key several times, so it trains fast barre moves across the neck."
+   "why": "Four chords in D minor like your Rockfour and Eviatar Banai songs, with a driving rock strum."
   },
   {
-   "title": "חור בלבנה",
-   "artist": "רוקפור",
-   "style": "Israeli alt rock",
-   "difficulty": 4,
+   "title": "קצב החיים",
+   "artist": "התקווה 6",
+   "style": "Israeli pop",
+   "difficulty": 2,
    "chords": [
-    "Bm",
-    "Gb",
-    "Dm",
-    "Am",
-    "E",
-    "Bb",
-    "F4",
-    "F",
-    "Ab",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Rockfour; unexpected chord jumps and a sus4 that give it that Britpop feel."
-  },
-  {
-   "title": "חיבורים",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 4,
-   "chords": [
-    "Em",
-    "Am",
-    "Am/F",
-    "Am/F#",
-    "Dm",
-    "G",
+    "Em7",
+    "Bm7",
     "Am7",
-    "Bm7b5",
-    "Fmaj7",
-    "C",
-    "G6"
+    "G",
+    "D/F#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Eviatar's moving bass line under Am is a new technique, with maj7 and m7b5 colours."
+   "why": "Another Hatikva 6 song for your folder, built on soft seventh chords and a groovy rhythm."
   }
  ],
  "history": [
@@ -1230,6 +1228,56 @@
    "title": "חיבורים",
    "artist": "אביתר בנאי",
    "date": "2026-10-24"
+  },
+  {
+   "title": "The Promise",
+   "artist": "Tracy Chapman",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "The Blower's Daughter",
+   "artist": "Damien Rice",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "Good People",
+   "artist": "Jack Johnson",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "Little by Little",
+   "artist": "Oasis",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "Next Year",
+   "artist": "Foo Fighters",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "כמו בחיים",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "ממריאים",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "בדרך אל הים",
+   "artist": "משינה",
+   "date": "2026-10-25"
+  },
+  {
+   "title": "קצב החיים",
+   "artist": "התקווה 6",
+   "date": "2026-10-25"
   }
  ],
  "sheets": [
@@ -1268,20 +1316,6 @@
    "at": "2026-10-10T23:07:35.424Z"
   },
   {
-   "title": "במקום-טסט שיר",
-   "artist": "אורית טשומה ואברהם לגסה",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z"
-  },
-  {
    "title": "יא",
    "artist": "Tuna",
    "capo": 0,
@@ -1293,20 +1327,6 @@
    "level": 1,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
    "at": "2026-10-12T05:44:13.178Z"
-  },
-  {
-   "title": "במקום בו אני גר",
-   "artist": "אורית טשומה ואברהם לגסה",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -1562,6 +1582,34 @@
    "level": 4,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
    "at": "2026-10-11T04:46:28.822Z"
+  },
+  {
+   "title": "במקום-טסט שיר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "at": "2026-10-16T22:12:44.867Z"
+  },
+  {
+   "title": "במקום בו אני גר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "My friends",
