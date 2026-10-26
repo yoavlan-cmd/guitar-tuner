@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-25T03:54:57Z",
- "date": "2026-10-25",
+ "at": "2026-10-26T03:54:56Z",
+ "date": "2026-10-26",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -28,6 +28,11 @@
     "ch": []
    },
    {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You (guitars only)",
+    "ch": []
+   },
+   {
     "a": "Jonnie Shualy",
     "t": "עכשיו",
     "ch": []
@@ -50,12 +55,26 @@
    {
     "a": "Jimbo J",
     "t": "במקום בו אני גר",
-    "ch": []
+    "ch": [
+     "F#m",
+     "E",
+     "C#m",
+     "A"
+    ]
    },
    {
     "a": "Amir dadon",
     "t": "שאריות של החיים",
-    "ch": []
+    "ch": [
+     "Db",
+     "Bbm",
+     "Fm",
+     "Fm/Eb",
+     "Db/C",
+     "Gb",
+     "Ebm",
+     "Ab"
+    ]
    },
    {
     "a": "Amir dadon",
@@ -66,8 +85,7 @@
      "Abm",
      "Emaj7",
      "F#",
-     "Ebm",
-     "F"
+     "Ebm"
     ]
    },
    {
@@ -101,10 +119,10 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "C",
-     "D",
      "Bm",
-     "Dm"
+     "D",
+     "Dm",
+     "C"
     ]
    },
    {
@@ -140,10 +158,10 @@
      "G#m",
      "A",
      "E",
-     "D",
      "Bm",
      "F#m7",
-     "F#m6"
+     "F#m6",
+     "D"
     ]
    },
    {
@@ -170,17 +188,23 @@
     "ch": [
      "Bm",
      "A",
-     "G",
-     "D",
      "F#m",
      "Em",
-     "F#"
+     "F#",
+     "G",
+     "D"
     ]
    },
    {
     "a": "Green Day",
     "t": "Good Riddance",
-    "ch": []
+    "ch": [
+     "G",
+     "C",
+     "D",
+     "Em",
+     "Cadd9"
+    ]
    },
    {
     "a": "Green Day",
@@ -266,11 +290,7 @@
      "F#add9",
      "A",
      "D",
-     "C",
-     "Asus2/B",
-     "A/B",
-     "D/F#",
-     "F"
+     "C"
     ],
     "tuning": "Drop D"
    },
@@ -298,184 +318,176 @@
    }
   ]
  },
- "level": "Comfortable with barre chords and flat keys; ready for slash-chord bass lines, fingerpicking and longer chord journeys.",
+ "level": "Comfortable with barre chords in flat keys, 7th/maj7 colours, capo and Drop D: a solid intermediate player ready for riffs and fingerpicking.",
  "suggestions": [
   {
-   "title": "The Promise",
-   "artist": "Tracy Chapman",
-   "style": "Folk ballad",
-   "difficulty": 2,
-   "chords": [
-    "C",
-    "G",
-    "F",
-    "Am"
-   ],
-   "capo": 1,
-   "tuning": "Standard",
-   "why": "Four friendly chords from an artist in your folder; the new skill is a gentle fingerpicked accompaniment."
-  },
-  {
-   "title": "The Blower's Daughter",
-   "artist": "Damien Rice",
-   "style": "Acoustic ballad",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "A",
-    "B",
-    "E7",
-    "Esus4",
-    "C#m",
-    "G#m",
-    "F#m",
-    "F#",
-    "C#",
-    "D#m",
-    "A#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: sharp-key barre chords and a quiet, dynamic picking style in the singer-songwriter vein you like."
-  },
-  {
-   "title": "Good People",
-   "artist": "Jack Johnson",
-   "style": "Surf folk",
-   "difficulty": 3,
-   "chords": [
-    "B",
-    "E",
-    "C#m",
-    "F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Jack Johnson groove, this time with B and F# barre shapes and a muted, percussive strum."
-  },
-  {
-   "title": "Little by Little",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
-   "chords": [
-    "C",
-    "D",
-    "C/B",
-    "D/F#",
-    "G",
-    "G/F#",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A big Oasis sing-along built on open chords, with walking bass notes (C/B, G/F#) to practise."
-  },
-  {
-   "title": "Next Year",
-   "artist": "Foo Fighters",
-   "style": "Alt rock",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "Cadd9",
-    "D/F#",
-    "A7",
-    "C",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Easy open-chord Foo Fighters song for relaxed playing; A7 and D/F# add small new colours."
-  },
-  {
-   "title": "אהבתיה",
-   "artist": "שלמה ארצי",
+   "title": "אני ואתה",
+   "artist": "אריק איינשטיין",
    "style": "Israeli classic",
-   "difficulty": 4,
-   "chords": [
-    "Cadd9",
-    "Em7",
-    "D6",
-    "G",
-    "D/F#",
-    "Bm",
-    "Am",
-    "D",
-    "Am7",
-    "B7",
-    "Am/F#",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: a classic with a key change and many colour chords, great for building a richer chord vocabulary."
-  },
-  {
-   "title": "כמו בחיים",
-   "artist": "מוש בן ארי",
-   "style": "Israeli folk rock",
    "difficulty": 2,
    "chords": [
     "Em",
-    "A5",
-    "Aadd9",
     "C",
-    "G",
     "D",
-    "G/F#",
+    "A",
+    "B7",
+    "G",
+    "E",
+    "Abm",
+    "F#m"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A sing-along classic on open chords, with one quick Abm barre change to keep your barres sharp."
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "Em7",
+    "Fmaj7",
+    "G",
+    "Am/Bb",
+    "E",
+    "E4/B",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Moody ballad in the spirit of your Banai and Saharof songs; the new part is the slash-chord bass walk."
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "E",
+    "F",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Few chords but a driving rock strum: a fun one for working on right-hand rhythm and muting."
+  },
+  {
+   "title": "גבר הולך לאיבוד",
+   "artist": "שלמה ארצי",
+   "style": "Israeli ballad",
+   "difficulty": 4,
+   "chords": [
+    "Dm",
+    "A#maj7",
+    "Am",
+    "F#dim",
+    "Gm",
+    "Gm/E",
+    "E7/Ab",
+    "A",
+    "Dm7/C",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: diminished and slash chords that move the bass line, like the colours in your Dadon sheets."
+  },
+  {
+   "title": "הוריקן",
+   "artist": "התקווה 6",
+   "style": "Israeli pop rock",
+   "difficulty": 3,
+   "chords": [
+    "Gm",
+    "Bb",
+    "Eb",
+    "Cm",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "From an artist already in your folder, using the flat-key barres you already play."
+  },
+  {
+   "title": "נתתי לה חיי",
+   "artist": "כוורת",
+   "style": "Israeli classic",
+   "difficulty": 3,
+   "chords": [
+    "F",
+    "Am",
+    "Em",
+    "G",
+    "D7",
+    "Dm",
+    "C",
+    "B7",
+    "D",
     "Bm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Mostly open chords you know, with A5 and Aadd9 as fresh, open-ringing shapes."
+   "why": "A campfire favourite with lots of chord changes: great practice for smooth, quick switches."
   },
   {
-   "title": "ממריאים",
-   "artist": "מוש בן ארי",
-   "style": "Israeli pop rock",
-   "difficulty": 1,
-   "chords": [
-    "F",
-    "Am",
-    "G",
-    "Dm",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy, upbeat one for warming up and practising smooth changes around the F barre."
-  },
-  {
-   "title": "בדרך אל הים",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "Dm",
-    "Bb",
-    "A",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Four chords in D minor like your Rockfour and Eviatar Banai songs, with a driving rock strum."
-  },
-  {
-   "title": "קצב החיים",
-   "artist": "התקווה 6",
-   "style": "Israeli pop",
+   "title": "Come as You Are",
+   "artist": "Nirvana",
+   "style": "Grunge",
    "difficulty": 2,
    "chords": [
-    "Em7",
-    "Bm7",
-    "Am7",
-    "G",
-    "D/F#"
+    "F#m",
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Hatikva 6 song for your folder, built on soft seventh chords and a groovy rhythm."
+   "why": "Your Nirvana folder is still empty; this one is all about the famous single-note riff, a new skill."
+  },
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "style": "Alt rock",
+   "difficulty": 4,
+   "chords": [
+    "D",
+    "Bm",
+    "G",
+    "Db",
+    "E",
+    "F#",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Drop D",
+   "why": "Uses the Drop D tuning you know from My Friends; the step up is the fast moving chord shapes."
+  },
+  {
+   "title": "High and Dry",
+   "artist": "Radiohead",
+   "style": "Alt rock",
+   "difficulty": 3,
+   "chords": [
+    "G#5",
+    "F#5",
+    "A#5",
+    "Asus2",
+    "E5",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Gentle acoustic strumming with open-string colour chords; new for you are the power-chord shapes."
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Jack Johnson to follow Better Together; a laid-back song to practise the muted 'chunk' strum."
   }
  ],
  "history": [
@@ -1278,6 +1290,56 @@
    "title": "קצב החיים",
    "artist": "התקווה 6",
    "date": "2026-10-25"
+  },
+  {
+   "title": "אני ואתה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "גבר הולך לאיבוד",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "הוריקן",
+   "artist": "התקווה 6",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "נתתי לה חיי",
+   "artist": "כוורת",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "Come as You Are",
+   "artist": "Nirvana",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "High and Dry",
+   "artist": "Radiohead",
+   "date": "2026-10-26"
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "date": "2026-10-26"
   }
  ],
  "sheets": [
@@ -1748,7 +1810,23 @@
   {
    "text": "Your strings said they're fine with being played every day, {n}. It's being ignored that makes them go flat.",
    "date": "2026-10-24"
+  },
+  {
+   "text": "Mark Tremonti practises scales for hours. Your scales are still in the shop window, {n}. Five minutes today?",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "Your metronome tried counting to four on its own and fell asleep at three, {n}. Wake it up with a song.",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "The low E string says it's not too low to be asked for help, {n}. Give it a strum.",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "Arik Einstein made simple chords sound like poetry. Your G chord is ready for its first verse, {n}.",
+   "date": "2026-10-26"
   }
  ],
- "jokesDate": "2026-10-24"
+ "jokesDate": "2026-10-26"
 }
