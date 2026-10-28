@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-27T03:54:57Z",
- "date": "2026-10-27",
+ "at": "2026-10-28T03:54:09Z",
+ "date": "2026-10-28",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -318,176 +318,183 @@
    }
   ]
  },
- "level": "Comfortable with barre chords in flat keys, 7th/maj7 colours, capo and Drop D: a solid intermediate player ready for new textures and riffs.",
+ "level": "Comfortable with full barre chords in flat keys plus maj7 and dim colours; ready for key changes and more detailed picking parts.",
  "suggestions": [
   {
-   "title": "עיניים שלי",
-   "artist": "יהודה פוליקר",
-   "style": "Israeli rock / Greek",
-   "difficulty": 3,
-   "chords": [
-    "Cm",
-    "G",
-    "Fm",
-    "G7",
-    "Ab",
-    "Eb",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic in C minor that uses the flat-key barres you already play; the new part is the driving bouzouki-style strum."
-  },
-  {
-   "title": "אל תפחד",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 3,
-   "chords": [
-    "G",
-    "G4",
-    "Cadd9",
-    "C",
-    "Cmaj7",
-    "C/G",
-    "Bm7",
-    "Em",
-    "D/C",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar Banai for your folder, with sus and slash chords that add colour to familiar open shapes."
-  },
-  {
-   "title": "שיר המכולת",
-   "artist": "כוורת",
-   "style": "Israeli classic",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "D",
-    "Am",
-    "Cadd9",
-    "F",
-    "B",
-    "Bb",
-    "Cmaj7",
-    "E4",
-    "Bm",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along classic with quick chord changes and a few surprise barres to keep your hands busy."
-  },
-  {
-   "title": "אוהב להיות בבית",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "A",
-    "B7",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy, relaxed four-chord song, good for working on a smooth strum and singing while you play."
-  },
-  {
-   "title": "ריקוד המכונה",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An Israeli rock classic in the spirit of Rockfour and Tuna; the challenge is the tight, rhythmic rock strumming."
-  },
-  {
-   "title": "Karma Police",
-   "artist": "Radiohead",
-   "style": "Alt rock",
-   "difficulty": 3,
-   "chords": [
-    "Am",
-    "D/F#",
-    "Em",
-    "G",
-    "F",
-    "G/F#",
-    "C",
-    "C/B",
-    "Bm",
-    "D",
-    "F#",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Moody alt-rock with walking bass notes under the chords: a good step up in slash-chord movement."
-  },
-  {
-   "title": "Cast No Shadow",
+   "title": "Don't Look Back in Anger",
    "artist": "Oasis",
    "style": "Britpop",
    "difficulty": 3,
    "chords": [
-    "A7sus4",
+    "C",
+    "F",
     "G",
-    "Em7",
-    "Dsus4",
-    "Cadd9"
+    "Am",
+    "E",
+    "Fm",
+    "G#/E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "If you like Wonderwall, this one uses the same ringing open shapes with a new A7sus4 colour."
+   "why": "An Oasis anthem a step past Wonderwall: the F barre and a sneaky Fm in the chorus."
   },
   {
-   "title": "Brain Stew",
-   "artist": "Green Day",
-   "style": "Punk rock",
-   "difficulty": 2,
+   "title": "Under the Bridge",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alt rock",
+   "difficulty": 4,
    "chords": [
+    "E",
+    "B",
+    "C#m",
+    "G#m",
     "A",
-    "G",
+    "Emaj7",
     "F#m",
-    "F",
-    "E"
+    "Am",
+    "G",
+    "Fmaj7",
+    "E7",
+    "Gmaj7"
    ],
    "capo": 0,
-   "tuning": "Eb Standard (half step down)",
-   "why": "A heavy descending power-chord riff: a fun new technique (palm-muted power chords) next to your Green Day songs."
+   "tuning": "Standard",
+   "why": "A step up for a Chili Peppers fan: barre chords in E and Frusciante-style embellished picking."
   },
   {
-   "title": "Bubble Toes",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-pop",
+   "title": "Daughter",
+   "artist": "Pearl Jam",
+   "style": "Grunge",
    "difficulty": 2,
    "chords": [
     "G",
-    "C",
-    "D"
+    "Am7",
+    "A7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Easy chords so you can focus on Jack Johnson's bouncy muted-strum groove."
+   "why": "Few chords, so the focus is a percussive, muted strumming hand."
   },
   {
-   "title": "Delicate",
-   "artist": "Damien Rice",
-   "style": "Acoustic singer-songwriter",
+   "title": "Times Like These",
+   "artist": "Foo Fighters",
+   "style": "Alt rock",
+   "difficulty": 3,
+   "chords": [
+    "D",
+    "D/C",
+    "D/B",
+    "Am",
+    "C",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits the Foo folder: a descending bass line under D and an odd-time intro riff."
+  },
+  {
+   "title": "עיר מקלט",
+   "artist": "אהוד בנאי",
+   "style": "Israeli rock",
+   "difficulty": 1,
+   "chords": [
+    "Am",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy classic for a relaxed day: two chords, all about groove and singing along."
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [
+    "Bm",
+    "G",
+    "F#",
+    "A",
+    "D",
+    "Bm7",
+    "Cm",
+    "Ab",
+    "Cm7",
+    "Bb",
+    "Eb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: the song jumps a semitone mid-way, so you move the same barre shapes up a fret."
+  },
+  {
+   "title": "לב שלם",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Gm",
+    "Dm",
+    "Cm",
+    "Eb",
+    "F",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Berry Sakharof in minor barre keys you already handle, with a lovely slow build."
+  },
+  {
+   "title": "סחרחורת",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
    "difficulty": 2,
    "chords": [
-    "F",
-    "C",
-    "G"
+    "Dm",
+    "Bb",
+    "Gm",
+    "A"
    ],
-   "capo": 5,
+   "capo": 0,
    "tuning": "Standard",
-   "why": "A gentle, easy song for practising soft dynamics and fingerpicking high up the neck with a capo."
+   "why": "A Tuna loop of four chords: tight rhythm practice under fast vocals."
+  },
+  {
+   "title": "אהובתי",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "Dm",
+    "F",
+    "Bb",
+    "A",
+    "C",
+    "Am"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Mashina at your level, with a suspended A that adds tension before the resolve."
+  },
+  {
+   "title": "תמיד אהבה",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [
+    "Am9",
+    "Am",
+    "Dm9",
+    "Dm",
+    "E7",
+    "E",
+    "F",
+    "G",
+    "Em"
+   ],
+   "capo": 3,
+   "tuning": "Standard",
+   "why": "More Ivri Lider with a capo, adding soft m9 colours to familiar open shapes."
   }
  ],
  "history": [
@@ -1390,6 +1397,56 @@
    "title": "Delicate",
    "artist": "Damien Rice",
    "date": "2026-10-27"
+  },
+  {
+   "title": "Don't Look Back in Anger",
+   "artist": "Oasis",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Under the Bridge",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Daughter",
+   "artist": "Pearl Jam",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Times Like These",
+   "artist": "Foo Fighters",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "עיר מקלט",
+   "artist": "אהוד בנאי",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "לב שלם",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "סחרחורת",
+   "artist": "טונה",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "אהובתי",
+   "artist": "משינה",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "תמיד אהבה",
+   "artist": "עברי לידר",
+   "date": "2026-10-28"
   }
  ],
  "sheets": [
@@ -1408,9 +1465,9 @@
     "Ebm",
     "Ab"
    ],
-   "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
-   "at": "2026-10-12T04:23:56.176Z"
+   "at": "2026-10-12T04:23:56.176Z",
+   "level": 5
   },
   {
    "title": "מאיר בנאי אצלך בעולם",
@@ -1423,9 +1480,9 @@
     "Em7",
     "Cadd9"
    ],
-   "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
-   "at": "2026-10-10T23:07:35.424Z"
+   "at": "2026-10-10T23:07:35.424Z",
+   "level": 1
   },
   {
    "title": "יא",
@@ -1436,9 +1493,9 @@
     "Cm",
     "C"
    ],
-   "level": 1,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
-   "at": "2026-10-12T05:44:13.178Z"
+   "at": "2026-10-12T05:44:13.178Z",
+   "level": 1
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -1450,9 +1507,9 @@
     "D",
     "Em"
    ],
-   "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
-   "at": "2026-10-12T05:50:07.510Z"
+   "at": "2026-10-12T05:50:07.510Z",
+   "level": 1
   },
   {
    "title": "חלל",
@@ -1467,9 +1524,9 @@
     "F#",
     "Ebm"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
-   "at": "2026-10-12T04:21:21.095Z"
+   "at": "2026-10-12T04:21:21.095Z",
+   "level": 4
   },
   {
    "title": "אור גדול",
@@ -1484,9 +1541,9 @@
     "Bb4",
     "Fm7"
    ],
-   "level": 5,
    "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
-   "at": "2026-10-12T04:13:33.006Z"
+   "at": "2026-10-12T04:13:33.006Z",
+   "level": 5
   },
   {
    "title": "Bascet Case",
@@ -1501,9 +1558,9 @@
     "Ab",
     "Dbm"
    ],
-   "level": 5,
    "url": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
-   "at": "2026-10-11T20:57:06.788Z"
+   "at": "2026-10-11T20:57:06.788Z",
+   "level": 5
   },
   {
    "title": "סהרה",
@@ -1516,9 +1573,9 @@
     "Abm",
     "B"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
-   "at": "2026-10-11T19:20:34.742Z"
+   "at": "2026-10-11T19:20:34.742Z",
+   "level": 4
   },
   {
    "title": "קשה בכדור הארץ",
@@ -1533,9 +1590,9 @@
     "F#",
     "G"
    ],
-   "level": 3,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
-   "at": "2026-10-11T19:18:19.408Z"
+   "at": "2026-10-11T19:18:19.408Z",
+   "level": 3
   },
   {
    "title": "ביום שמש יפה",
@@ -1552,9 +1609,9 @@
     "Cm",
     "Ddim"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
-   "at": "2026-10-10T17:10:42.560Z"
+   "at": "2026-10-10T17:10:42.560Z",
+   "level": 4
   },
   {
    "title": "בין קודש לחול",
@@ -1570,9 +1627,9 @@
     "Cm",
     "Bb"
    ],
-   "level": 5,
    "url": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
-   "at": "2026-10-11T11:24:33.896Z"
+   "at": "2026-10-11T11:24:33.896Z",
+   "level": 5
   },
   {
    "title": "חם על הירח",
@@ -1592,9 +1649,9 @@
     "Ebdim",
     "B7"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
-   "at": "2026-10-11T08:59:26.641Z"
+   "at": "2026-10-11T08:59:26.641Z",
+   "level": 4
   },
   {
    "title": "עד מתי",
@@ -1609,9 +1666,9 @@
     "Am",
     "C"
    ],
-   "level": 3,
    "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
-   "at": "2026-10-11T04:39:56.376Z"
+   "at": "2026-10-11T04:39:56.376Z",
+   "level": 3
   },
   {
    "title": "Wanderwall",
@@ -1623,9 +1680,9 @@
     "Em7",
     "E"
    ],
-   "level": 1,
    "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
-   "at": "2026-10-11T04:04:56.240Z"
+   "at": "2026-10-11T04:04:56.240Z",
+   "level": 1
   },
   {
    "title": "תחרות כלבים",
@@ -1642,9 +1699,9 @@
     "F#m7",
     "F#m6"
    ],
-   "level": 5,
    "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
-   "at": "2026-10-11T03:48:41.071Z"
+   "at": "2026-10-11T03:48:41.071Z",
+   "level": 5
   },
   {
    "title": "צבעים",
@@ -1658,9 +1715,9 @@
     "D",
     "Dm"
    ],
-   "level": 2,
    "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
-   "at": "2026-10-10T22:31:59.230Z"
+   "at": "2026-10-10T22:31:59.230Z",
+   "level": 2
   },
   {
    "title": "הכעס",
@@ -1674,9 +1731,9 @@
     "Eb",
     "F#m"
    ],
-   "level": 3,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
-   "at": "2026-10-10T19:13:35.115Z"
+   "at": "2026-10-10T19:13:35.115Z",
+   "level": 3
   },
   {
    "title": "Better Together",
@@ -1691,9 +1748,9 @@
     "Bb/A",
     "Gm"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
-   "at": "2026-10-11T04:46:28.822Z"
+   "at": "2026-10-11T04:46:28.822Z",
+   "level": 4
   },
   {
    "title": "במקום-טסט שיר",
@@ -1705,9 +1762,9 @@
     "E",
     "C#m"
    ],
-   "level": 2,
    "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z"
+   "at": "2026-10-16T22:12:44.867Z",
+   "level": 2
   },
   {
    "title": "במקום בו אני גר",
@@ -1719,9 +1776,9 @@
     "E",
     "C#m"
    ],
-   "level": 2,
    "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
+   "at": "2026-10-11T20:50:16.168Z",
+   "level": 2
   },
   {
    "title": "My friends",
@@ -1743,9 +1800,9 @@
     "F#add9/B",
     "G"
    ],
-   "level": 4,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
-   "at": "2026-10-07T10:16:18.945Z"
+   "at": "2026-10-07T10:16:18.945Z",
+   "level": 4
   }
  ],
  "jokes": [
@@ -1876,7 +1933,23 @@
   {
    "text": "Arik Einstein made simple chords sound like poetry. Your G chord is ready for its first verse, {n}.",
    "date": "2026-10-26"
+  },
+  {
+   "text": "Oasis made “Don't Look Back in Anger” sound easy. Learn the first verse before dinner and make it look easy too, {n}.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "Your guitar strap has been on the hook so long it forgot what a shoulder feels like, {n}. Remind it.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "Your tuning pegs are spreading rumours that you only visit them when guests come over, {n}. Prove them wrong.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "The pick jar is full, the strings are shiny and the couch has had enough of you, {n}. Go play.",
+   "date": "2026-10-28"
   }
  ],
- "jokesDate": "2026-10-26"
+ "jokesDate": "2026-10-28"
 }
