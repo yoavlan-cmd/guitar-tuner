@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-28T03:54:09Z",
- "date": "2026-10-28",
+ "at": "2026-10-29T03:54:19Z",
+ "date": "2026-10-29",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -318,183 +318,179 @@
    }
   ]
  },
- "level": "Comfortable with full barre chords in flat keys plus maj7 and dim colours; ready for key changes and more detailed picking parts.",
+ "level": "Plays full barre chords in flat and sharp keys, with maj7, sus and dim colours; ready for longer songs with richer voicings and faster changes.",
  "suggestions": [
   {
-   "title": "Don't Look Back in Anger",
-   "artist": "Oasis",
-   "style": "Britpop",
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "C",
+    "Em",
     "F",
-    "G",
+    "Dm",
     "Am",
-    "E",
-    "Fm",
-    "G#/E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An Oasis anthem a step past Wonderwall: the F barre and a sneaky Fm in the chorus."
-  },
-  {
-   "title": "Under the Bridge",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "B",
-    "C#m",
-    "G#m",
-    "A",
-    "Emaj7",
-    "F#m",
-    "Am",
-    "G",
+    "Am/G",
     "Fmaj7",
-    "E7",
-    "Gmaj7"
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up for a Chili Peppers fan: barre chords in E and Frusciante-style embellished picking."
+   "why": "Another Eviatar classic for your folder: an Am/G bass walk-down and a soft Fmaj7 colour."
   },
   {
-   "title": "Daughter",
-   "artist": "Pearl Jam",
-   "style": "Grunge",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "Am7",
-    "A7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Few chords, so the focus is a percussive, muted strumming hand."
-  },
-  {
-   "title": "Times Like These",
-   "artist": "Foo Fighters",
-   "style": "Alt rock",
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
     "D",
-    "D/C",
-    "D/B",
-    "Am",
-    "C",
-    "Em"
+    "A",
+    "D/A",
+    "A/C#",
+    "E",
+    "F#m",
+    "B/Eb",
+    "D/C#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits the Foo folder: a descending bass line under D and an odd-time intro riff."
+   "why": "Amir Dadon in a bright D key: practise slash-chord bass lines like A/C# and D/C#."
   },
   {
-   "title": "עיר מקלט",
-   "artist": "אהוד בנאי",
-   "style": "Israeli rock",
+   "title": "היי בייב",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
    "difficulty": 1,
    "chords": [
     "Am",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy classic for a relaxed day: two chords, all about groove and singing along."
-  },
-  {
-   "title": "מחכים למשיח",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "Bm",
-    "G",
-    "F#",
-    "A",
-    "D",
-    "Bm7",
-    "Cm",
-    "Ab",
-    "Cm7",
-    "Bb",
-    "Eb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: the song jumps a semitone mid-way, so you move the same barre shapes up a fret."
-  },
-  {
-   "title": "לב שלם",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "Gm",
     "Dm",
-    "Cm",
-    "Eb",
-    "F",
+    "Bb",
     "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Berry Sakharof in minor barre keys you already handle, with a lovely slow build."
+   "why": "An easy Tuna groove on four chords, good for locking in a steady strumming pattern."
   },
   {
-   "title": "סחרחורת",
-   "artist": "טונה",
-   "style": "Israeli hip hop",
+   "title": "ירח",
+   "artist": "שלמה ארצי",
+   "style": "Israeli pop rock",
+   "difficulty": 4,
+   "chords": [
+    "D6/F#",
+    "B/G",
+    "B7",
+    "Am",
+    "Em",
+    "G",
+    "Am/G",
+    "C",
+    "Am7",
+    "Em7",
+    "Am/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: a slow ballad full of moving bass notes and colour chords to make it sing."
+  },
+  {
+   "title": "עוף גוזל",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
    "difficulty": 2,
    "chords": [
-    "Dm",
-    "Bb",
-    "Gm",
+    "Am",
+    "C",
+    "G",
+    "E",
+    "F",
+    "D",
+    "Em",
+    "Bm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A sing-along classic in open chords with one Bm barre; great for fingerpicking practice."
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "style": "Pop punk",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "G",
+    "D",
     "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A Tuna loop of four chords: tight rhythm practice under fast vocals."
+   "why": "Next to Good Riddance and Basket Case: four open chords and a driving palm-muted strum."
   },
   {
-   "title": "אהובתי",
-   "artist": "משינה",
-   "style": "Israeli rock",
+   "title": "Smells Like Teen Spirit",
+   "artist": "Nirvana",
+   "style": "Grunge",
    "difficulty": 2,
    "chords": [
-    "Dm",
-    "F",
-    "Bb",
+    "Em",
     "A",
-    "C",
-    "Am"
+    "G",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Mashina at your level, with a suspended A that adds tension before the resolve."
+   "why": "A start for the empty Nirvana folder: loud-quiet dynamics and chunky muted strums."
   },
   {
-   "title": "תמיד אהבה",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alt rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits next to My Friends: a simple progression that leaves room to add Frusciante-style picking."
+  },
+  {
+   "title": "Creep",
+   "artist": "Radiohead",
+   "style": "Alt rock",
    "difficulty": 3,
    "chords": [
-    "Am9",
-    "Am",
-    "Dm9",
-    "Dm",
-    "E7",
-    "E",
-    "F",
     "G",
-    "Em"
+    "B",
+    "C",
+    "Cm"
    ],
-   "capo": 3,
+   "capo": 0,
    "tuning": "Standard",
-   "why": "More Ivri Lider with a capo, adding soft m9 colours to familiar open shapes."
+   "why": "Four chords with a twist: the B and Cm barre shapes and a big chorus dynamic."
+  },
+  {
+   "title": "Alive",
+   "artist": "Pearl Jam",
+   "style": "Grunge",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "G",
+    "C",
+    "F",
+    "E",
+    "D",
+    "Esus",
+    "Asus"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A rock anthem with sus-chord riffs and slides, a small step up in rhythm playing."
   }
  ],
  "history": [
@@ -1447,6 +1443,56 @@
    "title": "תמיד אהבה",
    "artist": "עברי לידר",
    "date": "2026-10-28"
+  },
+  {
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "היי בייב",
+   "artist": "טונה",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "ירח",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "עוף גוזל",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Smells Like Teen Spirit",
+   "artist": "Nirvana",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Creep",
+   "artist": "Radiohead",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Alive",
+   "artist": "Pearl Jam",
+   "date": "2026-10-29"
   }
  ],
  "sheets": [
