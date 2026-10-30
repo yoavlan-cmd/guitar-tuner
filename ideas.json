@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-29T03:54:19Z",
- "date": "2026-10-29",
+ "at": "2026-10-30T04:00:35Z",
+ "date": "2026-10-30",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -318,135 +318,161 @@
    }
   ]
  },
- "level": "Plays full barre chords in flat and sharp keys, with maj7, sus and dim colours; ready for longer songs with richer voicings and faster changes.",
+ "level": "Plays full barre chords in flat and sharp keys, with maj7, sus and dim colours; ready for richer voicings, slash-chord bass lines and faster changes.",
  "suggestions": [
   {
-   "title": "יש לי סיכוי",
+   "title": "לשונות של אש",
    "artist": "אביתר בנאי",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "Em",
-    "F",
+    "Gm",
+    "Bb",
     "Dm",
-    "Am",
-    "Am/G",
-    "Fmaj7",
-    "G"
+    "F",
+    "C",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Eviatar classic for your folder: an Am/G bass walk-down and a soft Fmaj7 colour."
+   "why": "An artist you already play, in a flat key you know; the augmented D5+ passing chord is the new colour."
   },
   {
-   "title": "נגד הרוח",
-   "artist": "אמיר דדון",
+   "title": "הזיות",
+   "artist": "ברי סחרוף",
    "style": "Israeli rock",
-   "difficulty": 3,
+   "difficulty": 4,
+   "chords": [
+    "Gm",
+    "F",
+    "Cm",
+    "Eb",
+    "Fm",
+    "Bbm7b5",
+    "C#",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: Berry's minor-key barre grooves plus a half-diminished Bbm7b5 to learn."
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "style": "Israeli classic rock",
+   "difficulty": 4,
+   "chords": [
+    "E",
+    "A",
+    "D",
+    "Dmaj7",
+    "Amaj7",
+    "Bm7",
+    "F#m",
+    "C#m7",
+    "G#m7",
+    "Dm7",
+    "D#m7b5",
+    "F#7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A classic ballad full of maj7 and m7 voicings in sharp keys; great for smooth chord changes."
+  },
+  {
+   "title": "סע לאט",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 4,
+   "chords": [
+    "C",
+    "C/B",
+    "Am",
+    "G",
+    "F",
+    "C7",
+    "F/G",
+    "Bb",
+    "Dm",
+    "G9",
+    "C/Bb",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Walking slash-chord bass lines (C, C/B, C/Bb) are the new skill in this sing-along classic."
+  },
+  {
+   "title": "רומנטיקה עתידנית",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
    "chords": [
     "D",
-    "A",
-    "D/A",
-    "A/C#",
-    "E",
-    "F#m",
-    "B/Eb",
-    "D/C#"
+    "C#m",
+    "F#m"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Amir Dadon in a bright D key: practise slash-chord bass lines like A/C# and D/C#."
+   "why": "An easier one: three chords and a driving strum, good for tightening your rhythm."
   },
   {
-   "title": "היי בייב",
-   "artist": "טונה",
+   "title": "עד אנה",
+   "artist": "הדג נחש",
    "style": "Israeli hip hop",
    "difficulty": 1,
    "chords": [
     "Am",
     "Dm",
-    "Bb",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Tuna groove on four chords, good for locking in a steady strumming pattern."
-  },
-  {
-   "title": "ירח",
-   "artist": "שלמה ארצי",
-   "style": "Israeli pop rock",
-   "difficulty": 4,
-   "chords": [
-    "D6/F#",
-    "B/G",
-    "B7",
-    "Am",
-    "Em",
     "G",
-    "Am/G",
     "C",
-    "Am7",
-    "Em7",
-    "Am/F#"
+    "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: a slow ballad full of moving bass notes and colour chords to make it sing."
+   "why": "Fits your Tuna and Jimbo J taste; open chords leave room to focus on a funky right hand."
   },
   {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "C",
-    "G",
-    "E",
-    "F",
-    "D",
-    "Em",
-    "Bm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along classic in open chords with one Bm barre; great for fingerpicking practice."
-  },
-  {
-   "title": "Boulevard of Broken Dreams",
+   "title": "Wake Me Up When September Ends",
    "artist": "Green Day",
-   "style": "Pop punk",
+   "style": "Pop punk ballad",
    "difficulty": 2,
    "chords": [
-    "Em",
     "G",
+    "C",
+    "Cm",
+    "E",
+    "Bm",
     "D",
-    "A"
+    "F#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Next to Good Riddance and Basket Case: four open chords and a driving palm-muted strum."
+   "why": "Green Day you already like; the G to C to Cm move and a picked intro riff are the new bits."
   },
   {
-   "title": "Smells Like Teen Spirit",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 2,
+   "title": "Champagne Supernova",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
    "chords": [
-    "Em",
-    "A",
+    "A9",
+    "A9/G",
+    "E4",
+    "E",
     "G",
-    "C"
+    "A",
+    "D",
+    "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A start for the empty Nirvana folder: loud-quiet dynamics and chunky muted strums."
+   "why": "After Wonderwall, a longer Oasis epic with ringing add9 and sus shapes and a big dynamic build."
   },
   {
-   "title": "Californication",
+   "title": "Otherside",
    "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
+   "style": "Alternative rock",
    "difficulty": 2,
    "chords": [
     "Am",
@@ -456,94 +482,25 @@
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits next to My Friends: a simple progression that leaves room to add Frusciante-style picking."
+   "why": "RHCP at an easy chord level, so you can work on the muted, syncopated strumming feel."
   },
   {
-   "title": "Creep",
+   "title": "No Surprises",
    "artist": "Radiohead",
-   "style": "Alt rock",
+   "style": "Alternative rock",
    "difficulty": 3,
    "chords": [
-    "G",
-    "B",
-    "C",
-    "Cm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Four chords with a twist: the B and Cm barre shapes and a big chorus dynamic."
-  },
-  {
-   "title": "Alive",
-   "artist": "Pearl Jam",
-   "style": "Grunge",
-   "difficulty": 3,
-   "chords": [
-    "A",
-    "G",
-    "C",
     "F",
-    "E",
-    "D",
-    "Esus",
-    "Asus"
+    "Bbm",
+    "Gm",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A rock anthem with sus-chord riffs and slides, a small step up in rhythm playing."
+   "why": "Gentle arpeggio picking in F, with the Bbm borrowed chord as the new sound."
   }
  ],
  "history": [
-  {
-   "title": "Everlong",
-   "artist": "Foo Fighters",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Lithium",
-   "artist": "Nirvana",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Come As You Are",
-   "artist": "Nirvana",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Scar Tissue",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Otherside",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Upside Down",
-   "artist": "Jack Johnson",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "רכבת לילה לקהיר",
-   "artist": "משינה",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "עכשיו מעונן",
-   "artist": "אביב גפן",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "מחכים למשיח",
-   "artist": "שלום חנוך",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "אני ואתה",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-10"
-  },
   {
    "title": "עד מתי",
    "artist": "אביתר בנאי",
@@ -1493,6 +1450,56 @@
    "title": "Alive",
    "artist": "Pearl Jam",
    "date": "2026-10-29"
+  },
+  {
+   "title": "לשונות של אש",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "הזיות",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "סע לאט",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "רומנטיקה עתידנית",
+   "artist": "משינה",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "עד אנה",
+   "artist": "הדג נחש",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "Wake Me Up When September Ends",
+   "artist": "Green Day",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "Champagne Supernova",
+   "artist": "Oasis",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "Otherside",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "No Surprises",
+   "artist": "Radiohead",
+   "date": "2026-10-30"
   }
  ],
  "sheets": [
@@ -1995,7 +2002,23 @@
   {
    "text": "The pick jar is full, the strings are shiny and the couch has had enough of you, {n}. Go play.",
    "date": "2026-10-28"
+  },
+  {
+   "text": "Joe Satriani plays faster than the speed of thought. You only need to beat the speed of “maybe tomorrow”, {n}.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "Your guitar's warranty doesn't cover neglect, {n}. Luckily, ten minutes of playing fixes almost everything.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "Mosh Ben Ari found a whole world in a few simple chords. Grab yours and go looking, {n}.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "The open strings are E, A, D, G, B, E. The open invitation is right now, {n}.",
+   "date": "2026-10-30"
   }
  ],
- "jokesDate": "2026-10-28"
+ "jokesDate": "2026-10-30"
 }
