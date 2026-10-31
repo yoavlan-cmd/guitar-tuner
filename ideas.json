@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-10-30T04:00:35Z",
- "date": "2026-10-30",
+ "at": "2026-10-31T03:54:54Z",
+ "date": "2026-10-31",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -200,10 +200,10 @@
     "t": "Good Riddance",
     "ch": [
      "G",
-     "C",
+     "Cadd9",
      "D",
-     "Em",
-     "Cadd9"
+     "C",
+     "Em"
     ]
    },
    {
@@ -285,12 +285,11 @@
      "Dm7/F",
      "G/B",
      "G",
-     "G/F",
+     "C",
      "Asus2",
      "F#add9",
      "A",
-     "D",
-     "C"
+     "D"
     ],
     "tuning": "Drop D"
    },
@@ -318,239 +317,181 @@
    }
   ]
  },
- "level": "Plays full barre chords in flat and sharp keys, with maj7, sus and dim colours; ready for richer voicings, slash-chord bass lines and faster changes.",
+ "level": "Comfortable with full barre chords in flat keys, capo and Drop D; ready for richer voicings and smoother changes.",
  "suggestions": [
   {
-   "title": "לשונות של אש",
+   "title": "חלומות של אחרים",
+   "artist": "הפרויקט של עידן רייכל",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [
+    "Eb",
+    "Fm",
+    "Bbm",
+    "Ab/G",
+    "Ab",
+    "C#",
+    "Bbm/C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Same flat-key barre world as songs you already play, with a few slash-bass moves to polish."
+  },
+  {
+   "title": "עד מחר",
    "artist": "אביתר בנאי",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "Gm",
-    "Bb",
     "Dm",
     "F",
+    "C/E",
     "C",
-    "D"
+    "Gm",
+    "Bb",
+    "Gm7",
+    "Bbmaj7",
+    "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An artist you already play, in a flat key you know; the augmented D5+ passing chord is the new colour."
+   "why": "A classic from an artist you love; adds Gm7 and Bbmaj7 colours to familiar D minor shapes."
   },
   {
-   "title": "הזיות",
+   "title": "יפה כלבנה",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Cm",
+    "Gm",
+    "Fm",
+    "Ab",
+    "Eb",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "All barre chords you already know, in a new order — great for clean, steady changes."
+  },
+  {
+   "title": "החיים שממול",
    "artist": "ברי סחרוף",
    "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "Gm",
-    "F",
-    "Cm",
-    "Eb",
-    "Fm",
-    "Bbm7b5",
-    "C#",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: Berry's minor-key barre grooves plus a half-diminished Bbm7b5 to learn."
-  },
-  {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "style": "Israeli classic rock",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "A",
-    "D",
-    "Dmaj7",
-    "Amaj7",
-    "Bm7",
-    "F#m",
-    "C#m7",
-    "G#m7",
-    "Dm7",
-    "D#m7b5",
-    "F#7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic ballad full of maj7 and m7 voicings in sharp keys; great for smooth chord changes."
-  },
-  {
-   "title": "סע לאט",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 4,
-   "chords": [
-    "C",
-    "C/B",
-    "Am",
-    "G",
-    "F",
-    "C7",
-    "F/G",
-    "Bb",
-    "Dm",
-    "G9",
-    "C/Bb",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Walking slash-chord bass lines (C, C/B, C/Bb) are the new skill in this sing-along classic."
-  },
-  {
-   "title": "רומנטיקה עתידנית",
-   "artist": "משינה",
-   "style": "Israeli rock",
    "difficulty": 2,
    "chords": [
+    "G",
+    "G/C",
+    "C",
+    "Gm",
+    "A",
+    "Em",
     "D",
-    "C#m",
-    "F#m"
+    "Bm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier one: three chords and a driving strum, good for tightening your rhythm."
+   "why": "A relaxed Berry classic; the G to Gm switch is the fun new move."
   },
   {
-   "title": "עד אנה",
-   "artist": "הדג נחש",
-   "style": "Israeli hip hop",
+   "title": "ים",
+   "artist": "מוש בן ארי",
+   "style": "Israeli folk-pop",
    "difficulty": 1,
    "chords": [
+    "C",
+    "F",
     "Am",
+    "G",
     "Dm",
-    "G",
-    "C",
-    "F"
+    "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits your Tuna and Jimbo J taste; open chords leave room to focus on a funky right hand."
+   "why": "An easy sing-along with open chords to give your hands a rest between harder songs."
   },
   {
-   "title": "Wake Me Up When September Ends",
-   "artist": "Green Day",
-   "style": "Pop punk ballad",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "C",
-    "Cm",
-    "E",
-    "Bm",
-    "D",
-    "F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Green Day you already like; the G to C to Cm move and a picked intro riff are the new bits."
-  },
-  {
-   "title": "Champagne Supernova",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [
-    "A9",
-    "A9/G",
-    "E4",
-    "E",
-    "G",
-    "A",
-    "D",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "After Wonderwall, a longer Oasis epic with ringing add9 and sus shapes and a big dynamic build."
-  },
-  {
-   "title": "Otherside",
+   "title": "Scar Tissue",
    "artist": "Red Hot Chili Peppers",
    "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "F",
-    "C",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "RHCP at an easy chord level, so you can work on the muted, syncopated strumming feel."
-  },
-  {
-   "title": "No Surprises",
-   "artist": "Radiohead",
-   "style": "Alternative rock",
    "difficulty": 3,
    "chords": [
     "F",
-    "Bbm",
-    "Gm",
-    "C"
+    "C",
+    "Dm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Gentle arpeggio picking in F, with the Bbm borrowed chord as the new sound."
+   "why": "Simple chords but a new technique: the double-stop slide riff, a step up from My Friends."
+  },
+  {
+   "title": "Stop Crying Your Heart Out",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 2,
+   "chords": [
+    "Bm",
+    "Asus2"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A big Oasis ballad built on Bm with ringing add11 and sus2 voicings."
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "style": "Punk rock",
+   "difficulty": 2,
+   "chords": [
+    "G5",
+    "D5",
+    "E5",
+    "C5",
+    "A5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Power chords and palm muting — a natural next Green Day after Basket Case."
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 3,
+   "chords": [
+    "G7",
+    "D7",
+    "D9",
+    "Am7",
+    "C7",
+    "D",
+    "Bm",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Like Better Together, but with seventh and ninth chords and a bouncy muted strum."
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "B5",
+    "C#5",
+    "D5",
+    "Bsus4",
+    "C#sus4",
+    "G",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Moving power chords and sus4 shapes up the neck; a fun step from My Hero."
   }
  ],
  "history": [
-  {
-   "title": "עד מתי",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "עיר מקלט",
-   "artist": "אהוד בנאי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "חם על הירח",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "בין קודש לחול",
-   "artist": "אמיר דדון ושולי רנד",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "ירח",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Wonderwall",
-   "artist": "Oasis",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Better Together",
-   "artist": "Jack Johnson",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Smells Like Teen Spirit",
-   "artist": "Nirvana",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Times Like These",
-   "artist": "Foo Fighters",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Under the Bridge",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-11"
-  },
   {
    "title": "יפה כלבנה",
    "artist": "אביתר בנאי",
@@ -1500,6 +1441,56 @@
    "title": "No Surprises",
    "artist": "Radiohead",
    "date": "2026-10-30"
+  },
+  {
+   "title": "חלומות של אחרים",
+   "artist": "הפרויקט של עידן רייכל",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "עד מחר",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "יפה כלבנה",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "החיים שממול",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "ים",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "Scar Tissue",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "Stop Crying Your Heart Out",
+   "artist": "Oasis",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "date": "2026-10-31"
   }
  ],
  "sheets": [
@@ -1516,11 +1507,16 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab"
+    "Ab",
+    "Bbm/Ab",
+    "Eb/G",
+    "Ab/Gb",
+    "Db/F",
+    "Eb"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
-   "at": "2026-10-12T04:23:56.176Z",
-   "level": 5
+   "at": "2026-10-12T04:23:56.176Z"
   },
   {
    "title": "מאיר בנאי אצלך בעולם",
@@ -1531,11 +1527,13 @@
     "Am",
     "Em",
     "Em7",
-    "Cadd9"
+    "Cadd9",
+    "C",
+    "D"
    ],
+   "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
-   "at": "2026-10-10T23:07:35.424Z",
-   "level": 1
+   "at": "2026-10-10T23:07:35.424Z"
   },
   {
    "title": "יא",
@@ -1544,11 +1542,12 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
-    "C"
+    "C",
+    "C#"
    ],
+   "level": 2,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
-   "at": "2026-10-12T05:44:13.178Z",
-   "level": 1
+   "at": "2026-10-12T05:44:13.178Z"
   },
   {
    "title": "Good Riddance (Time Of Your Life)",
@@ -1558,11 +1557,13 @@
    "chords": [
     "C",
     "D",
-    "Em"
+    "Em",
+    "G",
+    "Cadd9"
    ],
+   "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
-   "at": "2026-10-12T05:50:07.510Z",
-   "level": 1
+   "at": "2026-10-12T05:50:07.510Z"
   },
   {
    "title": "חלל",
@@ -1577,9 +1578,9 @@
     "F#",
     "Ebm"
    ],
+   "level": 4,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
-   "at": "2026-10-12T04:21:21.095Z",
-   "level": 4
+   "at": "2026-10-12T04:21:21.095Z"
   },
   {
    "title": "אור גדול",
@@ -1594,9 +1595,9 @@
     "Bb4",
     "Fm7"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
-   "at": "2026-10-12T04:13:33.006Z",
-   "level": 5
+   "at": "2026-10-12T04:13:33.006Z"
   },
   {
    "title": "Bascet Case",
@@ -1611,9 +1612,9 @@
     "Ab",
     "Dbm"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1Wc7mPYWHruA3RVF81umZ8ECVdVwcJs8t/view?usp=drivesdk",
-   "at": "2026-10-11T20:57:06.788Z",
-   "level": 5
+   "at": "2026-10-11T20:57:06.788Z"
   },
   {
    "title": "סהרה",
@@ -1626,9 +1627,9 @@
     "Abm",
     "B"
    ],
+   "level": 4,
    "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
-   "at": "2026-10-11T19:20:34.742Z",
-   "level": 4
+   "at": "2026-10-11T19:20:34.742Z"
   },
   {
    "title": "קשה בכדור הארץ",
@@ -1641,11 +1642,12 @@
     "F#m",
     "Em",
     "F#",
-    "G"
+    "G",
+    "D"
    ],
+   "level": 4,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
-   "at": "2026-10-11T19:18:19.408Z",
-   "level": 3
+   "at": "2026-10-11T19:18:19.408Z"
   },
   {
    "title": "ביום שמש יפה",
@@ -1660,11 +1662,13 @@
     "Eb",
     "Bb",
     "Cm",
-    "Ddim"
+    "Ddim",
+    "F",
+    "C"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
-   "at": "2026-10-10T17:10:42.560Z",
-   "level": 4
+   "at": "2026-10-10T17:10:42.560Z"
   },
   {
    "title": "בין קודש לחול",
@@ -1680,9 +1684,9 @@
     "Cm",
     "Bb"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1MQQqWq21c91bgCZ_Mos-G5baLouBrbh9/view?usp=drivesdk",
-   "at": "2026-10-11T11:24:33.896Z",
-   "level": 5
+   "at": "2026-10-11T11:24:33.896Z"
   },
   {
    "title": "חם על הירח",
@@ -1702,9 +1706,9 @@
     "Ebdim",
     "B7"
    ],
+   "level": 4,
    "url": "https://drive.google.com/file/d/1Xq_REk5NiRcZVXqAo0OU-ndsnahLdJ65/view?usp=drivesdk",
-   "at": "2026-10-11T08:59:26.641Z",
-   "level": 4
+   "at": "2026-10-11T08:59:26.641Z"
   },
   {
    "title": "עד מתי",
@@ -1719,9 +1723,9 @@
     "Am",
     "C"
    ],
+   "level": 3,
    "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
-   "at": "2026-10-11T04:39:56.376Z",
-   "level": 3
+   "at": "2026-10-11T04:39:56.376Z"
   },
   {
    "title": "Wanderwall",
@@ -1731,11 +1735,14 @@
    "chords": [
     "Cadd9",
     "Em7",
-    "E"
+    "E",
+    "G",
+    "D4",
+    "G/F#"
    ],
+   "level": 2,
    "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
-   "at": "2026-10-11T04:04:56.240Z",
-   "level": 1
+   "at": "2026-10-11T04:04:56.240Z"
   },
   {
    "title": "תחרות כלבים",
@@ -1750,11 +1757,12 @@
     "E",
     "Bm",
     "F#m7",
-    "F#m6"
+    "F#m6",
+    "D"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
-   "at": "2026-10-11T03:48:41.071Z",
-   "level": 5
+   "at": "2026-10-11T03:48:41.071Z"
   },
   {
    "title": "צבעים",
@@ -1766,11 +1774,12 @@
     "Cmaj7",
     "Bm",
     "D",
-    "Dm"
+    "Dm",
+    "C"
    ],
+   "level": 2,
    "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
-   "at": "2026-10-10T22:31:59.230Z",
-   "level": 2
+   "at": "2026-10-10T22:31:59.230Z"
   },
   {
    "title": "הכעס",
@@ -1782,11 +1791,15 @@
     "Bb",
     "Am",
     "Eb",
-    "F#m"
+    "F#m",
+    "A",
+    "G",
+    "C",
+    "D"
    ],
+   "level": 4,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
-   "at": "2026-10-10T19:13:35.115Z",
-   "level": 3
+   "at": "2026-10-10T19:13:35.115Z"
   },
   {
    "title": "Better Together",
@@ -1799,11 +1812,12 @@
     "Dm",
     "Bb",
     "Bb/A",
-    "Gm"
+    "Gm",
+    "C"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
-   "at": "2026-10-11T04:46:28.822Z",
-   "level": 4
+   "at": "2026-10-11T04:46:28.822Z"
   },
   {
    "title": "במקום-טסט שיר",
@@ -1813,11 +1827,12 @@
    "chords": [
     "F#m",
     "E",
-    "C#m"
+    "C#m",
+    "A"
    ],
+   "level": 2,
    "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z",
-   "level": 2
+   "at": "2026-10-16T22:12:44.867Z"
   },
   {
    "title": "במקום בו אני גר",
@@ -1827,11 +1842,12 @@
    "chords": [
     "F#m",
     "E",
-    "C#m"
+    "C#m",
+    "A"
    ],
+   "level": 2,
    "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z",
-   "level": 2
+   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "My friends",
@@ -1851,11 +1867,13 @@
     "Asus2/B",
     "A/B",
     "F#add9/B",
-    "G"
+    "G",
+    "C",
+    "D/F#"
    ],
+   "level": 5,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
-   "at": "2026-10-07T10:16:18.945Z",
-   "level": 4
+   "at": "2026-10-07T10:16:18.945Z"
   }
  ],
  "jokes": [
