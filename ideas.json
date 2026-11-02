@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-01T03:55:14Z",
- "date": "2026-11-01",
+ "at": "2026-11-02T03:54:24Z",
+ "date": "2026-11-02",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -325,216 +325,136 @@
  "level": "Comfortable intermediate player: barre chords in many keys, maj7 and slash chords, capo songs and a Drop D song are already in the folder.",
  "suggestions": [
   {
-   "title": "לך אלי תשוקתי",
-   "artist": "מאיר בנאי",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "Abm",
-    "B",
-    "F#",
-    "Emaj7",
-    "Ebm",
-    "C#m"
-   ],
-   "capo": 2,
-   "tuning": "Standard",
-   "why": "Same family as the Banai songs you play; barre minors and a maj7 colour you already know, now with a capo."
-  },
-  {
-   "title": "אבא",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "Em",
-    "B",
-    "B4",
-    "Cmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A gentle Eviatar Banai song; the only new move is the B to B4 suspension."
-  },
-  {
-   "title": "עזבנו את תל אביב",
-   "artist": "ג'ימבו ג'יי",
-   "style": "Israeli hip-hop / pop",
-   "difficulty": 1,
-   "chords": [
-    "Am",
-    "E",
-    "F",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy one with four familiar chords, so you can focus on a steady groove under fast vocals."
-  },
-  {
-   "title": "גאידמק",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae / pop",
-   "difficulty": 3,
-   "chords": [
-    "F#m",
-    "Bm",
-    "G#dim"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Hatikva 6 song with the reggae offbeat strum, plus a diminished chord to practise."
-  },
-  {
-   "title": "לזוז",
+   "title": "ואני בתומי אלך",
    "artist": "הדג נחש",
-   "style": "Israeli hip-hop / rock",
+   "style": "Israeli hip-hop / funk",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A groovy, rhythm-driven Hadag Nahash song; the new skill is a tight funky strum with muted beats."
+  },
+  {
+   "title": "משמיים",
+   "artist": "הדג נחש",
+   "style": "Israeli hip-hop / funk",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits the Jimbo J and Tuna side of your folder; practise keeping a steady groove under fast vocals."
+  },
+  {
+   "title": "בכל חורף",
+   "artist": "עמיר בניון",
+   "style": "Israeli ballad",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A heartfelt ballad close to the Amir Dadon songs you play; focus on smooth fingerpicked dynamics."
+  },
+  {
+   "title": "השמחה",
+   "artist": "רביד פלוטניק",
+   "style": "Israeli hip-hop",
    "difficulty": 2,
    "chords": [
-    "E5",
-    "G5",
-    "A5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A band close to Tuna and Jimbo J; new technique: tight, palm-muted power chords."
-  },
-  {
-   "title": "Stand By Me",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [
-    "G",
-    "Em",
-    "Cadd9",
-    "A",
-    "C",
-    "Am",
-    "Fmaj7",
-    "D",
-    "D7/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Builds on the Wonderwall shapes you know and adds a few colourful passing chords."
-  },
-  {
-   "title": "21 Guns",
-   "artist": "Green Day",
-   "style": "Pop punk ballad",
-   "difficulty": 3,
-   "chords": [
-    "Dm",
+    "Cm",
     "Bb",
-    "F",
-    "C"
+    "Ab",
+    "Gm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fits next to Good Riddance and Basket Case: open and barre chords with a big dynamic build."
+   "why": "A four-chord barre loop in the same flat keys as 'אור גדול', a quick win to lock in."
   },
   {
-   "title": "Breakdown",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-folk",
+   "title": "Society",
+   "artist": "Eddie Vedder",
+   "style": "Acoustic folk",
    "difficulty": 2,
    "chords": [
-    "G",
     "Bm",
-    "Em",
     "D",
-    "G/F#",
-    "C"
-   ],
-   "capo": 5,
-   "tuning": "Standard",
-   "why": "A relaxed Jack Johnson groove; the walking G/F# bass line and a high capo are the new bits."
-  },
-  {
-   "title": "Fake Plastic Trees",
-   "artist": "Radiohead",
-   "style": "Alternative rock",
-   "difficulty": 3,
-   "chords": [
     "A",
-    "F#m7",
-    "E",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Slow and expressive; practise smooth changes into the F#m7 barre and dynamic strumming."
-  },
-  {
-   "title": "Snow (Hey Oh)",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
-   "difficulty": 5,
-   "chords": [
-    "G#m",
-    "E",
-    "B",
-    "F#",
     "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up after My Friends: the fast picked riff is a real right-hand workout."
+   "why": "Pearl Jam's singer solo on acoustic; easy chords, with a lilting strum to get just right."
+  },
+  {
+   "title": "9 Crimes",
+   "artist": "Damien Rice",
+   "style": "Acoustic ballad",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "Fmaj7/C",
+    "C/G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A slow piano-led duet that teaches colour chords and slash-bass voicings on guitar."
+  },
+  {
+   "title": "Ho Hey",
+   "artist": "The Lumineers",
+   "style": "Folk rock",
+   "difficulty": 1,
+   "chords": [
+    "Csus4",
+    "C",
+    "Am",
+    "G",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy sing-along to relax with; the trick is the stomping, accented strum."
+  },
+  {
+   "title": "Waiting on an Angel",
+   "artist": "Ben Harper",
+   "style": "Acoustic soul",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "Em",
+    "D"
+   ],
+   "capo": 3,
+   "tuning": "Standard",
+   "why": "Close to Jack Johnson's laid-back style; simple shapes with a capo and gentle picking."
+  },
+  {
+   "title": "Why?",
+   "artist": "Tracy Chapman",
+   "style": "Folk",
+   "difficulty": 2,
+   "chords": [
+    "Bm",
+    "G",
+    "A",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Tracy Chapman classic for your folder; a driving strum and quick Bm changes."
+  },
+  {
+   "title": "Kiss Me",
+   "artist": "Sixpence None the Richer",
+   "style": "Pop rock",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A small step up: a bright, catchy pop song that rewards clean arpeggiated picking."
   }
  ],
  "history": [
-  {
-   "title": "Boulevard of Broken Dreams",
-   "artist": "Green Day",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "Dani California",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "About a Girl",
-   "artist": "Nirvana",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "Where Is My Mind?",
-   "artist": "Pixies",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "נגד הרוח",
-   "artist": "אמיר דדון",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "חלליות",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "יש לי סיכוי",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "ואולי עכשיו",
-   "artist": "משינה",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "בלוז כנעני",
-   "artist": "אהוד בנאי",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-13"
-  },
   {
    "title": "עולם משוגע",
    "artist": "טונה",
@@ -1484,6 +1404,56 @@
    "title": "Snow (Hey Oh)",
    "artist": "Red Hot Chili Peppers",
    "date": "2026-11-01"
+  },
+  {
+   "title": "ואני בתומי אלך",
+   "artist": "הדג נחש",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "משמיים",
+   "artist": "הדג נחש",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "בכל חורף",
+   "artist": "עמיר בניון",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "השמחה",
+   "artist": "רביד פלוטניק",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Society",
+   "artist": "Eddie Vedder",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "9 Crimes",
+   "artist": "Damien Rice",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Ho Hey",
+   "artist": "The Lumineers",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Waiting on an Angel",
+   "artist": "Ben Harper",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Why?",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Kiss Me",
+   "artist": "Sixpence None the Richer",
+   "date": "2026-11-02"
   }
  ],
  "sheets": [
