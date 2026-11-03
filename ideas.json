@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-02T03:54:24Z",
- "date": "2026-11-02",
+ "at": "2026-11-03T03:55:37Z",
+ "date": "2026-11-03",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -325,186 +325,176 @@
  "level": "Comfortable intermediate player: barre chords in many keys, maj7 and slash chords, capo songs and a Drop D song are already in the folder.",
  "suggestions": [
   {
-   "title": "ואני בתומי אלך",
-   "artist": "הדג נחש",
-   "style": "Israeli hip-hop / funk",
+   "title": "יושב על הגדר",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
    "difficulty": 3,
-   "chords": [],
+   "chords": [
+    "E",
+    "Am",
+    "D",
+    "Gm",
+    "C",
+    "Dm",
+    "E4",
+    "F",
+    "G",
+    "Bm"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A groovy, rhythm-driven Hadag Nahash song; the new skill is a tight funky strum with muted beats."
+   "why": "A sing-along classic that moves through many keys; good practice for quick Gm and Bm barre changes."
   },
   {
-   "title": "משמיים",
-   "artist": "הדג נחש",
-   "style": "Israeli hip-hop / funk",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits the Jimbo J and Tuna side of your folder; practise keeping a steady groove under fast vocals."
-  },
-  {
-   "title": "בכל חורף",
-   "artist": "עמיר בניון",
-   "style": "Israeli ballad",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A heartfelt ballad close to the Amir Dadon songs you play; focus on smooth fingerpicked dynamics."
-  },
-  {
-   "title": "השמחה",
-   "artist": "רביד פלוטניק",
-   "style": "Israeli hip-hop",
+   "title": "ככה וככה",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock",
    "difficulty": 2,
+   "chords": [
+    "F#m",
+    "D",
+    "Bm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Three chords in a minor key, so you can focus on a steady, driving strum and singing over it."
+  },
+  {
+   "title": "יו יה",
+   "artist": "כוורת",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "Dm",
+    "G",
+    "E",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A cheerful open-chord song: a relaxed break between the harder barre songs in your folder."
+  },
+  {
+   "title": "שירת הסטיקר",
+   "artist": "הדג נחש",
+   "style": "Israeli hip-hop",
+   "difficulty": 3,
    "chords": [
     "Cm",
-    "Bb",
-    "Ab",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A four-chord barre loop in the same flat keys as 'אור גדול', a quick win to lock in."
-  },
-  {
-   "title": "Society",
-   "artist": "Eddie Vedder",
-   "style": "Acoustic folk",
-   "difficulty": 2,
-   "chords": [
-    "Bm",
-    "D",
-    "A",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Pearl Jam's singer solo on acoustic; easy chords, with a lilting strum to get just right."
-  },
-  {
-   "title": "9 Crimes",
-   "artist": "Damien Rice",
-   "style": "Acoustic ballad",
-   "difficulty": 3,
-   "chords": [
-    "Am",
-    "Fmaj7/C",
-    "C/G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A slow piano-led duet that teaches colour chords and slash-bass voicings on guitar."
-  },
-  {
-   "title": "Ho Hey",
-   "artist": "The Lumineers",
-   "style": "Folk rock",
-   "difficulty": 1,
-   "chords": [
-    "Csus4",
-    "C",
-    "Am",
-    "G",
+    "Fm",
+    "Fm/D",
     "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy sing-along to relax with; the trick is the stomping, accented strum."
+   "why": "Fits your Tuna songs: a tight funky groove on a few minor barre chords, all about the right hand."
   },
   {
-   "title": "Waiting on an Angel",
-   "artist": "Ben Harper",
-   "style": "Acoustic soul",
-   "difficulty": 2,
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 4,
    "chords": [
+    "C6",
+    "C",
+    "D",
+    "F",
+    "F#",
+    "Am",
     "G",
+    "Fmaj7/D",
     "Em",
-    "D"
+    "Dm"
    ],
-   "capo": 3,
+   "capo": 0,
    "tuning": "Standard",
-   "why": "Close to Jack Johnson's laid-back style; simple shapes with a capo and gentle picking."
+   "why": "A step up from your other Eviatar Banai songs: colourful chords like C6 and Fmaj7/D, plus passing diminished chords."
   },
   {
-   "title": "Why?",
-   "artist": "Tracy Chapman",
-   "style": "Folk",
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "style": "Acoustic rock",
    "difficulty": 2,
    "chords": [
-    "Bm",
     "G",
+    "C",
+    "F",
+    "Dm",
+    "G7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A gentle acoustic ballad with open chords; work on smooth fingerpicked arpeggios."
+  },
+  {
+   "title": "About a Girl",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 3,
+   "chords": [
+    "E",
+    "G",
+    "C",
     "A",
+    "B",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Tracy Chapman classic for your folder; a driving strum and quick Bm changes."
+   "why": "A first song for your empty Nirvana folder: a catchy single-note riff mixed with simple chords."
   },
   {
-   "title": "Kiss Me",
-   "artist": "Sixpence None the Richer",
-   "style": "Pop rock",
-   "difficulty": 3,
-   "chords": [],
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "D",
+    "Am7",
+    "C",
+    "Em",
+    "Fmaj7"
+   ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A small step up: a bright, catchy pop song that rewards clean arpeggiated picking."
+   "why": "Close to Wonderwall in feel, with Am7 and Fmaj7 for a richer sound and a big sing-along chorus."
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "Am7",
+    "G",
+    "F",
+    "E",
+    "C7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A short, sweet Foo Fighters song that is great for practising clean changes to F and E."
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alternative rock",
+   "difficulty": 2,
+   "chords": [
+    "D",
+    "A",
+    "Bm",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Four familiar chords next to your My Friends sheet; focus on the laid-back RHCP strumming feel."
   }
  ],
  "history": [
-  {
-   "title": "עולם משוגע",
-   "artist": "טונה",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "אבא",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "ככה זה",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "לא פראיירים",
-   "artist": "הדג נחש",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "Wake Me Up When September Ends",
-   "artist": "Green Day",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "The Man Who Sold the World",
-   "artist": "Nirvana",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "Snow (Hey Oh)",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "Banana Pancakes",
-   "artist": "Jack Johnson",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "Champagne Supernova",
-   "artist": "Oasis",
-   "date": "2026-10-14"
-  },
   {
    "title": "סוף עונת התפוזים",
    "artist": "תמוז",
@@ -1454,6 +1444,56 @@
    "title": "Kiss Me",
    "artist": "Sixpence None the Richer",
    "date": "2026-11-02"
+  },
+  {
+   "title": "יושב על הגדר",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "ככה וככה",
+   "artist": "שלום חנוך",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "יו יה",
+   "artist": "כוורת",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "שירת הסטיקר",
+   "artist": "הדג נחש",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "About a Girl",
+   "artist": "Nirvana",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-03"
   }
  ],
  "sheets": [
@@ -1992,7 +2032,23 @@
   {
    "text": "Fun fact: diminished chords sound tense because they've been waiting for you to practise them, {n}.",
    "date": "2026-11-01"
+  },
+  {
+   "text": "Johnny Marr can make one guitar sound like three. You only need to make yours sound like one today, {n}.",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "Your capo, picks and tuner held a meeting about you, {n}. There was only one item on the agenda: “When?”",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "Kaveret made “Yo Ya” sound like the easiest thing in the world. Your Am to Dm change can borrow that attitude today, {n}.",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "The G string hummed a little when you walked past, {n}. In guitar, that means “pick me up”.",
+   "date": "2026-11-03"
   }
  ],
- "jokesDate": "2026-11-01"
+ "jokesDate": "2026-11-03"
 }
