@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-03T03:55:37Z",
- "date": "2026-11-03",
+ "at": "2026-11-04T03:54:27Z",
+ "date": "2026-11-04",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -325,226 +325,183 @@
  "level": "Comfortable intermediate player: barre chords in many keys, maj7 and slash chords, capo songs and a Drop D song are already in the folder.",
  "suggestions": [
   {
-   "title": "יושב על הגדר",
+   "title": "אור הירח",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
+   "difficulty": 4,
+   "chords": [
+    "A7",
+    "A7/Bb",
+    "Am",
+    "A",
+    "F#4",
+    "E",
+    "G#",
+    "G#4",
+    "B",
+    "C",
+    "E7",
+    "A#dim"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: sus4 and diminished passing chords give the ballad its colour and stretch your barre shapes."
+  },
+  {
+   "title": "למה לי לקחת ללב",
    "artist": "אריק איינשטיין",
    "style": "Israeli classic",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "Am",
-    "D",
-    "Gm",
-    "C",
-    "Dm",
-    "E4",
-    "F",
-    "G",
-    "Bm"
-   ],
+   "difficulty": 2,
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A sing-along classic that moves through many keys; good practice for quick Gm and Bm barre changes."
+   "why": "A relaxed sing-along classic; a good easy song to work on smooth strumming and singing together."
   },
   {
-   "title": "ככה וככה",
-   "artist": "שלום חנוך",
+   "title": "פלורנטין",
+   "artist": "אהוד בנאי",
    "style": "Israeli rock",
-   "difficulty": 2,
+   "difficulty": 3,
    "chords": [
     "F#m",
+    "C#7",
+    "Bm",
     "D",
-    "Bm"
+    "F#",
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Three chords in a minor key, so you can focus on a steady, driving strum and singing over it."
+   "why": "Minor-key groove close to the Eviatar Banai songs you play; the C#7 dominant is the new colour."
   },
   {
-   "title": "יו יה",
-   "artist": "כוורת",
-   "style": "Israeli pop-rock",
+   "title": "ארץ חדשה",
+   "artist": "שלמה ארצי",
+   "style": "Israeli pop",
    "difficulty": 2,
    "chords": [
-    "Am",
-    "Dm",
     "G",
-    "E",
-    "C"
+    "C",
+    "D",
+    "Em",
+    "B7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A cheerful open-chord song: a relaxed break between the harder barre songs in your folder."
+   "why": "Open chords only, so you can focus on rhythm and the B7 to Em change."
   },
   {
-   "title": "שירת הסטיקר",
-   "artist": "הדג נחש",
-   "style": "Israeli hip-hop",
-   "difficulty": 3,
-   "chords": [
-    "Cm",
-    "Fm",
-    "Fm/D",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits your Tuna songs: a tight funky groove on a few minor barre chords, all about the right hand."
-  },
-  {
-   "title": "אבות ובנים",
-   "artist": "אביתר בנאי",
+   "title": "על פני השטח",
+   "artist": "משינה",
    "style": "Israeli rock",
    "difficulty": 4,
    "chords": [
-    "C6",
-    "C",
-    "D",
-    "F",
-    "F#",
-    "Am",
     "G",
-    "Fmaj7/D",
-    "Em",
-    "Dm"
+    "D",
+    "Eb",
+    "A",
+    "Bb",
+    "F",
+    "Ab",
+    "F#",
+    "Gm",
+    "C",
+    "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from your other Eviatar Banai songs: colourful chords like C6 and Fmaj7/D, plus passing diminished chords."
+   "why": "Quick key jumps between barre chords; a fun challenge for fast changes up the neck."
   },
   {
-   "title": "Just Breathe",
+   "title": "Half the World Away",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [
+    "C",
+    "Fmaj7",
+    "G/B",
+    "Am",
+    "D",
+    "E",
+    "G",
+    "G7",
+    "F",
+    "Fm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Oasis at a gentle pace; the F to Fm move is a lovely new trick next to chords you already know."
+  },
+  {
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "A7",
+    "G",
+    "G7",
+    "F",
+    "F7",
+    "C",
+    "C7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Like Better Together but with a funky muted strum and dominant 7th shapes to learn."
+  },
+  {
+   "title": "Last Kiss",
    "artist": "Pearl Jam",
-   "style": "Acoustic rock",
-   "difficulty": 2,
+   "style": "Rock",
+   "difficulty": 1,
    "chords": [
     "G",
+    "Em",
     "C",
-    "F",
-    "Dm",
-    "G7"
+    "D",
+    "D4"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A gentle acoustic ballad with open chords; work on smooth fingerpicked arpeggios."
+   "why": "An easy four-chord singalong for a relaxed day, with a D to Dsus4 touch."
   },
   {
-   "title": "About a Girl",
+   "title": "Lithium",
    "artist": "Nirvana",
    "style": "Grunge",
    "difficulty": 3,
    "chords": [
     "E",
-    "G",
-    "C",
+    "Abm",
+    "C#m",
     "A",
-    "B",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A first song for your empty Nirvana folder: a catchy single-note riff mixed with simple chords."
-  },
-  {
-   "title": "Live Forever",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "D",
-    "Am7",
     "C",
-    "Em",
-    "Fmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Close to Wonderwall in feel, with Am7 and Fmaj7 for a richer sound and a big sing-along chorus."
-  },
-  {
-   "title": "Big Me",
-   "artist": "Foo Fighters",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "C",
-    "Am7",
-    "G",
-    "F",
-    "E",
-    "C7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A short, sweet Foo Fighters song that is great for practising clean changes to F and E."
-  },
-  {
-   "title": "Soul to Squeeze",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
     "D",
-    "A",
-    "Bm",
-    "G"
+    "B"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Four familiar chords next to your My Friends sheet; focus on the laid-back RHCP strumming feel."
+   "why": "A start for the Nirvana folder: quiet verse, loud chorus and power-chord dynamics."
+  },
+  {
+   "title": "Volcano",
+   "artist": "Damien Rice",
+   "style": "Acoustic folk",
+   "difficulty": 1,
+   "chords": [
+    "Am",
+    "G",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Three chords and a slow build; practise fingerpicking and playing softly with feeling."
   }
  ],
  "history": [
-  {
-   "title": "סוף עונת התפוזים",
-   "artist": "תמוז",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "עד מחר",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "עבדים",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "בתי קפה",
-   "artist": "עברי לידר",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "סוף הדרך",
-   "artist": "רוקפור",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "When I Come Around",
-   "artist": "Green Day",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "Learn to Fly",
-   "artist": "Foo Fighters",
-   "date": "2026-10-15"
-  },
-  {
-   "title": "Can't Stop",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-15"
-  },
   {
    "title": "כל הכוכבים",
    "artist": "טונה",
@@ -1494,6 +1451,56 @@
    "title": "Soul to Squeeze",
    "artist": "Red Hot Chili Peppers",
    "date": "2026-11-03"
+  },
+  {
+   "title": "אור הירח",
+   "artist": "אביב גפן",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "למה לי לקחת ללב",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "פלורנטין",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "ארץ חדשה",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "על פני השטח",
+   "artist": "משינה",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Half the World Away",
+   "artist": "Oasis",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Last Kiss",
+   "artist": "Pearl Jam",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Volcano",
+   "artist": "Damien Rice",
+   "date": "2026-11-04"
   }
  ],
  "sheets": [
