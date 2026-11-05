@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-04T03:54:27Z",
- "date": "2026-11-04",
+ "at": "2026-11-05T03:54:15Z",
+ "date": "2026-11-05",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -322,236 +322,177 @@
    }
   ]
  },
- "level": "Comfortable intermediate player: barre chords in many keys, maj7 and slash chords, capo songs and a Drop D song are already in the folder.",
+ "level": "Comfortable with open and barre chords in many keys, including flat and sharp keys, capo and Drop D.",
  "suggestions": [
   {
-   "title": "אור הירח",
-   "artist": "אביב גפן",
-   "style": "Israeli rock ballad",
-   "difficulty": 4,
-   "chords": [
-    "A7",
-    "A7/Bb",
-    "Am",
-    "A",
-    "F#4",
-    "E",
-    "G#",
-    "G#4",
-    "B",
-    "C",
-    "E7",
-    "A#dim"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: sus4 and diminished passing chords give the ballad its colour and stretch your barre shapes."
-  },
-  {
-   "title": "למה לי לקחת ללב",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 2,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A relaxed sing-along classic; a good easy song to work on smooth strumming and singing together."
-  },
-  {
-   "title": "פלורנטין",
-   "artist": "אהוד בנאי",
+   "title": "בבית",
+   "artist": "אביתר בנאי",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "F#m",
-    "C#7",
-    "Bm",
-    "D",
-    "F#",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Minor-key groove close to the Eviatar Banai songs you play; the C#7 dominant is the new colour."
-  },
-  {
-   "title": "ארץ חדשה",
-   "artist": "שלמה ארצי",
-   "style": "Israeli pop",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "C",
-    "D",
-    "Em",
-    "B7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Open chords only, so you can focus on rhythm and the B7 to Em change."
-  },
-  {
-   "title": "על פני השטח",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "G",
-    "D",
-    "Eb",
-    "A",
-    "Bb",
-    "F",
-    "Ab",
-    "F#",
+    "Gm7",
     "Gm",
+    "Cm",
+    "Eb",
+    "D",
     "C",
+    "G",
+    "A",
     "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Quick key jumps between barre chords; a fun challenge for fast changes up the neck."
+   "why": "Another Eviatar Banai classic that mixes the minor barre chords you know with open G, C and Em."
   },
   {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
+   "title": "עבדים",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 2,
    "chords": [
-    "C",
-    "Fmaj7",
-    "G/B",
-    "Am",
-    "D",
-    "E",
-    "G",
-    "G7",
-    "F",
-    "Fm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Oasis at a gentle pace; the F to Fm move is a lovely new trick next to chords you already know."
-  },
-  {
-   "title": "Sitting, Waiting, Wishing",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
-   "difficulty": 3,
-   "chords": [
-    "A",
-    "A7",
-    "G",
-    "G7",
-    "F",
-    "F7",
-    "C",
-    "C7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Like Better Together but with a funky muted strum and dominant 7th shapes to learn."
-  },
-  {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "style": "Rock",
-   "difficulty": 1,
-   "chords": [
-    "G",
     "Em",
-    "C",
-    "D",
-    "D4"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy four-chord singalong for a relaxed day, with a D to Dsus4 touch."
-  },
-  {
-   "title": "Lithium",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "Abm",
-    "C#m",
-    "A",
-    "C",
-    "D",
-    "B"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A start for the Nirvana folder: quiet verse, loud chorus and power-chord dynamics."
-  },
-  {
-   "title": "Volcano",
-   "artist": "Damien Rice",
-   "style": "Acoustic folk",
-   "difficulty": 1,
-   "chords": [
-    "Am",
+    "Bm",
     "G",
-    "F"
+    "Am",
+    "C",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Three chords and a slow build; practise fingerpicking and playing softly with feeling."
-  }
- ],
- "history": [
+   "why": "A Berry Sakharof favourite on friendly open chords, a relaxed song between the harder ones."
+  },
   {
    "title": "כל הכוכבים",
    "artist": "טונה",
-   "date": "2026-10-16"
+   "style": "Israeli hip-hop / pop",
+   "difficulty": 3,
+   "chords": [
+    "Gm",
+    "Cm",
+    "Eb",
+    "Bb",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Tuna again, with a short loop of barre chords in Gm, good practice for clean changes."
   },
   {
-   "title": "לא סתם",
-   "artist": "אמיר דדון",
-   "date": "2026-10-16"
+   "title": "מה שיהיה יהיה",
+   "artist": "התקווה 6",
+   "style": "Israeli pop rock",
+   "difficulty": 2,
+   "chords": [
+    "F",
+    "C",
+    "Dm",
+    "Bb",
+    "F/E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy sing-along from a band in your folder; the F and Bb barres get plenty of repetition."
   },
   {
    "title": "מישהו פעם",
    "artist": "עברי לידר",
-   "date": "2026-10-16"
+   "style": "Israeli pop",
+   "difficulty": 5,
+   "chords": [
+    "A",
+    "A/Ab",
+    "G",
+    "G/F#",
+    "Abmaj7",
+    "Eb",
+    "Bb",
+    "Bb6",
+    "Fm",
+    "Bbmaj7",
+    "F",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: Ivri Lider's ballad moves through many keys and maj7 colours, a real chord workout."
   },
   {
-   "title": "אבות ובנים",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "על הרצפה",
-   "artist": "מוניקה סקס",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "היינו עושים אהבה",
-   "artist": "כנסיית השכל",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "Stand By Me",
-   "artist": "Oasis",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "21 Guns",
+   "title": "American Idiot",
    "artist": "Green Day",
-   "date": "2026-10-16"
+   "style": "Punk rock",
+   "difficulty": 2,
+   "chords": [
+    "A",
+    "D",
+    "G",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Half step down",
+   "why": "Fast power-chord punk from Green Day; new here is tuning down a half step and palm muting."
   },
   {
-   "title": "I'm Yours",
-   "artist": "Jason Mraz",
-   "date": "2026-10-16"
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "C#m",
+    "A",
+    "B",
+    "F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A big Foo Fighters anthem in C#m, building on the sharp-key barre chords you already play."
   },
   {
    "title": "Polly",
    "artist": "Nirvana",
-   "date": "2026-10-16"
+   "style": "Grunge (acoustic)",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "G",
+    "D",
+    "C",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A quiet acoustic Nirvana song, a nice easy start for the empty Nirvana folder."
   },
+  {
+   "title": "Telling Stories",
+   "artist": "Tracy Chapman",
+   "style": "Folk pop",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "C",
+    "G",
+    "D/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Tracy Chapman with a steady picking groove on simple chords; the D/F# bass walk is the new bit."
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "style": "Acoustic surf pop",
+   "difficulty": 2,
+   "chords": [
+    "Dm",
+    "F",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Three chords and a laid-back Jack Johnson strum, an easy song to focus on rhythm."
+  }
+ ],
+ "history": [
   {
    "title": "גשם",
    "artist": "מאיר בנאי",
@@ -1501,6 +1442,56 @@
    "title": "Volcano",
    "artist": "Damien Rice",
    "date": "2026-11-04"
+  },
+  {
+   "title": "בבית",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "עבדים",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "כל הכוכבים",
+   "artist": "טונה",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "מה שיהיה יהיה",
+   "artist": "התקווה 6",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "מישהו פעם",
+   "artist": "עברי לידר",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "American Idiot",
+   "artist": "Green Day",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Polly",
+   "artist": "Nirvana",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Telling Stories",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "date": "2026-11-05"
   }
  ],
  "sheets": [
@@ -2055,7 +2046,23 @@
   {
    "text": "The G string hummed a little when you walked past, {n}. In guitar, that means “pick me up”.",
    "date": "2026-11-03"
+  },
+  {
+   "text": "Jack White made a whole band out of two people. Tonight's rehearsal only needs one person and one guitar, {n}.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Your setlist for tonight has exactly one song on it, {n}. It's called “Pick Up the Guitar”.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Carlos Santana can make one note cry. You can start by making one chord ring clean, {n}.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Danny Sanderson hides clever little guitar fills in every song. Learn one today and save it for the next party, {n}.",
+   "date": "2026-11-05"
   }
  ],
- "jokesDate": "2026-11-03"
+ "jokesDate": "2026-11-05"
 }
