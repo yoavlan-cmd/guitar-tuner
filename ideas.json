@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-06T03:56:18Z",
- "date": "2026-11-06",
+ "at": "2026-11-07T03:54:24Z",
+ "date": "2026-11-07",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -325,230 +325,173 @@
  "level": "Comfortable with open and barre chords in many keys, including flat keys, capo and Drop D.",
  "suggestions": [
   {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
-   "difficulty": 3,
-   "chords": [
-    "Eb",
-    "Eb/F",
-    "Ab",
-    "Fm",
-    "Cm",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Amir Dadon in the flat keys you already play, with one new slash chord, Eb/F."
-  },
-  {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "style": "Israeli pop",
-   "difficulty": 1,
-   "chords": [
-    "C",
-    "Gm",
-    "Bb",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A relaxed four-chord Hatikva 6 song to enjoy between the harder ones."
-  },
-  {
-   "title": "כנפיים",
-   "artist": "טונה",
-   "style": "Israeli hip-hop / pop",
-   "difficulty": 3,
-   "chords": [
-    "Bbmaj7",
-    "Gm",
-    "Dm7",
-    "C6",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A mellow Tuna song that adds colourful maj7 and 6 chords to the minor shapes you know."
-  },
-  {
-   "title": "בשבילך",
-   "artist": "אביתר בנאי",
+   "title": "יוצא לאור",
+   "artist": "אהוד בנאי",
    "style": "Israeli rock",
    "difficulty": 4,
    "chords": [
-    "Bm",
-    "Em",
-    "F#",
-    "C#m7b5",
-    "Bm/F#",
-    "Bm/G",
-    "Bm/G#"
+    "Ab",
+    "Fm",
+    "Bbm",
+    "Gb",
+    "Fm/Ab",
+    "Db",
+    "Db/C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: an early Eviatar Banai ballad with a descending bass line and a new m7b5 chord."
+   "why": "A classic in the flat keys you already play; the walking bass slash chords are the new part."
   },
   {
-   "title": "עוד חוזר הניגון",
-   "artist": "ברי סחרוף",
+   "title": "אין מקום אחר",
+   "artist": "משינה",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "D",
-    "Em",
-    "G",
-    "Bm",
-    "F#",
+    "C#m",
     "A",
-    "Bb",
-    "F"
+    "B",
+    "E",
+    "Abm",
+    "Ab",
+    "F#m"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A Berry Sakharof classic on open chords with a few barre surprises like Bb and F#."
+   "why": "Mashina at its most singable, built on minor barre chords that keep your hand moving up the neck."
   },
   {
-   "title": "סוף עונת התפוזים",
-   "artist": "תמוז",
-   "style": "Israeli rock classic",
+   "title": "מאיה",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock ballad",
    "difficulty": 3,
    "chords": [
-    "A",
-    "D",
-    "G",
-    "C",
-    "C#",
-    "B",
-    "D/F#",
-    "Am",
+    "F#",
     "Em",
+    "Am",
     "Dm",
-    "F"
+    "E",
+    "C",
+    "F/C",
+    "C4",
+    "C/B",
+    "G",
+    "G7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A 70s Israeli rock anthem that fits next to Berry and Eviatar, with quick moves to C# and B."
+   "why": "A gentle Shalom Hanoch ballad with suspended and slash chords that add colour to familiar shapes."
   },
   {
-   "title": "Supersonic",
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
+   "difficulty": 3,
+   "chords": [
+    "Bb",
+    "C",
+    "Dm",
+    "F",
+    "Gm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More from a band in your folder, with five chords and a steady groove for working on your strumming."
+  },
+  {
+   "title": "ביום ובלילה",
+   "artist": "כוורת",
+   "style": "Israeli classic rock",
+   "difficulty": 3,
+   "chords": [
+    "C",
+    "Bb",
+    "Cm",
+    "F",
+    "Gm",
+    "Dm",
+    "Ebmaj7",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A Kaveret classic that mixes major and minor versions of the same chord, plus an Ebmaj7 to learn."
+  },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "style": "Punk rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "C",
+    "G",
+    "D",
+    "B"
+   ],
+   "capo": 1,
+   "tuning": "Standard",
+   "why": "Fast punk energy from a band you play, with simple shapes so the focus is tight, driving strumming."
+  },
+  {
+   "title": "Black",
+   "artist": "Pearl Jam",
+   "style": "Grunge ballad",
+   "difficulty": 2,
+   "chords": [
+    "E",
+    "A",
+    "Asus4",
+    "Em",
+    "C",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier, emotional one: open chords and a sus4 move, great for working on dynamics."
+  },
+  {
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Something for your Nirvana folder: a laid-back song for relaxed strumming and singing along."
+  },
+  {
+   "title": "Whatever",
    "artist": "Oasis",
    "style": "Britpop",
    "difficulty": 2,
    "chords": [
-    "F#m",
-    "A",
-    "B",
-    "D",
+    "G",
+    "Dsus4/F#",
     "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Oasis rock built on the F#m and B barre shapes you already know."
+   "why": "A big sing-along Oasis song where the bass note walks down under open chords."
   },
   {
-   "title": "Dani California",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "G",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy RHCP groove on three chords, good for working on a tight, funky strum."
-  },
-  {
-   "title": "These Days",
+   "title": "Walk",
    "artist": "Foo Fighters",
-   "style": "Alt rock",
-   "difficulty": 2,
-   "chords": [
-    "A",
-    "D",
-    "C",
-    "G",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Foo Fighters song on open chords that builds from quiet picking to full strumming."
-  },
-  {
-   "title": "Better Man",
-   "artist": "Pearl Jam",
-   "style": "Grunge / alt rock",
+   "style": "Alternative rock",
    "difficulty": 3,
    "chords": [
-    "D/F#",
-    "E7/G#",
-    "E7/F#",
-    "F6/A",
-    "G/B",
-    "D",
     "A",
-    "G",
-    "Asus4"
+    "E/A",
+    "Bm/A",
+    "Dm/A",
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: a Pearl Jam classic whose intro walks through slash chords before an easy D–A–G chorus."
+   "why": "A step up for Foo Fighters fans: chords over a pedal A note and a build from quiet to loud."
   }
  ],
  "history": [
-  {
-   "title": "ממעמקים",
-   "artist": "הפרויקט של עידן רייכל",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "לבכות לך",
-   "artist": "אביב גפן",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "שפל רוח",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "לרגע קטן",
-   "artist": "עברי לידר",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "על הרכבת",
-   "artist": "טונה",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "מבול",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Soul to Squeeze",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Big Me",
-   "artist": "Foo Fighters",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Just Breathe",
-   "artist": "Pearl Jam",
-   "date": "2026-10-18"
-  },
   {
    "title": "כל יום מחדש",
    "artist": "התקווה 6",
@@ -1498,6 +1441,56 @@
    "title": "Better Man",
    "artist": "Pearl Jam",
    "date": "2026-11-06"
+  },
+  {
+   "title": "יוצא לאור",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "אין מקום אחר",
+   "artist": "משינה",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "מאיה",
+   "artist": "שלום חנוך",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "ביום ובלילה",
+   "artist": "כוורת",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Black",
+   "artist": "Pearl Jam",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Whatever",
+   "artist": "Oasis",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Walk",
+   "artist": "Foo Fighters",
+   "date": "2026-11-07"
   }
  ],
  "sheets": [
@@ -2068,7 +2061,23 @@
   {
    "text": "Danny Sanderson hides clever little guitar fills in every song. Learn one today and save it for the next party, {n}.",
    "date": "2026-11-05"
+  },
+  {
+   "text": "Neil Young has been rocking in the free world for decades. You only need to rock for twenty minutes before dinner, {n}.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "Your chord sheets have been sitting in Drive so long they started reading each other, {n}. Give them an audience.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "The Stones sang that time is on their side. It's on yours too, {n}, but only if you spend it with the guitar.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "Your fretboard has 22 frets and you've met maybe five of them, {n}. Today, say hello to a new one.",
+   "date": "2026-11-07"
   }
  ],
- "jokesDate": "2026-11-05"
+ "jokesDate": "2026-11-07"
 }
