@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-07T03:54:24Z",
- "date": "2026-11-07",
+ "at": "2026-11-08T03:55:22Z",
+ "date": "2026-11-08",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -325,223 +325,193 @@
  "level": "Comfortable with open and barre chords in many keys, including flat keys, capo and Drop D.",
  "suggestions": [
   {
-   "title": "יוצא לאור",
-   "artist": "אהוד בנאי",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "Ab",
-    "Fm",
-    "Bbm",
-    "Gb",
-    "Fm/Ab",
-    "Db",
-    "Db/C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic in the flat keys you already play; the walking bass slash chords are the new part."
-  },
-  {
-   "title": "אין מקום אחר",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "C#m",
-    "A",
-    "B",
-    "E",
-    "Abm",
-    "Ab",
-    "F#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Mashina at its most singable, built on minor barre chords that keep your hand moving up the neck."
-  },
-  {
-   "title": "מאיה",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "F#",
-    "Em",
-    "Am",
-    "Dm",
-    "E",
-    "C",
-    "F/C",
-    "C4",
-    "C/B",
-    "G",
-    "G7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A gentle Shalom Hanoch ballad with suspended and slash chords that add colour to familiar shapes."
-  },
-  {
-   "title": "כל יום מחדש",
-   "artist": "התקווה 6",
+   "title": "מתי נתנשק",
+   "artist": "אביתר בנאי",
    "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "D",
+    "Cmaj7",
+    "Bm",
+    "C",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy open-chord favourite from an artist you already play; a relaxed song to polish smooth changes."
+  },
+  {
+   "title": "לא חיים פעמיים",
+   "artist": "התקווה 6",
+   "style": "Israeli pop",
    "difficulty": 3,
    "chords": [
     "Bb",
     "C",
     "Dm",
     "F",
+    "Am",
+    "F/A",
     "Gm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More from a band in your folder, with five chords and a steady groove for working on your strumming."
+   "why": "Same band you already play, in the F-major family you know; the F/A bass note is the small new touch."
   },
   {
-   "title": "ביום ובלילה",
-   "artist": "כוורת",
-   "style": "Israeli classic rock",
+   "title": "תרקוד",
+   "artist": "שלמה ארצי",
+   "style": "Israeli classic",
    "difficulty": 3,
    "chords": [
-    "C",
-    "Bb",
-    "Cm",
-    "F",
-    "Gm",
-    "Dm",
-    "Ebmaj7",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Kaveret classic that mixes major and minor versions of the same chord, plus an Ebmaj7 to learn."
-  },
-  {
-   "title": "Holiday",
-   "artist": "Green Day",
-   "style": "Punk rock",
-   "difficulty": 2,
-   "chords": [
     "Em",
-    "C",
+    "B",
+    "B7",
+    "Am",
     "G",
     "D",
-    "B"
-   ],
-   "capo": 1,
-   "tuning": "Standard",
-   "why": "Fast punk energy from a band you play, with simple shapes so the focus is tight, driving strumming."
-  },
-  {
-   "title": "Black",
-   "artist": "Pearl Jam",
-   "style": "Grunge ballad",
-   "difficulty": 2,
-   "chords": [
-    "E",
-    "A",
-    "Asus4",
-    "Em",
     "C",
-    "D"
+    "G7",
+    "G/E",
+    "G/F",
+    "D/F#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier, emotional one: open chords and a sus4 move, great for working on dynamics."
+   "why": "A sing-along classic in E minor; the descending G/E–G/F–D/F# bass line is the new skill."
   },
   {
-   "title": "All Apologies",
+   "title": "יש בי אהבה",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 4,
+   "chords": [
+    "Am",
+    "Dm",
+    "F",
+    "C",
+    "G7",
+    "Bb",
+    "Bbmaj7",
+    "A7",
+    "A",
+    "A4",
+    "E",
+    "Bm7b5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: a timeless ballad that adds maj7, sus and m7b5 colours to chords you already know."
+  },
+  {
+   "title": "אנה",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "Am",
+    "D",
+    "C",
+    "G",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier Mashina hit with open chords and one F barre; good for a steady rock strum."
+  },
+  {
+   "title": "לאט לאט",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock ballad",
+   "difficulty": 5,
+   "chords": [
+    "F7",
+    "F4",
+    "Gb",
+    "Bbm",
+    "Fm",
+    "Ab",
+    "Cm7b5",
+    "Db",
+    "Gbmaj7",
+    "Gm7b5",
+    "Bbm7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A stretch song in the flat keys you already handle, adding half-diminished and maj7 barre shapes."
+  },
+  {
+   "title": "The Masterplan",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 4,
+   "chords": [
+    "Am",
+    "E7",
+    "Am7",
+    "G/A",
+    "F/A",
+    "D",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Oasis at their most melodic; the descending bass line under Amadd9 is the new technique."
+  },
+  {
+   "title": "Dumb",
    "artist": "Nirvana",
    "style": "Grunge",
    "difficulty": 2,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Something for your Nirvana folder: a laid-back song for relaxed strumming and singing along."
-  },
-  {
-   "title": "Whatever",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
    "chords": [
+    "Esus4",
+    "A",
+    "Gsus4",
+    "C",
+    "E",
+    "Em",
     "G",
-    "Dsus4/F#",
-    "E"
+    "B",
+    "E5"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A big sing-along Oasis song where the bass note walks down under open chords."
+   "why": "A gentle Nirvana song to finally fill that folder; sus chords and quiet-loud dynamics."
   },
   {
-   "title": "Walk",
-   "artist": "Foo Fighters",
-   "style": "Alternative rock",
+   "title": "The Zephyr Song",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alt rock",
    "difficulty": 3,
    "chords": [
-    "A",
-    "E/A",
-    "Bm/A",
-    "Dm/A",
-    "E"
+    "Am7",
+    "G7",
+    "Em",
+    "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up for Foo Fighters fans: chords over a pedal A note and a build from quiet to loud."
+   "why": "Easier than My Friends but just as RHCP; a smooth, laid-back groove with 7th chords."
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "style": "Acoustic",
+   "difficulty": 1,
+   "chords": [
+    "C",
+    "G",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A breezy three-chord song for a quick win; focus on Jack Johnson's light, bouncy strum."
   }
  ],
  "history": [
-  {
-   "title": "כל יום מחדש",
-   "artist": "התקווה 6",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "הכל עוד לפני",
-   "artist": "התקווה 6",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "מכה אפורה",
-   "artist": "מוניקה סקס",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "הכוכבים דולקים על אש קטנה",
-   "artist": "משינה",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "בגלגול הזה",
-   "artist": "שלום חנוך",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "ניסים",
-   "artist": "עברי לידר",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Best of You",
-   "artist": "Foo Fighters",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Heart-Shaped Box",
-   "artist": "Nirvana",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Sitting, Waiting, Wishing",
-   "artist": "Jack Johnson",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Black",
-   "artist": "Pearl Jam",
-   "date": "2026-10-19"
-  },
   {
    "title": "תתארו לכם",
    "artist": "שלמה ארצי",
@@ -1491,6 +1461,56 @@
    "title": "Walk",
    "artist": "Foo Fighters",
    "date": "2026-11-07"
+  },
+  {
+   "title": "מתי נתנשק",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "לא חיים פעמיים",
+   "artist": "התקווה 6",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "תרקוד",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "יש בי אהבה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "אנה",
+   "artist": "משינה",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "לאט לאט",
+   "artist": "שלום חנוך",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "The Masterplan",
+   "artist": "Oasis",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "Dumb",
+   "artist": "Nirvana",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "The Zephyr Song",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "date": "2026-11-08"
   }
  ],
  "sheets": [
