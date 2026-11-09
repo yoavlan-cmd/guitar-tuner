@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-08T03:55:22Z",
- "date": "2026-11-08",
+ "at": "2026-11-09T03:54:03Z",
+ "date": "2026-11-09",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -322,246 +322,183 @@
    }
   ]
  },
- "level": "Comfortable with open and barre chords in many keys, including flat keys, capo and Drop D.",
+ "level": "Comfortable with barre chords, flat and sharp keys, capo and Drop D; ready for richer voicings like maj7, diminished and m7b5.",
  "suggestions": [
   {
-   "title": "מתי נתנשק",
-   "artist": "אביתר בנאי",
+   "title": "סוף הדרך",
+   "artist": "רוקפור",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "F",
+    "Am/F",
+    "Am/F#",
+    "Am/G",
+    "Em",
+    "G",
+    "C",
+    "Gm",
+    "Dm",
+    "Eb",
+    "F/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Rockfour after the one in your folder; a descending bass line over Am is the new trick."
+  },
+  {
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
    "style": "Israeli pop-rock",
    "difficulty": 2,
    "chords": [
-    "G",
+    "Am",
+    "Em",
     "D",
+    "G",
     "Cmaj7",
-    "Bm",
-    "C",
-    "Em"
+    "Bm"
+   ],
+   "capo": 2,
+   "tuning": "Standard",
+   "why": "An easy, open-chord Hatikva 6 sing-along with a capo; a relaxed one between harder songs."
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
+   "difficulty": 4,
+   "chords": [
+    "F#m",
+    "C#m",
+    "A",
+    "B",
+    "E",
+    "G#m",
+    "Amaj7",
+    "D#m7b5"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy open-chord favourite from an artist you already play; a relaxed song to polish smooth changes."
+   "why": "Amir Dadon again, in sharp keys this time; the m7b5 chord is the new colour to learn."
   },
   {
-   "title": "לא חיים פעמיים",
-   "artist": "התקווה 6",
+   "title": "עיר של קיץ",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [
+    "Bbm",
+    "Ab",
+    "Adim",
+    "F",
+    "Bbm/G#",
+    "Db"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from the Berry Sakharof song you have: a passing diminished chord in a flat key."
+  },
+  {
+   "title": "שער הרחמים",
+   "artist": "מאיר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "G",
+    "Bm",
+    "C",
+    "Em",
+    "Em7",
+    "F#m7b5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits right next to the Banai song in your folder; mostly open chords with one half-diminished step."
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
    "style": "Israeli pop",
    "difficulty": 3,
    "chords": [
-    "Bb",
-    "C",
-    "Dm",
-    "F",
-    "Am",
-    "F/A",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Same band you already play, in the F-major family you know; the F/A bass note is the small new touch."
-  },
-  {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "style": "Israeli classic",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "B",
-    "B7",
-    "Am",
-    "G",
     "D",
-    "C",
-    "G7",
-    "G/E",
-    "G/F",
-    "D/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along classic in E minor; the descending G/E–G/F–D/F# bass line is the new skill."
-  },
-  {
-   "title": "יש בי אהבה",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 4,
-   "chords": [
-    "Am",
-    "Dm",
-    "F",
-    "C",
-    "G7",
-    "Bb",
-    "Bbmaj7",
-    "A7",
+    "F#m7",
+    "Gmaj7",
+    "E/G#",
     "A",
-    "A4",
-    "E",
-    "Bm7b5"
+    "Bm",
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: a timeless ballad that adds maj7, sus and m7b5 colours to chords you already know."
+   "why": "Ivri Lider at his smoothest: maj7 and slash chords that make simple changes sound rich."
   },
   {
-   "title": "אנה",
-   "artist": "משינה",
-   "style": "Israeli rock",
+   "title": "Elderly Woman Behind the Counter in a Small Town",
+   "artist": "Pearl Jam",
+   "style": "Acoustic rock",
    "difficulty": 2,
    "chords": [
-    "Em",
-    "Am",
     "D",
-    "C",
+    "Cadd9",
     "G",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier Mashina hit with open chords and one F barre; good for a steady rock strum."
-  },
-  {
-   "title": "לאט לאט",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock ballad",
-   "difficulty": 5,
-   "chords": [
-    "F7",
-    "F4",
-    "Gb",
-    "Bbm",
-    "Fm",
-    "Ab",
-    "Cm7b5",
-    "Db",
-    "Gbmaj7",
-    "Gm7b5",
-    "Bbm7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A stretch song in the flat keys you already handle, adding half-diminished and maj7 barre shapes."
-  },
-  {
-   "title": "The Masterplan",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 4,
-   "chords": [
-    "Am",
-    "E7",
-    "Am7",
-    "G/A",
-    "F/A",
-    "D",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Oasis at their most melodic; the descending bass line under Amadd9 is the new technique."
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 2,
-   "chords": [
-    "Esus4",
-    "A",
-    "Gsus4",
     "C",
-    "E",
-    "Em",
-    "G",
-    "B",
-    "E5"
+    "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A gentle Nirvana song to finally fill that folder; sus chords and quiet-loud dynamics."
+   "why": "A classic campfire strummer; open chords with a moving Cadd9 shape, an easy win."
   },
   {
-   "title": "The Zephyr Song",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
-   "difficulty": 3,
-   "chords": [
-    "Am7",
-    "G7",
-    "Em",
-    "F"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Easier than My Friends but just as RHCP; a smooth, laid-back groove with 7th chords."
-  },
-  {
-   "title": "Do You Remember",
+   "title": "Taylor",
    "artist": "Jack Johnson",
-   "style": "Acoustic",
-   "difficulty": 1,
+   "style": "Acoustic surf-pop",
+   "difficulty": 2,
    "chords": [
     "C",
-    "G",
+    "C/B",
+    "Am",
     "F"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A breezy three-chord song for a quick win; focus on Jack Johnson's light, bouncy strum."
+   "why": "Another breezy Jack Johnson groove to go with Better Together; work on the muted funk strum."
+  },
+  {
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "style": "Blues",
+   "difficulty": 3,
+   "chords": [
+    "F#",
+    "B",
+    "C#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Pairs with your Tracy Chapman folder; a 12-bar blues with three barre chords and a shuffle feel."
+  },
+  {
+   "title": "The Man Who Sold the World",
+   "artist": "Nirvana",
+   "style": "Grunge / unplugged",
+   "difficulty": 4,
+   "chords": [
+    "D#",
+    "G#",
+    "C#",
+    "F#",
+    "A#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fills the empty Nirvana folder with the Unplugged classic; the riff between chords is the new skill."
   }
  ],
  "history": [
-  {
-   "title": "תתארו לכם",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "מה שיהיה יהיה",
-   "artist": "התקווה 6",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "בשבילך",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "אוח",
-   "artist": "טונה",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "מכונת הזמן",
-   "artist": "רוקפור",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "Whatever",
-   "artist": "Oasis",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "date": "2026-10-20"
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "date": "2026-10-20"
-  },
   {
    "title": "Better Man",
    "artist": "Pearl Jam",
@@ -1511,6 +1448,56 @@
    "title": "Do You Remember",
    "artist": "Jack Johnson",
    "date": "2026-11-08"
+  },
+  {
+   "title": "סוף הדרך",
+   "artist": "רוקפור",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "עיר של קיץ",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "שער הרחמים",
+   "artist": "מאיר בנאי",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Elderly Woman Behind the Counter in a Small Town",
+   "artist": "Pearl Jam",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "The Man Who Sold the World",
+   "artist": "Nirvana",
+   "date": "2026-11-09"
   }
  ],
  "sheets": [
@@ -2097,7 +2084,23 @@
   {
    "text": "Your fretboard has 22 frets and you've met maybe five of them, {n}. Today, say hello to a new one.",
    "date": "2026-11-07"
+  },
+  {
+   "text": "Joni Mitchell invented dozens of tunings. You only need to finish one, {n}. Tap Listen.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Your guitar has six strings and zero patience left for excuses, {n}. Ten minutes, starts now.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Rockfour sang in English for the world. Your fingers only need to speak fluent C major tonight, {n}.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Your B string is still flat from last week, {n}. It's not sulking, it's waiting for you.",
+   "date": "2026-11-09"
   }
  ],
- "jokesDate": "2026-11-07"
+ "jokesDate": "2026-11-09"
 }
