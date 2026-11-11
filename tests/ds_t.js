@@ -29,10 +29,14 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   return r.fulfill({status:404,headers:H,body:'{}'})});
  // ---- GitHub ----
  const jobs={},done={},runState={};let dispatches=0,blobs={};
+ // Actions secrets (the Drive key goes as one, sealed; the app deletes it when the parts are back)
+ const nacl=require('./vendor/nacl.min.js'),ghKp=nacl.box.keyPair(),secrets={},secretsDel=[];
  const J=(r,st,o)=>r.fulfill({status:st,contentType:'application/json',headers:H,body:JSON.stringify(o||{})});
  await ctx.route('https://api.github.com/**',async r=>{const q=r.request(),u=q.url().replace('https://api.github.com/repos/me/split',''),m=q.method();
   if(m==='OPTIONS')return r.fulfill({status:204,headers:H});
   if(m==='GET'&&u==='')return J(r,200,{default_branch:'main',private:true});
+  if(m==='GET'&&u==='/actions/secrets/public-key')return J(r,200,{key:Buffer.from(ghKp.publicKey).toString('base64'),key_id:'k1'});
+  {const sm=u.match(/^\/actions\/secrets\/(\w+)$/);if(sm&&m==='PUT'){secrets[sm[1]]=JSON.parse(q.postData());return r.fulfill({status:201,headers:H,body:''})}if(sm&&m==='DELETE'){secretsDel.push(sm[1]);return r.fulfill({status:204,headers:H,body:''})}}
   if(u.startsWith('/contents/.github/workflows/split.yml'))return m==='GET'?J(r,404,{message:'Not Found'}):J(r,201,{});
   if(u==='/git/blobs'){const c=JSON.parse(q.postData()).content,sha='b'+Object.keys(blobs).length;blobs[sha]=Buffer.from(c,'base64').toString();return J(r,201,{sha})}
   if(u==='/git/trees'){const t=JSON.parse(q.postData()).tree[0];return J(r,201,{sha:'t:'+t.path+':'+t.sha})}
@@ -45,7 +49,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
   if(u.startsWith('/actions/runs'))return J(r,200,{workflow_runs:Object.entries(runState).map(([id,st])=>({id,name:'Split song',display_title:'split '+id,status:st.status,run_started_at:new Date(Date.now()-600000).toISOString(),updated_at:new Date().toISOString()}))});
   const c=u.match(/^\/contents\/([\w.]+)\?ref=r-(\w+)/);if(c&&done[c[2]]){const f=done[c[2]][c[1]];if(f==null)return J(r,404,{message:'Not Found'});return r.fulfill({status:200,headers:{...H,'content-type':'application/octet-stream'},body:typeof f==='string'?f:Buffer.from(f)})}
   return J(r,404,{message:'Not Found'})});
- await ctx.route(/^https:\/\/(?!www\.googleapis\.com|accounts\.google\.com|api\.github\.com)/,r=>r.abort());await ctx.route(/ideas\.json/,r=>r.abort());
+ await ctx.route(/^https:\/\/(?!www\.googleapis\.com|accounts\.google\.com|api\.github\.com)/,r=>r.abort());
+ await ctx.route(/cdnjs\.cloudflare\.com\/ajax\/libs\/tweetnacl\/1\.0\.3\/nacl\.min\.js/,r=>r.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(__dirname,'vendor','nacl.min.js'))}));await ctx.route(/ideas\.json/,r=>r.abort());
  const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
  await p.addInitScript(()=>{window.__GD_CLIENT='test.apps.googleusercontent.com';window.__mxWaitScale=0.001;window.__mxPollMs=1e9;window.__dsTickMs=250;window.__notes=[];
   window.Notification=class{static get permission(){return 'granted'}static requestPermission(){return Promise.resolve('granted')}constructor(t,o){window.__notes.push(t);window.__noteData=o&&o.data}};
@@ -66,8 +71,10 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok(!!await p.$('#dsDlg .dsprog')&&/Making the song/.test(await p.$eval('#dsDlg',e=>e.textContent)),'with both links it’s sent and the sheet turns into a progress view');
  const scopes1=await p.evaluate(()=>window.__scopes);ok(scopes1.includes('https://www.googleapis.com/auth/drive'),'it asks Google for Drive access ('+scopes1.join(',')+')');
  const ids=Object.keys(jobs);const job=JSON.parse(jobs[ids[0]].body||'{}');console.log('  job:',jobs[ids[0]].path,JSON.stringify({...job,token:job.token&&'…'}));
- ok(jobs[ids[0]].path==='drive.json'&&job.file==='aud1XyZ12345abcDEF'&&job.ext==='mp3'&&job.full===false&&job.folder==='folderA'&&job.base==='Amir Dadon - Leftovers'&&job.token==='drivetok'&&dispatches===1,
-  'GitHub gets a job, not the song: the audio as the source, no MP3 made of an MP3, the folder, the name, the sign-in; the split is started');
+ ok(jobs[ids[0]].path==='drive.json'&&job.file==='aud1XyZ12345abcDEF'&&job.ext==='mp3'&&job.full===false&&job.folder==='folderA'&&job.base==='Amir Dadon - Leftovers'&&!job.token&&job.tokenIn==='secret'&&dispatches===1,
+  'GitHub gets a job, not the song: the audio as the source, no MP3 made of an MP3, the folder, the name; the split is started');
+ {const sec=secrets['DRIVE_'+ids[0].toUpperCase()];let opened='';try{const c=Buffer.from(sec.encrypted_value,'base64'),epk=c.subarray(0,32),nonce=Buffer.from(require('child_process').execFileSync('python3',['-c','import hashlib,sys;print(hashlib.blake2b(bytes.fromhex(sys.argv[1]),digest_size=24).hexdigest())',Buffer.concat([epk,Buffer.from(ghKp.publicKey)]).toString('hex')]).toString().trim(),'hex');opened=Buffer.from(nacl.box.open(new Uint8Array(c.subarray(32)),new Uint8Array(nonce),new Uint8Array(epk),ghKp.secretKey)).toString()}catch(e){}
+  ok(sec&&sec.key_id==='k1'&&opened==='drivetok'&&!/drivetok/.test(jobs[ids[0]].body),'Google\u2019s Drive key goes as a sealed Actions secret (DRIVE_<id>), never in the job file in the repository');}
  ok(job.video==='vid1XyZ12345abcDEF'&&job.vext==='mp4','the job names the song’s video too (GitHub takes stills from it for the chord check)');
  const it1=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it1.state==='wait'&&it1.drive&&it1.drive.video&&it1.drive.video.id==='vid1XyZ12345abcDEF','the song waits for its parts and remembers the video');
  // the progress follows GitHub's own steps
@@ -94,6 +101,7 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  ok(/Ready/.test(await p.$eval('#dsDlg',e=>e.textContent))&&!!await p.$('#dsOpen'),'when it’s done the progress says Ready with “Open the song”');
  ok(await p.$eval('#dsDlg .dsbar',b=>{const i=b.querySelector('i'),r=b.getBoundingClientRect();return !b.classList.contains('done')&&r.height<=12&&i.getBoundingClientRect().width>=r.width-2}),'Ready: the bar is full (the tuner’s “done” card style doesn’t take it over)');
  const it2=await p.evaluate(()=>window.__mxTest.idx()[0]);ok(it2.state==='ready'&&it2.drive.ok&&it2.drive.out.guitars.id==='g9','the parts are back and the guitars-only MP3 GitHub saved in Drive is linked');
+ ok(secretsDel.includes('DRIVE_'+it1.id.toUpperCase()),'…and the Drive key\u2019s secret is deleted');
  const sti=await p.evaluate(async id=>{const v=await window.__bk.get('mixstills:'+id);return v&&{n:v.idx.length,size:v.bin.size}},it1.id);
  ok(sti&&sti.n===3&&sti.size===12,'the video stills come back with the parts and are kept on the phone '+JSON.stringify(sti));
  ok((await p.evaluate(()=>window.__notes)).some(t=>/is split|is ready/.test(t)),'a phone notification says it’s split (its session follows)');
