@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-10T03:55:09Z",
- "date": "2026-11-10",
+ "at": "2026-11-11T03:55:17Z",
+ "date": "2026-11-11",
  "index": {
   "artists": [
    "Tracy Chapman",
@@ -322,221 +322,172 @@
    }
   ]
  },
- "level": "Comfortable with barre chords, flat and sharp keys, capo and maj7 colours; ready for half-diminished chords and sharp-key barre work.",
+ "level": "Comfortable with barre chords, flat and sharp keys, capo and maj7 colours; ready for Drop D riffs, fingerpicked patterns and slash-chord bass lines.",
  "suggestions": [
   {
-   "title": "גשם",
-   "artist": "מאיר בנאי",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "Dm",
-    "Am",
-    "F",
-    "G",
-    "Fm7b5",
-    "G/Ab",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Banai classic close to your Eviatar songs; the Fm7b5 and G/Ab passing chords are the new colours."
-  },
-  {
-   "title": "ישראלי קומפלט",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 4,
-   "chords": [
-    "D#m",
-    "F#",
-    "G#m",
-    "A#",
-    "B",
-    "C#",
-    "A#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Hatikva 6 for your folder; a full sharp-key barre workout, a step up from the flat keys you already play."
-  },
-  {
-   "title": "עפיפונים",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop",
-   "difficulty": 2,
-   "chords": [
-    "D",
-    "G",
-    "Bm",
-    "Em",
-    "F#m",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier Amir Dadon song in D after his harder flat-key ones; a relaxed sing-along with smooth Bm to F#m changes."
-  },
-  {
-   "title": "חורף",
-   "artist": "עברי לידר",
-   "style": "Israeli pop ballad",
-   "difficulty": 3,
-   "chords": [
-    "F#m",
-    "Bm",
-    "C#",
-    "E",
-    "D",
-    "A",
-    "G#m",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Ivri Lider ballad; the C# major and G#m barres in an F#m key are good practice."
-  },
-  {
-   "title": "עמוק בקצפת",
-   "artist": "ברי סחרוף",
-   "style": "Israeli alt-rock",
-   "difficulty": 2,
-   "chords": [
-    "Dm",
-    "Am",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Berry Sakharof groove on three minor chords; the challenge is the hypnotic rhythm, not the shapes."
-  },
-  {
-   "title": "על הרכבת",
-   "artist": "טונה",
-   "style": "Israeli hip-hop",
-   "difficulty": 2,
-   "chords": [
-    "Dm",
-    "Am",
-    "Em",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Tuna for your folder; a simple minor loop that lets you focus on tight, steady strumming under fast lyrics."
-  },
-  {
-   "title": "Songbird",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 1,
-   "chords": [
-    "G5",
-    "G5/F#",
-    "Em7",
-    "Em7/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Oasis breather after Wonderwall; the moving bass note under fixed fingers is the small new trick."
-  },
-  {
-   "title": "Heart-Shaped Box",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 3,
-   "chords": [
-    "E",
-    "D",
-    "A",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fills your empty Nirvana folder; quiet-verse, loud-chorus dynamics are the thing to learn here."
-  },
-  {
-   "title": "Constellations",
-   "artist": "Jack Johnson",
-   "style": "Acoustic folk",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "C",
-    "D7",
-    "F"
-   ],
-   "capo": 1,
-   "tuning": "Standard",
-   "why": "A gentle Jack Johnson song after Better Together; light fingerpicking with a capo on 1."
-  },
-  {
-   "title": "Aurora",
+   "title": "Everlong",
    "artist": "Foo Fighters",
-   "style": "Alt rock",
+   "style": "Alt rock (acoustic)",
+   "difficulty": 4,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Drop D",
+   "why": "The acoustic Drop D version builds on My Friends: moving shapes over ringing open strings."
+  },
+  {
+   "title": "Fast Car",
+   "artist": "Tracy Chapman",
+   "style": "Folk",
    "difficulty": 3,
    "chords": [
+    "Cmaj7",
+    "G",
+    "Em7",
+    "Dadd11",
+    "C",
+    "Em",
+    "D"
+   ],
+   "capo": 2,
+   "tuning": "Standard",
+   "why": "A sibling to Baby Can I Hold You: a repeating fingerpicked riff to get clean and steady."
+  },
+  {
+   "title": "High and Dry",
+   "artist": "Radiohead",
+   "style": "Alt rock",
+   "difficulty": 2,
+   "chords": [
+    "B/F#",
     "A",
-    "E/G#",
-    "F#m",
     "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Foo Fighters after My Hero; ringing open-string voicings and a walking bass line (E/G#) are new."
-  }
- ],
- "history": [
+   "why": "A gentle Radiohead ballad with open-string colour chords and an easy strum."
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 2,
+   "chords": [
+    "E",
+    "F#m"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A breezy Jack Johnson groove; practise the muted-strum chuck in your right hand."
+  },
+  {
+   "title": "Yellow Ledbetter",
+   "artist": "Pearl Jam",
+   "style": "Grunge ballad",
+   "difficulty": 4,
+   "chords": [
+    "E",
+    "B",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: blends chords with Hendrix-style fills and hammer-ons around E."
+  },
+  {
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "G",
+    "D/F#",
+    "Em7",
+    "Bm",
+    "Cadd9",
+    "Am",
+    "D6",
+    "D",
+    "Am7",
+    "B7",
+    "Am/F#",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A classic sing-along with a key change to E: good practice for sharp-key barre chords."
+  },
+  {
+   "title": "לילה",
+   "artist": "אביב גפן",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "E",
+    "A",
+    "C#m/E",
+    "B",
+    "C#m",
+    "B/D#",
+    "E/G#",
+    "A/F#",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Slash-chord bass walks in E, a natural next step after the sharp-key songs you play."
+  },
   {
    "title": "עד האהבה",
    "artist": "אביתר בנאי",
-   "date": "2026-10-22"
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "G6",
+    "Am",
+    "F",
+    "Dm",
+    "Fm",
+    "Cm",
+    "Bb",
+    "Ab",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Eviatar Banai: borrowed minor chords (Fm, Ab) add a new colour to familiar shapes."
   },
   {
-   "title": "אנה",
-   "artist": "משינה",
-   "date": "2026-10-22"
+   "title": "סאלאם",
+   "artist": "שבע",
+   "style": "World / folk",
+   "difficulty": 1,
+   "chords": [
+    "G",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy campfire sing-along to rest your hands and work on strumming feel."
   },
   {
-   "title": "עדיין ילד",
-   "artist": "אמיר דדון",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "בנאדם",
-   "artist": "אמיר דדון",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "מרפקים",
-   "artist": "טונה",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "הכל בוער",
-   "artist": "עברי לידר",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "The Zephyr Song",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "Elderly Woman Behind the Counter in a Small Town",
-   "artist": "Pearl Jam",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "Taylor",
-   "artist": "Jack Johnson",
-   "date": "2026-10-22"
-  },
-  {
-   "title": "Walk",
-   "artist": "Foo Fighters",
-   "date": "2026-10-22"
-  },
+   "title": "הכל עוד לפני",
+   "artist": "התקווה 6",
+   "style": "Israeli pop rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "D",
+    "G",
+    "C",
+    "Bm",
+    "D/F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Hatikva 6 in open chords, with a D/F# bass walk to smooth the changes."
+  }
+ ],
+ "history": [
   {
    "title": "מיתר",
    "artist": "אביתר בנאי",
@@ -1486,6 +1437,56 @@
    "title": "Aurora",
    "artist": "Foo Fighters",
    "date": "2026-11-10"
+  },
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Fast Car",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "High and Dry",
+   "artist": "Radiohead",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Yellow Ledbetter",
+   "artist": "Pearl Jam",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "לילה",
+   "artist": "אביב גפן",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "עד האהבה",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "סאלאם",
+   "artist": "שבע",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "הכל עוד לפני",
+   "artist": "התקווה 6",
+   "date": "2026-11-11"
   }
  ],
  "sheets": [
@@ -2088,7 +2089,23 @@
   {
    "text": "Your B string is still flat from last week, {n}. It's not sulking, it's waiting for you.",
    "date": "2026-11-09"
+  },
+  {
+   "text": "Dave Grohl tunes his low E down to D and the whole room shakes. Today you can try it too, {n}. Just tune it back afterwards.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "Your fingerpicking hand has been keeping score, {n}: thumb 12, index 3, ring finger 0. Time to even things out.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "The slash in G/B isn't a typo, {n}. It's the bass note asking you to stop ignoring it.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "Shlomo Artzi changes key mid-song and nobody panics. You can survive one new chord tonight, {n}.",
+   "date": "2026-11-11"
   }
  ],
- "jokesDate": "2026-11-09"
+ "jokesDate": "2026-11-11"
 }
