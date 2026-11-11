@@ -164,7 +164,7 @@ const vl3=q=>{const iv=TYPES[q].iv;return iv.includes(3)?'m':iv.includes(4)?'M':
 const VL_OPEN={'':'C D E G A',m:'A D E','7':'A B C D E G',m7:'A D E',maj7:'C D E F G A',sus2:'A C D G',sus4:'A D E',add9:'C D E G A'};
 function vlOpen(segs,k){let o=0,t=0;segs.forEach(g=>{if(g.c>=NS)return;const l=g.t1-g.t0,r=(Math.floor(g.c/NT)-k+120)%12;t+=l;if((VL_OPEN[TYPES[g.c%NT].id]||'').split(' ').includes(CH[r]))o+=l});return t?o/t:0}
 // what the video adds to the analysis (sounding chords): its capo, the qualities it saw, where it disagrees
-function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand&&!(Number.isInteger(res.capo)&&ok(res.capo_conf))){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true};return a}
+function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&res.nohand&&!(Number.isInteger(res.capo)&&ok(res.capo_conf))){a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:null,frames:[],asked:res.looked,agree:0,differ:[],fixed:[],nohand:true,...(res.capoScan?{capoScan:res.capoScan}:{})};return a}
  const vc=Number.isInteger(res&&res.capo)&&res.capo>=0&&res.capo<=9&&ok(res.capo_conf)?res.capo:null;
  const capo=vc!=null?vc:0;
  // each clear frame: the chord the hand's shape gives with this capo and tuning (sh) against the chord heard at that moment
