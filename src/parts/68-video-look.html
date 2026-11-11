@@ -205,9 +205,38 @@ function vlApply(a,res,v,pts,mb){const ok=x=>x==='high'||x==='medium';if(res&&re
  a.video={at:Date.now(),name:v.name,url:v.url,mb,capo:vcap,...(shift?{shift}:{}),frames:seen,asked:res&&res.looked||pts.length,clear:res&&res.clear,who:res&&res.who||'',others:res&&res.others||[],agree,differ,fixed:[...fixed],...(res&&res.capoScan?{capoScan:res.capoScan}:{}),...(res&&res.nohand?{nohand:true}:{})};return a}
 // the stills GitHub took from the video during the split (splitter v5): the one nearest each moment
 function vlStills(st,times){return times.map(t=>{let b=st.idx[0];for(const x of st.idx)if(Math.abs(x[0]-t)<Math.abs(b[0]-t))b=x;return {t:b[0],blob:st.bin.slice(b[1],b[1]+b[2],'image/jpeg')}}).filter((f,i,a)=>a.findIndex(y=>y.t===f.t)===i)}
+// ---- the capo from another recording's video (Oct 2026, the user: "Make sessions use studio audio plus video for capo"; a test on
+// "עכשיו": the chords from the studio MP3 fit its guitar notes better than the live video's, and the live video was good only for the
+// capo, its fretting hand never clear). A split with no video of its own (a studio MP3) takes the capo from the video of another split
+// of the same song (a live MP4): the reading kept with that split's session, else a capo scan of its stills (Claude). Only the capo:
+// the hand shapes belong to the other performance. Taken only when this recording sounds played that way (70 %+ open shapes with that
+// capo): a live version in another key keeps the capo the sound gives.
+function vlSibs(it){try{const g=learnSongs({all:true}).find(x=>x.r.mix.some(m=>m.mix===it.id));
+ return g?g.r.mix.map(m=>mxIdx.find(x=>x.id===m.mix)).filter(x=>x&&x.id!==it.id&&x.state==='ready'):[]}catch(e){return []}}
+async function vlOther(it,a){const ok=x=>x==='high'||x==='medium';
+ for(const o of vlSibs(it)){let st=null;try{st=await mxGet('mixstills:'+o.id)}catch(e){}if(!st||!st.idx||!st.idx.length)continue;
+  const vkey='other:'+o.id+':'+st.idx.length,src={name:o.name,url:''},at={from:'other',other:o.id};
+  let res=vlKept(it,vkey);const kept=!!res;
+  // the other split's own reading of its video (no Claude), else a scan of its stills
+  if(!res){const v=(loadSong('mix_'+o.id)||{}).video,r=v&&v.from!=='other'&&v.raw;
+   if(r&&Number.isInteger(r.capo)&&ok(r.capo_conf))res={capo:r.capo,capo_conf:r.capo_conf,frames:[],nohand:true,neck:true,scan:true,...(r.capoScan?{capoScan:r.capoScan}:{})}}
+  if(!res){if(!claudeReads()){a.video={skip:'claude',name:o.name,...at};return true}
+   let sc=null;try{sc=await vlCapoScan(a.title,st.idx.map(x=>({t:x[0],blob:st.bin.slice(x[1],x[1]+x[2],'image/jpeg')})))}catch(e){}
+   res={capo:sc?sc.capo:null,capo_conf:sc?sc.capo_conf:null,frames:[],nohand:true,neck:true,scan:true,looked:st.idx.length,...(sc?{capoScan:{capo:sc.capo,conf:sc.capo_conf,each:sc.each,hint:sc.hint}}:{})}}
+  const c=Number.isInteger(res.capo)&&ok(res.capo_conf)?res.capo:null,op=c!=null?vlOpen(a.segs,c):0;
+  if(c!=null&&op<.7){a.video={at:Date.now(),name:o.name,url:'',capo:null,frames:[],asked:0,agree:0,differ:[],fixed:[],nohand:true,otherCapo:c,otherOpen:+op.toFixed(2),...at}}
+  else{vlApply(a,res,src,[],0);Object.assign(a.video,at)}
+  vlKeep(a,res,vkey,kept);return true}
+ return false}
+// a split of the song with no video of its own gets the capo of the video just read (its session was built first)
+async function vlShare(it){for(const o of vlSibs(it)){let st=null;try{st=await mxGet('mixstills:'+o.id)}catch(e){}if(st&&st.idx&&st.idx.length)continue;
+ const k='mix_'+o.id,d=loadSong(k);if(!d||!d.segs||(d.video&&d.video.capo!=null)||(d.video&&d.video.from!=='other'&&!d.video.skip))continue;
+ if(await vlOther(o,d))try{localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(d)))}catch(e){}}}
 // the whole look, for the session build (a: the new analysis); never throws: says why it was skipped instead
 // The stills from the split come first (no download, no Drive sign-in needed); an older song without them reads the video from Drive.
-async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}if(!st&&!it.drive)return;
+async function vlLook(it,a){let st=null;try{st=await mxGet('mixstills:'+it.id)}catch(e){}
+ if(!st&&!(it.drive&&it.drive.video&&it.drive.video.id)&&await vlOther(it,a))return;
+ if(!st&&!it.drive)return;
  const vname=it.drive&&it.drive.video&&it.drive.video.name||'',vurl=it.drive&&it.drive.video&&it.drive.video.url||'';
  // a reading kept from an earlier build of this recording is reused first: no Claude, no Drive, the same result (nothing you turn
  // on or off changes it)
@@ -230,5 +259,6 @@ function vlNote(d){const v=d&&d.video;if(!v)return '';
  if(v.skip==='claude')return `<p class="tip vlnote">With your Claude key (My profile › Claude features), Guitaring also looks at the song’s video for the capo and the chord shapes.</p>`;
  if(v.skip==='err')return `<p class="tip vlnote">The song’s video couldn’t be looked at this time${vlErrWhy(v.code)}. <button type="button" class="tlink" id="vlCheck">Try again</button></p>`;
  if(v.skip)return '';
+ if(v.from==='other')return `<p class="tip vlnote">The capo is from the video of “${esc(v.name)}”, another recording of this song${v.capo!=null?`: ${v.capo?'capo on fret '+v.capo:'no capo'}`:v.otherCapo!=null?`: capo ${v.otherCapo} there, but this recording doesn’t sound played that way (another key?), so the capo here is from the sound`:': the capo isn’t clear in it'}. The chords are from this recording.</p>`;
  const seen=v.frames.length,gw=v.who&&v.who!=='guitar'?`the ${v.who} guitarist’s hand`:'the hand';return `<p class="tip vlnote">Checked against the video: ${seen?`${gw} was clear at ${seen} of ${v.asked} moments${(v.others||[]).length?` (also seen: the ${v.others.join(' and ')} guitar)`:''}`:v.nohand?`the guitarist’s fretting hand isn’t shown clearly at any of the ${v.asked} moments looked at`:'the hand wasn’t clear in the stills'}${v.capo!=null?`; ${v.capo?'capo on fret '+v.capo:'no capo'} on the neck`:''}${v.fixed.length?`; set from the hand: ${v.fixed.map(esc).join(', ')}`:''}.</p>`}
-window.__vl={capoImages:async(frames,box)=>{const toUrl=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});const sh=await vlCapoSheets(frames);const out={grids:[],crops:[]};for(const x of sh)out.grids.push(await toUrl(x.blob));if(box)for(const f of frames.filter((_,i)=>i%15===7))out.crops.push(await toUrl(await vlCrop(f,box,1024,true)));return out},setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks
+window.__vl={capoImages:async(frames,box)=>{const toUrl=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});const sh=await vlCapoSheets(frames);const out={grids:[],crops:[]};for(const x of sh)out.grids.push(await toUrl(x.blob));if(box)for(const f of frames.filter((_,i)=>i%15===7))out.crops.push(await toUrl(await vlCrop(f,box,1024,true)));return out},setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},times:s=>vlTimes(s),other:{sibs:id=>vlSibs(mxIdx.find(x=>x.id===id)).map(x=>x.id),share:id=>vlShare(mxIdx.find(x=>x.id===id)),look:async(id,k)=>{const a=loadSong(k);await vlLook(mxIdx.find(x=>x.id===id),a);return a},ver:VL_VER,claude:fn=>claudeOn(fn,10),forget:id=>{mxIdx=mxIdx.filter(x=>x.id!==id)},anaKey:id=>sesAnaKey(learnSongs({all:true}).find(g=>g.r.mix.some(m=>m.mix===id)))},apply:(k,res,out)=>{const x=loadSong(k);vlApply(x,res,{name:'v.mp4',url:''},[],0);localStorage.setItem(KP+'song.'+out,JSON.stringify(compact(x)));return {play:x.play,video:x.video}}};// test hooks

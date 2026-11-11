@@ -31,9 +31,12 @@ function sesPractise(g){if(g.r.analysis.length)return {a:'guide',v:'',l:'Practis
  if(g.r.lesson.length)return {u:g.r.lesson[0].url,l:'Practise with the video lesson',s:g.r.lesson[0].label||'Watch it'};
  return null}
 // the analysis the guide is built from: the session of the song's newest split (its guitars-only part, whole song and video), then
-// another split's session, then the newest other analysis (a phone analysis saved later must not hide the split's session)
+// another split's session, then the newest other analysis (a phone analysis saved later must not hide the split's session). A split
+// with no video of its own (a studio MP3) comes before one with a video (a live MP4): its chords are cleaner, and it takes the capo
+// from the other's video (Oct 2026, the user: "Make sessions use studio audio plus video for capo")
 function sesAnaKey(g){const A=g.r.analysis.map(x=>x.key);if(!A.length)return '';
- for(const m of g.r.mix){const k='mix_'+m.mix;if(A.includes(k))return k}return A[0]}
+ const M=g.r.mix.map(m=>'mix_'+m.mix).filter(k=>A.includes(k)),own=k=>{const v=(loadSong(k)||{}).video;return !!v&&v.from!=='other'&&v.skip!=='none'};
+ return M.find(k=>!own(k))||M[0]||A[0]}
 function renderSession(){karaStop();const box=$('sesBox');if(!box)return;const g=sesSong();
  if(!g){box.innerHTML=`<p class="tip">This song isn’t in your learning list any more.</p><button type="button" class="btn" data-sec="learn">Back to Learn</button>`;return}
  const rec=songRec(g)||{},st=rec.status||'learning',f=sesFacts(g),pr=sesPractise(g),tn=f.tun?tName(f.tun):'';
