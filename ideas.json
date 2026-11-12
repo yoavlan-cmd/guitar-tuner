@@ -1,14 +1,14 @@
 {
  "v": 1,
- "at": "2026-11-11T03:55:17Z",
- "date": "2026-11-11",
+ "at": "2026-11-12T03:56:34Z",
+ "date": "2026-11-12",
  "index": {
   "artists": [
+   "Amir dadon",
    "Tracy Chapman",
    "Jonnie Shualy",
    "Hatikva 6",
    "Jimbo J",
-   "Amir dadon",
    "Eviatar Banai",
    "Tuna",
    "Green Day",
@@ -23,44 +23,9 @@
   ],
   "songs": [
    {
-    "a": "Tracy Chapman",
-    "t": "Baby Can I Hold You",
+    "a": "Amir dadon",
+    "t": "שברי את הטלויזיה",
     "ch": []
-   },
-   {
-    "a": "Tracy Chapman",
-    "t": "Baby Can I Hold You (guitars only)",
-    "ch": []
-   },
-   {
-    "a": "Jonnie Shualy",
-    "t": "עכשיו",
-    "ch": []
-   },
-   {
-    "a": "Hatikva 6",
-    "t": "לחזור הביתה",
-    "ch": []
-   },
-   {
-    "a": "Hatikva 6",
-    "t": "לחזור הביתה (full)",
-    "ch": []
-   },
-   {
-    "a": "Hatikva 6",
-    "t": "לחזור הביתה (guitars only)",
-    "ch": []
-   },
-   {
-    "a": "Jimbo J",
-    "t": "במקום בו אני גר",
-    "ch": [
-     "F#m",
-     "E",
-     "C#m",
-     "A"
-    ]
    },
    {
     "a": "Amir dadon",
@@ -119,22 +84,62 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "C",
-     "D",
      "Bm",
-     "Dm"
+     "D",
+     "Dm",
+     "C"
+    ]
+   },
+   {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You",
+    "ch": []
+   },
+   {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You (guitars only)",
+    "ch": []
+   },
+   {
+    "a": "Jonnie Shualy",
+    "t": "עכשיו",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (guitars only)",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (full)",
+    "ch": []
+   },
+   {
+    "a": "Jimbo J",
+    "t": "במקום בו אני גר",
+    "ch": [
+     "F#m",
+     "E",
+     "C#m",
+     "A"
     ]
    },
    {
     "a": "Eviatar Banai",
     "t": "מאיר בנאי אצלך בעולם",
     "ch": [
-     "C",
      "Am",
      "Em",
-     "D",
      "Em7",
-     "Cadd9"
+     "Cadd9",
+     "C",
+     "D"
     ]
    },
    {
@@ -143,10 +148,10 @@
     "ch": [
      "Dm",
      "F",
-     "C",
      "Gm",
      "Bb",
-     "Am"
+     "Am",
+     "C"
     ]
    },
    {
@@ -156,12 +161,12 @@
      "F#m",
      "C#m",
      "G#m",
-     "D",
      "A",
      "E",
      "Bm",
      "F#m7",
-     "F#m6"
+     "F#m6",
+     "D"
     ]
    },
    {
@@ -169,6 +174,7 @@
     "t": "יא",
     "ch": [
      "Cm",
+     "C",
      "C#"
     ]
    },
@@ -178,21 +184,21 @@
     "ch": [
      "Bbm",
      "Ebm",
-     "B",
-     "Abm"
+     "Abm",
+     "B"
     ]
    },
    {
     "a": "Tuna",
     "t": "קשה בכדור הארץ",
     "ch": [
-     "G",
      "Bm",
      "A",
-     "D",
      "F#m",
      "Em",
-     "F#"
+     "F#",
+     "G",
+     "D"
     ]
    },
    {
@@ -225,10 +231,10 @@
      "F",
      "F/E",
      "Dm",
-     "C",
      "Bb",
      "Bb/A",
-     "Gm"
+     "Gm",
+     "C"
     ]
    },
    {
@@ -240,10 +246,10 @@
      "F#",
      "Cmaj7",
      "Am7",
-     "E",
      "C",
-     "Am",
+     "E",
      "Dm",
+     "Am",
      "Ebdim",
      "B7"
     ]
@@ -254,10 +260,10 @@
     "ch": [
      "Cadd9",
      "Em7",
-     "E",
      "G",
      "D4",
-     "G/F#"
+     "G/F#",
+     "E"
     ],
     "capo": 2
    },
@@ -265,15 +271,15 @@
     "a": "Rockfour",
     "t": "הכעס",
     "ch": [
-     "G",
-     "Am",
-     "Bb",
      "Dm",
+     "Bb",
+     "Am",
      "Eb",
-     "C",
      "F#m",
-     "D",
-     "A"
+     "A",
+     "G",
+     "C",
+     "D"
     ]
    },
    {
@@ -283,18 +289,14 @@
      "Dsus2",
      "Dm7",
      "Dm7/F",
-     "D",
      "G/B",
-     "C",
      "G",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
-     "Asus2/B",
-     "A/B",
-     "D/F#",
-     "F"
+     "D",
+     "C"
     ],
     "tuning": "Drop D"
    },
@@ -302,10 +304,10 @@
     "a": "Ivri lider",
     "t": "ביום שמש יפה",
     "ch": [
-     "C",
      "G/B",
      "Am",
      "F",
+     "C",
      "Dm7",
      "Dm",
      "Eb",
@@ -322,222 +324,185 @@
    }
   ]
  },
- "level": "Comfortable with barre chords, flat and sharp keys, capo and maj7 colours; ready for Drop D riffs, fingerpicked patterns and slash-chord bass lines.",
+ "level": "You handle full songs with barre chords in sharp and flat keys, plus capo and Drop D, so you're ready for richer chord colours and new picking patterns.",
  "suggestions": [
   {
-   "title": "Everlong",
-   "artist": "Foo Fighters",
-   "style": "Alt rock (acoustic)",
-   "difficulty": 4,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Drop D",
-   "why": "The acoustic Drop D version builds on My Friends: moving shapes over ringing open strings."
-  },
-  {
-   "title": "Fast Car",
-   "artist": "Tracy Chapman",
-   "style": "Folk",
-   "difficulty": 3,
-   "chords": [
-    "Cmaj7",
-    "G",
-    "Em7",
-    "Dadd11",
-    "C",
-    "Em",
-    "D"
-   ],
-   "capo": 2,
-   "tuning": "Standard",
-   "why": "A sibling to Baby Can I Hold You: a repeating fingerpicked riff to get clean and steady."
-  },
-  {
-   "title": "High and Dry",
-   "artist": "Radiohead",
-   "style": "Alt rock",
+   "title": "Come as You Are",
+   "artist": "Nirvana",
+   "style": "Grunge",
    "difficulty": 2,
    "chords": [
-    "B/F#",
-    "A",
+    "F#m",
     "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A gentle Radiohead ballad with open-string colour chords and an easy strum."
+   "why": "Your Nirvana folder is still empty: two familiar chords, and the famous riff is a fun single-note workout."
   },
   {
-   "title": "Upside Down",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
+   "title": "Talkin' Bout a Revolution",
+   "artist": "Tracy Chapman",
+   "style": "Folk",
    "difficulty": 2,
    "chords": [
-    "E",
-    "F#m"
+    "G6",
+    "Cadd9",
+    "Em",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A breezy Jack Johnson groove; practise the muted-strum chuck in your right hand."
+   "why": "More Tracy Chapman: easy open chords with a steady fingerpicked loop to build right-hand independence."
   },
   {
-   "title": "Yellow Ledbetter",
-   "artist": "Pearl Jam",
-   "style": "Grunge ballad",
+   "title": "Bubble Toes",
+   "artist": "Jack Johnson",
+   "style": "Acoustic surf",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "C",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy, breezy Jack Johnson song where the challenge is the bouncy, muted strumming groove."
+  },
+  {
+   "title": "Little by Little",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [
+    "C",
+    "C/B",
+    "G",
+    "Em/F#",
+    "A",
+    "Em",
+    "D",
+    "D/F#",
+    "G/F#",
+    "F#m",
+    "Dsus2"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A big Oasis sing-along with walking bass lines (C/B, G/F#) that build on the slash chords you already know."
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Acoustic rock",
    "difficulty": 4,
    "chords": [
-    "E",
+    "Em",
+    "C",
+    "Cm",
     "B",
+    "Am",
     "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: blends chords with Hendrix-style fills and hammer-ons around E."
+   "why": "A step up from your RHCP song: a moody acoustic piece with arpeggiated picking and a tricky C to Cm move."
   },
   {
-   "title": "אהבתיה",
-   "artist": "שלמה ארצי",
-   "style": "Israeli rock",
-   "difficulty": 3,
+   "title": "ממעמקים",
+   "artist": "הפרויקט של עידן רייכל",
+   "style": "Israeli pop",
+   "difficulty": 4,
    "chords": [
-    "G",
-    "D/F#",
-    "Em7",
-    "Bm",
-    "Cadd9",
-    "Am",
-    "D6",
-    "D",
-    "Am7",
-    "B7",
-    "Am/F#",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic sing-along with a key change to E: good practice for sharp-key barre chords."
-  },
-  {
-   "title": "לילה",
-   "artist": "אביב גפן",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
+    "G#m",
     "E",
-    "A",
-    "C#m/E",
+    "C#m7",
+    "G#m/F#",
+    "F#",
+    "D#m7",
+    "D#m",
     "B",
-    "C#m",
-    "B/D#",
-    "E/G#",
-    "A/F#",
-    "C"
+    "Emaj7",
+    "A#4",
+    "D#4"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Slash-chord bass walks in E, a natural next step after the sharp-key songs you play."
+   "why": "Same flowing ballad style as the Idan Raichel song you already play, with new barre colours like D#m7 and Emaj7."
   },
   {
-   "title": "עד האהבה",
-   "artist": "אביתר בנאי",
-   "style": "Israeli rock",
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
    "difficulty": 3,
    "chords": [
-    "G6",
     "Am",
-    "F",
-    "Dm",
-    "Fm",
-    "Cm",
-    "Bb",
-    "Ab",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar Banai: borrowed minor chords (Fm, Ab) add a new colour to familiar shapes."
-  },
-  {
-   "title": "סאלאם",
-   "artist": "שבע",
-   "style": "World / folk",
-   "difficulty": 1,
-   "chords": [
+    "Em7",
+    "Fmaj7",
     "G",
-    "C"
+    "Am/Bb",
+    "E",
+    "E4/B",
+    "Bb"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy campfire sing-along to rest your hands and work on strumming feel."
+   "why": "A classic slow ballad in Am with soft maj7 and sus colours you can let ring."
   },
   {
-   "title": "הכל עוד לפני",
-   "artist": "התקווה 6",
-   "style": "Israeli pop rock",
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "style": "Israeli rock",
    "difficulty": 2,
+   "chords": [
+    "Bb",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy, driving rock song built on a two-chord shuffle: great for tight, energetic strumming."
+  },
+  {
+   "title": "שיר המכולת",
+   "artist": "כוורת",
+   "style": "Israeli classic rock",
+   "difficulty": 3,
    "chords": [
     "Em",
     "D",
-    "G",
-    "C",
+    "Am",
+    "Cadd9",
+    "F",
+    "B",
+    "Bb",
+    "Cmaj7",
+    "E4",
     "Bm",
-    "D/F#"
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Hatikva 6 in open chords, with a D/F# bass walk to smooth the changes."
+   "why": "A playful Kaveret classic with surprise chord turns (F, B, Bb) that keep your changes sharp."
+  },
+  {
+   "title": "זרעי קיץ",
+   "artist": "מאיר אריאל",
+   "style": "Israeli folk rock",
+   "difficulty": 2,
+   "chords": [
+    "Am7",
+    "C",
+    "G7",
+    "F",
+    "G",
+    "Ab",
+    "Am"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A gentle, storytelling song with mostly open chords and one sneaky Ab to slide into."
   }
  ],
  "history": [
-  {
-   "title": "מיתר",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "רגעים",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "גיבורי על",
-   "artist": "התקווה 6",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "לבחור נכון",
-   "artist": "אמיר דדון",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "גם זה יעבור",
-   "artist": "טונה",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "על קו המים",
-   "artist": "עברי לידר",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "Minority",
-   "artist": "Green Day",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "Long Road to Ruin",
-   "artist": "Foo Fighters",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "Yellow Ledbetter",
-   "artist": "Pearl Jam",
-   "date": "2026-10-23"
-  },
-  {
-   "title": "Morning Glory",
-   "artist": "Oasis",
-   "date": "2026-10-23"
-  },
   {
    "title": "Fast Car",
    "artist": "Tracy Chapman",
@@ -1487,12 +1452,62 @@
    "title": "הכל עוד לפני",
    "artist": "התקווה 6",
    "date": "2026-11-11"
+  },
+  {
+   "title": "Come as You Are",
+   "artist": "Nirvana",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Talkin' Bout a Revolution",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Bubble Toes",
+   "artist": "Jack Johnson",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Little by Little",
+   "artist": "Oasis",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "ממעמקים",
+   "artist": "הפרויקט של עידן רייכל",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "שיר המכולת",
+   "artist": "כוורת",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "זרעי קיץ",
+   "artist": "מאיר אריאל",
+   "date": "2026-11-12"
   }
  ],
  "sheets": [
   {
    "title": "שאריות של החיים",
-   "artist": "הפרוייקט של עידן רייכל",
+   "artist": "Amir dadon",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
@@ -1503,7 +1518,12 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab"
+    "Ab",
+    "Bbm/Ab",
+    "Eb/G",
+    "Ab/Gb",
+    "Db/F",
+    "Eb"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
@@ -1519,7 +1539,8 @@
     "Em",
     "Em7",
     "Cadd9",
-    "C"
+    "C",
+    "D"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
@@ -1532,9 +1553,10 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
-    "C"
+    "C",
+    "C#"
    ],
-   "level": 1,
+   "level": 2,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
    "at": "2026-10-12T05:44:13.178Z"
   },
@@ -1631,9 +1653,10 @@
     "F#m",
     "Em",
     "F#",
-    "G"
+    "G",
+    "D"
    ],
-   "level": 3,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
    "at": "2026-10-11T19:18:19.408Z"
   },
@@ -1650,9 +1673,11 @@
     "Eb",
     "Bb",
     "Cm",
-    "Ddim"
+    "Ddim",
+    "F",
+    "C"
    ],
-   "level": 4,
+   "level": 5,
    "url": "https://drive.google.com/file/d/1rwPD9wwiBODy4WaYqw_v68wYcDOy33dY/view?usp=drivesdk",
    "at": "2026-10-10T17:10:42.560Z"
   },
@@ -1721,9 +1746,12 @@
    "chords": [
     "Cadd9",
     "Em7",
-    "E"
+    "E",
+    "G",
+    "D4",
+    "G/F#"
    ],
-   "level": 1,
+   "level": 2,
    "url": "https://drive.google.com/file/d/1WgZAJoKlyNQUEercjC1oJKFuZ5fmpmBE/view?usp=drivesdk",
    "at": "2026-10-11T04:04:56.240Z"
   },
@@ -1740,7 +1768,8 @@
     "E",
     "Bm",
     "F#m7",
-    "F#m6"
+    "F#m6",
+    "D"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1JOz0FO5SivbXJE-pV2dHhRyAZkLCo8B5/view?usp=drivesdk",
@@ -1756,7 +1785,8 @@
     "Cmaj7",
     "Bm",
     "D",
-    "Dm"
+    "Dm",
+    "C"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1hSlqJwHZYC9t8H46a--z1r5D1lO4_o0t/view?usp=drivesdk",
@@ -1772,9 +1802,13 @@
     "Bb",
     "Am",
     "Eb",
-    "F#m"
+    "F#m",
+    "A",
+    "G",
+    "C",
+    "D"
    ],
-   "level": 3,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
    "at": "2026-10-10T19:13:35.115Z"
   },
@@ -1789,21 +1823,24 @@
     "Dm",
     "Bb",
     "Bb/A",
-    "Gm"
+    "Gm",
+    "C",
+    "B"
    ],
-   "level": 4,
+   "level": 5,
    "url": "https://drive.google.com/file/d/1Azz9ExdfuXSQa3NPZJg8KOejHC7rYqo9/view?usp=drivesdk",
    "at": "2026-10-11T04:46:28.822Z"
   },
   {
    "title": "במקום-טסט שיר",
-   "artist": "אורית טשומה ואברהם לגסה",
+   "artist": "Jimbo J",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
     "F#m",
     "E",
-    "C#m"
+    "C#m",
+    "A"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
@@ -1811,13 +1848,14 @@
   },
   {
    "title": "במקום בו אני גר",
-   "artist": "אורית טשומה ואברהם לגסה",
+   "artist": "Jimbo J",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
     "F#m",
     "E",
-    "C#m"
+    "C#m",
+    "A"
    ],
    "level": 2,
    "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
@@ -1842,7 +1880,8 @@
     "A/B",
     "F#add9/B",
     "G",
-    "C"
+    "C",
+    "D/F#"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
