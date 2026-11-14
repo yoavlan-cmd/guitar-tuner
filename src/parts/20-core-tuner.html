@@ -48,17 +48,18 @@ const nm=m=>NAMES[((m%12)+12)%12], oc=m=>Math.floor(m/12)-1, fq=m=>a4*Math.pow(2
 const shortName=t=>t.n.map(nm).map(s=>s.replace('♯','#').replace('♭','b')).join('');
 
 /* gauge */
-/* ±15¢ fills most of the arc (fine tuning); 15–50¢ is squeezed into the ends so far-off strings still show */
-const CX=160,CY=172,R=132,SPAN=62,FINE=.6;
+/* ±15¢ fills most of the arc (fine tuning); 15–100¢ is squeezed into the ends so far-off strings still show. A whole half step
+   (Nov 2026: tuning a standard guitar down a half step, the needle sat at the end of a ±50¢ gauge for the first half of the turn) */
+const CX=160,CY=172,R=132,SPAN=62,FINE=.6,FAR=100;
 const pt=(deg,r)=>{const a=(deg-90)*Math.PI/180;return [CX+r*Math.cos(a),CY+r*Math.sin(a)]};
-const centsAng=c=>{const a=Math.min(50,Math.abs(c)),f=a<=15?a/15*FINE:FINE+(a-15)/35*(1-FINE);return Math.sign(c)*f*SPAN};
+const centsAng=c=>{const a=Math.min(FAR,Math.abs(c)),f=a<=15?a/15*FINE:FINE+(a-15)/(FAR-15)*(1-FINE);return Math.sign(c)*f*SPAN};
 const arcD=(c1,c2,r)=>{const [a,b]=pt(centsAng(c1),r),[x,y]=pt(centsAng(c2),r);return `M${a.toFixed(1)} ${b.toFixed(1)} A${r} ${r} 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}`};
 (()=>{let s='';const T=(c,cls,i,o)=>{const d=centsAng(c),[x1,y1]=pt(d,R-i),[x2,y2]=pt(d,R-o);return `<line class="tick${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`};
  for(let c=-15;c<=15;c++){if(c%5===0)s+=T(c,c?' major':' major zero',10,c?26:30);else s+=T(c,'',10,18)}
- [-50,-30,30,50].forEach(c=>s+=T(c,' far',10,20));
+ [-100,-50,-30,30,50,100].forEach(c=>s+=T(c,' far',10,20));
  const L=(c,t)=>{const [x,y]=pt(centsAng(c),R-40);return `<text class="tlab" x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle">${t}</text>`};
- s+=L(-15,'−15')+L(15,'+15')+L(-50,'−50')+L(50,'+50');
- $('ticks').innerHTML=s;$('track').setAttribute('d',arcD(-50,50,R));$('zone').setAttribute('d',arcD(-5,5,R))})();
+ s+=L(-15,'−15')+L(15,'+15')+L(-100,'−100')+L(100,'+100');
+ $('ticks').innerHTML=s;$('track').setAttribute('d',arcD(-FAR,FAR,R));$('zone').setAttribute('d',arcD(-5,5,R))})();
 // spring-damped needle: a little overshoot and settle, like a real meter movement
 let needleNow=0,needleGoal=0,needleVel=0,needleRaf=0,needleT=0;
 const needleCalm=matchMedia('(prefers-reduced-motion: reduce)');
@@ -193,7 +194,7 @@ function idle(now){
  hist=[];needleGoal=0;$('screen').classList.remove('ok','locked');setFine(null);$('hz').textContent='—';$('cents').textContent='—';okSince=0;
  const st=$('status');st.className='status';st.textContent=locked!=null?`Play string ${6-locked} (${nm(tuning.n[locked])})`:'Play any string';showTarget();
 }
-let holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,rawC=[],lastGoodAt=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
+let lastF=0,holdUntil=0,lastCents=null,trend=[],zoneStr=null,cHist=[],cStr=null,shownC=null,lastCT=0,notePeak=0,rawC=[],lastGoodAt=0,envS=null,onsetAt=0,lastStr=null,lastStrAt=0;
 // phone mics barely pick up a low string's fundamental, so the tuner can lock onto its 2nd/3rd harmonic
 // (an in-tune A2 read as A3 = "way too high"). In automatic mode, if a reading is far from every string but
 // half/a third of it lands on a string, or it's an exact multiple of the string just played, use that instead.
@@ -204,8 +205,13 @@ function octaveFix(f,now){
  // the high E is exactly 2 octaves above the low E, so a flat high E used to be shown as the low E
  const d=off(f);if(d<=100)return f;
  // only for readings far from every string: a high string that's merely out of tune (E4 = 4 × low E) must stay itself
- if(d>60&&lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<40)return f/k}
- for(const k of [2,3]){const g=f/k;if(g>=fq(Math.min(...tuning.n))*0.75&&off(g)<35)return g}
+ // …the string just played, or the pitch just heard: a string still a half step off (tuning a standard guitar down to "Half step
+ // down", Nov 2026) has its 2nd harmonic far from every string, and was shown as another string ("tune up to F♯" for a low E)
+ if(d>60&&lastStr!=null&&now-lastStrAt<2500){const f0=fq(tuning.n[lastStr]);for(const k of [2,3,4])if(Math.abs(1200*Math.log2(f/(k*f0)))<40)return f/k;
+  // the pitch just heard: its octave only (4 × a low E is a high E, a real string)
+  if(lastF&&Math.abs(1200*Math.log2(f/(2*lastF)))<40)return f/2}
+ // an octave (or a twelfth) below lands on a string, or much closer to one (within a half step) than the reading itself
+ for(const k of [2,3]){const g=f/k;if(g<fq(Math.min(...tuning.n))*0.75)continue;const og=off(g);if(og<35||(og<=110&&og<d-60))return g}
  return f}
 function setFine(c,ok){const f=$('fine');if(c==null){f.classList.remove('on');return}f.classList.add('on');const x=Math.max(-15,Math.min(15,c));const d=$('fineDot');d.style.left=(50+x/15*46)+'%';d.className=ok?'ok':c<0?'flat':'sharp'}
 /* forgot to stop? Strumming chords / playing a tune for a few seconds, or a long quiet spell, turns Listen off.
@@ -270,7 +276,7 @@ function loop(){
   med=close.reduce((a,b)=>a+b,0)/close.length;lastHeard=now;holdUntil=now+1200;
   let i=locked;if(i==null){let best=1e9;tuning.n.forEach((m,k)=>{const cc=Math.abs(1200*Math.log2(med/fq(m)));if(cc<best){best=cc;i=k}})}
   if(i!==target){target=i;renderStrings()}
-  lastStr=i;lastStrAt=now;
+  lastStr=i;lastStrAt=now;lastF=med;
   const m=tuning.n[i];let cents=1200*Math.log2(med/fq(m));
   // smooth small wobbles, follow real peg turns quickly
   // steady reading: median of the last ~0.45 s, then a slow glide for tiny wobbles; real peg turns still follow fast
@@ -294,7 +300,7 @@ function loop(){
   $('note').innerHTML=`${nm(heard)}<sub>${oc(heard)}</sub>`;$('hz').textContent=med.toFixed(1);$('tgt').textContent=fq(m).toFixed(2);
   // the needle ignores the last ±1¢ (nobody can hear it, and it stops the centre flicker); the number only moves on a whole-cent change
   if(shownC==null||Math.abs(cents-shownC)>=.8)shownC=Math.round(cents);
-  $('cents').textContent=shownC?(shownC>0?'+':'')+shownC:'0';const nc=Math.sign(cents)*Math.max(0,Math.abs(cents)-1);needleGoal=Math.max(-50,Math.min(50,nc));
+  $('cents').textContent=shownC?(shownC>0?'+':'')+shownC:'0';const nc=Math.sign(cents)*Math.max(0,Math.abs(cents)-1);needleGoal=Math.max(-FAR,Math.min(FAR,nc));
   // in the zone: enter at ±3¢, stay until ±5¢ (no flicker at the edge); hold it for half a second to lock in
   const ac=Math.abs(cents),inZone=zoneStr===i&&okSince?ac<=5:ac<=3;
   const scr=$('screen');scr.classList.remove('hold');setFine(cents,inZone);
