@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-13T03:54:58Z",
- "date": "2026-11-13",
+ "at": "2026-11-14T03:53:29Z",
+ "date": "2026-11-14",
  "index": {
   "artists": [
    "Amir dadon",
@@ -324,239 +324,175 @@
    }
   ]
  },
- "level": "You play full songs with barre chords in flat and sharp keys, maj7 and slash chords, capo and Drop D, so you're ready for richer progressions and lead-style parts.",
+ "level": "You play full songs with barre chords in flat and sharp keys, maj7 and slash chords, capo and Drop D, so you're ready for richer progressions and more expressive strumming.",
  "suggestions": [
   {
-   "title": "אני ואתה",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "C",
-    "D",
-    "A",
-    "B7",
-    "G",
-    "E",
-    "Abm",
-    "F#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along classic with open chords you know and a quick key lift that keeps the changes sharp."
-  },
-  {
-   "title": "נתתי לה חיי",
-   "artist": "כוורת",
+   "title": "ואולי עכשיו",
+   "artist": "משינה",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "F",
-    "Am",
-    "Em",
-    "G",
-    "D7",
-    "Dm",
-    "C",
-    "B7",
+    "F#m",
+    "Bm",
     "D",
-    "Bm"
+    "C#m",
+    "A",
+    "G",
+    "Ebadd9"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A playful strumming groove with seventh chords and a lot of smooth changes between minor and major."
+   "why": "Classic Mashina with sharp-key minor barres you already know; the Ebadd9 colour chord is the new bit."
   },
   {
-   "title": "גבר הולך לאיבוד",
-   "artist": "שלמה ארצי",
-   "style": "Israeli rock ballad",
-   "difficulty": 4,
+   "title": "הוריקן",
+   "artist": "התקווה 6",
+   "style": "Israeli pop-rock",
+   "difficulty": 3,
    "chords": [
-    "Dm",
-    "A#maj7",
-    "Am",
-    "F#dim",
     "Gm",
-    "Gm/E",
-    "E7/Ab",
+    "Bb",
+    "Eb",
+    "Cm",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Flat-key barre chords like your Amir Dadon songs, with a driving strum to lock in."
+  },
+  {
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock ballad",
+   "difficulty": 3,
+   "chords": [
+    "D",
     "A",
-    "Dm7/C",
+    "D/A",
+    "A/C#",
+    "E",
+    "F#m",
+    "B/Eb",
+    "D/C#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An artist you already play; walking slash-chord bass lines are the step up here."
+  },
+  {
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 3,
+   "chords": [
+    "Em",
+    "F",
+    "Dm",
+    "Am",
+    "Am/G",
+    "Fmaj7",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Gentle Eviatar Banai ballad; practise the descending Am to Am/G bass and Fmaj7 voicing."
+  },
+  {
+   "title": "כולם יודעים",
+   "artist": "אהוד בנאי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "C7",
+    "Bbm",
+    "Fm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Ehud Banai fits next to Eviatar in your folder; dominant 7th and flat-minor barres keep it moving."
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "style": "Pop punk",
+   "difficulty": 2,
+   "chords": [
+    "Fm",
+    "Ab",
+    "Eb",
     "Bb"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: a moving bass line through slash and diminished chords, close to the colours you already use."
+   "why": "Same band and the same flat-key power-chord shapes as Basket Case, with a steady shuffle strum."
   },
   {
-   "title": "עבודה שחורה",
-   "artist": "אהוד בנאי",
-   "style": "Israeli folk rock",
-   "difficulty": 1,
-   "chords": [
-    "Am",
-    "Em",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy three-chord song, perfect for working on a tight, steady strumming feel and singing over it."
-  },
-  {
-   "title": "מחכים למשיח",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "Bm",
-    "G",
-    "F#",
-    "A",
-    "D",
-    "Bm7",
-    "Cm",
-    "Ab",
-    "Cm7",
-    "Bb",
-    "Eb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A rock anthem that moves between two keys, great practice for the barre chords you play in your Hebrew songs."
-  },
-  {
-   "title": "Don't Look Back in Anger",
-   "artist": "Oasis",
-   "style": "Britpop",
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Alternative rock",
    "difficulty": 2,
    "chords": [
-    "C",
+    "Am",
     "F",
-    "G",
-    "Am",
-    "E7",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "After Wonderwall this is the next Oasis must-know: big open chords and a chorus everyone sings."
-  },
-  {
-   "title": "Under the Bridge",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alt rock",
-   "difficulty": 5,
-   "chords": [
-    "D",
-    "F#",
-    "E",
-    "B",
-    "C#m",
-    "G#m",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up from My Friends: chord-melody fills and the famous intro to grow your lead-style playing."
-  },
-  {
-   "title": "Times Like These",
-   "artist": "Foo Fighters",
-   "style": "Alt rock",
-   "difficulty": 3,
-   "chords": [
-    "D",
-    "Am7",
     "C",
-    "Em7",
-    "Dsus2"
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Fills out your Foo folder with a driving acoustic part and a tricky odd-meter riff to master."
+   "why": "An easy RHCP classic after My Friends; focus on the clean picked arpeggio feel."
   },
   {
-   "title": "Karma Police",
+   "title": "Creep",
    "artist": "Radiohead",
-   "style": "Alt rock",
-   "difficulty": 3,
-   "chords": [
-    "Am",
-    "D9/F#",
-    "Bm",
-    "C",
-    "C/B",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Moody piano-style chords on guitar with walking bass notes, a nice new sound for you."
-  },
-  {
-   "title": "Daughter",
-   "artist": "Pearl Jam",
-   "style": "Grunge",
+   "style": "Alternative rock",
    "difficulty": 3,
    "chords": [
     "G",
-    "G4"
+    "B",
+    "C",
+    "Cm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A percussive strumming pattern with hammer-ons, a fresh right-hand challenge in a grunge classic."
-  }
- ],
- "history": [
-  {
-   "title": "The Promise",
-   "artist": "Tracy Chapman",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "The Blower's Daughter",
-   "artist": "Damien Rice",
-   "date": "2026-10-25"
+   "why": "Four chords, but the B major barre and the C to Cm switch are a nice workout."
   },
   {
    "title": "Good People",
    "artist": "Jack Johnson",
-   "date": "2026-10-25"
+   "style": "Acoustic",
+   "difficulty": 3,
+   "chords": [
+    "B",
+    "E",
+    "C#m",
+    "F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Laid-back Jack Johnson groove like Better Together, in a sharp key with muted percussive strums."
   },
   {
-   "title": "Little by Little",
-   "artist": "Oasis",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "Next Year",
+   "title": "Long Road to Ruin",
    "artist": "Foo Fighters",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "אהבתיה",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "כמו בחיים",
-   "artist": "מוש בן ארי",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "ממריאים",
-   "artist": "מוש בן ארי",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "בדרך אל הים",
-   "artist": "משינה",
-   "date": "2026-10-25"
-  },
-  {
-   "title": "קצב החיים",
-   "artist": "התקווה 6",
-   "date": "2026-10-25"
-  },
+   "style": "Alternative rock",
+   "difficulty": 4,
+   "chords": [
+    "C",
+    "F",
+    "Am",
+    "Gsus4/B",
+    "D",
+    "Gsus4",
+    "Am7/G",
+    "Cadd9",
+    "Am7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from My Hero: sus and slash voicings and quicker changes in an upbeat strum."
+  }
+ ],
+ "history": [
   {
    "title": "אני ואתה",
    "artist": "אריק איינשטיין",
@@ -1506,6 +1442,56 @@
    "title": "Daughter",
    "artist": "Pearl Jam",
    "date": "2026-11-13"
+  },
+  {
+   "title": "ואולי עכשיו",
+   "artist": "משינה",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "הוריקן",
+   "artist": "התקווה 6",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "כולם יודעים",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Creep",
+   "artist": "Radiohead",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Good People",
+   "artist": "Jack Johnson",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Long Road to Ruin",
+   "artist": "Foo Fighters",
+   "date": "2026-11-14"
   }
  ],
  "sheets": [
