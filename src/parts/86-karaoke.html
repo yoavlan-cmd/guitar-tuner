@@ -61,7 +61,7 @@ try{matchMedia('(orientation: landscape)').addEventListener('change',e=>{const h
 const KA_MEM={};// videos too big to keep on the phone, for this visit
 // the card in the guide (Full): filled in once the video is on the phone
 function karaHTML(G){return `<div class="gdblock gdkara" id="gdKara"><button type="button" class="kx" id="kaExit" aria-label="Exit full screen">✕</button><h4>Play along with the video</h4><div class="kbody"><p class="tip">Getting the video ready…</p></div>
- <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. Lyrics are never shown.</p></div>`}
+ <p class="tip">The chords change with the music: the lane slides under the line; tap it to jump. ${G.lyr?'The lyric line under it is from your chord sheet.':'Lyrics come only from a chord sheet in the song’s Drive folder.'}</p></div>`}
 let kaGen=0;
 async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');if(!host||!G||!d)return;const body=host.querySelector('.kbody'),it=karaItem(d.mix);
  let rec=null;try{rec=await mxGet('mixvideo:'+d.mix)}catch(e){}if((!rec||!rec.blob)&&KA_MEM[d.mix])rec={blob:KA_MEM[d.mix]};
@@ -73,12 +73,12 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
    catch(e){b.disabled=false;m.textContent=e&&e.code==='none'?'No video was found in the song’s Drive folder.':'Couldn’t load the video from Drive. Try again.'}};return}
  const M=karaBlocks(d),url=URL.createObjectURL(rec.blob);
  body.innerHTML=`<div class="kvid"><video playsinline preload="auto"></video></div>
-  <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>
+  <div class="know"><div class="kcur"><small>Now</small><b dir="ltr">–</b></div><div class="kdg"></div><div class="knx"><small>Next</small><b dir="ltr">–</b><em></em></div></div>${d.lyr&&d.lyr.lines?'<p class="klyr" dir="auto"></p>':''}
   <div class="klane" role="slider" aria-label="Chords in time; tap to jump"><div class="kstrip">${M.beats.map(t=>`<i class="kb" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.bars.map(t=>`<i class="kbar" style="left:${(t*KA_PPS).toFixed(1)}px"></i>`).join('')}${M.blocks.map((b,i)=>`<span class="kblk${b.u?' unsure':''}" data-i="${i}"${b.u?' title="Not sure of this chord: check it by ear"':''} style="left:${(b.t0*KA_PPS).toFixed(1)}px;width:${Math.max(18,(b.t1-b.t0)*KA_PPS-3).toFixed(1)}px">${esc(b.n)}</span>`).join('')}</div><i class="khead" aria-hidden="true"></i></div>
   <div class="mixbtns ktrans"><button type="button" class="mixback" data-kj="-5" aria-label="Back 5 seconds">−5s</button><button type="button" class="mixplay kbig" aria-label="Play">▶</button><button type="button" class="mixback" data-kj="5" aria-label="Forward 5 seconds">+5s</button></div>
   <div class="kctl"><div class="seg kspeed" role="group" aria-label="Speed (the pitch stays the same)">${[[.6,'60%'],[.8,'80%'],[1,'100%']].map(([r,l])=>`<button type="button" data-kr="${r}" aria-pressed="${r===1}">${l}</button>`).join('')}</div><button type="button" class="btn ghost" id="kaFull">Full screen</button></div>
   <p class="tip kof" hidden></p>`;
- const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg');
+ const v=body.querySelector('video'),strip=body.querySelector('.kstrip'),lane=body.querySelector('.klane'),big=body.querySelector('.kbig'),now=body.querySelector('.kcur b'),nx=body.querySelector('.knx b'),nxIn=body.querySelector('.knx em'),dg=body.querySelector('.kdg'),ly=body.querySelector('.klyr');
  v.src=url;KA={v,url,M,off:+(d.vOff||0),cur:-2,raf:0,host};
  if(KA_NOTE[d.mix]){const p0=document.createElement('p');p0.className='tip kanote';p0.textContent=KA_NOTE[d.mix];body.appendChild(p0)}
  // a video the phone can't play (some cameras' formats): say so instead of a black box
@@ -102,6 +102,8 @@ async function karaMount(G,d,key){karaStop();const gen=++kaGen,host=$('gdKara');
   let n=B.findIndex(b=>b.t0>t+.02);
   if(i!==KA.cur){const old=strip.querySelector('.kblk.cur');if(old)old.classList.remove('cur');if(i>=0){strip.querySelector(`.kblk[data-i="${i}"]`).classList.add('cur')}
    KA.cur=i;now.textContent=i>=0?B[i].n:'–';dg.innerHTML=i>=0?sesDiagram(B[i].n):''}
+  // the lyric line being sung (from a chord sheet in the song's Drive folder, 88-session-sheets)
+  if(ly){const L=ssLineAt(d,t),txt=L?L.w.join(' '):'';if(ly.textContent!==txt)ly.textContent=txt}
   if(n>=0){nx.textContent=B[n].n;const beats=Math.max(0,Math.ceil((B[n].t0-t)/M.bp-.05));nxIn.textContent=beats<=8?`in ${beats}`:''}else{nx.textContent='–';nxIn.textContent=''}
   KA.raf=requestAnimationFrame(tick)};
  KA.raf=requestAnimationFrame(tick)}

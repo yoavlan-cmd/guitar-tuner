@@ -171,7 +171,7 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;background:var(--surface);border:1px solid var(--sharp);border-radius:10px;padding:10px}
 .tip a{color:var(--accent);font-weight:600}
 .paperwrap{overflow-x:auto;border-radius:6px;box-shadow:0 1px 0 var(--line),0 6px 24px rgba(0,0,0,.12)}
-.paper{background:var(--paper);color:var(--paper-ink);padding:22px 20px 26px;font-family:var(--body);font-size:13.5px;line-height:1.45;min-width:0}
+.paper{--ink:var(--paper-ink);background:var(--paper);color:var(--paper-ink);padding:22px 20px 26px;font-family:var(--body);font-size:13.5px;line-height:1.45;min-width:0}
 .paper.print{width:760px;padding:34px 36px 40px}
 .paper h1{font:800 34px/1 var(--display);text-transform:uppercase;letter-spacing:.01em;margin:0 0 6px;text-wrap:balance}
 .paper .meta{display:flex;flex-wrap:wrap;gap:4px 16px;font:500 12.5px var(--mono);color:var(--paper-mute)}
@@ -179,6 +179,14 @@ select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border
 .paper h3{font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--paper-mute);margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--paper-line)}
 .paper .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px 10px}
 .paper.print .pgrid{grid-template-columns:repeat(6,1fr)}
+/* lyrics with the recording's chords over the words (88-session-sheets): in the session and on Guitaring's printed sheet */
+.sslyr{display:flex;flex-direction:column;gap:2px;margin:6px 0}
+.ssll{display:flex;flex-wrap:wrap;gap:0 6px;align-items:flex-end;line-height:1.25}
+.ssll time{font:500 11px var(--mono);color:var(--muted);align-self:flex-end;margin-inline-end:4px;direction:ltr}
+.ssw{display:inline-flex;flex-direction:column}.ssw b{font:700 13px var(--mono);color:var(--accent);direction:ltr;text-align:start;min-height:1em}
+.ssll.miss{opacity:.45;font-style:italic}.sslsec{font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.paper .ssmap .ch{color:var(--paper-ink)}.paper .ssmap .ch b{margin-inline-end:6px}.paper .ssll time{color:var(--paper-mute)}.paper .ssw b{color:var(--paper-ink)}.paper .sslsec{color:var(--paper-mute)}
+.gdkara .klyr{margin:0 0 8px;min-height:1.4em;text-align:center;font:600 17px/1.35 var(--body)}
 .paper .pgrid svg{width:100%;height:auto;display:block}
 .paper .prog{display:flex;flex-direction:column;gap:3px}
 .paper .pl{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:baseline;padding:3px 0;border-bottom:1px dotted var(--paper-line)}

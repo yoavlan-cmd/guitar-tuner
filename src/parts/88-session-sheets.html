@@ -1,0 +1,190 @@
+/* ===== The song's chord sheets in its Drive folder (V2, Nov 2026): lyrics from your sheet, Guitaring's own sheet saved there ===== */
+// The user (Nov 2026): "when I want to learn a session, I will share the Google drive. If it contains only generic chords sheet, use it
+// to pull the lyrics and add them to the session. Don't use them to detect the chords in any way. If the folder contains already a
+// chord sheet you created previously - use it and don't create a new one. If there is no chord sheet - create it, and add it to the
+// drive". And for a sheet Guitaring made before: the session takes it as it is (chords, capo, tuning, lyrics), and when the new build
+// hears the song quite differently it says so plainly, "so the user will be aware of it and won't be confused".
+// So, when a session is built from a Drive folder (part 67, after the chords are found):
+//  1. Guitaring's own sheet in the folder (saved with appProperties guitaring=sheet, named "… (Guitaring chords).pdf", its data inside
+//     the PDF): the session follows it as it is; a big difference from the new build is shown in the session. Nothing new is made.
+//  2. Otherwise, another chord sheet in the folder (a PDF, a photo, a Google Doc, a text file): read on the phone (PDF text, OCR; no
+//     Claude, lyrics are never sent to Claude). Only its lyrics are used: each line is placed in time by matching the order of its chords
+//     with the chords the recording plays. The sheet's chords never become the session's chords.
+//  3. Then Guitaring's own sheet is made from the session (the recording's chords, tuning, capo, strumming, the lyrics when there are
+//     some) and saved to the folder, so the next build finds it (1).
+// Needs the Drive sign-in of the "Create a song session" tap (Google's sign-in lasts an hour); when it ran out, the session page offers
+// a button that signs in again and does it. The lyrics stay on the phone: the session copies sent to GitHub leave them out (ssStrip).
+const SS_TAG='guitaring-sheet:',SS_V=1;
+const ssName=t=>`${String(t||'Song').replace(/[\\/:*?"<>|]+/g,' ').trim()||'Song'} (Guitaring chords).pdf`;
+const ssOurs=f=>!!f&&((f.appProperties&&f.appProperties.guitaring==='sheet')||/\(Guitaring chords\)\.pdf$/i.test(f.name||''));
+// a chord sheet someone else made: a PDF, a photo, a Google Doc or a text file (the song's own audio and video are left out)
+const ssKind=f=>{const mt=f.mimeType||'',n=f.name||'';if(dsKind(f)||ssOurs(f))return '';
+ if(mt==='application/pdf'||/\.pdf$/i.test(n))return 'pdf';if(/^image\/(png|jpe?g|webp)/.test(mt)||/\.(png|jpe?g|webp)$/i.test(n))return 'img';
+ if(mt==='application/vnd.google-apps.document')return 'gdoc';if(/^text\//.test(mt)||/\.(txt|cho|chopro|chordpro|pro)$/i.test(n))return 'txt';return ''};
+async function ssGd(url,opt={}){const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+gdFullTok}});
+ if(!r.ok)throw {code:'gd_http',status:r.status,message:'Google Drive said HTTP '+r.status};return r}
+async function ssFolder(fid){const q=encodeURIComponent(`'${fid}' in parents and trashed=false`);
+ return ((await (await ssGd(`${GD_API}?q=${q}&fields=files(id,name,mimeType,modifiedTime,appProperties,webViewLink)&orderBy=modifiedTime desc&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true`)).json()).files||[])}
+const ssBlob=async f=>(await ssGd(f.mimeType==='application/vnd.google-apps.document'?`${GD_API}/${f.id}/export?mimeType=text/plain`:`${GD_API}/${f.id}?alt=media&supportsAllDrives=true`)).blob();
+
+/* ---- reading someone else's sheet (on the phone) ---- */
+// plain text (a Google Doc, a .txt): chord rows over lyric rows, [C]inline chords, section names
+function ssTextLines(text){const out=[],L=String(text||'').replace(/\r/g,'').replace(/[‎‏‪-‮﻿]/g,'').split('\n');
+ const isCh=t=>{const w=t.trim().split(/\s+/).filter(x=>x&&x!=='|'&&!/^[x×]\d+$/i.test(x));return w.length>0&&w.every(x=>chordTok(x.replace(/[|()]/g,'')))};
+ for(let i=0;i<L.length;i++){const raw=L[i].replace(/\t/g,'    '),t=raw.trim();
+  if(!t){out.push({type:'blank'});continue}
+  if(SEC_RE.test(t.replace(/[:：\[\](){}]/g,'').trim())||/^\{(?:c|comment|section)?:?/i.test(t)){out.push({type:'section',text:t.replace(/^\{(?:c|comment|section)?:?\s*/i,'').replace(/[:：\[\]{}]/g,'').trim()});continue}
+  if(/^\{[^}]*\}$/.test(t))continue;
+  if(isCh(t)){const nx=L[i+1]!=null?L[i+1].replace(/\t/g,'    '):'';
+   if(nx.trim()&&!isCh(nx)&&!/\[[^\]]+\]/.test(nx)){
+    // each chord over the word under its column (a Hebrew line is read from the right)
+    const ws=[];nx.replace(/\S+/g,(w,k)=>{ws.push({w,s:k,e:k+w.length});return w});const heb=hasHeb(nx),W=Math.max(nx.length,raw.length),marks=ws.map(()=>[]),tail=[];
+    raw.replace(/\S+/g,(c,k)=>{const ch=chordTok(c.replace(/[|()]/g,''));if(!ch)return c;const col=heb?Math.max(0,nx.length-1-(k*nx.length/W)):k;
+     let j=ws.findIndex(x=>col<x.e);if(j<0)tail.push(ch);else marks[j].push(ch);return c});
+    out.push({type:'lyrics',text:ws.map((x,k)=>marks[k].map(c=>`[${c}]`).join('')+x.w).join(' ')+(tail.length?' '+tail.map(c=>`[${c}]`).join(' '):'')});i++;continue}
+   out.push({type:'chords',chords:t.split(/\s+/).map(x=>chordTok(x.replace(/[|()]/g,''))).filter(Boolean)});continue}
+  out.push({type:'lyrics',text:t})}
+ return out}
+// a sheet file -> {lc:[{t, ch:{word: chord}}], play:{tun, capo}} like a sheet read in the writer
+async function ssReadOther(f,blob){const k=ssKind(f),b=blob||await ssBlob(f),r={title:'',artist:'',capo:0,tuning:'Standard',note:'',lines:[]};
+ if(k==='pdf'){const pages=await pdfWords(b);pages.forEach((w,i)=>r.lines.push(...wordsToLines(w,i+1)))}
+ else if(k==='img'){await ocrSheetReady();const u=URL.createObjectURL(b);try{r.lines.push(...wordsToLines(await ocrImageWords(u),1))}finally{URL.revokeObjectURL(u)}}
+ else r.lines.push(...ssTextLines(await b.text()));
+ try{metaFromLines(r)}catch(e){}r.lines=dropOverlaps(r.lines.filter(Boolean));
+ // the lines above the first chord are the heading (song name, artist, credits, the site), not lyrics
+ {const first=r.lines.findIndex(L=>L.type==='chords'||/\[[^\]]+\]/.test(String(L.text||''))||(L.chords&&L.chords.length));if(first>0)r.lines=r.lines.slice(0,first).filter(L=>L.type==='section').concat(r.lines.slice(first))}const a=sheetFromShot(r);a.src={id:f.id,name:f.name};return a}
+
+/* ---- placing the lyrics in time (the chords only say where; they never change the session's chords) ---- */
+// the sheet's chords in order, each with its line and word; the recording's chord changes with their times (sounding pitch)
+function ssSheetToks(s){const T=[];(s.lc||[]).forEach((L,i)=>Object.keys(L.ch||{}).map(Number).sort((x,y)=>x-y).forEach(j=>{const p=parseChord(L.ch[j]);
+ if(p)T.push({i,j,r:p.root,m:p.iv.includes(3)?'m':p.iv.includes(4)?'M':''})}));return T}
+function ssHeardToks(segs){const E=[];for(const g of segs){if(g.c>=NS||g.t1-g.t0<.35)continue;const r=Math.floor(g.c/NT),m=gd3(g.c%NT),l=E[E.length-1];
+ if(l&&l.r===r&&l.m===m&&g.t0-l.t1<.6){l.t1=g.t1;continue}E.push({r,m,t0:g.t0,t1:g.t1})}return E}
+// global order match (the sheet may start later and end sooner than the recording); every key is tried, the sheet's own first
+function ssMatch(S,E,k){const n=S.length,m=E.length,GS=-1,GE=-.25,sc=(s,e)=>(s.r+k)%12===e.r?(!s.m||!e.m||s.m===e.m?2:1.2):-1.5;
+ const D=[],B=[];for(let i=0;i<=n;i++){D.push(new Float64Array(m+1));B.push(new Uint8Array(m+1))}
+ for(let i=1;i<=n;i++){D[i][0]=D[i-1][0]+GS;B[i][0]=1}// the recording before the sheet's first chord costs nothing
+ for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){const a=D[i-1][j-1]+sc(S[i-1],E[j-1]),b=D[i-1][j]+GS,c=D[i][j-1]+GE;
+  if(a>=b&&a>=c){D[i][j]=a;B[i][j]=0}else if(b>=c){D[i][j]=b;B[i][j]=1}else{D[i][j]=c;B[i][j]=2}}
+ let j=0,best=-1e9;for(let x=0;x<=m;x++)if(D[n][x]>best){best=D[n][x];j=x}// …and after its last one too
+ const at=new Array(n).fill(null);let i=n;while(i>0&&j>0){const t=B[i][j];if(t===0){if((S[i-1].r+k)%12===E[j-1].r)at[i-1]=j-1;i--;j--}else if(t===1)i--;else j--}
+ return {score:best,at,hit:at.filter(x=>x!=null).length/Math.max(1,n)}}
+function ssAlign(segs,s){const S=ssSheetToks(s),E=ssHeardToks(segs);if(S.length<3||E.length<3)return null;
+ const k0=(tshift(s.play&&s.play.tun||'std',s.play&&s.play.capo||0)+120)%12;let M=null,K=k0;
+ for(let d=0;d<12;d++){const k=(k0+d)%12,x=ssMatch(S,E,k);if(!M||x.score>M.score+(k===k0?-.01:.01)){M=x;K=k}}
+ // each line in time: its chords' times; words between two chords share the time between them; a line with no matched chord sits
+ // between its neighbours
+ const lc=s.lc||[],lines=lc.map((L,i)=>({i,t:null,w:wordsOf(L.t||'').every(x=>x==='♪')?[]:wordsOf(L.t||''),wt:[],sec:/^\[[^\]]+\]$/.test((L.t||'').trim())?L.t.trim().slice(1,-1):''}));
+ S.forEach((x,q)=>{const e=M.at[q];if(e==null)return;const L=lines[x.i];(L.c=L.c||[]).push({j:x.j,t:E[e].t0})});
+ lines.forEach(L=>{if(!L.c||!L.c.length)return;L.c.sort((a,b)=>a.j-b.j);// times must go forward within a line
+  for(let q=1;q<L.c.length;q++)if(L.c[q].t<L.c[q-1].t)L.c[q].t=L.c[q-1].t;L.t=Math.max(0,L.c[0].t-.35*L.c[0].j)});
+ // going forward from line to line; one that would go back in time is left unplaced
+ let last=-1;lines.forEach(L=>{if(L.t==null)return;if(L.t<last-.5){L.t=null;delete L.c;return}last=L.t});
+ const placed=lines.filter(L=>L.t!=null);
+ lines.forEach((L,q)=>{if(L.t!=null||!L.w.length||L.sec)return;const p=lines.slice(0,q).reverse().find(x=>x.t!=null),nx=lines.slice(q+1).find(x=>x.t!=null);
+  if(p&&nx)L.t=p.t+(nx.t-p.t)*.5,L.guess=1});
+ const ord=lines.filter(L=>L.t!=null).sort((a,b)=>a.t-b.t);ord.forEach((L,q)=>{L.t1=q+1<ord.length?ord[q+1].t:L.t+6});
+ lines.forEach(L=>{if(L.t==null||!L.w.length)return;const n=L.w.length,C=(L.c||[]).slice(),end=Math.max(L.t+.5,Math.min(L.t1,L.t+n*.7));
+  for(let w=0;w<n;w++){const a=C.filter(c=>c.j<=w).pop(),b=C.find(c=>c.j>w);
+   const t0=a?a.t:L.t,j0=a?a.j:0,t1=b?b.t:end,j1=b?b.j:n;L.wt[w]=+(t0+(t1-t0)*(w-j0)/Math.max(1,j1-j0)).toFixed(2)}});
+ return {v:SS_V,src:s.src||null,q:+M.hit.toFixed(2),key:(K-k0+12)%12,
+  lines:lines.filter(L=>L.w.length||L.sec).map(L=>L.sec?{sec:L.sec,t:L.t!=null?+L.t.toFixed(2):null}:{t:L.t!=null?+L.t.toFixed(2):null,w:L.w,wt:L.wt,...(L.guess?{guess:1}:{})}),
+  placed:placed.length,of:lines.filter(L=>L.w.length&&!L.sec).length}}
+
+/* ---- Guitaring's own sheet: the session as a printable sheet, its data inside the PDF so it can be read back ---- */
+const ssB64=s=>btoa(unescape(encodeURIComponent(s))),ssUnB64=s=>decodeURIComponent(escape(atob(s)));
+function ssData(d,G){return {v:SS_V,made:Date.now(),eng:d.eng||'',title:(d.song&&d.song.t)||d.title||'',artist:(d.song&&d.song.a)||d.artist||'',tun:G.tun,capo:G.capo,bpm:G.bpm,
+ segs:d.segs.map(g=>[+g.t0.toFixed(2),+g.t1.toFixed(2),g.c]),lyr:d.lyr&&d.lyr.lines?d.lyr:null}}
+// the chord of each word: the session's chord at that word's time, written where it changes
+function ssLyricChords(d,lyr){const keep=A;A=d;try{let prev='';return (lyr&&lyr.lines||[]).map(L=>{if(L.sec||L.t==null)return {...L,ch:{}};const ch={};
+  L.w.forEach((w,k)=>{const t=L.wt[k]!=null?L.wt[k]:L.t,g=d.segs.find(s=>t>=s.t0-.05&&t<s.t1);const n=g&&g.c<NS?nameOf(g):'';if(n&&n!==prev){ch[k]=n;prev=n}});return {...L,ch}})}finally{A=keep}}
+function ssLyricsHTML(d,lyr,print){return ssLyricChords(d,lyr).map(L=>L.sec?`<div class="sslsec">${esc(L.sec)}</div>`:L.t==null?`<div class="ssll miss" dir="auto">${esc(L.w.join(' '))}</div>`:
+ `<div class="ssll" dir="auto">${print?'':`<time>${mmss(L.t)}</time>`}${L.w.map((w,k)=>`<span class="ssw">${L.ch[k]?`<b dir="ltr">${esc(L.ch[k])}</b>`:'<b>&nbsp;</b>'}${esc(w)}</span>`).join(' ')}</div>`).join('')}
+function ssSheetHTML(d,G){const t=TUNINGS.find(x=>x.id===G.tun)||TUNINGS[0],title=(d.song&&d.song.t)||d.title||'Song',artist=(d.song&&d.song.a)||d.artist||'',lyr=d.lyr&&d.lyr.lines?d.lyr:null;
+ const dg=n=>printify(sesDiagram(n).replace(/^<div[^>]*>|<\/div>$/g,''));
+ let h=`<h1 dir="auto">${esc(title)}</h1><div class="meta">${artist?`<span>Artist <b dir="auto">${esc(artist)}</b></span>`:''}<span>Tuning <b>${esc(t.name)}</b> (${t.n.map(m=>nm(m).replace('♭','b').replace('♯','#')).join(' ')})</span><span>Capo <b>${G.capo?'fret '+G.capo:'none'}</b></span>${G.bpm?`<span>Tempo <b>≈${G.bpm} BPM</b></span>`:''}</div>`;
+ h+=`<h3>Chords</h3><div class="pgrid">${G.full.slice(0,12).map(dg).join('')}</div>`;
+ h+=`<h3>Song map</h3><div class="prog ssmap">${G.secs.map(s=>`<div class="pl"><time>${mmss(s.t)}</time><span class="ch"><b>${esc(s.name)}</b> ${s.chords.map(esc).join(' ')}${s.times>1?' ×'+s.times:''}</span>${s.pat&&/[DU]/.test(s.pat)?`<span class="x">${esc(s.pat)}</span>`:''}</div>`).join('')}</div>`;
+ if(lyr)h+=`<h3>Lyrics and chords</h3><div class="sslyr">${ssLyricsHTML(d,lyr,true)}</div>`;
+ h+=`<h3>How sure</h3><ul>${G.sure.map(x=>`<li><b>${esc(x.k)}</b> (${esc(GD_LV[x.lv]||x.lv)}): ${esc(x.why)}</li>`).join('')}</ul>`;
+ h+=`<div class="foot">Made by Guitaring from the recording itself: the chords, tuning, capo and strumming are what it plays${lyr&&lyr.src?`; the lyrics are from “${esc(lyr.src.name)}”, placed in time by the recording’s chords`:''}. ${fmtDate(Date.now())}</div>`;return h}
+async function ssPdf(d,G){await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+ const host=document.createElement('div');host.className='paper print';host.style.cssText='position:absolute;left:-12000px;top:0;width:760px';host.innerHTML=ssSheetHTML(d,G);document.body.appendChild(host);
+ try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+ const blocks=[...host.querySelectorAll('h1,.meta,h3,.pgrid svg,.pl,.ssll,.sslsec,li,.foot')].map(el=>{const r=el.getBoundingClientRect(),o=host.getBoundingClientRect();return [r.top-o.top,r.bottom-o.top]});
+ const S=2,canvas=await window.html2canvas(host,{scale:S,backgroundColor:'#ffffff',logging:false});host.remove();
+ const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'pt',format:'a4'}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=24;
+ const k=(pw-2*m)/(canvas.width/S),pageCss=(ph-2*m)/k,total=canvas.height/S;let y=0,first=true;
+ while(y<total-1){let end=Math.min(total,y+pageCss);if(end<total){const cut=blocks.filter(([a,b])=>a<end&&b>end).map(([a])=>a);let brk=cut.length?Math.min(...cut):end;if(brk<=y+40)brk=end;end=brk}
+  const hpx=Math.ceil((end-y)*S),c=document.createElement('canvas');c.width=canvas.width;c.height=hpx;const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.drawImage(canvas,0,Math.floor(y*S),canvas.width,hpx,0,0,canvas.width,hpx);
+  if(!first)pdf.addPage();first=false;pdf.addImage(c.toDataURL('image/jpeg',.86),'JPEG',m,m,pw-2*m,(end-y)*k);y=end}
+ // the session inside the PDF, so the next build reads it back (and the PDF still opens anywhere)
+ pdf.setProperties({title:ssName((d.song&&d.song.t)||d.title).replace(/\.pdf$/,''),subject:'Guitaring chord sheet',creator:'Guitaring',keywords:SS_TAG+ssB64(JSON.stringify(ssData(d,G)))});
+ return pdf.output('blob')}
+// read Guitaring's own sheet back: its data from the PDF's keywords
+async function ssReadOurs(f,blob){const b=blob||await ssBlob(f);let s='';
+ try{await loadScript(PDF_JS);const lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc=PDF_WORKER;const doc=await lib.getDocument({data:await b.arrayBuffer()}).promise;
+  const md=await doc.getMetadata();s=String(md&&md.info&&md.info.Keywords||'')}catch(e){}
+ if(!s){// no PDF reader: the keywords are plain text in the file
+  const t=await b.text(),m=t.match(/guitaring-sheet:([A-Za-z0-9+\/=]+)/);s=m?SS_TAG+m[1]:''}
+ if(!s.startsWith(SS_TAG))return null;try{const x=JSON.parse(ssUnB64(s.slice(SS_TAG.length)));return x&&x.segs?x:null}catch(e){return null}}
+async function ssUpload(blob,name,folder,mix){const meta={name,parents:[folder],mimeType:'application/pdf',appProperties:{guitaring:'sheet',v:String(SS_V),...(mix?{mix}:{})}},fd=new FormData();
+ fd.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));fd.append('file',blob);
+ const f=await (await ssGd('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink',{method:'POST',body:fd})).json();
+ return {id:f.id,name:f.name,url:f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`}}
+
+/* ---- the session takes Guitaring's sheet as it is, and says when the new build hears it differently ---- */
+function ssDiff(fresh,s){// the share of the song where the sheet's chord has another root than the new build's
+ const at=(segs,t)=>{const g=segs.find(x=>t>=x[0]&&t<x[1]);return g&&g[2]<NS?Math.floor(g[2]/NT):-1};const F=fresh.segs.map(g=>[g.t0,g.t1,g.c]);let n=0,d=0;
+ const end=Math.min(F.length?F[F.length-1][1]:0,s.segs.length?s.segs[s.segs.length-1][1]:0);for(let t=.25;t<end;t+=.5){const a=at(F,t),b=at(s.segs,t);if(a<0&&b<0)continue;n++;if(a!==b)d++}
+ return n?d/n:0}
+function ssApplyOurs(a,s,f){let fresh=null;try{fresh=gdFit(a,null)}catch(e){}const fc=fresh?fresh.play:a.play,frac=fresh?ssDiff(fresh,s):0;
+ const diff={capo:[s.capo,+fc.capo||0],tun:[s.tun,fc.tun],chords:+frac.toFixed(2)},big=diff.capo[0]!==diff.capo[1]||diff.tun[0]!==diff.tun[1]||frac>=.2;
+ a.heard={capo:diff.capo[1],tun:diff.tun[1],eng:a.eng||''};a.segs=s.segs.map(([t0,t1,c])=>({t0,t1,c}));delete a.conf;
+ a.play={...a.play,tun:s.tun,capo:s.capo};a.lyr=s.lyr||null;a.sheet={src:'ours',capo:s.capo,tun:s.tun,id:f.id,name:f.name,url:f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`,made:s.made||0,diff,big}}
+
+/* ---- the whole step, for a session built from a Drive folder ---- */
+async function ssBuild(it,a){const folder=it&&it.drive&&it.drive.folder;if(!folder)return;
+ if(!gdFullTok||Date.now()>gdFullExp-60000){a.sheets={todo:1};return}
+ const files=await ssFolder(folder);
+ // 1. Guitaring's own sheet: taken as it is
+ for(const f of files.filter(ssOurs)){let s=null;try{s=await ssReadOurs(f)}catch(e){}if(s){ssApplyOurs(a,s,f);a.sheets={at:Date.now()};return}}
+ // …one that can't be read back (edited and saved again elsewhere) is still Guitaring's: no second one is made
+ {const f=files.find(ssOurs);if(f){a.sheet={src:'unread',id:f.id,name:f.name,url:f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`};a.sheets={at:Date.now()};return}}
+ // 2. lyrics from another chord sheet in the folder (the best placed of up to 3)
+ const others=files.filter(f=>ssKind(f)).slice(0,3);let best=null,tried=[];
+ for(const f of others){try{const s=await ssReadOther(f),L=ssAlign(a.segs,s);tried.push(f.name);if(L&&(!best||L.q>best.q))best=L}catch(e){tried.push(f.name)}}
+ if(best&&best.q>=.5&&best.placed>=2)a.lyr=best;else if(tried.length)a.lyr={v:SS_V,fail:1,src:best&&best.src||{name:tried[0]},q:best?best.q:0};
+ // 3. Guitaring's own sheet from the session, saved to the folder
+ const d=gdFit(a,null),G=gdBuild(d),blob=await ssPdf({...d,lyr:a.lyr&&a.lyr.lines?a.lyr:null},G),up=await ssUpload(blob,ssName((it.song&&it.song.t)||a.title),folder,it.id);
+ a.sheet={src:'made',...up,made:Date.now()};a.sheets={at:Date.now()}}
+// again from the session page (Google's sign-in had run out during the build): signs in, does it, saves the session
+async function ssRunNow(key,it){await gdTokenFull();const a=loadSong(key);if(!a)throw {code:'none'};delete a.sheets;await ssBuild(it,a);localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));return a}
+// the session copy sent to GitHub (69-learn-log): without the lyrics
+const ssStrip=a=>a&&a.lyr&&a.lyr.lines?{...a,lyr:{v:a.lyr.v,q:a.lyr.q,src:a.lyr.src,placed:a.lyr.placed,of:a.lyr.of}}:a;
+
+/* ---- in the session ---- */
+// the guide's capo step (gdFit) takes the capo from the video or the sound; a session that follows Guitaring's sheet keeps the sheet's
+function ssFit(v){if(v&&v.sheet&&v.sheet.src==='ours'&&v.sheet.capo!=null){v.play={...v.play,tun:v.sheet.tun||v.play.tun,capo:+v.sheet.capo||0,capoBy:'sheet'};delete v.play.capoSnd}return v}
+// How sure: a session that follows Guitaring's sheet says so
+function ssPatch(G,d){if(!G||!d)return G;G.lyr=!!(d.lyr&&d.lyr.lines);if(!d.sheet||d.sheet.src!=='ours')return G;const s=d.sheet,on=s.made?` (made ${fmtDate(s.made)})`:'';
+ G.sure=G.sure.map(x=>x.k==='Capo and shapes'?{...x,lv:'solid',why:`From your chord sheet “${s.name}” in the song’s Drive folder${on}: ${G.capo?'capo '+G.capo:'no capo'}, ${tName(G.tun)} tuning.`}:
+  x.k==='Chords and order'?{...x,why:`As on your chord sheet “${s.name}”${on}. `+x.why}:x);return G}
+function ssHTML(d,key,it){if(!d||!it||!it.drive||!it.drive.folder)return '';const s=d.sheet,L=d.lyr,parts=[];
+ if(s&&s.src==='ours'){const df=s.diff||{},w=[];if(df.capo&&df.capo[0]!==df.capo[1])w.push(`${df.capo[1]?'capo '+df.capo[1]:'no capo'} instead of ${df.capo[0]?'capo '+df.capo[0]:'no capo'}`);
+  if(df.tun&&df.tun[0]!==df.tun[1])w.push(`${tName(df.tun[1])} tuning instead of ${tName(df.tun[0])}`);if(df.chords>=.2)w.push(`other chords in ${Math.round(df.chords*100)}% of the song`);
+  parts.push(s.big?`<p class="dswarn sswarn">This session follows your chord sheet <a href="${esc(s.url)}" target="_blank" rel="noopener">“${esc(s.name)}”</a>${s.made?`, made ${fmtDate(s.made)},`:''} as it is. The new build of the recording hears it differently: ${w.map(esc).join('; ')}. The sheet wasn’t changed. If the new build sounds right to you, delete that sheet from the folder and rebuild: Guitaring makes a new one.</p>`
+   :`<p class="tip">This session follows your chord sheet <a href="${esc(s.url)}" target="_blank" rel="noopener">“${esc(s.name)}”</a>${s.made?` (made ${fmtDate(s.made)})`:''} in the song’s Drive folder.</p>`)}
+ else if(s&&s.src==='unread')parts.push(`<p class="dswarn sswarn">The song’s folder has Guitaring’s chord sheet <a href="${esc(s.url)}" target="_blank" rel="noopener">“${esc(s.name)}”</a>, but it can’t be read back (it may have been changed and saved again), so this session shows the recording’s chords and no new sheet was made. To get a new one, delete that sheet from the folder and rebuild.</p>`);
+ else if(s&&s.src==='made')parts.push(`<p class="tip">Saved <a href="${esc(s.url)}" target="_blank" rel="noopener">“${esc(s.name)}”</a> to the song’s Drive folder: the recording’s chords${L&&L.lines?' with the lyrics':''}. Next time this session uses it as it is.</p>`);
+ if(L&&L.lines){parts.push(`<div class="sslyr">${ssLyricsHTML(d,L,false)}</div>`);
+  if(L.src&&s&&s.src!=='ours')parts.push(`<p class="tip">Lyrics from “${esc(L.src.name)}” in the song’s folder, placed in time by matching its chords with the recording’s. The chords above them are the recording’s, not the sheet’s.${L.of>L.placed?` ${L.of-L.placed} line${L.of-L.placed>1?'s':''} couldn’t be placed (greyed).`:''}</p>`)}
+ else if(L&&L.fail)parts.push(`<p class="tip">The lyrics of “${esc(L.src&&L.src.name||'your sheet')}” didn’t line up with this recording (it may be another version), so they aren’t shown.</p>`);
+ if(d.sheets&&d.sheets.todo)parts.push(`<p class="tip">Google’s sign-in ran out before Guitaring could look for a chord sheet in the song’s folder.</p><button type="button" class="btn wide" id="ssRun" data-k="${esc(key)}" data-mix="${esc(it.id)}">Get the lyrics and save the chord sheet</button><p class="tip" id="ssMsg" role="status"></p>`);
+ return parts.length?`<section class="card sessec" id="sesSheets"><h3>${L&&L.lines?'Lyrics and chords':'Chord sheet'}</h3>${parts.join('')}</section>`:''}
+function ssWire(){const b=$('ssRun');if(!b)return;b.onclick=async()=>{const m=$('ssMsg'),it=mxIdx.find(x=>x.id===b.dataset.mix);b.disabled=true;m.textContent='Opening Google…';
+ try{const p=ssRunNow(b.dataset.k,it);m.textContent='Reading the song’s folder…';await p;renderSession()}catch(e){b.disabled=false;m.textContent=e&&e.code==='gd_http'?esc(e.message):'Couldn’t do it this time. Try again.'}}}
+// the play-along: the lyric line being sung
+function ssLineAt(d,t){const L=d&&d.lyr&&d.lyr.lines;if(!L)return null;let cur=null;for(const x of L){if(x.sec||x.t==null)continue;if(x.t<=t+.1)cur=x;else break}return cur&&t<(cur.t+30)?cur:null}
+window.__ss={textLines:ssTextLines,read:(f,blob)=>ssReadOther(f,blob),align:(k,s)=>{const d=loadSong(k);return ssAlign(d.segs,s)},build:async(id,k)=>{const it=mxIdx.find(x=>x.id===id),a=loadSong(k);await ssBuild(it,a);localStorage.setItem(KP+'song.'+k,JSON.stringify(compact(a)));return a},
+ setTok:t=>{gdFullTok=t;gdFullExp=Date.now()+3600e3},strip:ssStrip,html:(k,id)=>ssHTML(ssFit(gdFit(loadSong(k),null)),k,mxIdx.find(x=>x.id===id)),lineAt:(k,t)=>ssLineAt(loadSong(k),t),readOurs:(f,blob)=>ssReadOurs(f,blob)};// test hooks

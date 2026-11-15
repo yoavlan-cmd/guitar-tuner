@@ -35,7 +35,7 @@ function learnEdit(key,g,before){try{if(!key||!g)return;const after=g.c<NS?nameO
 const LS_BR='learn';let lsT=0,lsBusy=null;
 function lsSessions(){const out={};(typeof mxIdx!=='undefined'?mxIdx:[]).forEach(it=>{if(!it||it.state!=='ready'||!it.anaKey)return;const raw=localStorage.getItem(KP+'song.'+it.anaKey);if(!raw)return;
   let a;try{a=JSON.parse(raw)}catch(e){return}
-  out['sessions/'+it.anaKey+'.json']=JSON.stringify({v:1,key:it.anaKey,id:it.id,name:it.name,song:it.song||null,keep:!!it.keep,drive:it.drive?{file:it.drive.file||'',video:it.drive.video||'',folder:it.drive.folder||''}:null,eng:a.eng||0,built:a.at||0,session:a})});return out}
+  out['sessions/'+it.anaKey+'.json']=JSON.stringify({v:1,key:it.anaKey,id:it.id,name:it.name,song:it.song||null,keep:!!it.keep,drive:it.drive?{file:it.drive.file||'',video:it.drive.video||'',folder:it.drive.folder||''}:null,eng:a.eng||0,built:a.at||0,session:ssStrip(a)})});return out}
 async function lsBranch(cfg){try{return await gh('/git/refs/heads/'+LS_BR,{},cfg)}catch(e){if(e.status!==404)throw e}
  const repo=await gh('',{},cfg),head=await gh('/git/refs/heads/'+(repo.default_branch||'main'),{},cfg);
  return await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/'+LS_BR,sha:head.object.sha})},cfg)}
