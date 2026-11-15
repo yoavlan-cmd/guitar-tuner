@@ -26,7 +26,8 @@ const SHAPE={'C#m':'Am',A:'F',E:'C','F#':'Dm'};// what the stand-in Claude "sees
  const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await ctx.route(/ideas\.json/,r=>r.abort());
  const calls={list:0,media:0,claude:0,images:0,prompt:'',find:0,nohand:false};const vbytes=fs.readFileSync(VID);
  await ctx.route(/^https:\/\//,async r=>{const u=r.request().url(),H={'access-control-allow-origin':'*'};
-  if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){calls.list++;return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
+  if(/googleapis\.com\/drive\/v3\/files\?/.test(u)){if(/video/.test(decodeURIComponent(u)))calls.list++;// the video search (the chord-sheet look at the folder, 88-session-sheets, isn't counted)
+  return r.fulfill({contentType:'application/json',headers:H,body:JSON.stringify({files:[{id:'vid1',name:'Test Band - Video Song.webm',webViewLink:'https://drive.google.com/file/d/vid1/view'},{id:'oth',name:'Another song.mp4'}]})})}
   if(/googleapis\.com\/drive\/v3\/files\/vid1\?alt=media/.test(u)){calls.media++;return r.fulfill({contentType:'video/webm',headers:H,body:vbytes})}
   if(/api\.anthropic\.com\/v1\/messages/.test(u)){calls.claude++;const body=JSON.parse(r.request().postData()||'{}'),c=body.messages[0].content,txt=(c.find(x=>x.type==='text')||{}).text||'';calls.images+=c.filter(x=>x.type==='image').length;
    // the capo scan: (1) grids of every still, (2) brightened close-ups of the neck (calls.scanCapo: the capo the video shows)

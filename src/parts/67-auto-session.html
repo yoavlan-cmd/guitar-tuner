@@ -40,6 +40,8 @@ async function asRun(id){const it=mxIdx.find(x=>x.id===id);if(!it||it.state!=='r
   it.sessStep='video';try{dsStatusUI()}catch(e){}try{await vlLook(it,a)}finally{it.sessStep=''}
   // what this build wasn't sure of goes into the learning log (69-learn-log); the session says which engine made it
   a.eng=engineId();try{learnFromBuild(key,a,mo.btc)}catch(e){try{console.error('learning log',e)}catch(_){}}
+  // 4. the chord sheets in the song's Drive folder (88-session-sheets): Guitaring's own sheet as it is, or lyrics from yours and a new one saved
+  it.sessStep='sheets';try{dsStatusUI()}catch(e){}try{await ssBuild(it,a)}catch(e){a.sheets={err:e&&(e.code||e.status)||1};try{console.error('chord sheets',e)}catch(_){}}finally{it.sessStep=''}
   localStorage.setItem(KP+'song.'+key,JSON.stringify(compact(a)));
   const idx=store.get('songs',[]).filter(k=>k!==key);idx.unshift(key);idx.slice(8).forEach(k=>{try{localStorage.removeItem(KP+'song.'+k)}catch(e){}});store.set('songs',idx.slice(0,8));
   it.sess='done';it.anaKey=key;try{lsSoon()}catch(e){}
