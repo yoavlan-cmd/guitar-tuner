@@ -52,7 +52,8 @@ let fail=0;const ok=(c,m)=>{console.log((c?'ok  ':'FAIL')+' '+m);if(!c)fail++};
  await p.uncheck('#prfOn');await p.waitForTimeout(600);
  ok(!files['profile.json']&&log.some(x=>/^DELETE .*profile\.json/.test(x))&&/Off/.test(await p.$eval('#prfSync',e=>e.textContent)),'off: the file is deleted');
  const n=log.length;await p.evaluate(()=>{const P=window.__v2.profGet();P.level='beginner';window.__v2.profSet(P)});await p.waitForTimeout(400);
- ok(log.length===n,'while off, changing an answer writes nothing');
+ // (reads don't count: the app reads its learned engine settings from the repository, 69-learn-log)
+ ok(log.slice(n).every(x=>/^GET /.test(x)),'while off, changing an answer writes nothing');
  await p.screenshot({path:path.join(OUT,'prf.png'),fullPage:true});
  ok(!errs.length,'no page errors '+JSON.stringify(errs));await ctx.close();
  // 2. without GitHub: the switch can't be turned on, and says why
