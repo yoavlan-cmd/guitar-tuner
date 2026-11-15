@@ -372,7 +372,7 @@ function mxSheetUI(){if(mxBusy)return;if(mxCreating&&mxSheetOpen())return mxCrea
 async function mxForget(id,quiet){const it=mxIdx.find(x=>x.id===id);mxIdx=mxIdx.filter(x=>x.id!==id);
  if(mxSong&&mxSong.id===id){mxStopAudio();mxSong=null;mxPos=0}
  try{await mxDel('mixdata:'+id)}catch(e){}try{await mxDel('mixsrc:'+id)}catch(e){}try{await mxDel('mixstills:'+id)}catch(e){}try{await mxDel('mixvideo:'+id)}catch(e){}await mxIdxSave();
- if(it&&it.src==='cloud'&&mxGh()){for(const b of ['j-','r-','keep-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});try{lsForget('mix_'+id)}catch(e){}}
+ if(it&&it.src==='cloud'&&mxGh()){if(it.secret)mxDriveSecretDel(id);for(const b of ['j-','r-','keep-'])gh('/git/refs/heads/'+b+id,{method:'DELETE'}).catch(()=>{});try{lsForget('mix_'+id)}catch(e){}}
  if(!quiet){mxSheetUI();mxBar();renderMixNew()}}
 const mxToI16=au=>{const n=au.length,a=au.getChannelData(0),b=au.numberOfChannels>1?au.getChannelData(1):a,o=new Int16Array(n*2);for(let i=0;i<n;i++){let x=a[i],y=b[i];o[2*i]=(x>1?1:x<-1?-1:x)*32767;o[2*i+1]=(y>1?1:y<-1?-1:y)*32767}return o};
 async function mxOpen(id){
@@ -404,9 +404,31 @@ async function gh(path,opt={},cfg=mxGh()){
  if(!r.ok){let m='';try{m=(await r.json()).message||''}catch(e){}const err=new Error('GitHub '+r.status+(m?': '+m:''));err.status=r.status;err.ghMsg=m;throw err}
  if(opt.raw)return r.blob();if(r.status===204)return {};
  try{return await r.json()}catch(e){return {}}}
+// ---- the Drive key as a GitHub secret (Oct 2026): a split from Drive needs Google's short-lived key on GitHub's computer. It goes as
+// an encrypted Actions secret (DRIVE_<ID>, one per job) instead of inside the job file, so it never sits in the repository; GitHub
+// hides secrets in its logs, and the app deletes the secret when the split comes back or fails. Encrypted the way GitHub asks
+// (libsodium's sealed box: X25519 + XSalsa20-Poly1305 from tweetnacl, the nonce a BLAKE2b hash of the two public keys).
+const NACL_URL='https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl.min.js';
+function blake2b(msg,outLen){const M=0xffffffffffffffffn,rot=(x,n)=>((x>>BigInt(n))|(x<<BigInt(64-n)))&M;
+ const IV=[0x6a09e667f3bcc908n,0xbb67ae8584caa73bn,0x3c6ef372fe94f82bn,0xa54ff53a5f1d36f1n,0x510e527fade682d1n,0x9b05688c2b3e6c1fn,0x1f83d9abfb41bd6bn,0x5be0cd19137e2179n];
+ const S=[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],[14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3],[11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4],[7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8],[9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13],[2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9],[12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11],[13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10],[6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5],[10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0]];
+ const h=IV.slice();h[0]^=0x01010000n^BigInt(outLen);const n=msg.length,blocks=Math.max(1,Math.ceil(n/128));
+ for(let b=0;b<blocks;b++){const last=b===blocks-1,m=[];for(let i=0;i<16;i++){let w=0n;for(let k=7;k>=0;k--){const j=b*128+i*8+k;w=(w<<8n)|BigInt(j<n?msg[j]:0)}m.push(w)}
+  const t=BigInt(last?n:(b+1)*128),v=h.concat(IV);v[12]^=t&M;v[13]^=t>>64n;if(last)v[14]^=M;
+  const G=(a,b2,c,d,x,y)=>{v[a]=(v[a]+v[b2]+x)&M;v[d]=rot(v[d]^v[a],32);v[c]=(v[c]+v[d])&M;v[b2]=rot(v[b2]^v[c],24);v[a]=(v[a]+v[b2]+y)&M;v[d]=rot(v[d]^v[a],16);v[c]=(v[c]+v[d])&M;v[b2]=rot(v[b2]^v[c],63)};
+  for(let r=0;r<12;r++){const s=S[r%10];G(0,4,8,12,m[s[0]],m[s[1]]);G(1,5,9,13,m[s[2]],m[s[3]]);G(2,6,10,14,m[s[4]],m[s[5]]);G(3,7,11,15,m[s[6]],m[s[7]]);G(0,5,10,15,m[s[8]],m[s[9]]);G(1,6,11,12,m[s[10]],m[s[11]]);G(2,7,8,13,m[s[12]],m[s[13]]);G(3,4,9,14,m[s[14]],m[s[15]])}
+  for(let i=0;i<8;i++)h[i]^=v[i]^v[i+8]}
+ const out=new Uint8Array(outLen);for(let i=0;i<outLen;i++)out[i]=Number((h[i>>3]>>BigInt(8*(i&7)))&0xffn);return out}
+async function ghSeal(pkB64,text){await loadScript(NACL_URL);const nacl=window.nacl,pk=Uint8Array.from(atob(pkB64),c=>c.charCodeAt(0)),e=nacl.box.keyPair();
+ const both=new Uint8Array(64);both.set(e.publicKey);both.set(pk,32);const ct=nacl.box(new TextEncoder().encode(text),blake2b(both,24),pk,e.secretKey);
+ const out=new Uint8Array(32+ct.length);out.set(e.publicKey);out.set(ct,32);let s='';out.forEach(b=>s+=String.fromCharCode(b));return btoa(s)}
+const mxSecretName=id=>'DRIVE_'+String(id).toUpperCase().replace(/[^A-Z0-9_]/g,'_');
+async function mxDriveSecret(id,token,cfg=mxGh()){const k=await gh('/actions/secrets/public-key',{},cfg);
+ await gh('/actions/secrets/'+mxSecretName(id),{method:'PUT',body:JSON.stringify({encrypted_value:await ghSeal(k.key,token),key_id:k.key_id})},cfg)}
+function mxDriveSecretDel(id){if(mxGh())gh('/actions/secrets/'+mxSecretName(id),{method:'DELETE'}).catch(()=>{})}
 function mxGhErr(e,what){const s=e&&e.status;
  if(s===401)return 'GitHub didn’t accept the access key. It may have expired: make a new one and paste it under GitHub connection.';
- if(s===403)return what==='wf'?'The access key needs the Workflows permission (Read and write).':'The access key is missing a permission. It needs Contents, Actions and Workflows, each Read and write.';
+ if(s===403)return what==='wf'?'The access key needs the Workflows permission (Read and write).':'The access key is missing a permission. It needs Contents, Actions, Secrets and Workflows, each Read and write.';
  if(s===404)return what==='repo'?'Couldn’t find that repository. Check the name, and that the key was given access to it.':'GitHub couldn’t find the splitter in the repository. Open GitHub connection and tap Connect again.';
  if(s===409)return 'The repository is empty. Tick “Add a README” when creating it, or add any file, then try again.';
  if(s===422&&what==='send')return 'GitHub refused the song file. Try an MP3 or M4A version of it.';
@@ -435,7 +457,7 @@ function mxSetup(){const v=$('mixView'),cfg=mxGh();
  <p class="tip" style="margin:0">A free GitHub computer splits the song, so you can lock the phone. Set it up once:</p>
  <ol class="mxsteps">
   <li><b>Create a private repository.</b> Open <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>, name it <code>guitaring-split</code>, choose <b>Private</b>, tick <b>Add a README file</b>, then <b>Create repository</b>.</li>
-  <li><b>Create an access key.</b> Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">New fine-grained token</a>. Under <b>Repository access</b> choose <b>Only select repositories</b> → <code>guitaring-split</code>. Under <b>Permissions</b> add <b>Contents</b>, <b>Actions</b> and <b>Workflows</b>, each set to <b>Read and write</b>. Pick the longest expiry, tap <b>Generate token</b> and copy it.</li>
+  <li><b>Create an access key.</b> Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">New fine-grained token</a>. Under <b>Repository access</b> choose <b>Only select repositories</b> → <code>guitaring-split</code>. Under <b>Permissions</b> add <b>Contents</b>, <b>Actions</b>, <b>Secrets</b> and <b>Workflows</b>, each set to <b>Read and write</b>. Pick the longest expiry, tap <b>Generate token</b> and copy it.</li>
   <li><b>Paste both here</b> and tap Connect.</li></ol>
  <label class="namefield">Repository <input id="mxRepo" type="text" autocapitalize="off" autocomplete="off" spellcheck="false" value="${esc(cfg?cfg.repo:'yoavlan-cmd/guitaring-split')}"></label>
  <label class="namefield">Access key <input id="mxTok" type="password" autocomplete="off" spellcheck="false" placeholder="${cfg?'Saved · paste a new one to replace it':'github_pat_…'}"></label>
@@ -489,6 +511,9 @@ async function mxUpload(it,file,job){mxBarOff=false;
  try{
   if(file&&file.size>95*1048576)throw {big:true};
   const fresh=await mxEnsureWf(cfg);step='upload';
+  // the Drive key as a secret; a GitHub key without the Secrets permission keeps the old way (in the job file) and says so once
+  if(job&&job.token){try{await mxDriveSecret(id,job.token,cfg);job={...job,token:'',tokenIn:'secret'};it.secret=true}
+   catch(e){if(!store.get('ghSecretTip',false)){store.set('ghSecretTip',true);try{toast('Tip: give your GitHub access key the <b>Secrets</b> permission (Read and write) and Guitaring keeps your Google Drive key out of the repository.','')}catch(_){}}}}
   const b64=job?mxB64(JSON.stringify(job)):await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]||'');fr.onerror=()=>rej(fr.error);fr.readAsDataURL(file)});
   const blob=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:b64,encoding:'base64'})});
   const tree=await gh('/git/trees',{method:'POST',body:JSON.stringify({tree:[{path:job?'drive.json':'song.'+ext,mode:'100644',type:'blob',sha:blob.sha}]})});
@@ -548,10 +573,11 @@ async function mxCollect(it){mxBarOff=false;
    // check (guitaring-split, 5:00) can build the session again with what Guitaring has learned (Oct 2026)
    try{const ref=await gh('/git/refs/heads/r-'+it.id);try{await gh('/git/refs',{method:'POST',body:JSON.stringify({ref:'refs/heads/keep-'+it.id,sha:ref.object.sha})})}
     catch(e){if(e.status!==422)throw e;await gh('/git/refs/heads/keep-'+it.id,{method:'PATCH',body:JSON.stringify({sha:ref.object.sha,force:true})})}it.keep=true}catch(e){}}
-  gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});
+  gh('/git/refs/heads/r-'+it.id,{method:'DELETE'}).catch(()=>{});if(it.secret)mxDriveSecretDel(it.id);
  }catch(e){try{console.error('mixer collect',e&&e.message||e)}catch(_){}it.state='wait'}// try again on the next check
 }
 // test hook (no UI): lets tests/mx_t.js drive the mixer and read the result
+window.__ghSeal={seal:(pk,t)=>ghSeal(pk,t),blake2b:(hex,n)=>Array.from(blake2b(Uint8Array.from((hex.match(/../g)||[]).map(x=>parseInt(x,16))),n)).map(b=>b.toString(16).padStart(2,'0')).join('')};// test hooks
 window.__mxTest={home:()=>{mxView(true);mxHome()},poll:()=>mxPoll(),send:f=>mxCloudSubmit(f),retry:id=>mxRetry(id),idx:()=>mxIdx,song:()=>mxSong,start:f=>mxStart(f),open:id=>mxOpen(id),collect:it=>mxCollect(it),put:(k,v)=>mxPut(k,v),add:it=>{mxIdx.unshift(it)},
  reset(){mxStopAudio();mxSong=null},async rate(){await mxAudio();return mxCtx.sampleRate},render:g=>new Promise((r,j)=>{mxRender(g,'test',r).catch(j)})};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)mxPoll()});
