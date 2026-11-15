@@ -1,13 +1,14 @@
 {
  "v": 1,
- "at": "2026-10-20T02:55:36Z",
- "date": "2026-10-20",
+ "at": "2026-11-15T03:55:59Z",
+ "date": "2026-11-15",
  "index": {
   "artists": [
+   "Amir dadon",
+   "Tracy Chapman",
    "Jonnie Shualy",
    "Hatikva 6",
    "Jimbo J",
-   "Amir dadon",
    "Eviatar Banai",
    "Tuna",
    "Green Day",
@@ -22,38 +23,14 @@
   ],
   "songs": [
    {
-    "a": "Jonnie Shualy",
-    "t": "עכשיו",
+    "a": "Amir dadon",
+    "t": "שברי את הטלויזיה",
     "ch": []
-   },
-   {
-    "a": "Hatikva 6",
-    "t": "לחזור הביתה",
-    "ch": []
-   },
-   {
-    "a": "Jimbo J",
-    "t": "במקום בו אני גר",
-    "ch": [
-     "F#m",
-     "E",
-     "C#m",
-     "A"
-    ]
    },
    {
     "a": "Amir dadon",
     "t": "שאריות של החיים",
-    "ch": [
-     "Db",
-     "Bbm",
-     "Fm",
-     "Fm/Eb",
-     "Db/C",
-     "Gb",
-     "Ebm",
-     "Ab"
-    ]
+    "ch": []
    },
    {
     "a": "Amir dadon",
@@ -64,7 +41,8 @@
      "Abm",
      "Emaj7",
      "F#",
-     "Ebm"
+     "Ebm",
+     "F"
     ]
    },
    {
@@ -75,8 +53,8 @@
      "Ab",
      "Cm",
      "Gm",
-     "Fm7",
-     "Bb4"
+     "Bb4",
+     "Fm7"
     ]
    },
    {
@@ -98,11 +76,46 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "C",
-     "D",
      "Bm",
-     "Dm"
+     "D",
+     "Dm",
+     "C"
     ]
+   },
+   {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You",
+    "ch": []
+   },
+   {
+    "a": "Tracy Chapman",
+    "t": "Baby Can I Hold You (guitars only)",
+    "ch": []
+   },
+   {
+    "a": "Jonnie Shualy",
+    "t": "עכשיו",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (guitars only)",
+    "ch": []
+   },
+   {
+    "a": "Hatikva 6",
+    "t": "לחזור הביתה (full)",
+    "ch": []
+   },
+   {
+    "a": "Jimbo J",
+    "t": "במקום בו אני גר",
+    "ch": []
    },
    {
     "a": "Eviatar Banai",
@@ -137,10 +150,10 @@
      "G#m",
      "A",
      "E",
-     "D",
      "Bm",
      "F#m7",
-     "F#m6"
+     "F#m6",
+     "D"
     ]
    },
    {
@@ -157,8 +170,8 @@
     "ch": [
      "Bbm",
      "Ebm",
-     "B",
-     "Abm"
+     "Abm",
+     "B"
     ]
    },
    {
@@ -167,23 +180,17 @@
     "ch": [
      "Bm",
      "A",
-     "G",
-     "D",
      "F#m",
      "Em",
-     "F#"
+     "F#",
+     "G",
+     "D"
     ]
    },
    {
     "a": "Green Day",
-    "t": "Good Riddance (Time Of Your Life)",
-    "ch": [
-     "G",
-     "Cadd9",
-     "D",
-     "C",
-     "Em"
-    ]
+    "t": "Good Riddance",
+    "ch": []
    },
    {
     "a": "Green Day",
@@ -204,10 +211,10 @@
      "F",
      "F/E",
      "Dm",
-     "C",
      "Bb",
      "Bb/A",
-     "Gm"
+     "Gm",
+     "C"
     ]
    },
    {
@@ -219,10 +226,10 @@
      "F#",
      "Cmaj7",
      "Am7",
-     "E",
      "C",
-     "Am",
+     "E",
      "Dm",
+     "Am",
      "Ebdim",
      "B7"
     ]
@@ -231,12 +238,12 @@
     "a": "Oasis",
     "t": "Wanderwall",
     "ch": [
-     "Em7",
-     "G",
      "Cadd9",
+     "Em7",
+     "E",
+     "G",
      "D4",
-     "G/F#",
-     "E"
+     "G/F#"
     ],
     "capo": 2
    },
@@ -248,11 +255,11 @@
      "Bb",
      "Am",
      "Eb",
+     "F#m",
+     "A",
      "G",
      "C",
-     "F#m",
-     "D",
-     "A"
+     "D"
     ]
    },
    {
@@ -263,17 +270,13 @@
      "Dm7",
      "Dm7/F",
      "G/B",
-     "G",
-     "C",
-     "D",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
-     "Asus2/B",
-     "A/B",
-     "D/F#",
-     "F"
+     "D",
+     "C",
+     "G"
     ],
     "tuning": "Drop D"
    },
@@ -283,14 +286,14 @@
     "ch": [
      "G/B",
      "Am",
-     "F",
-     "C",
      "Dm7",
      "Dm",
      "Eb",
      "Bb",
      "Cm",
-     "Ddim"
+     "Ddim",
+     "F",
+     "C"
     ],
     "capo": 1
    },
@@ -301,748 +304,1188 @@
    }
   ]
  },
- "level": "Confident intermediate: you already handle full barre chords in flat keys, maj7 and slash chords, capo and Drop D.",
+ "level": "You already handle barre chords in flat keys, maj7 and diminished chords, so these mix comfortable songs with a few steps up.",
  "suggestions": [
   {
-   "title": "תתארו לכם",
-   "artist": "שלמה ארצי",
-   "style": "Israeli classic rock",
+   "title": "כל יום כמו נס",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
    "difficulty": 3,
    "chords": [
-    "Gm",
-    "Dm",
-    "Eb",
-    "F4",
     "F",
+    "Dm",
+    "F/E",
+    "C",
     "Bb",
-    "Bb4",
+    "Am",
+    "Gm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Amir Dadon ballad in a friendly key, with a walking bass line through F/E."
+  },
+  {
+   "title": "ויהי אור",
+   "artist": "התקווה 6",
+   "style": "Israeli reggae-pop",
+   "difficulty": 2,
+   "chords": [
+    "F#m",
+    "A",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Uses the flat-key barre chords you already play, with sus4 touches to colour the changes."
+   "why": "Three chords and a big groove: a relaxed song to work on your reggae-style upstrokes."
   },
   {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
-   "chords": [
-    "C",
-    "Gm",
-    "Bb",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Same band as the song you're working on, built on four chords you know well; focus on a tight strum."
-  },
-  {
-   "title": "מה שיהיה יהיה",
-   "artist": "התקווה 6",
-   "style": "Israeli pop-rock",
-   "difficulty": 2,
-   "chords": [
-    "F",
-    "C",
-    "Dm",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy, upbeat one to play and sing straight through, good for clean F and Bb barres."
-  },
-  {
-   "title": "בשבילך",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
+   "title": "זכיתי לאהוב",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
    "difficulty": 4,
    "chords": [
-    "Bm",
-    "Em",
-    "F#",
-    "C#m7b5",
-    "Bm/F#",
-    "Bm/G",
-    "Bm/G#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: a descending bass line under Bm and your first m7b5 chord."
-  },
-  {
-   "title": "אוח",
-   "artist": "טונה",
-   "style": "Israeli hip-hop / groove",
-   "difficulty": 4,
-   "chords": [
-    "B7",
-    "C",
-    "Cmaj7",
-    "F#7",
-    "Bm7",
-    "F#m7",
     "E",
-    "C7",
-    "F#",
-    "Bm",
+    "A",
+    "C#m",
     "B",
-    "C5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Tuna with a jazzier palette: dominant 7 and m7 shapes, plus a groovy right hand."
-  },
-  {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "style": "Israeli classic rock",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "B",
-    "B7",
-    "Am",
-    "G",
-    "D",
-    "C",
-    "G7",
-    "G/E",
-    "G/F",
-    "D/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic at your level that adds B7 and walking slash-chord bass notes."
-  },
-  {
-   "title": "מכונת הזמן",
-   "artist": "רוקפור",
-   "style": "Israeli alt-rock",
-   "difficulty": 4,
-   "chords": [
-    "C",
-    "Em",
-    "Am",
-    "F",
-    "Fm",
-    "Cm",
-    "Dm",
+    "F#m",
+    "Ebm",
+    "Eb",
     "C#",
-    "F#dim7",
+    "Ab",
+    "Bbm",
+    "Fm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: it moves through several keys, great practice for quick barre-chord changes."
+  },
+  {
+   "title": "חבל שאת לא",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "D",
+    "A",
+    "Bm",
+    "E",
+    "F#m",
     "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More from a band in your folder; the F to Fm move and a dim7 passing chord are the new bits."
+   "why": "Berry Sakharof with open-position chords, a nice rest from the flat-key songs."
   },
   {
-   "title": "Whatever",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
+   "title": "אוהב להיות בבית",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 1,
    "chords": [
-    "G",
-    "Dsus4/F#",
-    "E"
+    "Em",
+    "A",
+    "B7",
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier Oasis strummer to enjoy; practise keeping the ringing top strings steady while the bass moves."
+   "why": "An easy sing-along classic; the only new shape for many players is B7."
   },
   {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "style": "Acoustic",
-   "difficulty": 2,
+   "title": "פה קבור הכלב",
+   "artist": "כוורת",
+   "style": "Israeli classic rock",
+   "difficulty": 4,
    "chords": [
-    "A",
     "G",
     "D",
     "Em",
-    "F#m"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Laid-back Jack Johnson with simple open chords; work on his muted, percussive strum."
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "style": "Grunge / acoustic",
-   "difficulty": 3,
-   "chords": [
-    "Esus4",
-    "A",
-    "Gsus4",
+    "Bm",
+    "Am",
     "C",
-    "E",
-    "Em",
-    "G",
-    "B",
-    "E5"
+    "Bb",
+    "F9",
+    "Cmaj7",
+    "Dm",
+    "D7",
+    "Fmaj7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A first song for your empty Nirvana folder; sus4 colours and quick changes between open shapes."
-  }
- ],
- "history": [
-  {
-   "title": "Everlong",
-   "artist": "Foo Fighters",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Lithium",
-   "artist": "Nirvana",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Come As You Are",
-   "artist": "Nirvana",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Scar Tissue",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Otherside",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "Upside Down",
-   "artist": "Jack Johnson",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "רכבת לילה לקהיר",
-   "artist": "משינה",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "עכשיו מעונן",
-   "artist": "אביב גפן",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "מחכים למשיח",
-   "artist": "שלום חנוך",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "אני ואתה",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-10"
-  },
-  {
-   "title": "עד מתי",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "עיר מקלט",
-   "artist": "אהוד בנאי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "חם על הירח",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "בין קודש לחול",
-   "artist": "אמיר דדון ושולי רנד",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "ירח",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Wonderwall",
-   "artist": "Oasis",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Better Together",
-   "artist": "Jack Johnson",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Smells Like Teen Spirit",
-   "artist": "Nirvana",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Times Like These",
-   "artist": "Foo Fighters",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "Under the Bridge",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-11"
-  },
-  {
-   "title": "יפה כלבנה",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "סחרחורת",
-   "artist": "טונה",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "עיר של קיץ",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "יותר טוב כלום",
-   "artist": "עברי לידר",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "שירת הסטיקר",
-   "artist": "הדג נחש",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "חלק לא נפרד מאחרים",
-   "artist": "עברי לידר ואביתר בנאי",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "Californication",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "Don't Look Back in Anger",
-   "artist": "Oasis",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "Good Riddance (Time of Your Life)",
-   "artist": "Green Day",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "Creep",
-   "artist": "Radiohead",
-   "date": "2026-10-12"
-  },
-  {
-   "title": "Boulevard of Broken Dreams",
-   "artist": "Green Day",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "Dani California",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "About a Girl",
-   "artist": "Nirvana",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "Where Is My Mind?",
-   "artist": "Pixies",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "נגד הרוח",
-   "artist": "אמיר דדון",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "חלליות",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "יש לי סיכוי",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "ואולי עכשיו",
-   "artist": "משינה",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "בלוז כנעני",
-   "artist": "אהוד בנאי",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-13"
-  },
-  {
-   "title": "עולם משוגע",
-   "artist": "טונה",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "אבא",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "ככה זה",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "לא פראיירים",
-   "artist": "הדג נחש",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "date": "2026-10-14"
+   "why": "A step up with jazzy colour chords like F9, Fmaj7 and Dm7 next to the familiar ones."
   },
   {
    "title": "Wake Me Up When September Ends",
    "artist": "Green Day",
-   "date": "2026-10-14"
+   "style": "Rock ballad",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "G/F#",
+    "Em",
+    "D",
+    "C",
+    "Cm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits your Green Day songs; the G to G/F# bass walk and the C to Cm switch are the new bits."
   },
   {
-   "title": "The Man Who Sold the World",
-   "artist": "Nirvana",
-   "date": "2026-10-14"
-  },
-  {
-   "title": "Snow (Hey Oh)",
+   "title": "Otherside",
    "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-14"
+   "style": "Alternative rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier RHCP song after My Friends: four chords, focus on steady rhythm."
   },
   {
-   "title": "Banana Pancakes",
+   "title": "No Surprises",
+   "artist": "Radiohead",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "D",
+    "G",
+    "G/B",
+    "Em",
+    "A7"
+   ],
+   "capo": 3,
+   "tuning": "Standard",
+   "why": "Gentle fingerpicked arpeggios with a capo, a new technique for your right hand."
+  },
+  {
+   "title": "Never Know",
    "artist": "Jack Johnson",
-   "date": "2026-10-14"
+   "style": "Acoustic surf-folk",
+   "difficulty": 3,
+   "chords": [
+    "C#m7",
+    "F#m7",
+    "B7",
+    "E",
+    "A7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Laid-back Jack Johnson groove built on minor seventh chords, a small step in harmony."
+  }
+ ],
+ "history": [
+  {
+   "title": "עיניים שלי",
+   "artist": "יהודה פוליקר",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "אל תפחד",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "שיר המכולת",
+   "artist": "כוורת",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "אוהב להיות בבית",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "ריקוד המכונה",
+   "artist": "משינה",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Karma Police",
+   "artist": "Radiohead",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Cast No Shadow",
+   "artist": "Oasis",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Brain Stew",
+   "artist": "Green Day",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Bubble Toes",
+   "artist": "Jack Johnson",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Delicate",
+   "artist": "Damien Rice",
+   "date": "2026-10-27"
+  },
+  {
+   "title": "Don't Look Back in Anger",
+   "artist": "Oasis",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Under the Bridge",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Daughter",
+   "artist": "Pearl Jam",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "Times Like These",
+   "artist": "Foo Fighters",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "עיר מקלט",
+   "artist": "אהוד בנאי",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "לב שלם",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "סחרחורת",
+   "artist": "טונה",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "אהובתי",
+   "artist": "משינה",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "תמיד אהבה",
+   "artist": "עברי לידר",
+   "date": "2026-10-28"
+  },
+  {
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "היי בייב",
+   "artist": "טונה",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "ירח",
+   "artist": "שלמה ארצי",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "עוף גוזל",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Smells Like Teen Spirit",
+   "artist": "Nirvana",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Creep",
+   "artist": "Radiohead",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "Alive",
+   "artist": "Pearl Jam",
+   "date": "2026-10-29"
+  },
+  {
+   "title": "לשונות של אש",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "הזיות",
+   "artist": "ברי סחרוף",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "סע לאט",
+   "artist": "אריק איינשטיין",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "רומנטיקה עתידנית",
+   "artist": "משינה",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "עד אנה",
+   "artist": "הדג נחש",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "Wake Me Up When September Ends",
+   "artist": "Green Day",
+   "date": "2026-10-30"
   },
   {
    "title": "Champagne Supernova",
    "artist": "Oasis",
-   "date": "2026-10-14"
+   "date": "2026-10-30"
   },
   {
-   "title": "סוף עונת התפוזים",
-   "artist": "תמוז",
-   "date": "2026-10-15"
+   "title": "Otherside",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "No Surprises",
+   "artist": "Radiohead",
+   "date": "2026-10-30"
+  },
+  {
+   "title": "חלומות של אחרים",
+   "artist": "הפרויקט של עידן רייכל",
+   "date": "2026-10-31"
   },
   {
    "title": "עד מחר",
    "artist": "אביתר בנאי",
-   "date": "2026-10-15"
+   "date": "2026-10-31"
   },
   {
-   "title": "עבדים",
+   "title": "יפה כלבנה",
+   "artist": "אביתר בנאי",
+   "date": "2026-10-31"
+  },
+  {
+   "title": "החיים שממול",
    "artist": "ברי סחרוף",
-   "date": "2026-10-15"
+   "date": "2026-10-31"
   },
   {
-   "title": "בתי קפה",
-   "artist": "עברי לידר",
-   "date": "2026-10-15"
+   "title": "ים",
+   "artist": "מוש בן ארי",
+   "date": "2026-10-31"
   },
   {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "date": "2026-10-15"
+   "title": "Scar Tissue",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-10-31"
   },
   {
-   "title": "סוף הדרך",
-   "artist": "רוקפור",
-   "date": "2026-10-15"
+   "title": "Stop Crying Your Heart Out",
+   "artist": "Oasis",
+   "date": "2026-10-31"
   },
   {
    "title": "When I Come Around",
    "artist": "Green Day",
-   "date": "2026-10-15"
+   "date": "2026-10-31"
   },
   {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "date": "2026-10-15"
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "date": "2026-10-31"
   },
   {
    "title": "Learn to Fly",
    "artist": "Foo Fighters",
-   "date": "2026-10-15"
+   "date": "2026-10-31"
   },
   {
-   "title": "Can't Stop",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-15"
+   "title": "לך אלי תשוקתי",
+   "artist": "מאיר בנאי",
+   "date": "2026-11-01"
   },
   {
-   "title": "כל הכוכבים",
-   "artist": "טונה",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "לא סתם",
-   "artist": "אמיר דדון",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "מישהו פעם",
-   "artist": "עברי לידר",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "אבות ובנים",
+   "title": "אבא",
    "artist": "אביתר בנאי",
-   "date": "2026-10-16"
+   "date": "2026-11-01"
   },
   {
-   "title": "על הרצפה",
-   "artist": "מוניקה סקס",
-   "date": "2026-10-16"
+   "title": "עזבנו את תל אביב",
+   "artist": "ג'ימבו ג'יי",
+   "date": "2026-11-01"
   },
   {
-   "title": "היינו עושים אהבה",
-   "artist": "כנסיית השכל",
-   "date": "2026-10-16"
+   "title": "גאידמק",
+   "artist": "התקווה 6",
+   "date": "2026-11-01"
+  },
+  {
+   "title": "לזוז",
+   "artist": "הדג נחש",
+   "date": "2026-11-01"
   },
   {
    "title": "Stand By Me",
    "artist": "Oasis",
-   "date": "2026-10-16"
+   "date": "2026-11-01"
   },
   {
    "title": "21 Guns",
    "artist": "Green Day",
-   "date": "2026-10-16"
+   "date": "2026-11-01"
   },
   {
-   "title": "I'm Yours",
-   "artist": "Jason Mraz",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "Polly",
-   "artist": "Nirvana",
-   "date": "2026-10-16"
-  },
-  {
-   "title": "גשם",
-   "artist": "מאיר בנאי",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "דרך",
-   "artist": "מוש בן ארי",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "יומולדת",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "השם ירחם",
-   "artist": "טונה",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "לבד",
-   "artist": "אמיר דדון",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "כל כיוון",
-   "artist": "רוקפור",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "Live Forever",
-   "artist": "Oasis",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "Holiday",
-   "artist": "Green Day",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "All Apologies",
-   "artist": "Nirvana",
-   "date": "2026-10-17"
-  },
-  {
-   "title": "Flake",
+   "title": "Breakdown",
    "artist": "Jack Johnson",
-   "date": "2026-10-17"
+   "date": "2026-11-01"
   },
   {
-   "title": "ממעמקים",
-   "artist": "הפרויקט של עידן רייכל",
-   "date": "2026-10-18"
+   "title": "Fake Plastic Trees",
+   "artist": "Radiohead",
+   "date": "2026-11-01"
   },
   {
-   "title": "לבכות לך",
-   "artist": "אביב גפן",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "שפל רוח",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "לרגע קטן",
-   "artist": "עברי לידר",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "על הרכבת",
-   "artist": "טונה",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "מבול",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "date": "2026-10-18"
-  },
-  {
-   "title": "Soul to Squeeze",
+   "title": "Snow (Hey Oh)",
    "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-18"
+   "date": "2026-11-01"
   },
   {
-   "title": "Big Me",
-   "artist": "Foo Fighters",
-   "date": "2026-10-18"
+   "title": "ואני בתומי אלך",
+   "artist": "הדג נחש",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "משמיים",
+   "artist": "הדג נחש",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "בכל חורף",
+   "artist": "עמיר בניון",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "השמחה",
+   "artist": "רביד פלוטניק",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Society",
+   "artist": "Eddie Vedder",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "9 Crimes",
+   "artist": "Damien Rice",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Ho Hey",
+   "artist": "The Lumineers",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Waiting on an Angel",
+   "artist": "Ben Harper",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Why?",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "Kiss Me",
+   "artist": "Sixpence None the Richer",
+   "date": "2026-11-02"
+  },
+  {
+   "title": "יושב על הגדר",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "ככה וככה",
+   "artist": "שלום חנוך",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "יו יה",
+   "artist": "כוורת",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "שירת הסטיקר",
+   "artist": "הדג נחש",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-03"
   },
   {
    "title": "Just Breathe",
    "artist": "Pearl Jam",
-   "date": "2026-10-18"
+   "date": "2026-11-03"
   },
   {
-   "title": "כל יום מחדש",
-   "artist": "התקווה 6",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "הכל עוד לפני",
-   "artist": "התקווה 6",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "מכה אפורה",
-   "artist": "מוניקה סקס",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "הכוכבים דולקים על אש קטנה",
-   "artist": "משינה",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "בגלגול הזה",
-   "artist": "שלום חנוך",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "ניסים",
-   "artist": "עברי לידר",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Best of You",
-   "artist": "Foo Fighters",
-   "date": "2026-10-19"
-  },
-  {
-   "title": "Heart-Shaped Box",
+   "title": "About a Girl",
    "artist": "Nirvana",
-   "date": "2026-10-19"
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-03"
+  },
+  {
+   "title": "אור הירח",
+   "artist": "אביב גפן",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "למה לי לקחת ללב",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "פלורנטין",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "ארץ חדשה",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "על פני השטח",
+   "artist": "משינה",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "Half the World Away",
+   "artist": "Oasis",
+   "date": "2026-11-04"
   },
   {
    "title": "Sitting, Waiting, Wishing",
    "artist": "Jack Johnson",
-   "date": "2026-10-19"
+   "date": "2026-11-04"
   },
   {
-   "title": "Black",
+   "title": "Last Kiss",
    "artist": "Pearl Jam",
-   "date": "2026-10-19"
+   "date": "2026-11-04"
   },
   {
-   "title": "תתארו לכם",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-20"
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "date": "2026-11-04"
   },
   {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "date": "2026-10-20"
+   "title": "Volcano",
+   "artist": "Damien Rice",
+   "date": "2026-11-04"
+  },
+  {
+   "title": "בבית",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "עבדים",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "כל הכוכבים",
+   "artist": "טונה",
+   "date": "2026-11-05"
   },
   {
    "title": "מה שיהיה יהיה",
    "artist": "התקווה 6",
-   "date": "2026-10-20"
+   "date": "2026-11-05"
+  },
+  {
+   "title": "מישהו פעם",
+   "artist": "עברי לידר",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "American Idiot",
+   "artist": "Green Day",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Polly",
+   "artist": "Nirvana",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Telling Stories",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "date": "2026-11-05"
+  },
+  {
+   "title": "גלים",
+   "artist": "אמיר דדון",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "בעולם שלה",
+   "artist": "התקווה 6",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "כנפיים",
+   "artist": "טונה",
+   "date": "2026-11-06"
   },
   {
    "title": "בשבילך",
    "artist": "אביתר בנאי",
-   "date": "2026-10-20"
+   "date": "2026-11-06"
   },
   {
-   "title": "אוח",
-   "artist": "טונה",
-   "date": "2026-10-20"
+   "title": "עוד חוזר הניגון",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-06"
   },
   {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-20"
+   "title": "סוף עונת התפוזים",
+   "artist": "תמוז",
+   "date": "2026-11-06"
   },
   {
-   "title": "מכונת הזמן",
-   "artist": "רוקפור",
-   "date": "2026-10-20"
+   "title": "Supersonic",
+   "artist": "Oasis",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "Dani California",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "These Days",
+   "artist": "Foo Fighters",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "Better Man",
+   "artist": "Pearl Jam",
+   "date": "2026-11-06"
+  },
+  {
+   "title": "יוצא לאור",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "אין מקום אחר",
+   "artist": "משינה",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "מאיה",
+   "artist": "שלום חנוך",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "ביום ובלילה",
+   "artist": "כוורת",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "Black",
+   "artist": "Pearl Jam",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "date": "2026-11-07"
   },
   {
    "title": "Whatever",
    "artist": "Oasis",
-   "date": "2026-10-20"
+   "date": "2026-11-07"
   },
   {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "date": "2026-10-20"
+   "title": "Walk",
+   "artist": "Foo Fighters",
+   "date": "2026-11-07"
+  },
+  {
+   "title": "מתי נתנשק",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "לא חיים פעמיים",
+   "artist": "התקווה 6",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "תרקוד",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "יש בי אהבה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "אנה",
+   "artist": "משינה",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "לאט לאט",
+   "artist": "שלום חנוך",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "The Masterplan",
+   "artist": "Oasis",
+   "date": "2026-11-08"
   },
   {
    "title": "Dumb",
    "artist": "Nirvana",
-   "date": "2026-10-20"
+   "date": "2026-11-08"
+  },
+  {
+   "title": "The Zephyr Song",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "date": "2026-11-08"
+  },
+  {
+   "title": "סוף הדרך",
+   "artist": "רוקפור",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "עיר של קיץ",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "שער הרחמים",
+   "artist": "מאיר בנאי",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Elderly Woman Behind the Counter in a Small Town",
+   "artist": "Pearl Jam",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "The Man Who Sold the World",
+   "artist": "Nirvana",
+   "date": "2026-11-09"
+  },
+  {
+   "title": "גשם",
+   "artist": "מאיר בנאי",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "ישראלי קומפלט",
+   "artist": "התקווה 6",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "עפיפונים",
+   "artist": "אמיר דדון",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "חורף",
+   "artist": "עברי לידר",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "עמוק בקצפת",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "על הרכבת",
+   "artist": "טונה",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "Songbird",
+   "artist": "Oasis",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "Heart-Shaped Box",
+   "artist": "Nirvana",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "Constellations",
+   "artist": "Jack Johnson",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "Aurora",
+   "artist": "Foo Fighters",
+   "date": "2026-11-10"
+  },
+  {
+   "title": "Everlong",
+   "artist": "Foo Fighters",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Fast Car",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "High and Dry",
+   "artist": "Radiohead",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Upside Down",
+   "artist": "Jack Johnson",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Yellow Ledbetter",
+   "artist": "Pearl Jam",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "לילה",
+   "artist": "אביב גפן",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "עד האהבה",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "סאלאם",
+   "artist": "שבע",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "הכל עוד לפני",
+   "artist": "התקווה 6",
+   "date": "2026-11-11"
+  },
+  {
+   "title": "Come as You Are",
+   "artist": "Nirvana",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Talkin' Bout a Revolution",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Bubble Toes",
+   "artist": "Jack Johnson",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Little by Little",
+   "artist": "Oasis",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "ממעמקים",
+   "artist": "הפרויקט של עידן רייכל",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "עכשיו מעונן",
+   "artist": "אביב גפן",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "שיר המכולת",
+   "artist": "כוורת",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "זרעי קיץ",
+   "artist": "מאיר אריאל",
+   "date": "2026-11-12"
+  },
+  {
+   "title": "אני ואתה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "נתתי לה חיי",
+   "artist": "כוורת",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "גבר הולך לאיבוד",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "עבודה שחורה",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "מחכים למשיח",
+   "artist": "שלום חנוך",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "Don't Look Back in Anger",
+   "artist": "Oasis",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "Under the Bridge",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "Times Like These",
+   "artist": "Foo Fighters",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "Karma Police",
+   "artist": "Radiohead",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "Daughter",
+   "artist": "Pearl Jam",
+   "date": "2026-11-13"
+  },
+  {
+   "title": "ואולי עכשיו",
+   "artist": "משינה",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "הוריקן",
+   "artist": "התקווה 6",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "נגד הרוח",
+   "artist": "אמיר דדון",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "יש לי סיכוי",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "כולם יודעים",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Boulevard of Broken Dreams",
+   "artist": "Green Day",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Californication",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Creep",
+   "artist": "Radiohead",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Good People",
+   "artist": "Jack Johnson",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "Long Road to Ruin",
+   "artist": "Foo Fighters",
+   "date": "2026-11-14"
+  },
+  {
+   "title": "כל יום כמו נס",
+   "artist": "אמיר דדון",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "ויהי אור",
+   "artist": "התקווה 6",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "זכיתי לאהוב",
+   "artist": "עברי לידר",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "חבל שאת לא",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "אוהב להיות בבית",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "פה קבור הכלב",
+   "artist": "כוורת",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "Wake Me Up When September Ends",
+   "artist": "Green Day",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "Otherside",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "No Surprises",
+   "artist": "Radiohead",
+   "date": "2026-11-15"
+  },
+  {
+   "title": "Never Know",
+   "artist": "Jack Johnson",
+   "date": "2026-11-15"
   }
  ],
  "sheets": [
   {
    "title": "שאריות של החיים",
-   "artist": "Amir dadon",
+   "artist": "הפרוייקט של עידן רייכל",
    "capo": 0,
    "tuning": "Standard",
    "chords": [
@@ -1053,12 +1496,7 @@
     "Db/C",
     "Gb",
     "Ebm",
-    "Ab",
-    "Bbm/Ab",
-    "Eb/G",
-    "Ab/Gb",
-    "Db/F",
-    "Eb"
+    "Ab"
    ],
    "level": 5,
    "url": "https://drive.google.com/file/d/1biqsTL-JDiEaQVW06qQ6a9gqCqADd92Y/view?usp=drivesdk",
@@ -1074,42 +1512,11 @@
     "Em",
     "Em7",
     "Cadd9",
-    "C",
-    "D"
+    "C"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
    "at": "2026-10-10T23:07:35.424Z"
-  },
-  {
-   "title": "במקום-טסט שיר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m",
-    "A"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z"
-  },
-  {
-   "title": "במקום בו אני גר",
-   "artist": "Jimbo J",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m",
-    "A"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
-   "at": "2026-10-11T20:50:16.168Z"
   },
   {
    "title": "יא",
@@ -1118,10 +1525,9 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
-    "C",
-    "C#"
+    "C"
    ],
-   "level": 2,
+   "level": 1,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
    "at": "2026-10-12T05:44:13.178Z"
   },
@@ -1383,6 +1789,34 @@
    "at": "2026-10-11T04:46:28.822Z"
   },
   {
+   "title": "במקום-טסט שיר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "at": "2026-10-16T22:12:44.867Z"
+  },
+  {
+   "title": "במקום בו אני גר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
+   "at": "2026-10-11T20:50:16.168Z"
+  },
+  {
    "title": "My friends",
    "artist": "RHCP",
    "capo": 0,
@@ -1488,7 +1922,215 @@
   {
    "text": "Your string winder is bored, {n}. Change one string today and give it something to talk about.",
    "date": "2026-10-20"
+  },
+  {
+   "text": "Bon Jovi was livin' on a prayer. You're livin' on one chord change a minute, {n}. Let's double it.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "Dave Grohl went from the drum stool to the front of the stage. You only need to get from the couch to the guitar, {n}.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "The dust on your guitar is thick enough for a slide solo, {n}. Wipe it off with a song instead.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "Strumming tip of the day, {n}: down, down, up, up, down, up. Scrolling is not part of the pattern.",
+   "date": "2026-10-22"
+  },
+  {
+   "text": "Tracy Chapman got a fast car. You got a whole new folder of her songs. Time to start the engine, {n}.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your capo has been clipped to the headstock so long it thinks it's a tuning peg, {n}. Give it a real job today.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your guitar stand is starting to look like a museum exhibit, {n}. Take the guitar off display and play it.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Your strings said they're fine with being played every day, {n}. It's being ignored that makes them go flat.",
+   "date": "2026-10-24"
+  },
+  {
+   "text": "Mark Tremonti practises scales for hours. Your scales are still in the shop window, {n}. Five minutes today?",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "Your metronome tried counting to four on its own and fell asleep at three, {n}. Wake it up with a song.",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "The low E string says it's not too low to be asked for help, {n}. Give it a strum.",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "Arik Einstein made simple chords sound like poetry. Your G chord is ready for its first verse, {n}.",
+   "date": "2026-10-26"
+  },
+  {
+   "text": "Oasis made “Don't Look Back in Anger” sound easy. Learn the first verse before dinner and make it look easy too, {n}.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "Your guitar strap has been on the hook so long it forgot what a shoulder feels like, {n}. Remind it.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "Your tuning pegs are spreading rumours that you only visit them when guests come over, {n}. Prove them wrong.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "The pick jar is full, the strings are shiny and the couch has had enough of you, {n}. Go play.",
+   "date": "2026-10-28"
+  },
+  {
+   "text": "Joe Satriani plays faster than the speed of thought. You only need to beat the speed of “maybe tomorrow”, {n}.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "Your guitar's warranty doesn't cover neglect, {n}. Luckily, ten minutes of playing fixes almost everything.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "Mosh Ben Ari found a whole world in a few simple chords. Grab yours and go looking, {n}.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "The open strings are E, A, D, G, B, E. The open invitation is right now, {n}.",
+   "date": "2026-10-30"
+  },
+  {
+   "text": "Power chords only need two fingers, {n}. That leaves eight fingers with no excuse at all.",
+   "date": "2026-11-01"
+  },
+  {
+   "text": "Hadag Nahash told everyone to get moving. Your fingers took it personally and stayed on the couch. Change that today, {n}.",
+   "date": "2026-11-01"
+  },
+  {
+   "text": "Your capo just asked for a promotion to fret five, {n}. Jack Johnson would approve. Go learn something breezy.",
+   "date": "2026-11-01"
+  },
+  {
+   "text": "Fun fact: diminished chords sound tense because they've been waiting for you to practise them, {n}.",
+   "date": "2026-11-01"
+  },
+  {
+   "text": "Johnny Marr can make one guitar sound like three. You only need to make yours sound like one today, {n}.",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "Your capo, picks and tuner held a meeting about you, {n}. There was only one item on the agenda: “When?”",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "Kaveret made “Yo Ya” sound like the easiest thing in the world. Your Am to Dm change can borrow that attitude today, {n}.",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "The G string hummed a little when you walked past, {n}. In guitar, that means “pick me up”.",
+   "date": "2026-11-03"
+  },
+  {
+   "text": "Jack White made a whole band out of two people. Tonight's rehearsal only needs one person and one guitar, {n}.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Your setlist for tonight has exactly one song on it, {n}. It's called “Pick Up the Guitar”.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Carlos Santana can make one note cry. You can start by making one chord ring clean, {n}.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Danny Sanderson hides clever little guitar fills in every song. Learn one today and save it for the next party, {n}.",
+   "date": "2026-11-05"
+  },
+  {
+   "text": "Neil Young has been rocking in the free world for decades. You only need to rock for twenty minutes before dinner, {n}.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "Your chord sheets have been sitting in Drive so long they started reading each other, {n}. Give them an audience.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "The Stones sang that time is on their side. It's on yours too, {n}, but only if you spend it with the guitar.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "Your fretboard has 22 frets and you've met maybe five of them, {n}. Today, say hello to a new one.",
+   "date": "2026-11-07"
+  },
+  {
+   "text": "Joni Mitchell invented dozens of tunings. You only need to finish one, {n}. Tap Listen.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Your guitar has six strings and zero patience left for excuses, {n}. Ten minutes, starts now.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Rockfour sang in English for the world. Your fingers only need to speak fluent C major tonight, {n}.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Your B string is still flat from last week, {n}. It's not sulking, it's waiting for you.",
+   "date": "2026-11-09"
+  },
+  {
+   "text": "Dave Grohl tunes his low E down to D and the whole room shakes. Today you can try it too, {n}. Just tune it back afterwards.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "Your fingerpicking hand has been keeping score, {n}: thumb 12, index 3, ring finger 0. Time to even things out.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "The slash in G/B isn't a typo, {n}. It's the bass note asking you to stop ignoring it.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "Shlomo Artzi changes key mid-song and nobody panics. You can survive one new chord tonight, {n}.",
+   "date": "2026-11-11"
+  },
+  {
+   "text": "Bruce Springsteen was born to run. You were born to switch from Am to C without looking, {n}. Let's prove it tonight.",
+   "date": "2026-11-13"
+  },
+  {
+   "text": "Your guitar checked its tuning, its strings and its neck. Everything's fine except it hasn't seen you in days, {n}.",
+   "date": "2026-11-13"
+  },
+  {
+   "text": "Idan Raichel can fill a whole stage with one melody. You can fill the living room with one riff tonight, {n}.",
+   "date": "2026-11-13"
+  },
+  {
+   "text": "Your spare set of strings is still sealed in its packet, {n}. It's starting to think it's a decoration.",
+   "date": "2026-11-13"
+  },
+  {
+   "text": "Your wah pedal has been saying “wah” all week, {n}. Mostly about how nobody steps on it anymore.",
+   "date": "2026-11-15"
+  },
+  {
+   "text": "Hatikva 6 made a whole career out of feeling good. Your upstrokes can feel good too, {n}. Ten minutes of reggae strumming starts now.",
+   "date": "2026-11-15"
+  },
+  {
+   "text": "Eric Johnson can hear the difference between battery brands in his pedals. You only need to hear when your G string is flat, {n}. Tap Listen.",
+   "date": "2026-11-15"
+  },
+  {
+   "text": "Your practice log has one entry, {n}: “Tuned the guitar, felt proud, went to bed.” Let's write a second line tonight.",
+   "date": "2026-11-15"
   }
  ],
- "jokesDate": "2026-10-20"
+ "jokesDate": "2026-11-15"
 }
