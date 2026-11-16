@@ -1,9 +1,10 @@
 {
  "v": 1,
- "at": "2026-11-15T03:55:59Z",
- "date": "2026-11-15",
+ "at": "2026-11-16T03:55:48Z",
+ "date": "2026-11-16",
  "index": {
   "artists": [
+   "Natasha's friends",
    "Amir dadon",
    "Tracy Chapman",
    "Jonnie Shualy",
@@ -22,6 +23,11 @@
    "Foo"
   ],
   "songs": [
+   {
+    "a": "Natasha's friends",
+    "t": "אם כבר לבד",
+    "ch": []
+   },
    {
     "a": "Amir dadon",
     "t": "שברי את הטלויזיה",
@@ -190,7 +196,13 @@
    {
     "a": "Green Day",
     "t": "Good Riddance",
-    "ch": []
+    "ch": [
+     "G",
+     "Cadd9",
+     "D",
+     "C",
+     "Em"
+    ]
    },
    {
     "a": "Green Day",
@@ -307,230 +319,173 @@
  "level": "You already handle barre chords in flat keys, maj7 and diminished chords, so these mix comfortable songs with a few steps up.",
  "suggestions": [
   {
-   "title": "כל יום כמו נס",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
+   "title": "חלליות",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "F",
     "Dm",
-    "F/E",
+    "Dm/A",
+    "Dm/Bb",
     "C",
     "Bb",
+    "F",
     "Am",
-    "Gm"
+    "Gm",
+    "C4"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Amir Dadon ballad in a friendly key, with a walking bass line through F/E."
+   "why": "More Berry Sakharof, built on a descending bass line under Dm: good practice for slash chords."
   },
   {
-   "title": "ויהי אור",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae-pop",
-   "difficulty": 2,
-   "chords": [
-    "F#m",
-    "A",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Three chords and a big groove: a relaxed song to work on your reggae-style upstrokes."
-  },
-  {
-   "title": "זכיתי לאהוב",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "A",
-    "C#m",
-    "B",
-    "F#m",
-    "Ebm",
-    "Eb",
-    "C#",
-    "Ab",
-    "Bbm",
-    "Fm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: it moves through several keys, great practice for quick barre-chord changes."
-  },
-  {
-   "title": "חבל שאת לא",
+   "title": "יומולדת",
    "artist": "ברי סחרוף",
    "style": "Israeli rock",
    "difficulty": 2,
    "chords": [
+    "D9",
+    "Bm",
+    "G",
     "D",
     "A",
-    "Bm",
-    "E",
-    "F#m",
-    "G"
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Berry Sakharof with open-position chords, a nice rest from the flat-key songs."
+   "why": "A warm, easier Sakharof song in D, with a D9 colour chord as the one new shape."
   },
   {
-   "title": "אוהב להיות בבית",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
+   "title": "חלון",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
    "difficulty": 1,
    "chords": [
     "Em",
-    "A",
-    "B7",
-    "G"
+    "Am",
+    "C",
+    "G",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy sing-along classic; the only new shape for many players is B7."
+   "why": "Five open chords from an artist you already play: a relaxed song to focus on smooth strumming and singing."
   },
   {
-   "title": "פה קבור הכלב",
-   "artist": "כוורת",
-   "style": "Israeli classic rock",
-   "difficulty": 4,
+   "title": "הכוכבים דולקים על אש קטנה",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 3,
    "chords": [
     "G",
-    "D",
-    "Em",
     "Bm",
-    "Am",
     "C",
-    "Bb",
-    "F9",
-    "Cmaj7",
-    "Dm",
-    "D7",
-    "Fmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up with jazzy colour chords like F9, Fmaj7 and Dm7 next to the familiar ones."
-  },
-  {
-   "title": "Wake Me Up When September Ends",
-   "artist": "Green Day",
-   "style": "Rock ballad",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "G/F#",
-    "Em",
-    "D",
-    "C",
-    "Cm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits your Green Day songs; the G to G/F# bass walk and the C to Cm switch are the new bits."
-  },
-  {
-   "title": "Otherside",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
     "F",
-    "C",
-    "G"
+    "Am",
+    "Em",
+    "Gm",
+    "Dm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier RHCP song after My Friends: four chords, focus on steady rhythm."
+   "why": "A Mashina classic that mixes open chords with F, Bm and Gm barres, close to the songs you already play."
   },
   {
-   "title": "No Surprises",
-   "artist": "Radiohead",
-   "style": "Alternative rock",
+   "title": "על קו המים",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 2,
+   "chords": [
+    "F",
+    "Bb",
+    "Dm",
+    "C",
+    "Gm",
+    "F/A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Ivri Lider song in F, the same family of chords as Better Together and עד מתי."
+  },
+  {
+   "title": "Talk Tonight",
+   "artist": "Oasis",
+   "style": "Britpop acoustic",
+   "difficulty": 3,
+   "chords": [
+    "Em7",
+    "A7sus4",
+    "Cadd9",
+    "C9",
+    "G",
+    "G/B"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from Wonderwall: the same ringing Em7 and Cadd9 shapes, with quicker fingerpicked changes."
+  },
+  {
+   "title": "The Promise",
+   "artist": "Tracy Chapman",
+   "style": "Acoustic folk",
    "difficulty": 3,
    "chords": [
     "D",
+    "D/C#",
+    "D/B",
+    "D/A",
+    "D/F#",
     "G",
-    "G/B",
-    "Em",
-    "A7"
-   ],
-   "capo": 3,
-   "tuning": "Standard",
-   "why": "Gentle fingerpicked arpeggios with a capo, a new technique for your right hand."
-  },
-  {
-   "title": "Never Know",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-folk",
-   "difficulty": 3,
-   "chords": [
-    "C#m7",
-    "F#m7",
-    "B7",
-    "E",
-    "A7"
+    "A",
+    "Bm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Laid-back Jack Johnson groove built on minor seventh chords, a small step in harmony."
+   "why": "Like Baby Can I Hold You, a gentle ballad; new here is the walking bass line under a held D chord."
+  },
+  {
+   "title": "Wishlist",
+   "artist": "Pearl Jam",
+   "style": "Alternative rock",
+   "difficulty": 1,
+   "chords": [
+    "C",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy two-chord song for a relaxed day: all about steady strumming and a laid-back groove."
+  },
+  {
+   "title": "Something in the Way",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 2,
+   "chords": [
+    "F#",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Drop Db",
+   "why": "Fills the empty Nirvana folder with a slow, quiet song; new for you is a lower drop tuning."
+  },
+  {
+   "title": "I'm Yours",
+   "artist": "Jason Mraz",
+   "style": "Acoustic pop",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "G",
+    "Am",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Half step down",
+   "why": "Breezy like Jack Johnson: four common chords with a bouncy, muted reggae-style strum to learn."
   }
  ],
  "history": [
-  {
-   "title": "עיניים שלי",
-   "artist": "יהודה פוליקר",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "אל תפחד",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "שיר המכולת",
-   "artist": "כוורת",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "אוהב להיות בבית",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "ריקוד המכונה",
-   "artist": "משינה",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "Karma Police",
-   "artist": "Radiohead",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "Cast No Shadow",
-   "artist": "Oasis",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "Brain Stew",
-   "artist": "Green Day",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "Bubble Toes",
-   "artist": "Jack Johnson",
-   "date": "2026-10-27"
-  },
-  {
-   "title": "Delicate",
-   "artist": "Damien Rice",
-   "date": "2026-10-27"
-  },
   {
    "title": "Don't Look Back in Anger",
    "artist": "Oasis",
@@ -1480,6 +1435,56 @@
    "title": "Never Know",
    "artist": "Jack Johnson",
    "date": "2026-11-15"
+  },
+  {
+   "title": "חלליות",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "יומולדת",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "חלון",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "הכוכבים דולקים על אש קטנה",
+   "artist": "משינה",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "על קו המים",
+   "artist": "עברי לידר",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "Talk Tonight",
+   "artist": "Oasis",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "The Promise",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "Wishlist",
+   "artist": "Pearl Jam",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "Something in the Way",
+   "artist": "Nirvana",
+   "date": "2026-11-16"
+  },
+  {
+   "title": "I'm Yours",
+   "artist": "Jason Mraz",
+   "date": "2026-11-16"
   }
  ],
  "sheets": [
