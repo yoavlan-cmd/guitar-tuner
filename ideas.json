@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-16T03:55:48Z",
- "date": "2026-11-16",
+ "at": "2026-11-17T03:55:53Z",
+ "date": "2026-11-17",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -36,7 +36,16 @@
    {
     "a": "Amir dadon",
     "t": "שאריות של החיים",
-    "ch": []
+    "ch": [
+     "Db",
+     "Bbm",
+     "Fm",
+     "Fm/Eb",
+     "Db/C",
+     "Gb",
+     "Ebm",
+     "Ab"
+    ]
    },
    {
     "a": "Amir dadon",
@@ -47,8 +56,7 @@
      "Abm",
      "Emaj7",
      "F#",
-     "Ebm",
-     "F"
+     "Ebm"
     ]
    },
    {
@@ -121,7 +129,12 @@
    {
     "a": "Jimbo J",
     "t": "במקום בו אני גר",
-    "ch": []
+    "ch": [
+     "F#m",
+     "E",
+     "C#m",
+     "A"
+    ]
    },
    {
     "a": "Eviatar Banai",
@@ -287,8 +300,11 @@
      "F#add9",
      "A",
      "D",
-     "C",
-     "G"
+     "Asus2/B",
+     "A/B",
+     "F#add9/B",
+     "G",
+     "C"
     ],
     "tuning": "Drop D"
    },
@@ -316,226 +332,197 @@
    }
   ]
  },
- "level": "You already handle barre chords in flat keys, maj7 and diminished chords, so these mix comfortable songs with a few steps up.",
+ "level": "You already play full barre chords in flat keys plus maj7, sus and slash chords, so you're at a solid intermediate level.",
  "suggestions": [
   {
-   "title": "חלליות",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 3,
+   "title": "סע לאט",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 4,
    "chords": [
-    "Dm",
-    "Dm/A",
-    "Dm/Bb",
+    "G9",
     "C",
-    "Bb",
-    "F",
+    "C/B",
     "Am",
-    "Gm",
-    "C4"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Berry Sakharof, built on a descending bass line under Dm: good practice for slash chords."
-  },
-  {
-   "title": "יומולדת",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "D9",
-    "Bm",
     "G",
-    "D",
-    "A",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A warm, easier Sakharof song in D, with a D9 colour chord as the one new shape."
-  },
-  {
-   "title": "חלון",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 1,
-   "chords": [
-    "Em",
-    "Am",
-    "C",
-    "G",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Five open chords from an artist you already play: a relaxed song to focus on smooth strumming and singing."
-  },
-  {
-   "title": "הכוכבים דולקים על אש קטנה",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "G",
-    "Bm",
-    "C",
     "F",
-    "Am",
-    "Em",
-    "Gm",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Mashina classic that mixes open chords with F, Bm and Gm barres, close to the songs you already play."
-  },
-  {
-   "title": "על קו המים",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
-   "difficulty": 2,
-   "chords": [
-    "F",
+    "C7",
+    "F/G",
     "Bb",
     "Dm",
-    "C",
-    "Gm",
-    "F/A"
+    "C#",
+    "C/Bb"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Ivri Lider song in F, the same family of chords as Better Together and עד מתי."
+   "why": "A step up: a gentle classic with a walking bass line under C that drills slash chords."
   },
   {
-   "title": "Talk Tonight",
-   "artist": "Oasis",
-   "style": "Britpop acoustic",
+   "title": "ירח",
+   "artist": "שלמה ארצי",
+   "style": "Israeli ballad",
    "difficulty": 3,
    "chords": [
+    "D6/F#",
+    "B/G",
+    "B7",
+    "Am",
+    "Em",
+    "G",
+    "Am/G",
+    "C",
+    "Am7",
     "Em7",
-    "A7sus4",
-    "Cadd9",
-    "C9",
-    "G",
-    "G/B"
+    "Am/F#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from Wonderwall: the same ringing Em7 and Cadd9 shapes, with quicker fingerpicked changes."
+   "why": "A sing-along ballad in Em; the new part is the colourful bass-note chords like Am/G and Am/F#."
   },
   {
-   "title": "The Promise",
-   "artist": "Tracy Chapman",
-   "style": "Acoustic folk",
+   "title": "נשל הנחש",
+   "artist": "מאיר אריאל",
+   "style": "Israeli folk rock",
    "difficulty": 3,
    "chords": [
+    "Dmaj7",
     "D",
-    "D/C#",
-    "D/B",
-    "D/A",
-    "D/F#",
+    "Bm",
     "G",
     "A",
-    "Bm"
+    "E",
+    "Em",
+    "F#m",
+    "D/C#"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Like Baby Can I Hold You, a gentle ballad; new here is the walking bass line under a held D chord."
+   "why": "Open-position chords you know in D, with Dmaj7 and a D/C# bass walk as the new touches."
   },
   {
-   "title": "Wishlist",
-   "artist": "Pearl Jam",
-   "style": "Alternative rock",
+   "title": "יפה כלבנה",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Cm",
+    "Gm",
+    "Fm",
+    "Ab",
+    "Gm/Bb",
+    "Bb",
+    "Eb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Eviatar Banai, in the flat-key barre shapes you already use, plus one Gm/Bb slash chord."
+  },
+  {
+   "title": "הכי ישראלי",
+   "artist": "התקווה 6",
+   "style": "Israeli reggae pop",
+   "difficulty": 3,
+   "chords": [
+    "Fm",
+    "Bbm",
+    "C#",
+    "Eb",
+    "Cm",
+    "Gm",
+    "Ab"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Hatikva 6 groove; barre minors you know with a laid-back offbeat strum to practise."
+  },
+  {
+   "title": "גם זה יעבור",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
    "difficulty": 1,
    "chords": [
-    "C",
-    "F"
+    "Em",
+    "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy two-chord song for a relaxed day: all about steady strumming and a laid-back groove."
+   "why": "An easy Tuna track on two chords, so all your focus can go on keeping the rhythm tight."
   },
   {
-   "title": "Something in the Way",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 2,
+   "title": "Stand by Me",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
    "chords": [
-    "F#",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Drop Db",
-   "why": "Fills the empty Nirvana folder with a slow, quiet song; new for you is a lower drop tuning."
-  },
-  {
-   "title": "I'm Yours",
-   "artist": "Jason Mraz",
-   "style": "Acoustic pop",
-   "difficulty": 2,
-   "chords": [
-    "C",
     "G",
+    "Em",
+    "Cadd9",
+    "A",
+    "C",
     "Am",
-    "F"
+    "Fmaj7",
+    "D",
+    "D7/F#"
    ],
    "capo": 0,
-   "tuning": "Half step down",
-   "why": "Breezy like Jack Johnson: four common chords with a bouncy, muted reggae-style strum to learn."
+   "tuning": "Standard",
+   "why": "Builds on Wonderwall's Cadd9 shapes and adds a few new colour chords like B7add11 and Fmaj7."
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 3,
+   "chords": [
+    "G7",
+    "D7",
+    "D9",
+    "Am7",
+    "C7",
+    "D",
+    "Bm",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A laid-back Jack Johnson song that teaches 7th and 9th chords and a percussive muted strum."
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 2,
+   "chords": [
+    "B5",
+    "C#5",
+    "D5",
+    "Bsus4",
+    "C#sus4",
+    "G",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier Foo Fighters song: power chords and sus4 moves that feel great on electric."
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "style": "Punk rock",
+   "difficulty": 2,
+   "chords": [
+    "G5",
+    "D5",
+    "E5",
+    "C5",
+    "A5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Four power chords on a loop, a fun easier one to tighten your palm-muted strumming."
   }
  ],
  "history": [
-  {
-   "title": "Don't Look Back in Anger",
-   "artist": "Oasis",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "Under the Bridge",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "Daughter",
-   "artist": "Pearl Jam",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "Times Like These",
-   "artist": "Foo Fighters",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "עיר מקלט",
-   "artist": "אהוד בנאי",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "מחכים למשיח",
-   "artist": "שלום חנוך",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "לב שלם",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "סחרחורת",
-   "artist": "טונה",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "אהובתי",
-   "artist": "משינה",
-   "date": "2026-10-28"
-  },
-  {
-   "title": "תמיד אהבה",
-   "artist": "עברי לידר",
-   "date": "2026-10-28"
-  },
   {
    "title": "יש לי סיכוי",
    "artist": "אביתר בנאי",
@@ -1485,6 +1472,56 @@
    "title": "I'm Yours",
    "artist": "Jason Mraz",
    "date": "2026-11-16"
+  },
+  {
+   "title": "סע לאט",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "ירח",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "נשל הנחש",
+   "artist": "מאיר אריאל",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "יפה כלבנה",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "הכי ישראלי",
+   "artist": "התקווה 6",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "גם זה יעבור",
+   "artist": "טונה",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "Stand by Me",
+   "artist": "Oasis",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "Banana Pancakes",
+   "artist": "Jack Johnson",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "Learn to Fly",
+   "artist": "Foo Fighters",
+   "date": "2026-11-17"
+  },
+  {
+   "title": "When I Come Around",
+   "artist": "Green Day",
+   "date": "2026-11-17"
   }
  ],
  "sheets": [
@@ -1513,11 +1550,7 @@
    "capo": 0,
    "tuning": "Standard",
    "chords": [
-    "Am",
-    "Em",
-    "Em7",
-    "Cadd9",
-    "C"
+    "Am"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
@@ -1530,9 +1563,9 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
-    "C"
+    "C#"
    ],
-   "level": 1,
+   "level": 2,
    "url": "https://drive.google.com/file/d/1rh1e1TyMDkgIQKCny2Q8CyTR2ypOa5zH/view?usp=drivesdk",
    "at": "2026-10-12T05:44:13.178Z"
   },
@@ -1544,9 +1577,7 @@
    "chords": [
     "C",
     "D",
-    "Em",
-    "G",
-    "Cadd9"
+    "Em"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
@@ -1559,13 +1590,9 @@
    "tuning": "Standard",
    "chords": [
     "Bmaj7",
-    "E",
-    "Abm",
-    "Emaj7",
-    "F#",
-    "Ebm"
+    "E"
    ],
-   "level": 4,
+   "level": 1,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
    "at": "2026-10-12T04:21:21.095Z"
   },
@@ -1578,11 +1605,9 @@
     "Eb",
     "Ab",
     "Cm",
-    "Gm",
-    "Bb4",
-    "Fm7"
+    "Gm"
    ],
-   "level": 5,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
    "at": "2026-10-12T04:13:33.006Z"
   },
@@ -1611,10 +1636,9 @@
    "chords": [
     "Bbm",
     "Ebm",
-    "Abm",
-    "B"
+    "Abm"
    ],
-   "level": 4,
+   "level": 3,
    "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
    "at": "2026-10-11T19:20:34.742Z"
   },
@@ -1628,8 +1652,7 @@
     "A",
     "F#m",
     "Em",
-    "F#",
-    "G"
+    "F#"
    ],
    "level": 3,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
@@ -1704,8 +1727,7 @@
     "F",
     "Gm",
     "Bb",
-    "Am",
-    "C"
+    "Am"
    ],
    "level": 3,
    "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
@@ -1838,11 +1860,9 @@
     "D",
     "Asus2/B",
     "A/B",
-    "F#add9/B",
-    "G",
-    "C"
+    "F#add9/B"
    ],
-   "level": 5,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
    "at": "2026-10-07T10:16:18.945Z"
   }
@@ -2135,7 +2155,23 @@
   {
    "text": "Your practice log has one entry, {n}: “Tuned the guitar, felt proud, went to bed.” Let's write a second line tonight.",
    "date": "2026-11-15"
+  },
+  {
+   "text": "Jack Johnson wrote a whole song about banana pancakes. You can write a short one about the twenty minutes you're about to practise, {n}.",
+   "date": "2026-11-17"
+  },
+  {
+   "text": "Meir Ariel sang about a snake shedding its skin. Your fingertips are about to do the same, {n}. That's just calluses saying hello.",
+   "date": "2026-11-17"
+  },
+  {
+   "text": "Foo Fighters want to know if you've learned to fly yet, {n}. Start with landing your chord changes on time.",
+   "date": "2026-11-17"
+  },
+  {
+   "text": "Your tuner yawned so hard it started tuning the fridge hum, {n}. Give it a real string to listen to.",
+   "date": "2026-11-17"
   }
  ],
- "jokesDate": "2026-11-15"
+ "jokesDate": "2026-11-17"
 }
