@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-17T03:55:53Z",
- "date": "2026-11-17",
+ "at": "2026-11-18T03:55:23Z",
+ "date": "2026-11-18",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -335,244 +335,172 @@
  "level": "You already play full barre chords in flat keys plus maj7, sus and slash chords, so you're at a solid intermediate level.",
  "suggestions": [
   {
-   "title": "סע לאט",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 4,
-   "chords": [
-    "G9",
-    "C",
-    "C/B",
-    "Am",
-    "G",
-    "F",
-    "C7",
-    "F/G",
-    "Bb",
-    "Dm",
-    "C#",
-    "C/Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up: a gentle classic with a walking bass line under C that drills slash chords."
-  },
-  {
-   "title": "ירח",
+   "title": "פתאום כשלא באת",
    "artist": "שלמה ארצי",
    "style": "Israeli ballad",
    "difficulty": 3,
    "chords": [
-    "D6/F#",
-    "B/G",
-    "B7",
-    "Am",
-    "Em",
-    "G",
-    "Am/G",
-    "C",
-    "Am7",
-    "Em7",
-    "Am/F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along ballad in Em; the new part is the colourful bass-note chords like Am/G and Am/F#."
-  },
-  {
-   "title": "נשל הנחש",
-   "artist": "מאיר אריאל",
-   "style": "Israeli folk rock",
-   "difficulty": 3,
-   "chords": [
-    "Dmaj7",
-    "D",
-    "Bm",
-    "G",
-    "A",
+    "A/C",
+    "Emaj7",
     "E",
-    "Em",
+    "A",
+    "E7",
+    "B",
+    "E/Ab",
     "F#m",
-    "D/C#"
+    "C#m"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Open-position chords you know in D, with Dmaj7 and a D/C# bass walk as the new touches."
+   "why": "A sing-along classic in E that uses the maj7 and slash chords you already like, plus a C#m barre."
   },
   {
-   "title": "יפה כלבנה",
-   "artist": "אביתר בנאי",
+   "title": "לב שלם",
+   "artist": "ברי סחרוף",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "Cm",
+    "Dm",
     "Gm",
-    "Fm",
-    "Ab",
-    "Gm/Bb",
-    "Bb",
-    "Eb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar Banai, in the flat-key barre shapes you already use, plus one Gm/Bb slash chord."
-  },
-  {
-   "title": "הכי ישראלי",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae pop",
-   "difficulty": 3,
-   "chords": [
-    "Fm",
-    "Bbm",
-    "C#",
     "Eb",
     "Cm",
-    "Gm",
-    "Ab"
+    "F",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Hatikva 6 groove; barre minors you know with a laid-back offbeat strum to practise."
+   "why": "More Berry for your folder: flat-key barre chords like the ones in your Amir Dadon sheets, in a moody minor groove."
   },
   {
-   "title": "גם זה יעבור",
-   "artist": "טונה",
-   "style": "Israeli hip hop",
-   "difficulty": 1,
+   "title": "על המים",
+   "artist": "אהוד בנאי",
+   "style": "Israeli folk-rock",
+   "difficulty": 2,
    "chords": [
-    "Em",
+    "D",
+    "C",
+    "Bb",
     "Am"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy Tuna track on two chords, so all your focus can go on keeping the rhythm tight."
+   "why": "An easy breather with four chords; the only barre is Bb, so you can focus on a steady, rolling strum."
   },
   {
-   "title": "Stand by Me",
+   "title": "משהו קטן וטוב",
+   "artist": "משינה",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "D",
+    "F#m",
+    "F",
+    "Am"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed Mashina song; the fun part is the colourful jump from F#m to F."
+  },
+  {
+   "title": "עד הבוקר",
+   "artist": "טונה",
+   "style": "Israeli hip-hop/pop",
+   "difficulty": 3,
+   "chords": [
+    "Cm",
+    "Eb",
+    "Bb",
+    "Ab"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A new Tuna loop in the flat keys you already know; work on a tight, rhythmic strum under the rap."
+  },
+  {
+   "title": "Morning Glory",
    "artist": "Oasis",
    "style": "Britpop",
    "difficulty": 3,
    "chords": [
-    "G",
     "Em",
+    "Dsus2",
+    "A7sus4",
     "Cadd9",
-    "A",
-    "C",
-    "Am",
-    "Fmaj7",
-    "D",
-    "D7/F#"
+    "D5",
+    "B",
+    "Asus4"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Builds on Wonderwall's Cadd9 shapes and adds a few new colour chords like B7add11 and Fmaj7."
+   "why": "A step up from Wonderwall: the same ringing sus and add9 shapes, played with a driving, faster strum."
   },
   {
-   "title": "Banana Pancakes",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
-   "difficulty": 3,
-   "chords": [
-    "G7",
-    "D7",
-    "D9",
-    "Am7",
-    "C7",
-    "D",
-    "Bm",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A laid-back Jack Johnson song that teaches 7th and 9th chords and a percussive muted strum."
-  },
-  {
-   "title": "Learn to Fly",
+   "title": "Next Year",
    "artist": "Foo Fighters",
-   "style": "Alternative rock",
+   "style": "Alt rock",
    "difficulty": 2,
    "chords": [
-    "B5",
-    "C#5",
-    "D5",
-    "Bsus4",
-    "C#sus4",
     "G",
+    "D",
+    "C",
+    "A7",
     "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier Foo Fighters song: power chords and sus4 moves that feel great on electric."
+   "why": "A gentle Foo Fighters song in open chords, a nice partner to My Hero with an A7 twist."
   },
   {
-   "title": "When I Come Around",
-   "artist": "Green Day",
-   "style": "Punk rock",
-   "difficulty": 2,
+   "title": "Island in the Sun",
+   "artist": "Weezer",
+   "style": "Alt rock",
+   "difficulty": 1,
    "chords": [
-    "G5",
-    "D5",
-    "E5",
-    "C5",
-    "A5"
+    "Em",
+    "Am",
+    "D",
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Four power chords on a loop, a fun easier one to tighten your palm-muted strumming."
+   "why": "An easy four-chord loop from a new band for you; good for practising a relaxed, bouncy strum."
+  },
+  {
+   "title": "Free Fallin'",
+   "artist": "Tom Petty",
+   "style": "Classic rock",
+   "difficulty": 1,
+   "chords": [
+    "D",
+    "Dsus4",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A classic campfire song built on one sus4 hammer-on, great for clean, ringing chords."
+  },
+  {
+   "title": "Losing My Religion",
+   "artist": "R.E.M.",
+   "style": "Alt rock",
+   "difficulty": 3,
+   "chords": [
+    "F",
+    "Dm",
+    "G",
+    "Am",
+    "Am/B",
+    "Am/C",
+    "Am/D",
+    "Em",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A small step up: the F barre and a walking bass line under Am turn simple chords into a famous riff."
   }
  ],
  "history": [
-  {
-   "title": "יש לי סיכוי",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "נגד הרוח",
-   "artist": "אמיר דדון",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "היי בייב",
-   "artist": "טונה",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "ירח",
-   "artist": "שלמה ארצי",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "Boulevard of Broken Dreams",
-   "artist": "Green Day",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "Smells Like Teen Spirit",
-   "artist": "Nirvana",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "Californication",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "Creep",
-   "artist": "Radiohead",
-   "date": "2026-10-29"
-  },
-  {
-   "title": "Alive",
-   "artist": "Pearl Jam",
-   "date": "2026-10-29"
-  },
   {
    "title": "לשונות של אש",
    "artist": "אביתר בנאי",
@@ -1522,6 +1450,56 @@
    "title": "When I Come Around",
    "artist": "Green Day",
    "date": "2026-11-17"
+  },
+  {
+   "title": "פתאום כשלא באת",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "לב שלם",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "על המים",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "משהו קטן וטוב",
+   "artist": "משינה",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "עד הבוקר",
+   "artist": "טונה",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "Morning Glory",
+   "artist": "Oasis",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "Next Year",
+   "artist": "Foo Fighters",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "Island in the Sun",
+   "artist": "Weezer",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "Free Fallin'",
+   "artist": "Tom Petty",
+   "date": "2026-11-18"
+  },
+  {
+   "title": "Losing My Religion",
+   "artist": "R.E.M.",
+   "date": "2026-11-18"
   }
  ],
  "sheets": [
