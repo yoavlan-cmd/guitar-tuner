@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-18T03:55:23Z",
- "date": "2026-11-18",
+ "at": "2026-11-19T03:54:52Z",
+ "date": "2026-11-19",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -332,225 +332,174 @@
    }
   ]
  },
- "level": "You already play full barre chords in flat keys plus maj7, sus and slash chords, so you're at a solid intermediate level.",
+ "level": "Comfortable with open and barre chords, flat-key songs, capo and Drop D; ready for richer voicings and steadier rhythm work.",
  "suggestions": [
   {
-   "title": "פתאום כשלא באת",
-   "artist": "שלמה ארצי",
-   "style": "Israeli ballad",
-   "difficulty": 3,
+   "title": "עיר מקלט",
+   "artist": "אהוד בנאי",
+   "style": "Israeli rock",
+   "difficulty": 2,
    "chords": [
-    "A/C",
-    "Emaj7",
-    "E",
-    "A",
-    "E7",
-    "B",
-    "E/Ab",
-    "F#m",
-    "C#m"
+    "Am",
+    "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A sing-along classic in E that uses the maj7 and slash chords you already like, plus a C#m barre."
+   "why": "A classic built on a hypnotic minor groove: great for locking in a steady strumming feel."
   },
   {
-   "title": "לב שלם",
-   "artist": "ברי סחרוף",
+   "title": "אם כבר",
+   "artist": "היהודים",
    "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "C9",
+    "Em7",
+    "C",
+    "D",
+    "Em",
+    "B",
+    "Am",
+    "Gm",
+    "F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Rock ballad with colourful C9/Em7 voicings and a B major barre to practise."
+  },
+  {
+   "title": "סחרחורת",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
    "difficulty": 3,
    "chords": [
     "Dm",
+    "Bb",
     "Gm",
-    "Eb",
-    "Cm",
-    "F",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Berry for your folder: flat-key barre chords like the ones in your Amir Dadon sheets, in a moody minor groove."
-  },
-  {
-   "title": "על המים",
-   "artist": "אהוד בנאי",
-   "style": "Israeli folk-rock",
-   "difficulty": 2,
-   "chords": [
-    "D",
-    "C",
-    "Bb",
-    "Am"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy breather with four chords; the only barre is Bb, so you can focus on a steady, rolling strum."
-  },
-  {
-   "title": "משהו קטן וטוב",
-   "artist": "משינה",
-   "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "D",
-    "F#m",
-    "F",
-    "Am"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A relaxed Mashina song; the fun part is the colourful jump from F#m to F."
-  },
-  {
-   "title": "עד הבוקר",
-   "artist": "טונה",
-   "style": "Israeli hip-hop/pop",
-   "difficulty": 3,
-   "chords": [
-    "Cm",
-    "Eb",
-    "Bb",
-    "Ab"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A new Tuna loop in the flat keys you already know; work on a tight, rhythmic strum under the rap."
-  },
-  {
-   "title": "Morning Glory",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [
-    "Em",
-    "Dsus2",
-    "A7sus4",
-    "Cadd9",
-    "D5",
-    "B",
-    "Asus4"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A step up from Wonderwall: the same ringing sus and add9 shapes, played with a driving, faster strum."
-  },
-  {
-   "title": "Next Year",
-   "artist": "Foo Fighters",
-   "style": "Alt rock",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "D",
-    "C",
-    "A7",
     "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A gentle Foo Fighters song in open chords, a nice partner to My Hero with an A7 twist."
+   "why": "Another Tuna loop like the ones you play, with Bb and Gm barres to keep them sharp."
   },
   {
-   "title": "Island in the Sun",
-   "artist": "Weezer",
-   "style": "Alt rock",
-   "difficulty": 1,
+   "title": "גאידמק",
+   "artist": "התקווה 6",
+   "style": "Israeli reggae / pop",
+   "difficulty": 3,
+   "chords": [
+    "F#m",
+    "Bm",
+    "G#dim"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Upbeat offbeat strumming with a diminished chord as the new shape to learn."
+  },
+  {
+   "title": "לא סתם",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop rock",
+   "difficulty": 2,
    "chords": [
     "Em",
     "Am",
-    "D",
+    "C",
+    "F",
     "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy four-chord loop from a new band for you; good for practising a relaxed, bouncy strum."
+   "why": "An easier Amir Dadon song for relaxed playing, with just the F barre to watch."
   },
   {
-   "title": "Free Fallin'",
-   "artist": "Tom Petty",
-   "style": "Classic rock",
-   "difficulty": 1,
-   "chords": [
-    "D",
-    "Dsus4",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic campfire song built on one sus4 hammer-on, great for clean, ringing chords."
-  },
-  {
-   "title": "Losing My Religion",
-   "artist": "R.E.M.",
-   "style": "Alt rock",
+   "title": "מונסון",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "F",
-    "Dm",
-    "G",
-    "Am",
-    "Am/B",
-    "Am/C",
-    "Am/D",
+    "Bm",
     "Em",
-    "C"
+    "A",
+    "A9",
+    "Gb",
+    "G",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A small step up: the F barre and a walking bass line under Am turn simple chords into a famous riff."
+   "why": "Moody Berry Sakharof rock with an A9 colour chord and a Bm barre groove."
+  },
+  {
+   "title": "21 Guns",
+   "artist": "Green Day",
+   "style": "Rock ballad",
+   "difficulty": 4,
+   "chords": [
+    "A",
+    "Bb",
+    "C",
+    "Dm",
+    "F",
+    "Bb5",
+    "C5",
+    "C/E",
+    "D5",
+    "F5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up: mixes open chords with power-chord sections and quick changes in a big rock build."
+  },
+  {
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "D",
+    "Am7",
+    "C",
+    "Em7",
+    "Fsus2"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A Britpop anthem in easy open shapes; Fsus2 is a friendly new chord."
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "Am",
+    "E",
+    "F",
+    "C7",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A short, sweet Foo Fighters song to warm up with: clean changes and a C7 twist."
+  },
+  {
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "style": "Acoustic rock",
+   "difficulty": 4,
+   "chords": [
+    "C",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up: a fingerpicked acoustic pattern that builds right-hand independence."
   }
  ],
  "history": [
-  {
-   "title": "לשונות של אש",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "הזיות",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "סע לאט",
-   "artist": "אריק איינשטיין",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "רומנטיקה עתידנית",
-   "artist": "משינה",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "עד אנה",
-   "artist": "הדג נחש",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "Wake Me Up When September Ends",
-   "artist": "Green Day",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "Champagne Supernova",
-   "artist": "Oasis",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "Otherside",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-30"
-  },
-  {
-   "title": "No Surprises",
-   "artist": "Radiohead",
-   "date": "2026-10-30"
-  },
   {
    "title": "חלומות של אחרים",
    "artist": "הפרויקט של עידן רייכל",
@@ -1500,6 +1449,56 @@
    "title": "Losing My Religion",
    "artist": "R.E.M.",
    "date": "2026-11-18"
+  },
+  {
+   "title": "עיר מקלט",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "אם כבר",
+   "artist": "היהודים",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "סחרחורת",
+   "artist": "טונה",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "גאידמק",
+   "artist": "התקווה 6",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "לא סתם",
+   "artist": "אמיר דדון",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "מונסון",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "21 Guns",
+   "artist": "Green Day",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "Live Forever",
+   "artist": "Oasis",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "Big Me",
+   "artist": "Foo Fighters",
+   "date": "2026-11-19"
+  },
+  {
+   "title": "Just Breathe",
+   "artist": "Pearl Jam",
+   "date": "2026-11-19"
   }
  ],
  "sheets": [
@@ -2149,7 +2148,23 @@
   {
    "text": "Your tuner yawned so hard it started tuning the fridge hum, {n}. Give it a real string to listen to.",
    "date": "2026-11-17"
+  },
+  {
+   "text": "Brian Johnson can scream over a wall of Marshalls. Your G chord only needs to be heard over the dishwasher, {n}.",
+   "date": "2026-11-19"
+  },
+  {
+   "text": "Your guitar's neck has a slight bow, {n}. It's not a defect, it's from leaning forward waiting for you.",
+   "date": "2026-11-19"
+  },
+  {
+   "text": "Ehud Banai found a refuge city in a few minor chords. Your living room can be one too, {n}, for twenty minutes.",
+   "date": "2026-11-19"
+  },
+  {
+   "text": "Your strap button just asked if it's still employed, {n}. Strap in and give it a shift tonight.",
+   "date": "2026-11-19"
   }
  ],
- "jokesDate": "2026-11-17"
+ "jokesDate": "2026-11-19"
 }
