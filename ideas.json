@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-19T03:54:52Z",
- "date": "2026-11-19",
+ "at": "2026-11-20T04:00:34Z",
+ "date": "2026-11-20",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -335,221 +335,186 @@
  "level": "Comfortable with open and barre chords, flat-key songs, capo and Drop D; ready for richer voicings and steadier rhythm work.",
  "suggestions": [
   {
-   "title": "עיר מקלט",
-   "artist": "אהוד בנאי",
-   "style": "Israeli rock",
+   "title": "יו יה",
+   "artist": "כוורת",
+   "style": "Israeli rock classic",
+   "difficulty": 2,
+   "chords": [
+    "Dm",
+    "G",
+    "Am",
+    "E",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy sing-along with a bouncy strum; a relaxed warm-up between harder songs."
+  },
+  {
+   "title": "עוף גוזל",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli folk-rock",
    "difficulty": 2,
    "chords": [
     "Am",
+    "C",
+    "G",
+    "E",
+    "F",
+    "D",
+    "Em",
+    "Bm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Gentle fingerpicking-friendly ballad; practise smooth changes and one short Bm barre."
+  },
+  {
+   "title": "מתנות",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 2,
+   "chords": [
+    "F",
+    "C",
+    "Am",
+    "G",
+    "Em",
+    "Dm",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Eviatar Banai at your level, with an F barre and a Dm-to-E turn to clean up."
+  },
+  {
+   "title": "פלורנטין",
+   "artist": "אהוד בנאי",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "F#m",
+    "C#7",
+    "Bm",
+    "D",
+    "F#",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Sharp-key barre workout; C#7 is a new colour chord that pulls nicely back to F#m."
+  },
+  {
+   "title": "מפנה מקום",
+   "artist": "ברי סחרוף",
+   "style": "Israeli alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "Gm",
+    "Cm",
+    "D",
+    "Am",
+    "G",
+    "C",
     "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A classic built on a hypnotic minor groove: great for locking in a steady strumming feel."
+   "why": "Mixes minor barres with open chords, a good follow-up to his song already in your folder."
   },
   {
-   "title": "אם כבר",
-   "artist": "היהודים",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
-    "C9",
-    "Em7",
-    "C",
-    "D",
-    "Em",
-    "B",
-    "Am",
-    "Gm",
-    "F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Rock ballad with colourful C9/Em7 voicings and a B major barre to practise."
-  },
-  {
-   "title": "סחרחורת",
+   "title": "סרט ערבי",
    "artist": "טונה",
-   "style": "Israeli hip hop",
-   "difficulty": 3,
-   "chords": [
-    "Dm",
-    "Bb",
-    "Gm",
-    "A"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Tuna loop like the ones you play, with Bb and Gm barres to keep them sharp."
-  },
-  {
-   "title": "גאידמק",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae / pop",
-   "difficulty": 3,
-   "chords": [
-    "F#m",
-    "Bm",
-    "G#dim"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Upbeat offbeat strumming with a diminished chord as the new shape to learn."
-  },
-  {
-   "title": "לא סתם",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop rock",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "Am",
-    "C",
-    "F",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier Amir Dadon song for relaxed playing, with just the F barre to watch."
-  },
-  {
-   "title": "מונסון",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 3,
+   "style": "Israeli hip-hop / pop",
+   "difficulty": 4,
    "chords": [
     "Bm",
-    "Em",
-    "A",
-    "A9",
-    "Gb",
+    "A/B",
+    "G/B",
     "G",
+    "B5",
+    "F#5",
+    "C#5",
+    "D5",
+    "Bm/F#",
+    "Gmaj7",
+    "A#dim",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up: power chords, slash chords and a passing diminished chord in one groove."
+  },
+  {
+   "title": "Last Kiss",
+   "artist": "Pearl Jam",
+   "style": "Rock / oldies cover",
+   "difficulty": 1,
+   "chords": [
+    "G",
+    "Em",
+    "C",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Moody Berry Sakharof rock with an A9 colour chord and a Bm barre groove."
+   "why": "Four open chords and a steady shuffle strum; an easy, fun play-along."
   },
   {
-   "title": "21 Guns",
-   "artist": "Green Day",
-   "style": "Rock ballad",
-   "difficulty": 4,
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "style": "Acoustic surf-pop",
+   "difficulty": 3,
    "chords": [
-    "A",
-    "Bb",
-    "C",
-    "Dm",
-    "F",
-    "Bb5",
-    "C5",
-    "C/E",
-    "D5",
-    "F5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Step up: mixes open chords with power-chord sections and quick changes in a big rock build."
-  },
-  {
-   "title": "Live Forever",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "D",
-    "Am7",
-    "C",
-    "Em7",
-    "Fsus2"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A Britpop anthem in easy open shapes; Fsus2 is a friendly new chord."
-  },
-  {
-   "title": "Big Me",
-   "artist": "Foo Fighters",
-   "style": "Alternative rock",
-   "difficulty": 2,
-   "chords": [
-    "C",
     "Am",
-    "E",
+    "Am7",
+    "G",
+    "G7",
     "F",
-    "C7",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A short, sweet Foo Fighters song to warm up with: clean changes and a C7 twist."
-  },
-  {
-   "title": "Just Breathe",
-   "artist": "Pearl Jam",
-   "style": "Acoustic rock",
-   "difficulty": 4,
-   "chords": [
+    "F7",
     "C",
-    "G"
+    "C7",
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Step up: a fingerpicked acoustic pattern that builds right-hand independence."
-  }
- ],
- "history": [
-  {
-   "title": "חלומות של אחרים",
-   "artist": "הפרויקט של עידן רייכל",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "עד מחר",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "יפה כלבנה",
-   "artist": "אביתר בנאי",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "החיים שממול",
-   "artist": "ברי סחרוף",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "ים",
-   "artist": "מוש בן ארי",
-   "date": "2026-10-31"
+   "why": "Builds on Better Together: syncopated muted strumming and moving 7th chords."
   },
   {
    "title": "Scar Tissue",
    "artist": "Red Hot Chili Peppers",
-   "date": "2026-10-31"
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "F",
+    "C",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "New technique: Frusciante-style double-stop slides over a simple F-C-Dm loop."
   },
   {
-   "title": "Stop Crying Your Heart Out",
+   "title": "Champagne Supernova",
    "artist": "Oasis",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "When I Come Around",
-   "artist": "Green Day",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "Banana Pancakes",
-   "artist": "Jack Johnson",
-   "date": "2026-10-31"
-  },
-  {
-   "title": "Learn to Fly",
-   "artist": "Foo Fighters",
-   "date": "2026-10-31"
-  },
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [
+    "A9",
+    "A9/G",
+    "E4",
+    "E",
+    "G",
+    "A",
+    "D",
+    "F"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Next Oasis step after Wonderwall: ringing open-string voicings and a long build-up."
+  }
+ ],
+ "history": [
   {
    "title": "לך אלי תשוקתי",
    "artist": "מאיר בנאי",
@@ -1499,6 +1464,56 @@
    "title": "Just Breathe",
    "artist": "Pearl Jam",
    "date": "2026-11-19"
+  },
+  {
+   "title": "יו יה",
+   "artist": "כוורת",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "עוף גוזל",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "מתנות",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "פלורנטין",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "מפנה מקום",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "סרט ערבי",
+   "artist": "טונה",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "Last Kiss",
+   "artist": "Pearl Jam",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "Sitting, Waiting, Wishing",
+   "artist": "Jack Johnson",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "Scar Tissue",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-20"
+  },
+  {
+   "title": "Champagne Supernova",
+   "artist": "Oasis",
+   "date": "2026-11-20"
   }
  ],
  "sheets": [
