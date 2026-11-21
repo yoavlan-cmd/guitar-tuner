@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-20T04:00:34Z",
- "date": "2026-11-20",
+ "at": "2026-11-21T03:56:18Z",
+ "date": "2026-11-21",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -332,239 +332,193 @@
    }
   ]
  },
- "level": "Comfortable with open and barre chords, flat-key songs, capo and Drop D; ready for richer voicings and steadier rhythm work.",
+ "level": "Comfortable with open and barre chords, flat keys, capo and Drop D; ready for maj7 colours, slash-chord bass lines and steadier rhythm work.",
  "suggestions": [
   {
-   "title": "יו יה",
-   "artist": "כוורת",
-   "style": "Israeli rock classic",
-   "difficulty": 2,
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "style": "Israeli rock ballad",
+   "difficulty": 4,
    "chords": [
-    "Dm",
-    "G",
-    "Am",
     "E",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy sing-along with a bouncy strum; a relaxed warm-up between harder songs."
-  },
-  {
-   "title": "עוף גוזל",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli folk-rock",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "C",
-    "G",
-    "E",
-    "F",
+    "A",
     "D",
-    "Em",
-    "Bm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Gentle fingerpicking-friendly ballad; practise smooth changes and one short Bm barre."
-  },
-  {
-   "title": "מתנות",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 2,
-   "chords": [
-    "F",
-    "C",
-    "Am",
-    "G",
-    "Em",
-    "Dm",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Eviatar Banai at your level, with an F barre and a Dm-to-E turn to clean up."
-  },
-  {
-   "title": "פלורנטין",
-   "artist": "אהוד בנאי",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [
+    "Dmaj7",
+    "Amaj7",
+    "Bm7",
     "F#m",
-    "C#7",
-    "Bm",
-    "D",
-    "F#",
-    "E"
+    "C#m7",
+    "G#m7",
+    "Dm7",
+    "D#m7b5",
+    "F#7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Sharp-key barre workout; C#7 is a new colour chord that pulls nicely back to F#m."
+   "why": "A classic step up: lots of maj7 and m7 shapes and one half-diminished chord to learn."
   },
   {
-   "title": "מפנה מקום",
-   "artist": "ברי סחרוף",
-   "style": "Israeli alternative rock",
+   "title": "תתארו לכם",
+   "artist": "שלמה ארצי",
+   "style": "Israeli pop-rock",
    "difficulty": 3,
    "chords": [
     "Gm",
-    "Cm",
-    "D",
-    "Am",
-    "G",
-    "C",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Mixes minor barres with open chords, a good follow-up to his song already in your folder."
-  },
-  {
-   "title": "סרט ערבי",
-   "artist": "טונה",
-   "style": "Israeli hip-hop / pop",
-   "difficulty": 4,
-   "chords": [
-    "Bm",
-    "A/B",
-    "G/B",
-    "G",
-    "B5",
-    "F#5",
-    "C#5",
-    "D5",
-    "Bm/F#",
-    "Gmaj7",
-    "A#dim",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Step up: power chords, slash chords and a passing diminished chord in one groove."
-  },
-  {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "style": "Rock / oldies cover",
-   "difficulty": 1,
-   "chords": [
-    "G",
-    "Em",
-    "C",
+    "Dm7",
+    "Eb",
+    "F4",
+    "F",
+    "Bb",
+    "Bb4",
     "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Four open chords and a steady shuffle strum; an easy, fun play-along."
+   "why": "Flat-key barre chords you already know, plus sus4 moves that add colour."
   },
   {
-   "title": "Sitting, Waiting, Wishing",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-pop",
+   "title": "גוליית",
+   "artist": "כוורת",
+   "style": "Israeli classic rock",
    "difficulty": 3,
    "chords": [
-    "Am",
-    "Am7",
-    "G",
-    "G7",
-    "F",
-    "F7",
-    "C",
-    "C7",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Builds on Better Together: syncopated muted strumming and moving 7th chords."
-  },
-  {
-   "title": "Scar Tissue",
-   "artist": "Red Hot Chili Peppers",
-   "style": "Alternative rock",
-   "difficulty": 3,
-   "chords": [
-    "F",
-    "C",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "New technique: Frusciante-style double-stop slides over a simple F-C-Dm loop."
-  },
-  {
-   "title": "Champagne Supernova",
-   "artist": "Oasis",
-   "style": "Britpop",
-   "difficulty": 3,
-   "chords": [
-    "A9",
-    "A9/G",
-    "E4",
-    "E",
-    "G",
-    "A",
+    "A7",
+    "Em",
+    "Bm",
     "D",
-    "F"
+    "A",
+    "E",
+    "Bm7",
+    "F#",
+    "Em7",
+    "Bb",
+    "Gm",
+    "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Next Oasis step after Wonderwall: ringing open-string voicings and a long build-up."
-  }
- ],
- "history": [
-  {
-   "title": "לך אלי תשוקתי",
-   "artist": "מאיר בנאי",
-   "date": "2026-11-01"
+   "why": "Fun sing-along with a sneaky key change to Bb and Gm."
   },
   {
    "title": "אבא",
    "artist": "אביתר בנאי",
-   "date": "2026-11-01"
+   "style": "Israeli singer-songwriter",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "Em",
+    "B",
+    "B4",
+    "Cmaj7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier one from an artist you love; focus on a clean B barre and its sus4."
   },
   {
-   "title": "עזבנו את תל אביב",
-   "artist": "ג'ימבו ג'יי",
-   "date": "2026-11-01"
+   "title": "מלאך",
+   "artist": "אביב גפן",
+   "style": "Israeli rock ballad",
+   "difficulty": 3,
+   "chords": [
+    "F#m",
+    "A/C#",
+    "A",
+    "D",
+    "F#m/E",
+    "A/Ab",
+    "E",
+    "E4",
+    "Bm",
+    "Aadd9",
+    "A4"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Practises a walking bass line with slash chords under a slow ballad."
   },
   {
-   "title": "גאידמק",
-   "artist": "התקווה 6",
-   "date": "2026-11-01"
+   "title": "קול גלגל",
+   "artist": "שוטי הנבואה",
+   "style": "Israeli folk-rock",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "Dadd9",
+    "Cadd9"
+   ],
+   "capo": 2,
+   "tuning": "Standard",
+   "why": "Three ringing shapes with a capo, so all the work goes into a driving strum."
   },
   {
-   "title": "לזוז",
-   "artist": "הדג נחש",
-   "date": "2026-11-01"
-  },
-  {
-   "title": "Stand By Me",
+   "title": "Half the World Away",
    "artist": "Oasis",
-   "date": "2026-11-01"
+   "style": "Britpop acoustic",
+   "difficulty": 3,
+   "chords": [
+    "C",
+    "Fmaj7",
+    "C/B",
+    "Am",
+    "D",
+    "E",
+    "G",
+    "G7",
+    "Fm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "More Oasis after Wonderwall, with a lovely Fmaj7 and a borrowed Fm chord."
   },
   {
-   "title": "21 Guns",
-   "artist": "Green Day",
-   "date": "2026-11-01"
-  },
-  {
-   "title": "Breakdown",
+   "title": "Flake",
    "artist": "Jack Johnson",
-   "date": "2026-11-01"
+   "style": "Acoustic surf-pop",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "C",
+    "F",
+    "G",
+    "E"
+   ],
+   "capo": 5,
+   "tuning": "Standard",
+   "why": "An easier groove: simple shapes high on a capo, all about the muted strum."
   },
   {
-   "title": "Fake Plastic Trees",
-   "artist": "Radiohead",
-   "date": "2026-11-01"
+   "title": "Yellow",
+   "artist": "Coldplay",
+   "style": "Alt-rock ballad",
+   "difficulty": 2,
+   "chords": [
+    "G",
+    "D",
+    "C",
+    "Cmaj7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A new band close to Oasis; easy shapes with ringing open strings and big dynamics."
   },
   {
-   "title": "Snow (Hey Oh)",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-11-01"
-  },
+   "title": "Alive",
+   "artist": "Pearl Jam",
+   "style": "Grunge",
+   "difficulty": 4,
+   "chords": [
+    "A",
+    "G6/A",
+    "F5",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up in electric rhythm: power chords and an open-A drone riff."
+  }
+ ],
+ "history": [
   {
    "title": "ואני בתומי אלך",
    "artist": "הדג נחש",
@@ -1514,6 +1468,56 @@
    "title": "Champagne Supernova",
    "artist": "Oasis",
    "date": "2026-11-20"
+  },
+  {
+   "title": "אדם בתוך עצמו",
+   "artist": "שלום חנוך",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "תתארו לכם",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "גוליית",
+   "artist": "כוורת",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "אבא",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "מלאך",
+   "artist": "אביב גפן",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "קול גלגל",
+   "artist": "שוטי הנבואה",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "Half the World Away",
+   "artist": "Oasis",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "Flake",
+   "artist": "Jack Johnson",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "Yellow",
+   "artist": "Coldplay",
+   "date": "2026-11-21"
+  },
+  {
+   "title": "Alive",
+   "artist": "Pearl Jam",
+   "date": "2026-11-21"
   }
  ],
  "sheets": [
@@ -1861,22 +1865,6 @@
  ],
  "jokes": [
   {
-   "text": "Nirvana's folder in your Drive is still empty, {n}. Kurt would say “come as you are”, but maybe come with a chord sheet.",
-   "date": "2026-10-12"
-  },
-  {
-   "text": "Your tuner has seen things, {n}. Mostly a low E that thinks it's a D. Tap Listen and set it free.",
-   "date": "2026-10-12"
-  },
-  {
-   "text": "Green Day wrote three chords and sold millions. You know way more than three, {n}. No pressure.",
-   "date": "2026-10-12"
-  },
-  {
-   "text": "Tuna rhymes at 100 words a minute. Your chord changes can manage four a bar, {n}. Probably.",
-   "date": "2026-10-12"
-  },
-  {
    "text": "Your guitar case has been closed so long it's started a podcast, {n}. Episode one: “Is anyone out there?”",
    "date": "2026-10-14"
   },
@@ -2179,7 +2167,23 @@
   {
    "text": "Your strap button just asked if it's still employed, {n}. Strap in and give it a shift tonight.",
    "date": "2026-11-19"
+  },
+  {
+   "text": "Coldplay wrote a whole hit about a colour. Your chord changes could use some colour too, {n}. Start with a Cmaj7.",
+   "date": "2026-11-21"
+  },
+  {
+   "text": "Your guitar's humidity is fine, its strings are fine, its feelings are slightly hurt. Ten minutes fixes all three, {n}.",
+   "date": "2026-11-21"
+  },
+  {
+   "text": "Shotei Hanevua turned three chords into a party. You know at least three, {n}. The party is waiting for you.",
+   "date": "2026-11-21"
+  },
+  {
+   "text": "Your plectrum has been holding the same pose on the shelf for a week, {n}. It wants to strum, not to model.",
+   "date": "2026-11-21"
   }
  ],
- "jokesDate": "2026-11-19"
+ "jokesDate": "2026-11-21"
 }
