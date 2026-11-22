@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-21T03:56:18Z",
- "date": "2026-11-21",
+ "at": "2026-11-22T03:54:44Z",
+ "date": "2026-11-22",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -332,243 +332,177 @@
    }
   ]
  },
- "level": "Comfortable with open and barre chords, flat keys, capo and Drop D; ready for maj7 colours, slash-chord bass lines and steadier rhythm work.",
+ "level": "Comfortable intermediate: open chords, barre chords in flat keys, sus/add9 colours and the odd capo or Drop D song.",
  "suggestions": [
   {
-   "title": "אדם בתוך עצמו",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock ballad",
-   "difficulty": 4,
-   "chords": [
-    "E",
-    "A",
-    "D",
-    "Dmaj7",
-    "Amaj7",
-    "Bm7",
-    "F#m",
-    "C#m7",
-    "G#m7",
-    "Dm7",
-    "D#m7b5",
-    "F#7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic step up: lots of maj7 and m7 shapes and one half-diminished chord to learn."
-  },
-  {
-   "title": "תתארו לכם",
-   "artist": "שלמה ארצי",
-   "style": "Israeli pop-rock",
+   "title": "בלוז כנעני",
+   "artist": "אהוד בנאי",
+   "style": "Israeli rock / blues",
    "difficulty": 3,
    "chords": [
-    "Gm",
-    "Dm7",
-    "Eb",
-    "F4",
-    "F",
-    "Bb",
-    "Bb4",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Flat-key barre chords you already know, plus sus4 moves that add colour."
-  },
-  {
-   "title": "גוליית",
-   "artist": "כוורת",
-   "style": "Israeli classic rock",
-   "difficulty": 3,
-   "chords": [
-    "A7",
-    "Em",
-    "Bm",
-    "D",
-    "A",
-    "E",
-    "Bm7",
-    "F#",
-    "Em7",
-    "Bb",
-    "Gm",
-    "G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fun sing-along with a sneaky key change to Bb and Gm."
-  },
-  {
-   "title": "אבא",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "Em",
-    "B",
-    "B4",
-    "Cmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier one from an artist you love; focus on a clean B barre and its sus4."
-  },
-  {
-   "title": "מלאך",
-   "artist": "אביב גפן",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "F#m",
-    "A/C#",
-    "A",
-    "D",
-    "F#m/E",
-    "A/Ab",
-    "E",
-    "E4",
-    "Bm",
-    "Aadd9",
-    "A4"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Practises a walking bass line with slash chords under a slow ballad."
-  },
-  {
-   "title": "קול גלגל",
-   "artist": "שוטי הנבואה",
-   "style": "Israeli folk-rock",
-   "difficulty": 2,
-   "chords": [
-    "Em",
     "Dadd9",
-    "Cadd9"
+    "D/C",
+    "D/E",
+    "D/F",
+    "G",
+    "Fmaj7",
+    "Em",
+    "Am"
    ],
-   "capo": 2,
+   "capo": 0,
    "tuning": "Standard",
-   "why": "Three ringing shapes with a capo, so all the work goes into a driving strum."
+   "why": "A classic riff built on one D shape with moving bass notes: great for picking-hand control."
   },
   {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "style": "Britpop acoustic",
+   "title": "לבכות לך",
+   "artist": "אביב גפן",
+   "style": "Israeli ballad",
    "difficulty": 3,
    "chords": [
-    "C",
-    "Fmaj7",
-    "C/B",
-    "Am",
+    "Em",
+    "Am7",
+    "Em/G",
+    "Am/Gb",
+    "B",
+    "Dsus4",
     "D",
-    "E",
     "G",
-    "G7",
-    "Fm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Oasis after Wonderwall, with a lovely Fmaj7 and a borrowed Fm chord."
-  },
-  {
-   "title": "Flake",
-   "artist": "Jack Johnson",
-   "style": "Acoustic surf-pop",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "C",
-    "F",
-    "G",
-    "E"
-   ],
-   "capo": 5,
-   "tuning": "Standard",
-   "why": "An easier groove: simple shapes high on a capo, all about the muted strum."
-  },
-  {
-   "title": "Yellow",
-   "artist": "Coldplay",
-   "style": "Alt-rock ballad",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "D",
-    "C",
-    "Cmaj7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A new band close to Oasis; easy shapes with ringing open strings and big dynamics."
-  },
-  {
-   "title": "Alive",
-   "artist": "Pearl Jam",
-   "style": "Grunge",
-   "difficulty": 4,
-   "chords": [
-    "A",
-    "G6/A",
-    "F5",
+    "Bsus4",
     "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up in electric rhythm: power chords and an open-A drone riff."
+   "why": "Mostly open chords with a walking bass line and sus resolutions; a gentle step into slash chords."
+  },
+  {
+   "title": "פסק זמן",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 4,
+   "chords": [
+    "Em",
+    "A7",
+    "D",
+    "Dmaj7",
+    "C#7",
+    "F#m",
+    "G#7",
+    "C#m",
+    "E",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up: a key change with C#7 and G#7 that stretches your barre-chord vocabulary."
+  },
+  {
+   "title": "עד מחר",
+   "artist": "אביתר בנאי",
+   "style": "Israeli pop-rock",
+   "difficulty": 3,
+   "chords": [
+    "Dm",
+    "F",
+    "C",
+    "Gm",
+    "Bb",
+    "Am"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Same artist you already play, with a familiar Dm–F–Bb family: good for smooth barre changes."
+  },
+  {
+   "title": "עולם משוגע",
+   "artist": "טונה",
+   "style": "Israeli hip-hop",
+   "difficulty": 2,
+   "chords": [
+    "Fm",
+    "C#",
+    "Cm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier one: three barre chords on a loop, so you can focus on a tight groove."
+  },
+  {
+   "title": "עדיין ילד",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "Am",
+    "G",
+    "Dm",
+    "F",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed open-chord song by an artist you love; good for singing along while you strum."
+  },
+  {
+   "title": "Polly",
+   "artist": "Nirvana",
+   "style": "Grunge acoustic",
+   "difficulty": 2,
+   "chords": [
+    "Em",
+    "G",
+    "D",
+    "C",
+    "Bb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Simple acoustic grunge; the only twist is a Bb, a quick win between bigger songs."
+  },
+  {
+   "title": "Better Man",
+   "artist": "Pearl Jam",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "Dadd9",
+    "E11",
+    "F13",
+    "D",
+    "A",
+    "G",
+    "Asus4"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Ringing add9 and 11 voicings around D teach you colourful shapes that move up the neck."
+  },
+  {
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "C#m",
+    "A",
+    "B",
+    "F#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Driving strumming with a C#m–A–B–F# loop: builds stamina and dynamics from soft to loud."
+  },
+  {
+   "title": "Supersonic",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 2,
+   "tuning": "Standard",
+   "why": "You already play Wonderwall; this one adds a swaggering mid-tempo strum and a few new shapes."
   }
  ],
  "history": [
-  {
-   "title": "ואני בתומי אלך",
-   "artist": "הדג נחש",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "משמיים",
-   "artist": "הדג נחש",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "בכל חורף",
-   "artist": "עמיר בניון",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "השמחה",
-   "artist": "רביד פלוטניק",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "Society",
-   "artist": "Eddie Vedder",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "9 Crimes",
-   "artist": "Damien Rice",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "Ho Hey",
-   "artist": "The Lumineers",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "Waiting on an Angel",
-   "artist": "Ben Harper",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "Why?",
-   "artist": "Tracy Chapman",
-   "date": "2026-11-02"
-  },
-  {
-   "title": "Kiss Me",
-   "artist": "Sixpence None the Richer",
-   "date": "2026-11-02"
-  },
   {
    "title": "יושב על הגדר",
    "artist": "אריק איינשטיין",
@@ -1518,6 +1452,56 @@
    "title": "Alive",
    "artist": "Pearl Jam",
    "date": "2026-11-21"
+  },
+  {
+   "title": "בלוז כנעני",
+   "artist": "אהוד בנאי",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "לבכות לך",
+   "artist": "אביב גפן",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "פסק זמן",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "עד מחר",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "עולם משוגע",
+   "artist": "טונה",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "עדיין ילד",
+   "artist": "אמיר דדון",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "Polly",
+   "artist": "Nirvana",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "Better Man",
+   "artist": "Pearl Jam",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "Best of You",
+   "artist": "Foo Fighters",
+   "date": "2026-11-22"
+  },
+  {
+   "title": "Supersonic",
+   "artist": "Oasis",
+   "date": "2026-11-22"
   }
  ],
  "sheets": [
