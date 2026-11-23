@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-22T03:54:44Z",
- "date": "2026-11-22",
+ "at": "2026-11-23T03:56:33Z",
+ "date": "2026-11-23",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -90,10 +90,10 @@
     "ch": [
      "Em",
      "Cmaj7",
-     "Bm",
+     "C",
      "D",
-     "Dm",
-     "C"
+     "Bm",
+     "Dm"
     ]
    },
    {
@@ -140,12 +140,12 @@
     "a": "Eviatar Banai",
     "t": "מאיר בנאי אצלך בעולם",
     "ch": [
+     "C",
      "Am",
      "Em",
+     "D",
      "Em7",
-     "Cadd9",
-     "C",
-     "D"
+     "Cadd9"
     ]
    },
    {
@@ -154,10 +154,10 @@
     "ch": [
      "Dm",
      "F",
+     "C",
      "Gm",
      "Bb",
-     "Am",
-     "C"
+     "Am"
     ]
    },
    {
@@ -167,12 +167,12 @@
      "F#m",
      "C#m",
      "G#m",
+     "D",
      "A",
      "E",
      "Bm",
      "F#m7",
-     "F#m6",
-     "D"
+     "F#m6"
     ]
    },
    {
@@ -187,23 +187,23 @@
     "a": "Tuna",
     "t": "סהרה",
     "ch": [
-     "Bbm",
      "Ebm",
-     "Abm",
-     "B"
+     "Bbm",
+     "B",
+     "Abm"
     ]
    },
    {
     "a": "Tuna",
     "t": "קשה בכדור הארץ",
     "ch": [
+     "G",
      "Bm",
      "A",
+     "D",
      "F#m",
      "Em",
-     "F#",
-     "G",
-     "D"
+     "F#"
     ]
    },
    {
@@ -236,10 +236,10 @@
      "F",
      "F/E",
      "Dm",
+     "C",
      "Bb",
      "Bb/A",
-     "Gm",
-     "C"
+     "Gm"
     ]
    },
    {
@@ -251,11 +251,11 @@
      "F#",
      "Cmaj7",
      "Am7",
-     "C",
      "E",
-     "Dm",
      "Am",
+     "Dm",
      "Ebdim",
+     "C",
      "B7"
     ]
    },
@@ -263,12 +263,12 @@
     "a": "Oasis",
     "t": "Wanderwall",
     "ch": [
-     "Cadd9",
      "Em7",
-     "E",
      "G",
+     "Cadd9",
      "D4",
-     "G/F#"
+     "G/F#",
+     "E"
     ],
     "capo": 2
    },
@@ -276,15 +276,15 @@
     "a": "Rockfour",
     "t": "הכעס",
     "ch": [
-     "Dm",
-     "Bb",
-     "Am",
-     "Eb",
-     "F#m",
-     "A",
      "G",
+     "Am",
+     "Bb",
+     "Dm",
+     "Eb",
      "C",
-     "D"
+     "F#m",
+     "D",
+     "A"
     ]
    },
    {
@@ -294,17 +294,18 @@
      "Dsus2",
      "Dm7",
      "Dm7/F",
+     "D",
      "G/B",
+     "C",
+     "G",
      "G/F",
      "Asus2",
      "F#add9",
      "A",
-     "D",
      "Asus2/B",
      "A/B",
-     "F#add9/B",
-     "G",
-     "C"
+     "D/F#",
+     "F"
     ],
     "tuning": "Drop D"
    },
@@ -314,14 +315,14 @@
     "ch": [
      "G/B",
      "Am",
+     "F",
+     "C",
      "Dm7",
      "Dm",
      "Eb",
      "Bb",
      "Cm",
-     "Ddim",
-     "F",
-     "C"
+     "Ddim"
     ],
     "capo": 1
    },
@@ -332,227 +333,182 @@
    }
   ]
  },
- "level": "Comfortable intermediate: open chords, barre chords in flat keys, sus/add9 colours and the odd capo or Drop D song.",
+ "level": "Comfortable intermediate: open and barre chords, flat-key minor chords and some maj7 and dim colours.",
  "suggestions": [
   {
-   "title": "בלוז כנעני",
-   "artist": "אהוד בנאי",
-   "style": "Israeli rock / blues",
-   "difficulty": 3,
-   "chords": [
-    "Dadd9",
-    "D/C",
-    "D/E",
-    "D/F",
-    "G",
-    "Fmaj7",
-    "Em",
-    "Am"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic riff built on one D shape with moving bass notes: great for picking-hand control."
-  },
-  {
-   "title": "לבכות לך",
+   "title": "עם הזמן",
    "artist": "אביב גפן",
-   "style": "Israeli ballad",
+   "style": "Israeli rock ballad",
    "difficulty": 3,
    "chords": [
-    "Em",
-    "Am7",
-    "Em/G",
-    "Am/Gb",
-    "B",
-    "Dsus4",
-    "D",
     "G",
-    "Bsus4",
+    "Am",
+    "F",
+    "G6",
+    "E",
+    "F6",
+    "Am/C",
+    "Em",
+    "Dm",
     "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Mostly open chords with a walking bass line and sus resolutions; a gentle step into slash chords."
+   "why": "Mostly familiar open shapes, with G6/F6 colour chords and an augmented chord as the new bit."
   },
   {
-   "title": "פסק זמן",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
+   "title": "הזיות",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
    "difficulty": 4,
    "chords": [
-    "Em",
-    "A7",
-    "D",
-    "Dmaj7",
-    "C#7",
-    "F#m",
-    "G#7",
-    "C#m",
-    "E",
-    "A"
+    "Gm",
+    "F",
+    "Cm",
+    "Eb",
+    "Fm",
+    "Bbm7b5",
+    "C#",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up: a key change with C#7 and G#7 that stretches your barre-chord vocabulary."
+   "why": "Another Berry Sakharof song in flat keys; the half-diminished chord is a small step up."
   },
   {
-   "title": "עד מחר",
-   "artist": "אביתר בנאי",
-   "style": "Israeli pop-rock",
-   "difficulty": 3,
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "style": "Israeli reggae pop",
+   "difficulty": 2,
    "chords": [
+    "Bb",
+    "C",
     "Dm",
     "F",
-    "C",
-    "Gm",
-    "Bb",
-    "Am"
+    "Gm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Same artist you already play, with a familiar Dm–F–Bb family: good for smooth barre changes."
+   "why": "An easier one: five chords and a relaxed offbeat strum to keep the right hand loose."
   },
   {
-   "title": "עולם משוגע",
+   "title": "כל הכוכבים",
    "artist": "טונה",
    "style": "Israeli hip-hop",
-   "difficulty": 2,
+   "difficulty": 3,
    "chords": [
-    "Fm",
-    "C#",
-    "Cm"
+    "Gm",
+    "Cm",
+    "Eb",
+    "Bb",
+    "Dm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier one: three barre chords on a loop, so you can focus on a tight groove."
+   "why": "A short barre-chord loop in G minor, close to the Tuna songs already in the folder."
   },
   {
-   "title": "עדיין ילד",
+   "title": "בנאדם",
    "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
+   "style": "Israeli pop rock",
+   "difficulty": 4,
+   "chords": [
+    "F#",
+    "Ebm",
+    "Bbm",
+    "Ab",
+    "C#",
+    "Fm",
+    "F#maj7",
+    "Eb"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits the Amir Dadon sheets already played; F#maj7 adds a new barre colour."
+  },
+  {
+   "title": "תחזור תחזור",
+   "artist": "משינה",
+   "style": "Israeli rock",
    "difficulty": 2,
    "chords": [
+    "G",
+    "D7",
     "Am",
-    "G",
-    "Dm",
-    "F",
-    "Em"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A relaxed open-chord song by an artist you love; good for singing along while you strum."
-  },
-  {
-   "title": "Polly",
-   "artist": "Nirvana",
-   "style": "Grunge acoustic",
-   "difficulty": 2,
-   "chords": [
-    "Em",
-    "G",
-    "D",
     "C",
-    "Bb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Simple acoustic grunge; the only twist is a Bb, a quick win between bigger songs."
-  },
-  {
-   "title": "Better Man",
-   "artist": "Pearl Jam",
-   "style": "Alternative rock",
-   "difficulty": 3,
-   "chords": [
-    "Dadd9",
-    "E11",
-    "F13",
     "D",
-    "A",
-    "G",
-    "Asus4"
+    "D/G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Ringing add9 and 11 voicings around D teach you colourful shapes that move up the neck."
+   "why": "An easier campfire classic with open chords and a D7 to D/G movement."
   },
   {
-   "title": "Best of You",
-   "artist": "Foo Fighters",
-   "style": "Alternative rock",
-   "difficulty": 3,
-   "chords": [
-    "C#m",
-    "A",
-    "B",
-    "F#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Driving strumming with a C#m–A–B–F# loop: builds stamina and dynamics from soft to loud."
-  },
-  {
-   "title": "Supersonic",
+   "title": "Whatever",
    "artist": "Oasis",
    "style": "Britpop",
    "difficulty": 3,
-   "chords": [],
-   "capo": 2,
+   "chords": [
+    "G",
+    "Dsus4/F#",
+    "E"
+   ],
+   "capo": 0,
    "tuning": "Standard",
-   "why": "You already play Wonderwall; this one adds a swaggering mid-tempo strum and a few new shapes."
-  }
- ],
- "history": [
-  {
-   "title": "יושב על הגדר",
-   "artist": "אריק איינשטיין",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "ככה וככה",
-   "artist": "שלום חנוך",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "יו יה",
-   "artist": "כוורת",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "שירת הסטיקר",
-   "artist": "הדג נחש",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "אבות ובנים",
-   "artist": "אביתר בנאי",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "Just Breathe",
-   "artist": "Pearl Jam",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "About a Girl",
-   "artist": "Nirvana",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "Live Forever",
-   "artist": "Oasis",
-   "date": "2026-11-03"
-  },
-  {
-   "title": "Big Me",
-   "artist": "Foo Fighters",
-   "date": "2026-11-03"
+   "why": "Builds on Wonderwall-style open strumming, with sus and slash chords that move the bass."
   },
   {
    "title": "Soul to Squeeze",
    "artist": "Red Hot Chili Peppers",
-   "date": "2026-11-03"
+   "style": "Alternative rock",
+   "difficulty": 3,
+   "chords": [
+    "A",
+    "F",
+    "C",
+    "Dm",
+    "Bb",
+    "Gm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A mellow RHCP song with F, Bb and Gm barres that are already in reach."
   },
+  {
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 4,
+   "chords": [
+    "Em",
+    "G#",
+    "C#5",
+    "A",
+    "C5",
+    "D5",
+    "B5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Step up: fast-moving power chords and quiet-loud dynamics on the electric."
+  },
+  {
+   "title": "Breakdown",
+   "artist": "Jack Johnson",
+   "style": "Acoustic pop",
+   "difficulty": 2,
+   "chords": [
+    "C",
+    "Em/B",
+    "Am",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easier, laid-back acoustic song like Better Together, good for a steady groove."
+  }
+ ],
+ "history": [
   {
    "title": "אור הירח",
    "artist": "אביב גפן",
@@ -1502,6 +1458,56 @@
    "title": "Supersonic",
    "artist": "Oasis",
    "date": "2026-11-22"
+  },
+  {
+   "title": "עם הזמן",
+   "artist": "אביב גפן",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "הזיות",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "כל יום מחדש",
+   "artist": "התקווה 6",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "כל הכוכבים",
+   "artist": "טונה",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "בנאדם",
+   "artist": "אמיר דדון",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "תחזור תחזור",
+   "artist": "משינה",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "Whatever",
+   "artist": "Oasis",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "Soul to Squeeze",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "Lithium",
+   "artist": "Nirvana",
+   "date": "2026-11-23"
+  },
+  {
+   "title": "Breakdown",
+   "artist": "Jack Johnson",
+   "date": "2026-11-23"
   }
  ],
  "sheets": [
@@ -1530,7 +1536,12 @@
    "capo": 0,
    "tuning": "Standard",
    "chords": [
-    "Am"
+    "Am",
+    "Em",
+    "Em7",
+    "Cadd9",
+    "C",
+    "D"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1vmMOGvuiJ9fexMKcrFatbvk28wownaaa/view?usp=drivesdk",
@@ -1543,6 +1554,7 @@
    "tuning": "Standard",
    "chords": [
     "Cm",
+    "C",
     "C#"
    ],
    "level": 2,
@@ -1557,7 +1569,9 @@
    "chords": [
     "C",
     "D",
-    "Em"
+    "Em",
+    "G",
+    "Cadd9"
    ],
    "level": 1,
    "url": "https://drive.google.com/file/d/1sKjivxVQgmyv-R3Th6Gl3x-WtvU1uOl_/view?usp=drivesdk",
@@ -1570,9 +1584,13 @@
    "tuning": "Standard",
    "chords": [
     "Bmaj7",
-    "E"
+    "E",
+    "Abm",
+    "Emaj7",
+    "F#",
+    "Ebm"
    ],
-   "level": 1,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1JaLI2mf_SBhvXDG9E0pUVOUuLSTCzjXd/view?usp=drivesdk",
    "at": "2026-10-12T04:21:21.095Z"
   },
@@ -1585,9 +1603,11 @@
     "Eb",
     "Ab",
     "Cm",
-    "Gm"
+    "Gm",
+    "Bb4",
+    "Fm7"
    ],
-   "level": 4,
+   "level": 5,
    "url": "https://drive.google.com/file/d/1IjqfkEzcjXAvqaywd9xf0PLzVi_Ag85Z/view?usp=drivesdk",
    "at": "2026-10-12T04:13:33.006Z"
   },
@@ -1616,9 +1636,10 @@
    "chords": [
     "Bbm",
     "Ebm",
-    "Abm"
+    "Abm",
+    "B"
    ],
-   "level": 3,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1bC51ZLJcqvxpRkXFYwyb2dpEkJzJmWyN/view?usp=drivesdk",
    "at": "2026-10-11T19:20:34.742Z"
   },
@@ -1632,7 +1653,8 @@
     "A",
     "F#m",
     "Em",
-    "F#"
+    "F#",
+    "G"
    ],
    "level": 3,
    "url": "https://drive.google.com/file/d/1TbgU-G24LGO90f_YEF9TPSPlTmho6S1j/view?usp=drivesdk",
@@ -1707,7 +1729,8 @@
     "F",
     "Gm",
     "Bb",
-    "Am"
+    "Am",
+    "C"
    ],
    "level": 3,
    "url": "https://drive.google.com/file/d/1nnNKUBsfatJKz1OpGMlm_pxuZJ9v6kqC/view?usp=drivesdk",
@@ -1772,9 +1795,11 @@
     "Bb",
     "Am",
     "Eb",
-    "F#m"
+    "F#m",
+    "A",
+    "G"
    ],
-   "level": 3,
+   "level": 4,
    "url": "https://drive.google.com/file/d/1TuybECPy7Brr2hQ8MMMrlfRl4C2H1NmW/view?usp=drivesdk",
    "at": "2026-10-10T19:13:35.115Z"
   },
@@ -1796,20 +1821,6 @@
    "at": "2026-10-11T04:46:28.822Z"
   },
   {
-   "title": "במקום-טסט שיר",
-   "artist": "אורית טשומה ואברהם לגסה",
-   "capo": 0,
-   "tuning": "Standard",
-   "chords": [
-    "F#m",
-    "E",
-    "C#m"
-   ],
-   "level": 2,
-   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
-   "at": "2026-10-16T22:12:44.867Z"
-  },
-  {
    "title": "במקום בו אני גר",
    "artist": "אורית טשומה ואברהם לגסה",
    "capo": 0,
@@ -1822,6 +1833,20 @@
    "level": 2,
    "url": "https://drive.google.com/file/d/1MMtYWJS6IZU88MTRETAmsziOWpefkDox/view?usp=drivesdk",
    "at": "2026-10-11T20:50:16.168Z"
+  },
+  {
+   "title": "במקום-טסט שיר",
+   "artist": "אורית טשומה ואברהם לגסה",
+   "capo": 0,
+   "tuning": "Standard",
+   "chords": [
+    "F#m",
+    "E",
+    "C#m"
+   ],
+   "level": 2,
+   "url": "https://drive.google.com/file/d/1DcjnxDe4VVwXvxCPqEJJmZkrFJHzVdDl/view?usp=drivesdk",
+   "at": "2026-10-16T22:12:44.867Z"
   },
   {
    "title": "My friends",
@@ -1840,30 +1865,16 @@
     "D",
     "Asus2/B",
     "A/B",
-    "F#add9/B"
+    "F#add9/B",
+    "G",
+    "C"
    ],
-   "level": 4,
+   "level": 5,
    "url": "https://drive.google.com/file/d/1kDL1NzsL3tJFG52HShs1fyOnvugyRjlA/view?usp=drivesdk",
    "at": "2026-10-07T10:16:18.945Z"
   }
  ],
  "jokes": [
-  {
-   "text": "Your guitar case has been closed so long it's started a podcast, {n}. Episode one: “Is anyone out there?”",
-   "date": "2026-10-14"
-  },
-  {
-   "text": "The tuner is warmed up, the capo is ready and the pick is right there. The only thing missing is you, {n}.",
-   "date": "2026-10-14"
-  },
-  {
-   "text": "The Beatles needed four people to make a band. You only need one guitar and 15 minutes, {n}.",
-   "date": "2026-10-14"
-  },
-  {
-   "text": "Brian May built his own guitar from a fireplace. You just have to pick yours up off the stand, {n}.",
-   "date": "2026-10-14"
-  },
   {
    "text": "Angus Young plays in a school uniform. You're allowed to practise in pyjamas, {n}. No excuses left.",
    "date": "2026-10-16"
@@ -2167,7 +2178,23 @@
   {
    "text": "Your plectrum has been holding the same pose on the shelf for a week, {n}. It wants to strum, not to model.",
    "date": "2026-11-21"
+  },
+  {
+   "text": "Your guitar has been leaning on the wall so long it now identifies as furniture, {n}. Remind it what it really is.",
+   "date": "2026-11-23"
+  },
+  {
+   "text": "Oasis made three chords sound like a stadium anthem. You have at least three, {n}. The stadium is your living room tonight.",
+   "date": "2026-11-23"
+  },
+  {
+   "text": "Your power chords are all power and no chord, {n}. Two fingers, one fret apart. Try again tonight.",
+   "date": "2026-11-23"
+  },
+  {
+   "text": "Mashina have played “Tachzor Tachzor” thousands of times. Your G to D7 change only needs about fifty more, {n}.",
+   "date": "2026-11-23"
   }
  ],
- "jokesDate": "2026-11-21"
+ "jokesDate": "2026-11-23"
 }
