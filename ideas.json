@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-23T03:56:33Z",
- "date": "2026-11-23",
+ "at": "2026-11-24T03:55:11Z",
+ "date": "2026-11-24",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -336,229 +336,157 @@
  "level": "Comfortable intermediate: open and barre chords, flat-key minor chords and some maj7 and dim colours.",
  "suggestions": [
   {
-   "title": "עם הזמן",
-   "artist": "אביב גפן",
-   "style": "Israeli rock ballad",
-   "difficulty": 3,
-   "chords": [
-    "G",
-    "Am",
-    "F",
-    "G6",
-    "E",
-    "F6",
-    "Am/C",
-    "Em",
-    "Dm",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Mostly familiar open shapes, with G6/F6 colour chords and an augmented chord as the new bit."
-  },
-  {
-   "title": "הזיות",
-   "artist": "ברי סחרוף",
-   "style": "Israeli rock",
-   "difficulty": 4,
-   "chords": [
-    "Gm",
-    "F",
-    "Cm",
-    "Eb",
-    "Fm",
-    "Bbm7b5",
-    "C#",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Berry Sakharof song in flat keys; the half-diminished chord is a small step up."
-  },
-  {
-   "title": "כל יום מחדש",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae pop",
-   "difficulty": 2,
-   "chords": [
-    "Bb",
-    "C",
-    "Dm",
-    "F",
-    "Gm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier one: five chords and a relaxed offbeat strum to keep the right hand loose."
-  },
-  {
-   "title": "כל הכוכבים",
-   "artist": "טונה",
-   "style": "Israeli hip-hop",
-   "difficulty": 3,
-   "chords": [
-    "Gm",
-    "Cm",
-    "Eb",
-    "Bb",
-    "Dm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A short barre-chord loop in G minor, close to the Tuna songs already in the folder."
-  },
-  {
-   "title": "בנאדם",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop rock",
-   "difficulty": 4,
-   "chords": [
-    "F#",
-    "Ebm",
-    "Bbm",
-    "Ab",
-    "C#",
-    "Fm",
-    "F#maj7",
-    "Eb"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fits the Amir Dadon sheets already played; F#maj7 adds a new barre colour."
-  },
-  {
-   "title": "תחזור תחזור",
+   "title": "שלח לי מלאך",
    "artist": "משינה",
    "style": "Israeli rock",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "D7",
-    "Am",
-    "C",
-    "D",
-    "D/G"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easier campfire classic with open chords and a D7 to D/G movement."
-  },
-  {
-   "title": "Whatever",
-   "artist": "Oasis",
-   "style": "Britpop",
    "difficulty": 3,
    "chords": [
-    "G",
-    "Dsus4/F#",
-    "E"
+    "F#m",
+    "E",
+    "D",
+    "G#m",
+    "C#m",
+    "E6",
+    "B"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Builds on Wonderwall-style open strumming, with sus and slash chords that move the bass."
+   "why": "Mashina in a sharp key; the C#madd9 colour chord is the new shape to learn."
   },
   {
-   "title": "Soul to Squeeze",
-   "artist": "Red Hot Chili Peppers",
+   "title": "יושב על הגדר",
+   "artist": "אריק איינשטיין ויצחק קלפטר",
+   "style": "Israeli classic rock",
+   "difficulty": 4,
+   "chords": [
+    "Bbm",
+    "F",
+    "Eb",
+    "Ab",
+    "C#",
+    "Ebm",
+    "F#",
+    "Cm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A flat-key barre workout close to the Amir Dadon songs you already play."
+  },
+  {
+   "title": "תגידי",
+   "artist": "שלמה ארצי",
+   "style": "Israeli pop-rock",
+   "difficulty": 2,
+   "chords": [
+    "F#m",
+    "E",
+    "D",
+    "A",
+    "C#7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Familiar shapes with one C#7 barre as the small new step."
+  },
+  {
+   "title": "היי בייב",
+   "artist": "טונה",
+   "style": "Israeli hip-hop / pop",
+   "difficulty": 1,
+   "chords": [
+    "Am",
+    "Dm",
+    "Bb",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "An easy Tuna loop to groove on; focus on a tight, rhythmic strum."
+  },
+  {
+   "title": "קוקוריקו",
+   "artist": "התקווה 6",
+   "style": "Israeli reggae-pop",
+   "difficulty": 2,
+   "chords": [
+    "Fm",
+    "Bb",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Three chords and a bouncy reggae upstroke, a relaxed warm-up song."
+  },
+  {
+   "title": "שוב אני לבד",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "F",
+    "Dm",
+    "G",
+    "Bbmaj7",
+    "A",
+    "Em"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Eviatar Banai again, with a Bbmaj7 that builds on the maj7 colours you know."
+  },
+  {
+   "title": "About a Girl",
+   "artist": "Nirvana",
+   "style": "Grunge / acoustic",
+   "difficulty": 2,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A melodic Nirvana classic; practise clean changes and the riff-like strum."
+  },
+  {
+   "title": "Fake Plastic Trees",
+   "artist": "Radiohead",
    "style": "Alternative rock",
    "difficulty": 3,
    "chords": [
     "A",
-    "F",
-    "C",
-    "Dm",
-    "Bb",
-    "Gm"
+    "F#m7",
+    "E",
+    "D"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A mellow RHCP song with F, Bb and Gm barres that are already in reach."
+   "why": "Gentle dynamics from soft to loud, a nice step in expressive playing."
   },
   {
-   "title": "Lithium",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 4,
-   "chords": [
-    "Em",
-    "G#",
-    "C#5",
-    "A",
-    "C5",
-    "D5",
-    "B5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Step up: fast-moving power chords and quiet-loud dynamics on the electric."
-  },
-  {
-   "title": "Breakdown",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
+   "title": "The Scientist",
+   "artist": "Coldplay",
+   "style": "Alt pop ballad",
    "difficulty": 2,
    "chords": [
-    "C",
-    "Em/B",
-    "Am",
-    "G"
+    "Bm7",
+    "G",
+    "D",
+    "Dsus2"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easier, laid-back acoustic song like Better Together, good for a steady groove."
+   "why": "A slow ballad to work on smooth sus and 7th voicings."
+  },
+  {
+   "title": "Stop Crying Your Heart Out",
+   "artist": "Oasis",
+   "style": "Britpop ballad",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Oasis anthem; a slow build that rewards steady strumming."
   }
  ],
  "history": [
-  {
-   "title": "אור הירח",
-   "artist": "אביב גפן",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "למה לי לקחת ללב",
-   "artist": "אריק איינשטיין",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "פלורנטין",
-   "artist": "אהוד בנאי",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "ארץ חדשה",
-   "artist": "שלמה ארצי",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "על פני השטח",
-   "artist": "משינה",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "Half the World Away",
-   "artist": "Oasis",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "Sitting, Waiting, Wishing",
-   "artist": "Jack Johnson",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "Last Kiss",
-   "artist": "Pearl Jam",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "Lithium",
-   "artist": "Nirvana",
-   "date": "2026-11-04"
-  },
-  {
-   "title": "Volcano",
-   "artist": "Damien Rice",
-   "date": "2026-11-04"
-  },
   {
    "title": "בבית",
    "artist": "אביתר בנאי",
@@ -1508,6 +1436,56 @@
    "title": "Breakdown",
    "artist": "Jack Johnson",
    "date": "2026-11-23"
+  },
+  {
+   "title": "שלח לי מלאך",
+   "artist": "משינה",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "יושב על הגדר",
+   "artist": "אריק איינשטיין ויצחק קלפטר",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "תגידי",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "היי בייב",
+   "artist": "טונה",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "קוקוריקו",
+   "artist": "התקווה 6",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "שוב אני לבד",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "About a Girl",
+   "artist": "Nirvana",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "Fake Plastic Trees",
+   "artist": "Radiohead",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "The Scientist",
+   "artist": "Coldplay",
+   "date": "2026-11-24"
+  },
+  {
+   "title": "Stop Crying Your Heart Out",
+   "artist": "Oasis",
+   "date": "2026-11-24"
   }
  ],
  "sheets": [
