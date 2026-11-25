@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-24T03:55:11Z",
- "date": "2026-11-24",
+ "at": "2026-11-25T04:00:27Z",
+ "date": "2026-11-25",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -333,210 +333,185 @@
    }
   ]
  },
- "level": "Comfortable intermediate: open and barre chords, flat-key minor chords and some maj7 and dim colours.",
+ "level": "Comfortable intermediate: open and barre chords in sharp and flat keys, with maj7, add9 and sus colours.",
  "suggestions": [
   {
-   "title": "שלח לי מלאך",
-   "artist": "משינה",
-   "style": "Israeli rock",
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "style": "Israeli pop-rock",
    "difficulty": 3,
    "chords": [
     "F#m",
-    "E",
-    "D",
-    "G#m",
     "C#m",
-    "E6",
-    "B"
+    "A",
+    "B",
+    "E",
+    "G#m",
+    "Amaj7",
+    "D#m7b5"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Mashina in a sharp key; the C#madd9 colour chord is the new shape to learn."
+   "why": "More Amir Dadon in a sharp key; the D#m7b5 half-diminished shape is the new step."
   },
   {
-   "title": "יושב על הגדר",
-   "artist": "אריק איינשטיין ויצחק קלפטר",
-   "style": "Israeli classic rock",
-   "difficulty": 4,
-   "chords": [
-    "Bbm",
-    "F",
-    "Eb",
-    "Ab",
-    "C#",
-    "Ebm",
-    "F#",
-    "Cm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A flat-key barre workout close to the Amir Dadon songs you already play."
-  },
-  {
-   "title": "תגידי",
-   "artist": "שלמה ארצי",
-   "style": "Israeli pop-rock",
+   "title": "גלים",
+   "artist": "אמיר דדון",
+   "style": "Israeli ballad",
    "difficulty": 2,
    "chords": [
-    "F#m",
-    "E",
-    "D",
     "A",
-    "C#7"
+    "D",
+    "Bm",
+    "F#m",
+    "E"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Familiar shapes with one C#7 barre as the small new step."
+   "why": "An easy Amir Dadon ballad to relax with between the harder barre songs."
   },
   {
-   "title": "היי בייב",
-   "artist": "טונה",
-   "style": "Israeli hip-hop / pop",
-   "difficulty": 1,
-   "chords": [
-    "Am",
-    "Dm",
-    "Bb",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Tuna loop to groove on; focus on a tight, rhythmic strum."
-  },
-  {
-   "title": "קוקוריקו",
+   "title": "גיבורי על",
    "artist": "התקווה 6",
    "style": "Israeli reggae-pop",
    "difficulty": 2,
    "chords": [
-    "Fm",
+    "Am",
+    "Em",
+    "D",
+    "Cmaj7",
+    "G",
+    "Bm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Friendly open chords with a reggae upstroke groove, close to the Hatikva 6 song you have."
+  },
+  {
+   "title": "כנפיים",
+   "artist": "טונה",
+   "style": "Israeli hip-hop",
+   "difficulty": 4,
+   "chords": [
+    "Bbmaj7",
+    "Gm9",
+    "Dm7",
+    "Am/C",
+    "Dm",
+    "Gm7"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Tuna with jazzy extended chords; Gm9 and Bbmaj7 are fresh colours to learn."
+  },
+  {
+   "title": "יש בי אהבה",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "Dm",
+    "F",
+    "C",
+    "G7",
     "Bb",
+    "G",
+    "Bbmaj7",
+    "A7",
+    "A",
+    "A4",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A classic sing-along full of passing chords; C6 and G/F are the new shapes."
+  },
+  {
+   "title": "ואולי",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 4,
+   "chords": [
+    "Bm",
+    "Aadd9",
+    "Gmaj7",
+    "Em",
+    "G",
+    "Dadd9",
+    "A",
+    "F#m7b5",
+    "D",
+    "Dm",
+    "Bbmaj7",
     "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Three chords and a bouncy reggae upstroke, a relaxed warm-up song."
+   "why": "Another Ivri Lider song with lush add9 and maj7 voicings and a key change."
   },
   {
-   "title": "שוב אני לבד",
-   "artist": "אביתר בנאי",
-   "style": "Israeli singer-songwriter",
-   "difficulty": 3,
-   "chords": [
-    "Am",
-    "F",
-    "Dm",
-    "G",
-    "Bbmaj7",
-    "A",
-    "Em"
-   ],
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "style": "Blues",
+   "difficulty": 2,
+   "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Eviatar Banai again, with a Bbmaj7 that builds on the maj7 colours you know."
+   "why": "A three-chord blues by an artist you already play; great for a steady shuffle strum."
   },
   {
-   "title": "About a Girl",
+   "title": "Dumb",
    "artist": "Nirvana",
-   "style": "Grunge / acoustic",
+   "style": "Grunge",
    "difficulty": 2,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A melodic Nirvana classic; practise clean changes and the riff-like strum."
-  },
-  {
-   "title": "Fake Plastic Trees",
-   "artist": "Radiohead",
-   "style": "Alternative rock",
-   "difficulty": 3,
    "chords": [
+    "Esus4",
     "A",
-    "F#m7",
+    "Gsus4",
+    "C",
     "E",
-    "D"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Gentle dynamics from soft to loud, a nice step in expressive playing."
-  },
-  {
-   "title": "The Scientist",
-   "artist": "Coldplay",
-   "style": "Alt pop ballad",
-   "difficulty": 2,
-   "chords": [
-    "Bm7",
+    "Em",
     "G",
-    "D",
-    "Dsus2"
+    "B",
+    "E5"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A slow ballad to work on smooth sus and 7th voicings."
+   "why": "A gentle Nirvana song where sus4 chords do the work; easy to sing over."
   },
   {
-   "title": "Stop Crying Your Heart Out",
-   "artist": "Oasis",
-   "style": "Britpop ballad",
-   "difficulty": 3,
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "style": "Acoustic folk",
+   "difficulty": 2,
    "chords": [],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Oasis anthem; a slow build that rewards steady strumming."
+   "why": "Breezy Jack Johnson strumming, a relaxed partner to Better Together."
+  },
+  {
+   "title": "Slide Away",
+   "artist": "Oasis",
+   "style": "Britpop",
+   "difficulty": 3,
+   "chords": [
+    "Am7",
+    "G",
+    "G7",
+    "F",
+    "Fmaj7",
+    "C",
+    "D7",
+    "D/F#",
+    "E"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from Wonderwall: a long Oasis anthem with Fmaj7 and D/F# bass moves."
   }
  ],
  "history": [
-  {
-   "title": "בבית",
-   "artist": "אביתר בנאי",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "עבדים",
-   "artist": "ברי סחרוף",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "כל הכוכבים",
-   "artist": "טונה",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "מה שיהיה יהיה",
-   "artist": "התקווה 6",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "מישהו פעם",
-   "artist": "עברי לידר",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "American Idiot",
-   "artist": "Green Day",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "Best of You",
-   "artist": "Foo Fighters",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "Polly",
-   "artist": "Nirvana",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "Telling Stories",
-   "artist": "Tracy Chapman",
-   "date": "2026-11-05"
-  },
-  {
-   "title": "Flake",
-   "artist": "Jack Johnson",
-   "date": "2026-11-05"
-  },
   {
    "title": "גלים",
    "artist": "אמיר דדון",
@@ -1486,6 +1461,56 @@
    "title": "Stop Crying Your Heart Out",
    "artist": "Oasis",
    "date": "2026-11-24"
+  },
+  {
+   "title": "לבחור נכון",
+   "artist": "אמיר דדון",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "גלים",
+   "artist": "אמיר דדון",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "גיבורי על",
+   "artist": "התקווה 6",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "כנפיים",
+   "artist": "טונה",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "יש בי אהבה",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "ואולי",
+   "artist": "עברי לידר",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Give Me One Reason",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Dumb",
+   "artist": "Nirvana",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Do You Remember",
+   "artist": "Jack Johnson",
+   "date": "2026-11-25"
+  },
+  {
+   "title": "Slide Away",
+   "artist": "Oasis",
+   "date": "2026-11-25"
   }
  ],
  "sheets": [
@@ -1854,22 +1879,6 @@
  ],
  "jokes": [
   {
-   "text": "Angus Young plays in a school uniform. You're allowed to practise in pyjamas, {n}. No excuses left.",
-   "date": "2026-10-16"
-  },
-  {
-   "text": "Jimmy Page played with a violin bow. You don't need one, {n}. Just the guitar and five spare minutes.",
-   "date": "2026-10-16"
-  },
-  {
-   "text": "Your chord sheets are in Drive, your guitar is on the stand and your thumbs are on your phone. Swap one of those, {n}.",
-   "date": "2026-10-16"
-  },
-  {
-   "text": "Hadag Nahash learned to groove one strum at a time. Your right hand is next in line, {n}.",
-   "date": "2026-10-16"
-  },
-  {
    "text": "Kurt Cobain played a left-handed guitar upside down at times. You're allowed to play yours the right way up, {n}. Today would be nice.",
    "date": "2026-10-18"
   },
@@ -2172,7 +2181,23 @@
   {
    "text": "Mashina have played “Tachzor Tachzor” thousands of times. Your G to D7 change only needs about fifty more, {n}.",
    "date": "2026-11-23"
+  },
+  {
+   "text": "Brian May built his own guitar from a fireplace. You only need to build a habit of picking yours up, {n}.",
+   "date": "2026-11-25"
+  },
+  {
+   "text": "Your guitar case has been zipped shut so long it started a podcast about loneliness, {n}. Unzip it and be the first guest.",
+   "date": "2026-11-25"
+  },
+  {
+   "text": "Eviatar Banai can hold a whole room with one quiet chord. Find yours tonight, {n}. Volume optional.",
+   "date": "2026-11-25"
+  },
+  {
+   "text": "Your D chord and your G chord keep waving at each other across the fretboard, {n}. Help them meet halfway, ten times in a row.",
+   "date": "2026-11-25"
   }
  ],
- "jokesDate": "2026-11-23"
+ "jokesDate": "2026-11-25"
 }
