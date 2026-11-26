@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-25T04:00:27Z",
- "date": "2026-11-25",
+ "at": "2026-11-26T03:54:53Z",
+ "date": "2026-11-26",
  "index": {
   "artists": [
    "Natasha's friends",
@@ -333,235 +333,166 @@
    }
   ]
  },
- "level": "Comfortable intermediate: open and barre chords in sharp and flat keys, with maj7, add9 and sus colours.",
+ "level": "Comfortable intermediate player: barre chords in flat keys, maj7 and slash chords, capo and Drop D are all in the folder.",
  "suggestions": [
   {
-   "title": "לבחור נכון",
-   "artist": "אמיר דדון",
-   "style": "Israeli pop-rock",
-   "difficulty": 3,
-   "chords": [
-    "F#m",
-    "C#m",
-    "A",
-    "B",
-    "E",
-    "G#m",
-    "Amaj7",
-    "D#m7b5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "More Amir Dadon in a sharp key; the D#m7b5 half-diminished shape is the new step."
-  },
-  {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "style": "Israeli ballad",
-   "difficulty": 2,
-   "chords": [
-    "A",
-    "D",
-    "Bm",
-    "F#m",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "An easy Amir Dadon ballad to relax with between the harder barre songs."
-  },
-  {
-   "title": "גיבורי על",
-   "artist": "התקווה 6",
-   "style": "Israeli reggae-pop",
-   "difficulty": 2,
-   "chords": [
-    "Am",
-    "Em",
-    "D",
-    "Cmaj7",
-    "G",
-    "Bm"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Friendly open chords with a reggae upstroke groove, close to the Hatikva 6 song you have."
-  },
-  {
-   "title": "כנפיים",
-   "artist": "טונה",
-   "style": "Israeli hip-hop",
-   "difficulty": 4,
-   "chords": [
-    "Bbmaj7",
-    "Gm9",
-    "Dm7",
-    "Am/C",
-    "Dm",
-    "Gm7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Tuna with jazzy extended chords; Gm9 and Bbmaj7 are fresh colours to learn."
-  },
-  {
-   "title": "יש בי אהבה",
-   "artist": "אריק איינשטיין",
-   "style": "Israeli classic",
-   "difficulty": 3,
-   "chords": [
-    "Am",
-    "Dm",
-    "F",
-    "C",
-    "G7",
-    "Bb",
-    "G",
-    "Bbmaj7",
-    "A7",
-    "A",
-    "A4",
-    "E"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A classic sing-along full of passing chords; C6 and G/F are the new shapes."
-  },
-  {
-   "title": "ואולי",
-   "artist": "עברי לידר",
-   "style": "Israeli pop",
-   "difficulty": 4,
-   "chords": [
-    "Bm",
-    "Aadd9",
-    "Gmaj7",
-    "Em",
-    "G",
-    "Dadd9",
-    "A",
-    "F#m7b5",
-    "D",
-    "Dm",
-    "Bbmaj7",
-    "C"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Another Ivri Lider song with lush add9 and maj7 voicings and a key change."
-  },
-  {
-   "title": "Give Me One Reason",
-   "artist": "Tracy Chapman",
-   "style": "Blues",
-   "difficulty": 2,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A three-chord blues by an artist you already play; great for a steady shuffle strum."
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 2,
-   "chords": [
-    "Esus4",
-    "A",
-    "Gsus4",
-    "C",
-    "E",
-    "Em",
-    "G",
-    "B",
-    "E5"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A gentle Nirvana song where sus4 chords do the work; easy to sing over."
-  },
-  {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "style": "Acoustic folk",
-   "difficulty": 2,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Breezy Jack Johnson strumming, a relaxed partner to Better Together."
-  },
-  {
-   "title": "Slide Away",
+   "title": "Songbird",
    "artist": "Oasis",
    "style": "Britpop",
-   "difficulty": 3,
+   "difficulty": 2,
    "chords": [
-    "Am7",
     "G",
-    "G7",
-    "F",
-    "Fmaj7",
-    "C",
-    "D7",
-    "D/F#",
-    "E"
+    "G/F#",
+    "Em"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A step up from Wonderwall: a long Oasis anthem with Fmaj7 and D/F# bass moves."
-  }
- ],
- "history": [
-  {
-   "title": "גלים",
-   "artist": "אמיר דדון",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "בעולם שלה",
-   "artist": "התקווה 6",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "כנפיים",
-   "artist": "טונה",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "בשבילך",
-   "artist": "אביתר בנאי",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "עוד חוזר הניגון",
-   "artist": "ברי סחרוף",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "סוף עונת התפוזים",
-   "artist": "תמוז",
-   "date": "2026-11-06"
-  },
-  {
-   "title": "Supersonic",
-   "artist": "Oasis",
-   "date": "2026-11-06"
+   "why": "A short, sweet Oasis tune to relax with: open chords and a walking G/F# bass line."
   },
   {
    "title": "Dani California",
    "artist": "Red Hot Chili Peppers",
-   "date": "2026-11-06"
+   "style": "Alt rock",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "G",
+    "Dm"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A RHCP favourite built on an easy Am–G–Dm loop; the challenge is the tight funky strumming."
   },
   {
-   "title": "These Days",
-   "artist": "Foo Fighters",
-   "date": "2026-11-06"
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "style": "Grunge",
+   "difficulty": 2,
+   "chords": [
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Mellow unplugged Nirvana: a laid-back way to practise steady strumming and clean chord changes."
   },
   {
-   "title": "Better Man",
-   "artist": "Pearl Jam",
-   "date": "2026-11-06"
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "style": "Acoustic",
+   "difficulty": 3,
+   "chords": [],
+   "capo": 3,
+   "tuning": "Standard",
+   "why": "Breezy Jack Johnson groove with a capo; good for muted, percussive strumming."
   },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "style": "Punk rock",
+   "difficulty": 3,
+   "chords": [
+    "Em",
+    "C",
+    "G",
+    "D",
+    "B"
+   ],
+   "capo": 1,
+   "tuning": "Standard",
+   "why": "Fast Green Day power-chord rock that builds stamina and quick changes, with a B chord to tackle."
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "style": "Israeli pop",
+   "difficulty": 3,
+   "chords": [
+    "D",
+    "F#m7",
+    "Gmaj7",
+    "E/G#",
+    "A",
+    "Bm",
+    "G"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Ivri Lider again, with soft maj7 colours and an E/G# passing bass to learn."
+  },
+  {
+   "title": "בשבילך",
+   "artist": "אביתר בנאי",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [
+    "Bm",
+    "Em",
+    "F#",
+    "C#m7b5",
+    "Bm/F#",
+    "Bm/G",
+    "Bm/G#"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A step up from his Eviatar songs: a descending bass line under Bm and a new m7b5 chord."
+  },
+  {
+   "title": "בסיבוב",
+   "artist": "טונה",
+   "style": "Israeli hip hop",
+   "difficulty": 2,
+   "chords": [
+    "Gmaj7",
+    "Em",
+    "A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed Tuna groove on just a few chords, close to the Tuna songs he already plays."
+  },
+  {
+   "title": "עיר של קיץ",
+   "artist": "ברי סחרוף",
+   "style": "Israeli rock",
+   "difficulty": 4,
+   "chords": [
+    "Bbm",
+    "Ebm",
+    "Fm",
+    "Ab",
+    "Adim",
+    "F",
+    "Db"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Berry Sakharof in flat keys like his Amir Dadon sheets, with a diminished passing chord."
+  },
+  {
+   "title": "לבד",
+   "artist": "אמיר דדון",
+   "style": "Israeli rock",
+   "difficulty": 3,
+   "chords": [
+    "Am",
+    "Aadd9",
+    "G",
+    "C",
+    "F",
+    "Aadd9/F#",
+    "Em",
+    "E",
+    "C/B",
+    "D",
+    "F#m"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Another Amir Dadon ballad in an easier key, with add9 colours and walking slash chords."
+  }
+ ],
+ "history": [
   {
    "title": "יוצא לאור",
    "artist": "אהוד בנאי",
@@ -1511,6 +1442,56 @@
    "title": "Slide Away",
    "artist": "Oasis",
    "date": "2026-11-25"
+  },
+  {
+   "title": "Songbird",
+   "artist": "Oasis",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Dani California",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "All Apologies",
+   "artist": "Nirvana",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Taylor",
+   "artist": "Jack Johnson",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "Holiday",
+   "artist": "Green Day",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "בתי קפה",
+   "artist": "עברי לידר",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "בשבילך",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "בסיבוב",
+   "artist": "טונה",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "עיר של קיץ",
+   "artist": "ברי סחרוף",
+   "date": "2026-11-26"
+  },
+  {
+   "title": "לבד",
+   "artist": "אמיר דדון",
+   "date": "2026-11-26"
   }
  ],
  "sheets": [
