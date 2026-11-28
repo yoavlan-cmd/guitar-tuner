@@ -1,7 +1,7 @@
 {
  "v": 1,
- "at": "2026-11-27T03:56:28Z",
- "date": "2026-11-27",
+ "at": "2026-11-28T03:55:02Z",
+ "date": "2026-11-28",
  "index": {
   "artists": [
    "Amir dadon",
@@ -336,217 +336,192 @@
  "level": "Comfortable with open and barre chords in many keys, including flat keys, slash chords and a capo; ready for small steps up in technique.",
  "suggestions": [
   {
-   "title": "Fast Car",
-   "artist": "Tracy Chapman",
-   "style": "Folk",
-   "difficulty": 3,
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "style": "Israeli rock ballad",
+   "difficulty": 4,
    "chords": [
+    "G",
+    "D/F#",
+    "Em7",
+    "Bm",
+    "Cadd9",
+    "Am",
+    "D6",
+    "D",
+    "Am7",
+    "B7",
+    "Am/F#",
+    "C"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A sing-along classic with a walking bass line and a key change, a nice step up from the songs you already play."
+  },
+  {
+   "title": "צליל מכוון",
+   "artist": "אריק איינשטיין",
+   "style": "Israeli classic",
+   "difficulty": 4,
+   "chords": [
+    "Bdim",
+    "Am",
+    "Fmaj7",
     "Cmaj7",
     "G",
+    "Dm7",
+    "A",
     "Em",
-    "D"
-   ],
-   "capo": 2,
-   "tuning": "Standard",
-   "why": "A classic from an artist you already play; the new skill is the famous fingerpicked riff over a capo."
-  },
-  {
-   "title": "Upside Down",
-   "artist": "Jack Johnson",
-   "style": "Acoustic pop",
-   "difficulty": 2,
-   "chords": [
-    "G",
-    "Am",
-    "C",
-    "D",
-    "Bm"
+    "E",
+    "Dmaj7",
+    "C#m7",
+    "Bm7"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "An easy, sunny Jack Johnson tune to relax with; focus on a bouncy, muted strum."
+   "why": "Gentle and pretty, with major-seventh and half-diminished shapes that add new colours to your chord vocabulary."
   },
   {
-   "title": "Everlong",
-   "artist": "Foo Fighters",
-   "style": "Alt rock",
-   "difficulty": 4,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Drop D",
-   "why": "A step up for a Foo fan: moving chord shapes over a droning low string and a fast steady strum."
-  },
-  {
-   "title": "The Man Who Sold the World",
-   "artist": "Nirvana",
-   "style": "Grunge",
-   "difficulty": 3,
-   "chords": [
-    "D#",
-    "G#",
-    "C#",
-    "F#",
-    "A#"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Fills your empty Nirvana folder with an Unplugged classic; practise the single-note riff between chords."
-  },
-  {
-   "title": "רגעים",
-   "artist": "ברי סחרוף",
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
    "style": "Israeli rock",
    "difficulty": 3,
    "chords": [
-    "Dm",
-    "G",
     "A",
-    "Fm",
-    "Ab",
-    "Cm"
+    "Bb",
+    "Gm"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A Berry Sakharof classic with a surprising Fm–Ab turn, good barre practice in a moody key."
+   "why": "Driving rock strumming over just a few chords, so you can focus on rhythm and energy."
   },
   {
-   "title": "חורף",
-   "artist": "עברי לידר",
+   "title": "ממעמקים",
+   "artist": "הפרוייקט של עידן רייכל",
    "style": "Israeli pop",
+   "difficulty": 4,
+   "chords": [
+    "G#m",
+    "E",
+    "C#m7",
+    "G#m/F#",
+    "F#",
+    "D#m7",
+    "D#m",
+    "B",
+    "Emaj7",
+    "A#4",
+    "D#4"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "Fits the sharp-key barre chords you already know and adds suspended shapes for a soulful sound."
+  },
+  {
+   "title": "מכה אפורה",
+   "artist": "מוניקה סקס",
+   "style": "Israeli rock",
+   "difficulty": 2,
+   "chords": [
+    "D",
+    "Bm",
+    "A",
+    "G",
+    "A/F#",
+    "Em",
+    "D4",
+    "F#m",
+    "D/A"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A relaxed pick with familiar chords, good for tight strumming and clean changes."
+  },
+  {
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "style": "Israeli singer-songwriter",
+   "difficulty": 5,
+   "chords": [
+    "C6",
+    "F/F#",
+    "F",
+    "D",
+    "C",
+    "Am/D",
+    "F#dim",
+    "G",
+    "Am",
+    "Em",
+    "Dm",
+    "C#5"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "A challenge from an artist you already play, full of passing and diminished chords to stretch your hands."
+  },
+  {
+   "title": "Wish You Were Here",
+   "artist": "Pink Floyd",
+   "style": "Classic rock",
    "difficulty": 3,
    "chords": [
-    "F#m",
-    "Bm",
-    "C#",
-    "E",
-    "D",
-    "A",
-    "G#m",
+    "Em7",
     "G"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "Another Ivri Lider ballad with sharp-key barre chords; smooth changes between minor shapes."
+   "why": "An iconic acoustic song whose intro riff teaches you to mix single-note lines with strummed chords."
   },
   {
-   "title": "בזמן האחרון",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock",
+   "title": "Talkin' 'bout a Revolution",
+   "artist": "Tracy Chapman",
+   "style": "Folk",
+   "difficulty": 2,
+   "chords": [
+    "G6",
+    "Cadd9",
+    "Em",
+    "D"
+   ],
+   "capo": 0,
+   "tuning": "Standard",
+   "why": "From an artist already in your folder: easy shapes with a fast, steady picking pattern to build stamina."
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "style": "Acoustic rock",
    "difficulty": 3,
    "chords": [
-    "E",
-    "C#m",
+    "Em",
     "C",
+    "Cm",
     "B",
-    "G",
-    "Bm",
-    "D",
+    "Am",
     "A"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "More Amir Dadon for your collection; the new trick is the borrowed C and G chords in an E song."
+   "why": "A calm acoustic RHCP song that brings fingerpicking and a major-to-minor chord move into your playing."
   },
   {
-   "title": "יש אין סוף",
-   "artist": "אמיר דדון",
-   "style": "Israeli rock",
-   "difficulty": 3,
-   "chords": [],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "A sing-along Amir Dadon song in the style you already play, good for building a song set."
-  },
-  {
-   "title": "מאיה",
-   "artist": "שלום חנוך",
-   "style": "Israeli rock",
-   "difficulty": 3,
+   "title": "Knockin' on Heaven's Door",
+   "artist": "Bob Dylan",
+   "style": "Folk rock",
+   "difficulty": 1,
    "chords": [
-    "F#",
-    "Em",
-    "Am",
-    "Dm",
-    "E",
-    "C",
-    "F/C",
-    "C4",
-    "C/B",
     "G",
-    "G7"
+    "D",
+    "Am7",
+    "C"
    ],
    "capo": 0,
    "tuning": "Standard",
-   "why": "A Shalom Hanoch classic with a walking C/B bass line and a sus4 colour to learn."
-  },
-  {
-   "title": "מרפקים",
-   "artist": "טונה",
-   "style": "Israeli hip hop",
-   "difficulty": 4,
-   "chords": [
-    "Ebm",
-    "F#",
-    "B",
-    "Bbm7",
-    "Abm7"
-   ],
-   "capo": 0,
-   "tuning": "Standard",
-   "why": "Tuna in a flat key like your other Tuna songs; new minor-seventh barre shapes and a tight groove."
+   "why": "An easy campfire favourite to relax with and practise singing while you strum."
   }
  ],
  "history": [
-  {
-   "title": "מתי נתנשק",
-   "artist": "אביתר בנאי",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "לא חיים פעמיים",
-   "artist": "התקווה 6",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "תרקוד",
-   "artist": "שלמה ארצי",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "יש בי אהבה",
-   "artist": "אריק איינשטיין",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "אנה",
-   "artist": "משינה",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "לאט לאט",
-   "artist": "שלום חנוך",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "The Masterplan",
-   "artist": "Oasis",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "Dumb",
-   "artist": "Nirvana",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "The Zephyr Song",
-   "artist": "Red Hot Chili Peppers",
-   "date": "2026-11-08"
-  },
-  {
-   "title": "Do You Remember",
-   "artist": "Jack Johnson",
-   "date": "2026-11-08"
-  },
   {
    "title": "סוף הדרך",
    "artist": "רוקפור",
@@ -1496,6 +1471,56 @@
    "title": "מרפקים",
    "artist": "טונה",
    "date": "2026-11-27"
+  },
+  {
+   "title": "אהבתיה",
+   "artist": "שלמה ארצי",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "צליל מכוון",
+   "artist": "אריק איינשטיין",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "רכבת לילה לקהיר",
+   "artist": "משינה",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "ממעמקים",
+   "artist": "הפרוייקט של עידן רייכל",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "מכה אפורה",
+   "artist": "מוניקה סקס",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "אבות ובנים",
+   "artist": "אביתר בנאי",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "Wish You Were Here",
+   "artist": "Pink Floyd",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "Talkin' 'bout a Revolution",
+   "artist": "Tracy Chapman",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "Road Trippin'",
+   "artist": "Red Hot Chili Peppers",
+   "date": "2026-11-28"
+  },
+  {
+   "title": "Knockin' on Heaven's Door",
+   "artist": "Bob Dylan",
+   "date": "2026-11-28"
   }
  ],
  "sheets": [
